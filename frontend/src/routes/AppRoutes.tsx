@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import Layout from "../components/Layout";
 import { LandingPage } from "../pages/LandingPage";
 import CandidateDashboardView from "../features/dashboard/components/views/CandidateDashboardView";
+import CandidateProfile from "../features/profile/CandidateProfile";
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -13,6 +14,7 @@ export const AppRoutes: React.FC = () => {
           path="/candidate-dashboard"
           element={<CandidateDashboardView />}
         />
+        <Route path="/candidate/profile" element={<CandidateProfile />} />
       </Route>
       {/* Add more app routes below as pages/components become available */}
     </Routes>

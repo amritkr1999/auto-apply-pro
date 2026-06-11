@@ -31,7 +31,7 @@ export const DashboardSidebar: React.FC = () => {
             <a href="#saved">Saved Jobs</a>
           </li>
           <li>
-            <a href="#profile">Profile</a>
+            <Link to="/candidate/profile">Profile</Link>
           </li>
         </ul>
       </nav>
