@@ -1,13 +1,19 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
+import Layout from "../components/Layout";
 import { LandingPage } from "../pages/LandingPage";
 import CandidateDashboardView from "../features/dashboard/components/views/CandidateDashboardView";
 
 export const AppRoutes: React.FC = () => {
   return (
     <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/candidate-dashboard" element={<CandidateDashboardView />} />
+      <Route element={<Layout />}>
+        <Route path="/" element={<LandingPage />} />
+        <Route
+          path="/candidate-dashboard"
+          element={<CandidateDashboardView />}
+        />
+      </Route>
       {/* Add more app routes below as pages/components become available */}
     </Routes>
   );
