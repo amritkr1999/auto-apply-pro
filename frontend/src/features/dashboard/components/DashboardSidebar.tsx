@@ -68,6 +68,11 @@ export const DashboardSidebar: React.FC = () => {
                     Saved Jobs
                   </a>
                 </li>
+                <li>
+                  <Link to="/jobs/parse" style={{ color: "#cbd5e1", textDecoration: "none", fontWeight: 500 }}>
+                    Parse Screenshot
+                  </Link>
+                </li>
               </>
             )}
             {role === "RECRUITER" && (

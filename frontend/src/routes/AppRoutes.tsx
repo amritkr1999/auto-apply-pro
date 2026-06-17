@@ -6,6 +6,7 @@ import CandidateDashboardView from "../features/dashboard/components/views/Candi
 import RecruiterDashboardView from "../features/dashboard/components/views/RecruiterDashboardView";
 import CompanyDashboardView from "../features/dashboard/components/views/CompanyDashboardView";
 import CandidateProfile from "../features/profile/CandidateProfile";
+import ScreenshotUploader from "../features/jobs/components/ScreenshotUploader";
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -25,6 +26,7 @@ export const AppRoutes: React.FC = () => {
           element={<CompanyDashboardView />}
         />
         <Route path="/candidate/profile" element={<CandidateProfile />} />
+        <Route path="/jobs/parse" element={<ScreenshotUploader />} />
       </Route>
     </Routes>
   );
