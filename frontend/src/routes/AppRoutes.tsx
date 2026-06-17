@@ -7,6 +7,8 @@ import RecruiterDashboardView from "../features/dashboard/components/views/Recru
 import CompanyDashboardView from "../features/dashboard/components/views/CompanyDashboardView";
 import CandidateProfile from "../features/profile/CandidateProfile";
 import ScreenshotUploader from "../features/jobs/components/ScreenshotUploader";
+import { TemplateManager } from "../features/outreach/components/TemplateManager";
+import { OutreachDraftSection } from "../features/outreach/components/OutreachDraftSection";
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -27,6 +29,8 @@ export const AppRoutes: React.FC = () => {
         />
         <Route path="/candidate/profile" element={<CandidateProfile />} />
         <Route path="/jobs/parse" element={<ScreenshotUploader />} />
+        <Route path="/outreach/templates" element={<TemplateManager />} />
+        <Route path="/outreach/draft" element={<OutreachDraftSection />} />
       </Route>
     </Routes>
   );

@@ -42,6 +42,17 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Company company;
 
+    @Builder.Default
+    @Column(name = "daily_limit")
+    private Integer dailyLimit = 50;
+
+    @Builder.Default
+    @Column(name = "sent_today")
+    private Integer sentToday = 0;
+
+    @Column(name = "last_sent_reset")
+    private java.time.LocalDate lastSentReset;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -52,6 +63,15 @@ public class User {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        if (dailyLimit == null) {
+            dailyLimit = 50;
+        }
+        if (sentToday == null) {
+            sentToday = 0;
+        }
+        if (lastSentReset == null) {
+            lastSentReset = java.time.LocalDate.now();
+        }
     }
 
     @PreUpdate

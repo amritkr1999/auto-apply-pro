@@ -73,6 +73,16 @@ export const DashboardSidebar: React.FC = () => {
                     Parse Screenshot
                   </Link>
                 </li>
+                <li>
+                  <Link to="/outreach/templates" style={{ color: "#cbd5e1", textDecoration: "none", fontWeight: 500 }}>
+                    Email Templates
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/outreach/draft" style={{ color: "#cbd5e1", textDecoration: "none", fontWeight: 500 }}>
+                    Draft Outreach
+                  </Link>
+                </li>
               </>
             )}
             {role === "RECRUITER" && (
