@@ -8,6 +8,7 @@ export const DashboardSidebar: React.FC = () => {
         width: 240,
         padding: 16,
         borderRight: "1px solid rgba(255,255,255,0.04)",
+        backgroundColor: "#f9f9f9",
       }}
     >
       <nav>

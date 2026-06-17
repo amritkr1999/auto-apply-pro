@@ -1,15 +1,24 @@
-import React from "react";
+import React, { useState } from "react";
 import DashboardSidebar from "../DashboardSidebar";
 import "./candidate-dashboard.css";
 
 export const CandidateDashboardView: React.FC = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
   return (
     <div
       className="candidate-dashboard-root"
       style={{ display: "flex", minHeight: "100vh" }}
     >
-      <DashboardSidebar />
+      {sidebarOpen && <DashboardSidebar />}
       <main style={{ flex: 1, padding: 24 }}>
+        <button
+          className="sidebar-toggle-btn"
+          type="button"
+          onClick={() => setSidebarOpen((open) => !open)}
+        >
+          {sidebarOpen ? "Hide sidebar" : "Show sidebar"}
+        </button>
         <h1>Candidate Dashboard</h1>
         <section
           id="overview"

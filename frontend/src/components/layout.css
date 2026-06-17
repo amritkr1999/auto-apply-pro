@@ -1,7 +1,7 @@
 :root {
-  --bg: #071029;
-  --muted: #94a3b8;
-  --surface: #0b1220;
+  --bg: #ffffff;
+  --muted: #6b6375;
+  --surface: #f3f4f6;
   --accent: #06b6d4;
 }
 .app-root {
@@ -9,7 +9,7 @@
   flex-direction: column;
   min-height: 100vh;
   background: var(--bg);
-  color: #e6eef8;
+  color: #000000;
 }
 .container {
   max-width: 1100px;
@@ -21,6 +21,8 @@
 }
 .app-header {
   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  color: #15b239;
+  background-color: #113bae;
 }
 .brand-link {
   font-weight: 700;
