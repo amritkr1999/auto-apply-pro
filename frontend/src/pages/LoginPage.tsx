@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./login.css";
+import { profileService } from "../features/profile/services/profileService";
 
 type AuthTab = "login" | "register";
 type UserRole = "candidate" | "recruiter" | "company";
@@ -52,20 +53,31 @@ export const LoginPage: React.FC = () => {
     setError("");
   };
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
       setError("Please enter both email and password.");
       return;
     }
     
-    // Mock successful authentication and redirect to dashboard
-    console.log("Mock Login Success with:", { email, password, rememberMe });
-    setError("");
-    navigate("/candidate-dashboard");
+    try {
+      setError("");
+      const userData = await profileService.login({ email, password });
+      localStorage.setItem("user", JSON.stringify(userData));
+      
+      if (userData.role === "RECRUITER") {
+        navigate("/recruiter-dashboard");
+      } else if (userData.role === "COMPANY") {
+        navigate("/company-dashboard");
+      } else {
+        navigate("/candidate-dashboard");
+      }
+    } catch (err: any) {
+      setError(err.message || "Invalid credentials. Please try again.");
+    }
   };
 
-  const handleRegisterSubmit = (e: React.FormEvent) => {
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !mobile || !email || !password || !confirmPassword) {
       setError("All fields are required.");
@@ -76,21 +88,41 @@ export const LoginPage: React.FC = () => {
       return;
     }
 
-    // Mock successful registration and redirect to dashboard
-    console.log("Mock Registration Success with:", {
-      role: selectedRole,
-      name,
-      mobile,
-      email,
-      password,
-    });
-    setError("");
-    navigate("/candidate-dashboard");
+    try {
+      setError("");
+      const userData = await profileService.register({
+        name,
+        email,
+        mobile,
+        password,
+        role: selectedRole?.toUpperCase(),
+      });
+      localStorage.setItem("user", JSON.stringify(userData));
+      
+      if (userData.role === "RECRUITER") {
+        navigate("/recruiter-dashboard");
+      } else if (userData.role === "COMPANY") {
+        navigate("/company-dashboard");
+      } else {
+        navigate("/candidate-dashboard");
+      }
+    } catch (err: any) {
+      setError(err.message || "Registration failed. Please try again.");
+    }
   };
 
   const handleSocialAuth = (provider: string) => {
     console.log(`Authenticating with ${provider}...`);
-    // Redirect to dashboard on mock social login
+    // Mock user login for social auth
+    const mockUser = {
+      token: "mock-social-token",
+      id: 999,
+      email: `social.${provider.toLowerCase()}@example.com`,
+      name: `Social ${provider} User`,
+      mobile: "+1234567890",
+      role: "CANDIDATE",
+    };
+    localStorage.setItem("user", JSON.stringify(mockUser));
     navigate("/candidate-dashboard");
   };
 

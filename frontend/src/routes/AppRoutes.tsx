@@ -3,6 +3,8 @@ import { Routes, Route } from "react-router-dom";
 import Layout from "../components/Layout";
 import LoginPage from "../pages/LoginPage";
 import CandidateDashboardView from "../features/dashboard/components/views/CandidateDashboardView";
+import RecruiterDashboardView from "../features/dashboard/components/views/RecruiterDashboardView";
+import CompanyDashboardView from "../features/dashboard/components/views/CompanyDashboardView";
 import CandidateProfile from "../features/profile/CandidateProfile";
 
 export const AppRoutes: React.FC = () => {
@@ -14,9 +16,16 @@ export const AppRoutes: React.FC = () => {
           path="/candidate-dashboard"
           element={<CandidateDashboardView />}
         />
+        <Route
+          path="/recruiter-dashboard"
+          element={<RecruiterDashboardView />}
+        />
+        <Route
+          path="/company-dashboard"
+          element={<CompanyDashboardView />}
+        />
         <Route path="/candidate/profile" element={<CandidateProfile />} />
       </Route>
-      {/* Add more app routes below as pages/components become available */}
     </Routes>
   );
 };
