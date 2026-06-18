@@ -103,15 +103,29 @@ The frontend is built with React, TypeScript, and Vite.
 
 ## Contributing Rules
 
-To maintain a clean and stable codebase, please adhere to the following branch strategy:
+To maintain a clean and stable codebase, please adhere to the following issue-based contribution workflow:
 
-1. **Do not merge directly into the `main` branch.**
-2. When starting a new task, always pull the latest changes from the `develop` branch.
-3. Create your own side/feature branch from `develop`:
-   ```bash
-   git checkout develop
-   git pull origin develop
-   git checkout -b feature/your-feature-name
-   ```
-4. Work on your branch, commit your changes, and merge them back into the `develop` branch (preferably via a Pull Request).
-5. The `develop` branch will be periodically reviewed and personally merged into the `main` branch by the project owner.
+### 1. Issue Assignment
+* **Do not start work without an issue.** All work must be tracked via GitHub issues created by the project owner.
+* Before starting, select an issue, assign it to yourself (or comment to indicate you are working on it), and mark it as "working on it."
+
+### 2. Branching & Naming
+* **Do not merge directly into the `main` branch.**
+* Always create a new side branch branching off from the `develop` branch.
+* Link the branch with the issue by naming it descriptively, preferably including the issue number:
+  ```bash
+  git checkout develop
+  git pull origin develop
+  git checkout -b issue-<number>/<short-description>
+  # Example: git checkout -b issue-42/add-email-rate-limiting
+  ```
+
+### 3. Development & Pull Request
+* Implement your changes, write tests if applicable, and commit your work.
+* Once ready, push your branch and open a Pull Request (PR) to merge your branch **back into the `develop` branch**.
+* Make sure to link the PR to the original issue (e.g., by writing `Closes #<issue-number>` in the PR description).
+
+### 4. Code Review & Release
+* Get your PR reviewed and approved by the team/owner.
+* Once approved, the PR can be merged into `develop`.
+* Periodically, the project owner will personally review and merge the `develop` branch into the `main` branch.
