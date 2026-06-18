@@ -1,7 +1,117 @@
-# auto-apply-pro
-Will add it later.
+# Auto Apply Pro
 
-Note: This project requires Java 21 (LTS) or newer to build and run. Set your JDK to match the `java.version` property in `backend/pom.xml`.
+Auto Apply Pro is an AI-powered career coach and job search automation platform designed to simplify the job hunting process. The core focus of the project is to automate the cold emailing and application outreach phase, reducing application fatigue and letting job seekers focus on interview preparation.
 
+* **System Design Architecture**: View the design diagrams on [Lucidchart](https://lucid.app/lucidchart/6707ac3d-7e0e-43f8-a861-53cf3db1c9ba/edit?viewport_loc=32%2C-11%2C1575%2C895%2C0_0&invitationId=inv_8000be9d-0c0e-47eb-b0a4-2e5fdc796501).
 
-https://lucid.app/lucidchart/6707ac3d-7e0e-43f8-a861-53cf3db1c9ba/edit?viewport_loc=32%2C-11%2C1575%2C895%2C0_0&invitationId=inv_8000be9d-0c0e-47eb-b0a4-2e5fdc796501
+---
+
+## Project Description
+
+### 1. Executive Summary & Value Proposition
+* **The Problem:** Job seekers face significant "application fatigue" due to the slow, repetitive, and error-prone process of manually searching for jobs, tailoring resumes, and tracking application statuses.
+* **The Solution:** Auto Apply Pro serves as an intelligent agent that automates the repetitive parts of the job search process (searching, drafting, applying), freeing up candidates to focus on high-value activities like interviewing and networking.
+* **Target Audience:** Anyone actively searching for a job.
+
+### 2. Feature Matrix (MVP vs. Future Releases)
+
+| Feature | Scope | Description |
+| :--- | :--- | :--- |
+| **Automated Email Drafting** | MVP (Phase 1) | Automatically draft personalized emails based on user resumes and job descriptions. |
+| **Scheduled Email Sending** | MVP (Phase 1) | Send outreach emails via SMTP with rate-limiting to protect sender reputation. |
+| **PostgreSQL Database Tracking** | MVP (Phase 1) | Keep track of manual job entries, CSV imports, and application statuses. |
+| **AI Resume Optimizer/ATS Checker** | Nice-to-Have (V2+) | Parse resumes and optimize them to match ATS systems. |
+| **Multi-Profile Portfolio Management** | Nice-to-Have (V2+) | Manage multiple portfolios or resumes for different target roles. |
+| **Automated Job Scraping/Discovery** | Nice-to-Have (V2+) | Automatically find and crawl new job listings based on preferences. |
+| **Mock Interview Platform** | Nice-to-Have (V2+) | Provide AI-driven mock interview sessions and feedback. |
+
+### 3. End-to-End User Journey
+1. **Onboarding:** User registers and creates their profile.
+2. **Asset Upload:** User uploads their primary resume and defines job search preferences.
+3. **Job Pipeline:** System pulls relevant job opportunities into a "Review" queue.
+4. **Drafting & Review:** User reviews AI-generated draft emails for specific job listings and clicks "Approve".
+5. **Outreach:** The system automatically sends the email via SMTP and updates the application status to "Sent" in the database.
+6. **Tracking:** User views the dashboard to see application statuses ("Pending", "Rejected", "Interviewing") and leverages AI analytics to understand rejection trends.
+
+### 4. Success Metrics
+* **Outreach Velocity:** Number of personalized applications sent per week per user.
+* **Response Rate:** Percentage of applications resulting in a recruiter response or interview request.
+* **System Health:** Email deliverability rate (percentage of successfully sent emails without bounce-backs).
+* **User Efficiency:** Time saved per application compared to manual processing.
+
+---
+
+## Local Setup & Run Instructions
+
+Follow these steps to get the project running locally on your machine.
+
+### Prerequisites
+Make sure you have the following installed:
+* **Java 21 (LTS)** or newer
+* **Node.js** (v18 or newer recommended) and **npm**
+* **PostgreSQL** database server
+
+---
+
+### 1. Database Setup
+1. Start your local PostgreSQL server.
+2. Create a new database named `autoapplypro`.
+3. The database connection properties can be found and configured in:
+   [backend/src/main/resources/application.properties](file:///Users/amrit/Development/work/auto-apply-pro/backend/src/main/resources/application.properties)
+   * Default URL: `jdbc:postgresql://localhost:5432/autoapplypro`
+   * Default Username: `amrit`
+   * Default Password: `amrit123`
+   *(Update these credentials in your local properties if your PostgreSQL settings differ.)*
+
+---
+
+### 2. Backend Setup & Run
+The backend is built with Spring Boot and Maven.
+
+1. Navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
+2. Build and run the application using the Maven Wrapper:
+   ```bash
+   ./mvnw spring-boot:run
+   ```
+3. Once running, the server will start on port `8060`.
+4. You can access the OpenAPI Swagger documentation at:
+   [http://localhost:8060/swagger-ui.html](http://localhost:8060/swagger-ui.html)
+
+---
+
+### 3. Frontend Setup & Run
+The frontend is built with React, TypeScript, and Vite.
+
+1. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+2. Install the required dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the Vite development server:
+   ```bash
+   npm run dev
+   ```
+4. Once running, you can access the frontend in your browser (typically at [http://localhost:5173](http://localhost:5173)).
+
+---
+
+## Contributing Rules
+
+To maintain a clean and stable codebase, please adhere to the following branch strategy:
+
+1. **Do not merge directly into the `main` branch.**
+2. When starting a new task, always pull the latest changes from the `develop` branch.
+3. Create your own side/feature branch from `develop`:
+   ```bash
+   git checkout develop
+   git pull origin develop
+   git checkout -b feature/your-feature-name
+   ```
+4. Work on your branch, commit your changes, and merge them back into the `develop` branch (preferably via a Pull Request).
+5. The `develop` branch will be periodically reviewed and personally merged into the `main` branch by the project owner.
