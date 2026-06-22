@@ -1,60 +1,77 @@
 import React, { useState } from "react";
 import DashboardSidebar from "../DashboardSidebar";
-import "./candidate-dashboard.css";
+import Button from "../../../../components/ui/Button";
+import Badge from "../../../../components/ui/Badge";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../../../../components/ui/Table";
 
 export const CompanyDashboardView: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  return (
-    <div
-      className="candidate-dashboard-root"
-      style={{ display: "flex", minHeight: "100vh" }}
-    >
-      {sidebarOpen && <DashboardSidebar />}
-      <main style={{ flex: 1, padding: 24 }}>
-        <button
-          className="sidebar-toggle-btn"
-          type="button"
-          onClick={() => setSidebarOpen((open) => !open)}
-        >
-          {sidebarOpen ? "Hide sidebar" : "Show sidebar"}
-        </button>
-        <h1>Company Dashboard</h1>
-        <section
-          id="overview"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))",
-            gap: 16,
-            marginTop: 16,
-          }}
-        >
-          <div className="card">
-            <h3>Active Jobs</h3>
-            <p>15 listings</p>
-          </div>
-          <div className="card">
-            <h3>Total Recruiters</h3>
-            <p>8 active</p>
-          </div>
-          <div className="card">
-            <h3>Applicants</h3>
-            <p>342 received</p>
-          </div>
-        </section>
+  const postings = [
+    { id: 1, title: "Senior Product Manager", applicants: "12 applicants", status: "Active", variant: "success" as const },
+    { id: 2, title: "DevOps Architect", applicants: "8 applicants", status: "Active", variant: "success" as const },
+  ];
 
-        <section id="jobs" style={{ marginTop: 24 }}>
-          <h2>Active Postings</h2>
-          <ul>
-            <li>
-              Senior Product Manager — <small>12 applicants</small>
-            </li>
-            <li>
-              DevOps Architect — <small>8 applicants</small>
-            </li>
-          </ul>
+  return (
+    <div className="flex-1 flex gap-8">
+      {sidebarOpen && <DashboardSidebar />}
+      
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-800">Company Dashboard</h1>
+            <p className="text-sm text-slate-500 mt-1">Manage active corporate job postings and internal recruiters</p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setSidebarOpen((open) => !open)}
+          >
+            {sidebarOpen ? "Hide Sidebar" : "Show Sidebar"}
+          </Button>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+          <div className="bg-white rounded-card shadow-sm border border-slate-200 p-5">
+            <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Active Jobs</h3>
+            <p className="text-3xl font-bold text-slate-800 mt-2">15 listings</p>
+          </div>
+          <div className="bg-white rounded-card shadow-sm border border-slate-200 p-5">
+            <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Total Recruiters</h3>
+            <p className="text-3xl font-bold text-slate-800 mt-2">8 active</p>
+          </div>
+          <div className="bg-white rounded-card shadow-sm border border-slate-200 p-5">
+            <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Applicants</h3>
+            <p className="text-3xl font-bold text-slate-800 mt-2">342 received</p>
+          </div>
+        </div>
+
+        {/* Postings Table */}
+        <section id="jobs">
+          <h2 className="text-lg font-bold text-slate-800 mb-4">Active Postings</h2>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Job Title</TableHead>
+                <TableHead>Applicants Count</TableHead>
+                <TableHead>Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {postings.map((post) => (
+                <TableRow key={post.id}>
+                  <TableCell className="font-semibold text-slate-700">{post.title}</TableCell>
+                  <TableCell className="text-slate-500">{post.applicants}</TableCell>
+                  <TableCell>
+                    <Badge variant={post.variant}>{post.status}</Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </section>
-      </main>
+      </div>
     </div>
   );
 };
