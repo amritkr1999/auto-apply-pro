@@ -1,0 +1,53 @@
+# OS & IDEs
+.DS_Store
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Python (Local pipeline)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+pipeline/logs/
+pipeline/data/cache/
+pipeline/.env
+pipeline/poetry.lock
+
+# Spring Boot / Java (Backend)
+backend/target/
+backend/build/
+backend/.gradle/
+backend/out/
+backend/*.class
+backend/*.jar
+backend/*.war
+backend/*.ear
+backend/bin/
+backend/.classpath
+backend/.project
+backend/.settings/
+
+# Node / React (Frontend)
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.pnpm-debug.log*

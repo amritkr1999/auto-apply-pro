@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "auto-apply-pro-pipeline"
+version = "0.1.0"
+description = "Local LLM Pipeline for Job Outreach"
+authors = ["Auto Apply Pro Team"]
+readme = "README.md"
+packages = [{include = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pydantic = "^2.0"
+pydantic-settings = "^2.0"
+python-dotenv = "^1.0"
+aiohttp = "^3.8"
+pillow = "^9.0"
+pypdf = "^3.0"
+python-docx = "^0.8"
+asyncpg = "^0.28"
+sqlalchemy = "^2.0"
+alembic = "^1.12"
+email-validator = "^1.3"
+psutil = "^5.9"
+loguru = "^0.7"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.0"
+pytest-asyncio = "^0.21"
+pytest-cov = "^4.0"
+black = "^23.0"
+mypy = "^1.0"
+pylint = "^2.17"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
