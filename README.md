@@ -3,6 +3,7 @@
 Auto Apply Pro is an AI-powered career coach and job search automation platform designed to simplify the job hunting process. The core focus of the project is to automate the cold emailing and application outreach phase, reducing application fatigue and letting job seekers focus on interview preparation.
 
 * **System Design Architecture**: View the design diagrams on [Lucidchart](https://lucid.app/lucidchart/6707ac3d-7e0e-43f8-a861-53cf3db1c9ba/edit?viewport_loc=32%2C-11%2C1575%2C895%2C0_0&invitationId=inv_8000be9d-0c0e-47eb-b0a4-2e5fdc796501).
+* **UI/UX Design**: View the SaaS Dashboard mockup on [Figma](https://www.figma.com/make/BuR77V0IplrEwWdMx8wGda/SaaS-Dashboard-for-AutoApply-Pro?t=th4ZFWN23WX9ofYJ-1).
 
 ---
 
