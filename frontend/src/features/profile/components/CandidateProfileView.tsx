@@ -13,10 +13,69 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
   const [skills, setSkills] = useState("");
   const [locationPreference, setLocationPreference] = useState("");
   const [expectedSalary, setExpectedSalary] = useState("");
+  const [masterSkills, setMasterSkills] = useState<{ id: number; name: string }[]>([]);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [uploadingResume, setUploadingResume] = useState(false);
+
+  const handleUploadResume = async (file: File) => {
+    try {
+      setUploadingResume(true);
+      setError("");
+      setMessage("");
+      await profileService.uploadCandidateResume(userId, file);
+      setProfile((prev) => prev ? { ...prev, resumeFilename: file.name } : null);
+      setMessage("Resume uploaded successfully!");
+    } catch (err: any) {
+      setError(err.message || "Failed to upload resume.");
+    } finally {
+      setUploadingResume(false);
+    }
+  };
   
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    profileService.getSkills()
+      .then((data) => setMasterSkills(data))
+      .catch((err) => console.error("Failed to load master skills", err));
+  }, []);
+
+  useEffect(() => {
+    if (!skills || masterSkills.length === 0) {
+      setSuggestions([]);
+      return;
+    }
+
+    const parts = skills.split(",");
+    const lastPart = parts[parts.length - 1].trim();
+
+    if (lastPart.length < 1) {
+      setSuggestions([]);
+      return;
+    }
+
+    const lowerLastPart = lastPart.toLowerCase();
+    const existingSkillsLower = parts.slice(0, -1).map(p => p.trim().toLowerCase());
+
+    const filtered = masterSkills
+      .map(s => s.name)
+      .filter(name => {
+        const lowerName = name.toLowerCase();
+        return lowerName.includes(lowerLastPart) && !existingSkillsLower.includes(lowerName);
+      })
+      .slice(0, 5);
+
+    setSuggestions(filtered);
+  }, [skills, masterSkills]);
+
+  const handleSelectSuggestion = (suggestion: string) => {
+    const parts = skills.split(",");
+    const updatedParts = [...parts.slice(0, -1), suggestion];
+    setSkills(updatedParts.join(", ") + ", ");
+    setSuggestions([]);
+  };
 
   useEffect(() => {
     profileService
@@ -116,7 +175,7 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
           />
         </div>
 
-        <div className="form-group">
+        <div className="form-group" style={{ position: "relative" }}>
           <label style={{ display: "block", marginBottom: 6, fontWeight: 500 }}>Skills (comma-separated)</label>
           <input
             type="text"
@@ -126,6 +185,40 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
             className="auth-input"
             style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff" }}
           />
+          {suggestions.length > 0 && (
+            <div style={{
+              position: "absolute",
+              top: "100%",
+              left: 0,
+              right: 0,
+              zIndex: 10,
+              background: "#1e293b",
+              border: "1px solid rgba(255,255,255,0.1)",
+              borderRadius: "6px",
+              marginTop: "4px",
+              boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+              maxHeight: "200px",
+              overflowY: "auto"
+            }}>
+              {suggestions.map((suggestion) => (
+                <div
+                  key={suggestion}
+                  onClick={() => handleSelectSuggestion(suggestion)}
+                  style={{
+                    padding: "8px 12px",
+                    cursor: "pointer",
+                    transition: "background-color 0.2s",
+                    borderBottom: "1px solid rgba(255,255,255,0.05)",
+                    color: "#f1f5f9"
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(99, 102, 241, 0.2)"}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+                >
+                  {suggestion}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="form-group">
@@ -150,6 +243,62 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
             className="auth-input"
             style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff" }}
           />
+        </div>
+
+        <div className="form-group" style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 20, display: "flex", flexDirection: "column", gap: 8 }}>
+          <label style={{ display: "block", fontWeight: 500 }}>Upload Resume (PDF, DOC, DOCX)</label>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <input
+              type="file"
+              accept=".pdf,.doc,.docx"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  handleUploadResume(file);
+                }
+              }}
+              style={{ display: "none" }}
+              id="resume-upload-input"
+            />
+            <label
+              htmlFor="resume-upload-input"
+              style={{
+                padding: "8px 16px",
+                background: "rgba(255, 255, 255, 0.05)",
+                border: "1px solid rgba(255, 255, 255, 0.15)",
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontWeight: 500,
+                color: "#fff",
+                display: "inline-block"
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)"}
+              onMouseLeave={(e) => e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)"}
+            >
+              {uploadingResume ? "Uploading..." : "Choose File"}
+            </label>
+            {profile?.resumeFilename ? (
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span style={{ color: "#94a3b8", fontSize: "0.9rem" }}>📄 {profile.resumeFilename}</span>
+                <a
+                  href={`http://localhost:8060/api/v1/profiles/candidate/${userId}/resume`}
+                  download
+                  style={{
+                    color: "#6366f1",
+                    textDecoration: "none",
+                    fontSize: "0.85rem",
+                    fontWeight: 500
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.textDecoration = "underline"}
+                  onMouseLeave={(e) => e.currentTarget.style.textDecoration = "none"}
+                >
+                  Download
+                </a>
+              </div>
+            ) : (
+              <span style={{ color: "#64748b", fontSize: "0.9rem" }}>No resume uploaded</span>
+            )}
+          </div>
         </div>
 
         <button

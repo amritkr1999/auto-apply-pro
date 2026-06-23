@@ -19,6 +19,7 @@ public class UserServiceImpl implements UserService {
     private final RecruiterRepository recruiterRepository;
     private final CompanyRepository companyRepository;
     private final PasswordEncoder passwordEncoder;
+    private final SkillRepository skillRepository;
 
     @Override
     @Transactional
@@ -58,7 +59,7 @@ public class UserServiceImpl implements UserService {
         if (role == UserRole.CANDIDATE) {
             Candidate candidate = Candidate.builder()
                     .user(user)
-                    .skills(new ArrayList<>())
+                    .skills(new java.util.HashSet<>())
                     .jobPreferences(new HashMap<>())
                     .build();
             candidateRepository.save(candidate);
@@ -105,7 +106,7 @@ public class UserServiceImpl implements UserService {
                     
                     Candidate candidate = Candidate.builder()
                             .user(newUser)
-                            .skills(new ArrayList<>())
+                            .skills(new java.util.HashSet<>())
                             .jobPreferences(new HashMap<>())
                             .build();
                     candidateRepository.save(candidate);
@@ -141,8 +142,9 @@ public class UserServiceImpl implements UserService {
                 .email(user.getEmail())
                 .name(user.getName())
                 .mobile(user.getMobile())
-                .skills(candidate.getSkills())
+                .skills(candidate.getSkills() != null ? candidate.getSkills().stream().map(Skill::getName).collect(java.util.stream.Collectors.toList()) : new ArrayList<>())
                 .jobPreferences(candidate.getJobPreferences())
+                .resumeFilename(candidate.getResumeFilename())
                 .build();
     }
 
@@ -157,7 +159,21 @@ public class UserServiceImpl implements UserService {
         user.setMobile(dto.getMobile());
         userRepository.save(user);
 
-        candidate.setSkills(dto.getSkills());
+        java.util.Set<Skill> dbSkills = new java.util.HashSet<>();
+        if (dto.getSkills() != null) {
+            for (String skillName : dto.getSkills()) {
+                String trimmedName = skillName.trim();
+                if (!trimmedName.isEmpty()) {
+                    Skill skill = skillRepository.findByNameIgnoreCase(trimmedName)
+                            .orElseGet(() -> {
+                                Skill newSkill = Skill.builder().name(trimmedName).build();
+                                return skillRepository.save(newSkill);
+                            });
+                    dbSkills.add(skill);
+                }
+            }
+        }
+        candidate.setSkills(dbSkills);
         candidate.setJobPreferences(dto.getJobPreferences());
         candidate = candidateRepository.save(candidate);
 
@@ -167,8 +183,9 @@ public class UserServiceImpl implements UserService {
                 .email(user.getEmail())
                 .name(user.getName())
                 .mobile(user.getMobile())
-                .skills(candidate.getSkills())
+                .skills(candidate.getSkills().stream().map(Skill::getName).collect(java.util.stream.Collectors.toList()))
                 .jobPreferences(candidate.getJobPreferences())
+                .resumeFilename(candidate.getResumeFilename())
                 .build();
     }
 
@@ -282,5 +299,23 @@ public class UserServiceImpl implements UserService {
                 .website(company.getWebsite())
                 .description(company.getDescription())
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public void uploadResume(Long userId, org.springframework.web.multipart.MultipartFile file) throws java.io.IOException {
+        Candidate candidate = candidateRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Candidate profile not found"));
+        candidate.setResumeFilename(file.getOriginalFilename());
+        candidate.setResumeContentType(file.getContentType());
+        candidate.setResumeBytes(file.getBytes());
+        candidateRepository.save(candidate);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Candidate getCandidateResume(Long userId) {
+        return candidateRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Candidate profile not found"));
     }
 }

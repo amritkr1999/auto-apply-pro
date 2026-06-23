@@ -17,4 +17,5 @@ public class JobDetailsDto {
     private String requirements;
     private String salary;
     private String sourceUrl;
+    private java.util.List<String> skills;
 }

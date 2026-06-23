@@ -1,6 +1,8 @@
 package com.backend.autoapplypro.modules.jobs.controller;
 
 import com.backend.autoapplypro.modules.jobs.dto.JobDetailsDto;
+import com.backend.autoapplypro.modules.users.model.Skill;
+import com.backend.autoapplypro.modules.users.repository.SkillRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
@@ -21,6 +23,7 @@ import java.io.IOException;
 @CrossOrigin(origins = "*")
 public class JobScreenshotController {
 
+    private final SkillRepository skillRepository;
     private final RestTemplate restTemplate = new RestTemplate();
     private static final String PYTHON_SERVICE_URL = "http://localhost:8000/extract-job-details";
 
@@ -70,7 +73,21 @@ public class JobScreenshotController {
             );
 
             log.info("Successfully received response from Python extraction service. Status: {}", response.getStatusCode());
-            return ResponseEntity.ok(response.getBody());
+            JobDetailsDto dto = response.getBody();
+            if (dto != null && dto.getSkills() != null) {
+                log.info("Extracted {} skills. Persisting/associating with master skills table...", dto.getSkills().size());
+                for (String skillName : dto.getSkills()) {
+                    String trimmedName = skillName.trim();
+                    if (!trimmedName.isEmpty()) {
+                        skillRepository.findByNameIgnoreCase(trimmedName)
+                            .orElseGet(() -> {
+                                Skill newSkill = Skill.builder().name(trimmedName).build();
+                                return skillRepository.save(newSkill);
+                            });
+                    }
+                }
+            }
+            return ResponseEntity.ok(dto);
 
         } catch (ResourceAccessException e) {
             log.error("Failed to connect to the Python service at {}. Is the service running? Error: {}", 

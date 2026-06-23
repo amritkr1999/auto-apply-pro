@@ -9,6 +9,7 @@ interface JobDetails {
   requirements: string;
   salary: string;
   sourceUrl: string;
+  skills: string[];
 }
 
 export const ScreenshotUploader: React.FC = () => {
@@ -75,7 +76,7 @@ export const ScreenshotUploader: React.FC = () => {
   };
 
   // Handle editable input field changes
-  const handleFieldChange = (field: keyof JobDetails, value: string) => {
+  const handleFieldChange = (field: keyof JobDetails, value: any) => {
     if (!jobDetails) return;
     setJobDetails({
       ...jobDetails,
@@ -317,6 +318,20 @@ export const ScreenshotUploader: React.FC = () => {
                 onChange={(e) => handleFieldChange("requirements", e.target.value)}
                 rows={4}
                 style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff", resize: "vertical", fontFamily: "inherit" }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: "block", marginBottom: 6, fontWeight: 500, color: "#94a3b8" }}>Required Skills (comma-separated)</label>
+              <input
+                type="text"
+                value={jobDetails.skills ? jobDetails.skills.join(", ") : ""}
+                onChange={(e) => {
+                  const val = e.target.value.split(",").map(s => s.trim());
+                  handleFieldChange("skills", val);
+                }}
+                placeholder="e.g. React, TypeScript, Java"
+                style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff" }}
               />
             </div>
 
