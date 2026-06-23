@@ -18,6 +18,10 @@ export interface CandidateProfile {
   skills: string[];
   jobPreferences: Record<string, any>;
   resumeFilename?: string;
+  summary?: string;
+  education?: any[];
+  experience?: any[];
+  certifications?: string[];
 }
 
 export interface RecruiterProfile {

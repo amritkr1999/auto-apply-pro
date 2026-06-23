@@ -49,4 +49,19 @@ public class Candidate {
 
     @Column(name = "resume_content_type")
     private String resumeContentType;
+
+    @Column(name = "summary", columnDefinition = "TEXT")
+    private String summary;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "education", columnDefinition = "jsonb")
+    private List<Map<String, Object>> education;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "experience", columnDefinition = "jsonb")
+    private List<Map<String, Object>> experience;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "certifications", columnDefinition = "jsonb")
+    private List<String> certifications;
 }

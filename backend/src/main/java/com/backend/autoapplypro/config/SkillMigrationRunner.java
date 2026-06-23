@@ -19,13 +19,17 @@ public class SkillMigrationRunner implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         try {
-            // Check if candidates table has skills column
+            // Check if candidates table has skills column and does not have legacy_skills column
             Boolean hasSkillsColumn = jdbcTemplate.queryForObject(
                 "SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='candidates' AND column_name='skills')",
                 Boolean.class
             );
+            Boolean hasLegacyColumn = jdbcTemplate.queryForObject(
+                "SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='candidates' AND column_name='legacy_skills')",
+                Boolean.class
+            );
 
-            if (Boolean.TRUE.equals(hasSkillsColumn)) {
+            if (Boolean.TRUE.equals(hasSkillsColumn) && !Boolean.TRUE.equals(hasLegacyColumn)) {
                 log.info("Found legacy 'skills' JSONB column in candidates table. Starting migration...");
 
                 // Fetch candidates with non-null legacy skills

@@ -20,4 +20,8 @@ public class CandidateProfileDto {
     private List<String> skills;
     private Map<String, Object> jobPreferences;
     private String resumeFilename;
+    private String summary;
+    private List<Map<String, Object>> education;
+    private List<Map<String, Object>> experience;
+    private List<String> certifications;
 }
