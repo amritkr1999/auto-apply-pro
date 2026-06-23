@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { profileService } from "../services/profileService";
 import type { CandidateProfile } from "../services/profileService";
+import Button from "../../../components/ui/Button";
+import Input from "../../../components/ui/Input";
 
 interface Props {
   userId: number;
@@ -72,102 +74,74 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
     }
   };
 
-  if (loading) return <div style={{ color: "#cbd5e1" }}>Loading profile details...</div>;
+  if (loading) return <div className="text-slate-500">Loading profile details...</div>;
 
   return (
-    <div className="profile-details-card" style={{ maxWidth: 600, margin: "0 auto" }}>
-      <h2>Candidate Profile Settings</h2>
-      {message && <div className="alert success" style={{ color: "#4ade80", marginBottom: 15 }}>{message}</div>}
-      {error && <div className="alert danger" style={{ color: "#f87171", marginBottom: 15 }}>{error}</div>}
-
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        <div className="form-group">
-          <label style={{ display: "block", marginBottom: 6, fontWeight: 500 }}>Full Name</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="auth-input"
-            required
-            style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff" }}
-          />
+    <div className="w-full">
+      {message && (
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-card mb-6 text-sm">
+          {message}
         </div>
-
-        <div className="form-group">
-          <label style={{ display: "block", marginBottom: 6, fontWeight: 500 }}>Email Address (Read-only)</label>
-          <input
-            type="email"
-            value={profile?.email || ""}
-            disabled
-            className="auth-input"
-            style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.02)", color: "#64748b", cursor: "not-allowed" }}
-          />
+      )}
+      {error && (
+        <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-card mb-6 text-sm">
+          {error}
         </div>
+      )}
 
-        <div className="form-group">
-          <label style={{ display: "block", marginBottom: 6, fontWeight: 500 }}>Mobile Number</label>
-          <input
-            type="text"
-            value={mobile}
-            onChange={(e) => setMobile(e.target.value)}
-            className="auth-input"
-            required
-            style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff" }}
-          />
+      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <Input
+          label="Full Name"
+          type="text"
+          value={name}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
+          required
+        />
+
+        <Input
+          label="Email Address (Read-only)"
+          type="email"
+          value={profile?.email || ""}
+          disabled
+        />
+
+        <Input
+          label="Mobile Number"
+          type="text"
+          value={mobile}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMobile(e.target.value)}
+          required
+        />
+
+        <Input
+          label="Skills (comma-separated)"
+          type="text"
+          value={skills}
+          placeholder="React, TypeScript, Java, Spring Boot"
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSkills(e.target.value)}
+        />
+
+        <Input
+          label="Preferred Job Location"
+          type="text"
+          value={locationPreference}
+          placeholder="San Francisco, CA or Remote"
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocationPreference(e.target.value)}
+        />
+
+        <Input
+          label="Expected Salary"
+          type="text"
+          value={expectedSalary}
+          placeholder="$120k/yr"
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setExpectedSalary(e.target.value)}
+        />
+
+        <div className="flex justify-end pt-2">
+          <Button type="submit">
+            Save Profile
+          </Button>
         </div>
-
-        <div className="form-group">
-          <label style={{ display: "block", marginBottom: 6, fontWeight: 500 }}>Skills (comma-separated)</label>
-          <input
-            type="text"
-            value={skills}
-            placeholder="React, TypeScript, Java, Spring Boot"
-            onChange={(e) => setSkills(e.target.value)}
-            className="auth-input"
-            style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff" }}
-          />
-        </div>
-
-        <div className="form-group">
-          <label style={{ display: "block", marginBottom: 6, fontWeight: 500 }}>Preferred Job Location</label>
-          <input
-            type="text"
-            value={locationPreference}
-            placeholder="San Francisco, CA or Remote"
-            onChange={(e) => setLocationPreference(e.target.value)}
-            className="auth-input"
-            style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff" }}
-          />
-        </div>
-
-        <div className="form-group">
-          <label style={{ display: "block", marginBottom: 6, fontWeight: 500 }}>Expected Salary</label>
-          <input
-            type="text"
-            value={expectedSalary}
-            placeholder="$120k/yr"
-            onChange={(e) => setExpectedSalary(e.target.value)}
-            className="auth-input"
-            style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff" }}
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="btn"
-          style={{
-            padding: "12px",
-            background: "#4f46e5",
-            color: "#fff",
-            border: "none",
-            borderRadius: "6px",
-            cursor: "pointer",
-            fontWeight: 500,
-            marginTop: 10,
-          }}
-        >
-          Save Profile
-        </button>
       </form>
     </div>
   );
