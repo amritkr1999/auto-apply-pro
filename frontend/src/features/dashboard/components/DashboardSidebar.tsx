@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 export const DashboardSidebar: React.FC = () => {
   const navigate = useNavigate();
@@ -23,118 +23,79 @@ export const DashboardSidebar: React.FC = () => {
     }
   };
 
+  const linkStyle = ({ isActive }: { isActive: boolean }) =>
+    `flex items-center px-3 py-2.5 text-sm font-medium rounded-btn transition-all duration-150 ${
+      isActive
+        ? "bg-slate-100 text-primary border-l-4 border-primary pl-2"
+        : "text-slate-600 hover:bg-slate-50 hover:text-primary"
+    }`;
+
+  const anchorStyle = "flex items-center px-3 py-2.5 text-sm font-medium rounded-btn text-slate-600 hover:bg-slate-50 hover:text-primary transition-all duration-150";
+
   return (
-    <aside
-      style={{
-        width: 240,
-        padding: 16,
-        borderRight: "1px solid rgba(255,255,255,0.04)",
-        backgroundColor: "#0f172a", // Sleek dark mode background
-        color: "#f8fafc",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "between",
-      }}
-    >
-      <div style={{ flex: 1 }}>
-        <h3 style={{ margin: "0 0 20px 0", fontSize: "1.1rem", opacity: 0.8 }}>
+    <aside className="w-[240px] shrink-0 p-4 border-r border-slate-200 bg-white flex flex-col justify-between min-h-[calc(100vh-64px)]">
+      <div className="flex-1">
+        <h3 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-4 px-3">
           Menu ({role.toLowerCase()})
         </h3>
-        <nav>
-          <ul
-            style={{
-              listStyle: "none",
-              padding: 0,
-              margin: 0,
-              display: "flex",
-              flexDirection: "column",
-              gap: 12,
-            }}
-          >
-            <li>
-              <Link to={getOverviewPath()} style={{ color: "#cbd5e1", textDecoration: "none", fontWeight: 500 }}>
-                Overview
-              </Link>
-            </li>
-            {role === "CANDIDATE" && (
-              <>
-                <li>
-                  <a href="#applications" style={{ color: "#cbd5e1", textDecoration: "none", fontWeight: 500 }}>
-                    Applications
-                  </a>
-                </li>
-                <li>
-                  <a href="#saved" style={{ color: "#cbd5e1", textDecoration: "none", fontWeight: 500 }}>
-                    Saved Jobs
-                  </a>
-                </li>
-                <li>
-                  <Link to="/jobs/parse" style={{ color: "#cbd5e1", textDecoration: "none", fontWeight: 500 }}>
-                    Parse Screenshot
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/outreach/templates" style={{ color: "#cbd5e1", textDecoration: "none", fontWeight: 500 }}>
-                    Email Templates
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/outreach/draft" style={{ color: "#cbd5e1", textDecoration: "none", fontWeight: 500 }}>
-                    Draft Outreach
-                  </Link>
-                </li>
-              </>
-            )}
-            {role === "RECRUITER" && (
-              <>
-                <li>
-                  <a href="#outreach" style={{ color: "#cbd5e1", textDecoration: "none", fontWeight: 500 }}>
-                    Outreach
-                  </a>
-                </li>
-                <li>
-                  <a href="#candidates" style={{ color: "#cbd5e1", textDecoration: "none", fontWeight: 500 }}>
-                    Candidates
-                  </a>
-                </li>
-              </>
-            )}
-            {role === "COMPANY" && (
-              <>
-                <li>
-                  <a href="#jobs" style={{ color: "#cbd5e1", textDecoration: "none", fontWeight: 500 }}>
-                    Job Listings
-                  </a>
-                </li>
-                <li>
-                  <a href="#recruiters" style={{ color: "#cbd5e1", textDecoration: "none", fontWeight: 500 }}>
-                    Recruiters
-                  </a>
-                </li>
-              </>
-            )}
-            <li>
-              <Link to="/candidate/profile" style={{ color: "#cbd5e1", textDecoration: "none", fontWeight: 500 }}>
-                Profile Settings
-              </Link>
-            </li>
-          </ul>
+        <nav className="space-y-1">
+          <NavLink to={getOverviewPath()} className={linkStyle} end>
+            Overview
+          </NavLink>
+
+          {role === "CANDIDATE" && (
+            <>
+              <a href="#applications" className={anchorStyle}>
+                Applications
+              </a>
+              <a href="#saved" className={anchorStyle}>
+                Saved Jobs
+              </a>
+              <NavLink to="/jobs/parse" className={linkStyle}>
+                Parse Screenshot
+              </NavLink>
+              <NavLink to="/outreach/templates" className={linkStyle}>
+                Email Templates
+              </NavLink>
+              <NavLink to="/outreach/draft" className={linkStyle}>
+                Draft Outreach
+              </NavLink>
+            </>
+          )}
+
+          {role === "RECRUITER" && (
+            <>
+              <a href="#outreach" className={anchorStyle}>
+                Outreach
+              </a>
+              <a href="#candidates" className={anchorStyle}>
+                Candidates
+              </a>
+            </>
+          )}
+
+          {role === "COMPANY" && (
+            <>
+              <a href="#jobs" className={anchorStyle}>
+                Job Listings
+              </a>
+              <a href="#recruiters" className={anchorStyle}>
+                Recruiters
+              </a>
+            </>
+          )}
+
+          <NavLink to="/candidate/profile" className={linkStyle}>
+            Profile Settings
+          </NavLink>
         </nav>
       </div>
-      <div style={{ marginTop: "auto", paddingTop: 20 }}>
+
+      <div className="pt-4 border-t border-slate-100">
         <button
+          type="button"
           onClick={handleLogout}
-          style={{
-            width: "100%",
-            padding: "8px 12px",
-            background: "rgba(239, 68, 68, 0.1)",
-            border: "1px solid rgba(239, 68, 68, 0.2)",
-            color: "#ef4444",
-            borderRadius: "6px",
-            cursor: "pointer",
-            fontWeight: 500,
-            transition: "all 0.2s",
-          }}
+          className="w-full py-2 px-4 rounded-btn border border-rose-200 bg-rose-50 text-rose-600 font-medium hover:bg-rose-100 transition-colors text-sm"
         >
           Logout
         </button>

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { outreachService, type EmailTemplate } from "../services/outreachService";
 import { GmailComposeModal } from "./GmailComposeModal";
-import "../outreach.css";
+import Button from "../../../components/ui/Button";
+import Input from "../../../components/ui/Input";
 
 export const OutreachDraftSection: React.FC = () => {
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
@@ -122,167 +123,129 @@ export const OutreachDraftSection: React.FC = () => {
   };
 
   if (loading) {
-    return <div style={{ color: "#cbd5e1", padding: 24 }}>Loading outreach templates...</div>;
+    return <div className="text-slate-600 p-6">Loading outreach templates...</div>;
   }
 
   return (
-    <div className="outreach-root" style={{ maxWidth: 800, margin: "0 auto" }}>
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{ margin: 0, fontSize: "1.8rem", color: "#f8fafc" }}>Draft Email Outreach</h1>
-        <p style={{ margin: "4px 0 0 0", color: "#94a3b8" }}>Personalize a template and queue cold recruitment emails</p>
+    <div className="max-w-[800px] mx-auto w-full">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-slate-800">Draft Email Outreach</h1>
+        <p className="text-sm text-slate-500 mt-1">Personalize templates and queue outbound recruitment cold emails</p>
       </div>
 
       {statusMessage && (
-        <div style={{ color: "#4ade80", marginBottom: 16, padding: "10px 14px", borderRadius: 6, background: "rgba(74, 222, 128, 0.1)", border: "1px solid rgba(74, 222, 128, 0.2)" }}>
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-card mb-6 text-sm">
           {statusMessage}
         </div>
       )}
       {errorMessage && (
-        <div style={{ color: "#f87171", marginBottom: 16, padding: "10px 14px", borderRadius: 6, background: "rgba(248, 113, 113, 0.1)", border: "1px solid rgba(248, 113, 113, 0.2)" }}>
+        <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-card mb-6 text-sm">
           {errorMessage}
         </div>
       )}
 
-      <div className="draft-editor-container" style={{ background: "rgba(15, 23, 42, 0.6)", padding: 24, borderRadius: 12, border: "1px solid rgba(255, 255, 255, 0.08)" }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          
-          {/* Template Selection Dropdown */}
-          <div className="form-group">
-            <label style={{ display: "block", marginBottom: 6, fontWeight: 500, color: "#cbd5e1" }}>Select Template</label>
-            <select
-              value={selectedTemplateId}
-              onChange={handleTemplateChange}
-              style={{
-                width: "100%",
-                padding: "10px 12px",
-                borderRadius: 6,
-                border: "1px solid rgba(255,255,255,0.1)",
-                background: "rgba(15,23,42,0.8)",
-                color: "#fff",
-                outline: "none",
-                fontSize: "0.95rem"
-              }}
-            >
-              {templates.map(t => (
-                <option key={t.id} value={t.id}>{t.name}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Placeholders Variable Inputs */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-            <div className="form-group">
-              <label style={{ display: "block", marginBottom: 6, fontWeight: 500, color: "#cbd5e1" }}>Recipient Email</label>
-              <input
-                type="email"
-                placeholder="recruiter@company.com"
-                value={recipientEmail}
-                onChange={(e) => setRecipientEmail(e.target.value)}
-                style={{ width: "100%", padding: "10px 12px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff", outline: "none" }}
-                required
-              />
-            </div>
-            
-            <div className="form-group">
-              <label style={{ display: "block", marginBottom: 6, fontWeight: 500, color: "#cbd5e1" }}>HR Name (for `{"{{hrName}}"}`)</label>
-              <input
-                type="text"
-                placeholder="e.g., Jane Doe"
-                value={hrName}
-                onChange={(e) => setHrName(e.target.value)}
-                style={{ width: "100%", padding: "10px 12px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff", outline: "none" }}
-              />
-            </div>
-
-            <div className="form-group">
-              <label style={{ display: "block", marginBottom: 6, fontWeight: 500, color: "#cbd5e1" }}>Company Name (for `{"{{companyName}}"}`)</label>
-              <input
-                type="text"
-                placeholder="e.g., Stripe"
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-                style={{ width: "100%", padding: "10px 12px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff", outline: "none" }}
-              />
-            </div>
-
-            <div className="form-group">
-              <label style={{ display: "block", marginBottom: 6, fontWeight: 500, color: "#cbd5e1" }}>Job Role (for `{"{{jobRole}}"}`)</label>
-              <input
-                type="text"
-                placeholder="e.g., Software Engineer"
-                value={jobRole}
-                onChange={(e) => setJobRole(e.target.value)}
-                style={{ width: "100%", padding: "10px 12px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff", outline: "none" }}
-              />
-            </div>
-          </div>
-
-          <hr style={{ border: "0", borderTop: "1px solid rgba(255, 255, 255, 0.05)", margin: "8px 0" }} />
-
-          {/* Raw Subject Field */}
-          <div className="form-group">
-            <label style={{ display: "block", marginBottom: 6, fontWeight: 500, color: "#cbd5e1" }}>Edit Subject Structure</label>
-            <input
-              type="text"
-              value={rawSubject}
-              onChange={(e) => setRawSubject(e.target.value)}
-              style={{ width: "100%", padding: "10px 12px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff", outline: "none" }}
-            />
-          </div>
-
-          {/* Raw Body Editor Field with Badge Controls */}
-          <div className="form-group">
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-              <label style={{ fontWeight: 500, color: "#cbd5e1" }}>Edit Body Structure (HTML Supported)</label>
-              <div>
-                <span style={{ fontSize: "0.8rem", color: "#94a3b8", marginRight: 8 }}>Insert tags:</span>
-                <button type="button" className="placeholder-badge" onClick={() => insertPlaceholder("{{hrName}}")}>{"{{hrName}}"}</button>
-                <button type="button" className="placeholder-badge" onClick={() => insertPlaceholder("{{companyName}}")}>{"{{companyName}}"}</button>
-                <button type="button" className="placeholder-badge" onClick={() => insertPlaceholder("{{jobRole}}")}>{"{{jobRole}}"}</button>
-              </div>
-            </div>
-            <textarea
-              id="draft-body-textarea"
-              value={rawBody}
-              onChange={(e) => setRawBody(e.target.value)}
-              rows={8}
-              style={{
-                width: "100%",
-                padding: "12px",
-                borderRadius: 6,
-                border: "1px solid rgba(255,255,255,0.1)",
-                background: "rgba(255,255,255,0.05)",
-                color: "#fff",
-                outline: "none",
-                resize: "vertical",
-                fontFamily: "monospace",
-                lineHeight: 1.5
-              }}
-            />
-          </div>
-
-          {/* Preview Trigger Button */}
-          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
-            <button
-              type="button"
-              onClick={handlePreview}
-              style={{
-                padding: "12px 24px",
-                background: "#4f46e5",
-                color: "#fff",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-                fontWeight: 600,
-                fontSize: "0.95rem",
-                transition: "background 0.2s"
-              }}
-            >
-              Preview in Gmail Composer
-            </button>
-          </div>
-
+      {/* Draft Editor Card */}
+      <div className="bg-white border border-slate-200 p-6 rounded-card shadow-sm space-y-6">
+        
+        {/* Template Selection Dropdown */}
+        <div className="flex flex-col">
+          <label className="text-sm font-medium text-slate-600 mb-1.5">Select Template</label>
+          <select
+            value={selectedTemplateId}
+            onChange={handleTemplateChange}
+            className="w-full px-3 py-2 border border-[#b2bec3] rounded-input text-sm text-base-text bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+          >
+            {templates.map(t => (
+              <option key={t.id} value={t.id}>{t.name}</option>
+            ))}
+          </select>
         </div>
+
+        {/* Placeholders Variable Inputs Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Input
+            label="Recipient Email"
+            type="email"
+            placeholder="recruiter@company.com"
+            value={recipientEmail}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRecipientEmail(e.target.value)}
+            required
+          />
+          <Input
+            label="HR Name ({{hrName}})"
+            placeholder="e.g. Jane Doe"
+            value={hrName}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setHrName(e.target.value)}
+          />
+          <Input
+            label="Company Name ({{companyName}})"
+            placeholder="e.g. Stripe"
+            value={companyName}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCompanyName(e.target.value)}
+          />
+          <Input
+            label="Job Role ({{jobRole}})"
+            placeholder="e.g. Software Engineer"
+            value={jobRole}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setJobRole(e.target.value)}
+          />
+        </div>
+
+        <hr className="border-slate-100" />
+
+        {/* Raw Subject Field */}
+        <Input
+          label="Edit Subject Structure"
+          type="text"
+          value={rawSubject}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRawSubject(e.target.value)}
+        />
+
+        {/* Raw Body Editor */}
+        <div className="flex flex-col">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-1.5">
+            <label className="text-sm font-medium text-slate-600">Edit Body Structure (HTML Supported)</label>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-xs text-slate-400">Insert tags:</span>
+              <button
+                type="button"
+                onClick={() => insertPlaceholder("{{hrName}}")}
+                className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200 transition-colors"
+              >
+                {"{{hrName}}"}
+              </button>
+              <button
+                type="button"
+                onClick={() => insertPlaceholder("{{companyName}}")}
+                className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200 transition-colors"
+              >
+                {"{{companyName}}"}
+              </button>
+              <button
+                type="button"
+                onClick={() => insertPlaceholder("{{jobRole}}")}
+                className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200 transition-colors"
+              >
+                {"{{jobRole}}"}
+              </button>
+            </div>
+          </div>
+          <textarea
+            id="draft-body-textarea"
+            value={rawBody}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setRawBody(e.target.value)}
+            rows={8}
+            className="w-full px-3 py-2 border border-[#b2bec3] rounded-input text-sm text-base-text bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 font-mono leading-relaxed"
+          />
+        </div>
+
+        {/* Preview Trigger Button */}
+        <div className="flex justify-end pt-2">
+          <Button type="button" onClick={handlePreview}>
+            Preview in Gmail Composer
+          </Button>
+        </div>
+
       </div>
 
       {/* Gmail High-Fidelity Preview Modal */}

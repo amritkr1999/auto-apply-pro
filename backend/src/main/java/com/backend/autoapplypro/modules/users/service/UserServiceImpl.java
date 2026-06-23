@@ -19,6 +19,7 @@ public class UserServiceImpl implements UserService {
     private final RecruiterRepository recruiterRepository;
     private final CompanyRepository companyRepository;
     private final PasswordEncoder passwordEncoder;
+    private final SkillRepository skillRepository;
 
     @Override
     @Transactional
@@ -58,7 +59,7 @@ public class UserServiceImpl implements UserService {
         if (role == UserRole.CANDIDATE) {
             Candidate candidate = Candidate.builder()
                     .user(user)
-                    .skills(new ArrayList<>())
+                    .skills(new java.util.HashSet<>())
                     .jobPreferences(new HashMap<>())
                     .build();
             candidateRepository.save(candidate);
@@ -105,7 +106,7 @@ public class UserServiceImpl implements UserService {
                     
                     Candidate candidate = Candidate.builder()
                             .user(newUser)
-                            .skills(new ArrayList<>())
+                            .skills(new java.util.HashSet<>())
                             .jobPreferences(new HashMap<>())
                             .build();
                     candidateRepository.save(candidate);
@@ -141,8 +142,13 @@ public class UserServiceImpl implements UserService {
                 .email(user.getEmail())
                 .name(user.getName())
                 .mobile(user.getMobile())
-                .skills(candidate.getSkills())
+                .skills(candidate.getSkills() != null ? candidate.getSkills().stream().map(Skill::getName).collect(java.util.stream.Collectors.toList()) : new ArrayList<>())
                 .jobPreferences(candidate.getJobPreferences())
+                .resumeFilename(candidate.getResumeFilename())
+                .summary(candidate.getSummary())
+                .education(candidate.getEducation())
+                .experience(candidate.getExperience())
+                .certifications(candidate.getCertifications())
                 .build();
     }
 
@@ -157,8 +163,26 @@ public class UserServiceImpl implements UserService {
         user.setMobile(dto.getMobile());
         userRepository.save(user);
 
-        candidate.setSkills(dto.getSkills());
+        java.util.Set<Skill> dbSkills = new java.util.HashSet<>();
+        if (dto.getSkills() != null) {
+            for (String skillName : dto.getSkills()) {
+                String trimmedName = skillName.trim();
+                if (!trimmedName.isEmpty()) {
+                    Skill skill = skillRepository.findByNameIgnoreCase(trimmedName)
+                            .orElseGet(() -> {
+                                Skill newSkill = Skill.builder().name(trimmedName).build();
+                                return skillRepository.save(newSkill);
+                            });
+                    dbSkills.add(skill);
+                }
+            }
+        }
+        candidate.setSkills(dbSkills);
         candidate.setJobPreferences(dto.getJobPreferences());
+        candidate.setSummary(dto.getSummary());
+        candidate.setEducation(dto.getEducation());
+        candidate.setExperience(dto.getExperience());
+        candidate.setCertifications(dto.getCertifications());
         candidate = candidateRepository.save(candidate);
 
         return CandidateProfileDto.builder()
@@ -167,8 +191,13 @@ public class UserServiceImpl implements UserService {
                 .email(user.getEmail())
                 .name(user.getName())
                 .mobile(user.getMobile())
-                .skills(candidate.getSkills())
+                .skills(candidate.getSkills().stream().map(Skill::getName).collect(java.util.stream.Collectors.toList()))
                 .jobPreferences(candidate.getJobPreferences())
+                .resumeFilename(candidate.getResumeFilename())
+                .summary(candidate.getSummary())
+                .education(candidate.getEducation())
+                .experience(candidate.getExperience())
+                .certifications(candidate.getCertifications())
                 .build();
     }
 
@@ -282,5 +311,82 @@ public class UserServiceImpl implements UserService {
                 .website(company.getWebsite())
                 .description(company.getDescription())
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public void uploadResume(Long userId, org.springframework.web.multipart.MultipartFile file) throws java.io.IOException {
+        Candidate candidate = candidateRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Candidate profile not found"));
+        candidate.setResumeFilename(file.getOriginalFilename());
+        candidate.setResumeContentType(file.getContentType());
+        candidate.setResumeBytes(file.getBytes());
+        candidateRepository.save(candidate);
+
+        try {
+            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            String pythonServiceUrl = "http://localhost:8000/parse-resume";
+
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.MULTIPART_FORM_DATA);
+
+            final String filename = file.getOriginalFilename() != null ? file.getOriginalFilename() : "resume.pdf";
+            org.springframework.core.io.ByteArrayResource fileResource = new org.springframework.core.io.ByteArrayResource(file.getBytes()) {
+                @Override
+                public String getFilename() {
+                    return filename;
+                }
+            };
+
+            org.springframework.util.MultiValueMap<String, Object> body = new org.springframework.util.LinkedMultiValueMap<>();
+            body.add("file", fileResource);
+
+            org.springframework.http.HttpEntity<org.springframework.util.MultiValueMap<String, Object>> requestEntity = 
+                new org.springframework.http.HttpEntity<>(body, headers);
+
+            org.springframework.http.ResponseEntity<ParsedResumeDto> response = restTemplate.postForEntity(
+                pythonServiceUrl,
+                requestEntity,
+                ParsedResumeDto.class
+            );
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                ParsedResumeDto parsed = response.getBody();
+                candidate.setSummary(parsed.getSummary());
+                candidate.setEducation(parsed.getEducation());
+                candidate.setExperience(parsed.getExperience());
+                candidate.setCertifications(parsed.getCertifications());
+
+                // Update/link skills
+                if (parsed.getSkills() != null) {
+                    java.util.Set<Skill> dbSkills = candidate.getSkills();
+                    if (dbSkills == null) {
+                        dbSkills = new java.util.HashSet<>();
+                    }
+                    for (String skillName : parsed.getSkills()) {
+                        String trimmedName = skillName.trim();
+                        if (!trimmedName.isEmpty()) {
+                            Skill skill = skillRepository.findByNameIgnoreCase(trimmedName)
+                                .orElseGet(() -> {
+                                    Skill newSkill = Skill.builder().name(trimmedName).build();
+                                    return skillRepository.save(newSkill);
+                                });
+                            dbSkills.add(skill);
+                        }
+                    }
+                    candidate.setSkills(dbSkills);
+                }
+                candidateRepository.save(candidate);
+            }
+        } catch (Exception e) {
+            System.err.println("Warning: Failed to parse resume with Python AI service. File saved without parsing. Error: " + e.getMessage());
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Candidate getCandidateResume(Long userId) {
+        return candidateRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Candidate profile not found"));
     }
 }

@@ -78,4 +78,39 @@ public class ProfileController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    // RESUME UPLOAD / DOWNLOAD
+    @PostMapping(value = "/candidate/{userId}/resume", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadResume(
+            @PathVariable Long userId,
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+        try {
+            userService.uploadResume(userId, file);
+            return ResponseEntity.ok(java.util.Map.of("message", "Resume uploaded successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to upload resume: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/candidate/{userId}/resume")
+    public ResponseEntity<org.springframework.core.io.ByteArrayResource> getResume(@PathVariable Long userId) {
+        try {
+            com.backend.autoapplypro.modules.users.model.Candidate candidate = userService.getCandidateResume(userId);
+            if (candidate.getResumeBytes() == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            org.springframework.core.io.ByteArrayResource resource = new org.springframework.core.io.ByteArrayResource(candidate.getResumeBytes());
+            String contentType = candidate.getResumeContentType() != null ? candidate.getResumeContentType() : "application/octet-stream";
+            String filename = candidate.getResumeFilename() != null ? candidate.getResumeFilename() : "resume.pdf";
+
+            return ResponseEntity.ok()
+                    .contentType(org.springframework.http.MediaType.parseMediaType(contentType))
+                    .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                    .body(resource);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

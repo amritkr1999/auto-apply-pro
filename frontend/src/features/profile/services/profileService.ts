@@ -17,6 +17,11 @@ export interface CandidateProfile {
   mobile: string;
   skills: string[];
   jobPreferences: Record<string, any>;
+  resumeFilename?: string;
+  summary?: string;
+  education?: any[];
+  experience?: any[];
+  certifications?: string[];
 }
 
 export interface RecruiterProfile {
@@ -88,6 +93,19 @@ export const profileService = {
     return response.json();
   },
 
+  async uploadCandidateResume(userId: number, file: File): Promise<{ message: string }> {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await fetch(`${API_BASE}/profiles/candidate/${userId}/resume`, {
+      method: "POST",
+      body: formData,
+    });
+    if (!response.ok) {
+      throw new Error("Failed to upload candidate resume");
+    }
+    return response.json();
+  },
+
   async getRecruiterProfile(userId: number): Promise<RecruiterProfile> {
     const response = await fetch(`${API_BASE}/profiles/recruiter/${userId}`);
     if (!response.ok) {
@@ -124,6 +142,14 @@ export const profileService = {
     });
     if (!response.ok) {
       throw new Error("Failed to update company profile");
+    }
+    return response.json();
+  },
+
+  async getSkills(): Promise<{ id: number; name: string }[]> {
+    const response = await fetch(`${API_BASE}/skills`);
+    if (!response.ok) {
+      throw new Error("Failed to load skills list");
     }
     return response.json();
   },
