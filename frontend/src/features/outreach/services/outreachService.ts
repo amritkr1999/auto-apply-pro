@@ -137,5 +137,18 @@ export const outreachService = {
     localQueue.push(finalDraft);
     localStorage.setItem("email_outreach_queue", JSON.stringify(localQueue));
     return finalDraft;
+  },
+
+  // Generate outreach email draft using AI pipeline
+  async generateOutreachEmail(userId: number, jobDetails: any): Promise<{ subject: string; body: string; recipientEmail: string }> {
+    const response = await fetch(`${API_BASE}/drafts/generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, jobDetails })
+    });
+    if (!response.ok) {
+      throw new Error("Failed to generate AI outreach email.");
+    }
+    return response.json();
   }
 };

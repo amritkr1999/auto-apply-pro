@@ -28,7 +28,8 @@ class JDParser:
             "recruiter_email": "string" or null,
             "experience_required": "string" or null,
             "location": "string" or null,
-            "job_type": "string" or null (e.g. Full-time, Contract, Part-time, Internship)
+            "job_type": "string" or null (e.g. Full-time, Contract, Part-time, Internship),
+            "description": "string (Required, a clean, readable, professional summary of the job description. Do not include coordinates, HTML tags, or email/contact instructions)"
         }}
 
         Ensure all keys are present. If a field is missing, assign it null.
@@ -73,6 +74,8 @@ class JDParser:
                     parsed_json["company"] = "Unknown Company"
                 if not isinstance(parsed_json.get("skills"), list):
                     parsed_json["skills"] = []
+                if not parsed_json.get("description"):
+                    parsed_json["description"] = ocr_text or "No description provided."
 
                 return JobDescription(**parsed_json)
         except json.JSONDecodeError as jde:

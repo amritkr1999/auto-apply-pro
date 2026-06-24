@@ -1,15 +1,9 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export const Header: React.FC = () => {
-  const navigate = useNavigate();
   const userStr = localStorage.getItem("user");
   const user = userStr ? JSON.parse(userStr) : null;
-
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    navigate("/");
-  };
 
   const getDashboardPath = () => {
     if (!user) return "/";
@@ -47,13 +41,6 @@ export const Header: React.FC = () => {
             <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full uppercase tracking-wider">
               {user.role}
             </span>
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="text-sm font-medium text-rose-600 hover:text-rose-700 transition-colors"
-            >
-              Logout
-            </button>
           </div>
         )}
       </div>

@@ -7,6 +7,17 @@ Auto Apply Pro is an AI-powered career coach and job search automation platform 
 
 ---
 
+## Project Structure
+
+This project is structured as a monorepo containing the following components:
+
+* **[backend](file:///Users/amrit/Development/work/auto-apply-pro/backend)**: A Spring Boot application providing the REST API, database access (Hibernate/JPA), and user/candidate authentication and management.
+* **[frontend](file:///Users/amrit/Development/work/auto-apply-pro/frontend)**: A React frontend application built with TypeScript and Vite, providing a modern SaaS dashboard and profile/job pipeline interfaces.
+* **[pipeline](file:///Users/amrit/Development/work/auto-apply-pro/pipeline)**: A local Python-based AI pipeline utilizing Poetry, Alembic, and FastAPI. It orchestrates job description OCR/extraction (via local Ollama/Deepseek-vision) and resume parsing.
+* **[pipeline_architecture](file:///Users/amrit/Development/work/auto-apply-pro/pipeline_architecture)**: Detailed architecture specifications and diagrams for the local AI pipeline.
+
+---
+
 ## Project Description
 
 ### 1. Executive Summary & Value Proposition
@@ -40,6 +51,11 @@ Auto Apply Pro is an AI-powered career coach and job search automation platform 
 * **System Health:** Email deliverability rate (percentage of successfully sent emails without bounce-backs).
 * **User Efficiency:** Time saved per application compared to manual processing.
 
+### 5. Recent System Updates
+* **Skills Database Refactoring**: Created a separate `skills` database table and established a many-to-many relationship (`candidate_skills`) with the `candidates` table. This allows dynamic skill categorization and autocomplete features.
+* **Resume Upload & DB Storage**: Implemented file upload for resumes, saving them directly as a byte array (BLOB) (`resume_bytes`) in the PostgreSQL candidate profile.
+* **UI Redesign**: Refactored the dashboard layout and candidate profile pages to match the Figma designs.
+
 ---
 
 ## Local Setup & Run Instructions
@@ -50,7 +66,9 @@ Follow these steps to get the project running locally on your machine.
 Make sure you have the following installed:
 * **Java 21 (LTS)** or newer
 * **Node.js** (v18 or newer recommended) and **npm**
+* **Python 3.9+** and **Poetry**
 * **PostgreSQL** database server
+* **Ollama** (configured with local LLM models)
 
 ---
 
@@ -99,6 +117,34 @@ The frontend is built with React, TypeScript, and Vite.
    npm run dev
    ```
 4. Once running, you can access the frontend in your browser (typically at [http://localhost:5173](http://localhost:5173)).
+
+---
+
+### 4. AI Outreach Pipeline Setup & Run
+The AI outreach pipeline is a Python-based asynchronous service that handles job description (JD) extraction, candidate resume parsing, and personalized outreach email generation.
+
+1. Navigate to the pipeline directory:
+   ```bash
+   cd pipeline
+   ```
+2. Copy the environment variables template and configure them:
+   ```bash
+   cp .env.example .env
+   ```
+   *(Edit the `.env` file to specify your local database credentials, Ollama API endpoint, and Spring Boot API endpoints.)*
+3. Install dependencies using Poetry:
+   ```bash
+   poetry install
+   ```
+4. Run the database migrations using Alembic to set up the pipeline schemas:
+   ```bash
+   poetry run alembic upgrade head
+   ```
+5. Start the FastAPI development server:
+   ```bash
+   poetry run uvicorn src.server:app --host 0.0.0.0 --port 8000 --reload
+   ```
+6. Once running, the service starts on port `8000`. You can access the API endpoints (e.g., `/extract-job-details`, `/parse-resume`) to interact with the pipeline.
 
 ---
 
