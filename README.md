@@ -13,7 +13,7 @@ This project is structured as a monorepo containing the following components:
 
 * **[backend](file:///Users/amrit/Development/work/auto-apply-pro/backend)**: A Spring Boot application providing the REST API, database access (Hibernate/JPA), and user/candidate authentication and management.
 * **[frontend](file:///Users/amrit/Development/work/auto-apply-pro/frontend)**: A React frontend application built with TypeScript and Vite, providing a modern SaaS dashboard and profile/job pipeline interfaces.
-* **[pipeline](file:///Users/amrit/Development/work/auto-apply-pro/pipeline)**: A local Python-based AI pipeline utilizing Poetry, Alembic, and FastAPI. It orchestrates job description OCR/extraction (via local Ollama/Deepseek-vision) and resume parsing.
+* **[pipeline](file:///Users/amrit/Development/work/auto-apply-pro/pipeline)**: A local Python-based AI pipeline utilizing Poetry, Alembic, and FastAPI. It orchestrates job description OCR/extraction (via local Ollama/deepseek-ocr) and resume parsing.
 * **[pipeline_architecture](file:///Users/amrit/Development/work/auto-apply-pro/pipeline_architecture)**: Detailed architecture specifications and diagrams for the local AI pipeline.
 
 ---
@@ -68,7 +68,7 @@ Make sure you have the following installed:
 * **Node.js** (v18 or newer recommended) and **npm**
 * **Python 3.9+** and **Poetry**
 * **PostgreSQL** database server
-* **Ollama** (configured with local LLM models)
+* **Ollama** (configured with local LLM models: `deepseek-ocr` and `llama3.1:8b`)
 
 ---
 
@@ -144,7 +144,7 @@ The AI outreach pipeline is a Python-based asynchronous service that handles job
    ```bash
    poetry run uvicorn src.server:app --host 0.0.0.0 --port 8000 --reload
    ```
-6. Once running, the service starts on port `8000`. You can access the API endpoints (e.g., `/extract-job-details`, `/parse-resume`) to interact with the pipeline.
+6. Once running, the service starts on port `8000`. You can access the API endpoints (e.g., `/extract-job-details`, `/parse-resume`, and `/generate-email`) to interact with the pipeline.
 
 ---
 

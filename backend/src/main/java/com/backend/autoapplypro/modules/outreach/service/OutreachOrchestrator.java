@@ -57,10 +57,13 @@ public class OutreachOrchestrator {
                 userRepository.save(user);
             }
 
+            int sentToday = user.getSentToday() != null ? user.getSentToday() : 0;
+            int dailyLimit = user.getDailyLimit() != null ? user.getDailyLimit() : 50;
+
             // Enforce daily limits
-            if (user.getSentToday() >= user.getDailyLimit()) {
+            if (sentToday >= dailyLimit) {
                 log.warn("ANTI-SPAM SHIELD: User ID {} has hit their daily sending limit of {} emails/day. Pausing send.", 
-                        user.getId(), user.getDailyLimit());
+                        user.getId(), dailyLimit);
                 item.setStatus(OutreachStatus.PAUSED);
                 item.setErrorMessage("Daily outreach send limit reached. Paused until next quota reset.");
                 queueRepository.save(item);
@@ -78,7 +81,7 @@ public class OutreachOrchestrator {
                 queueRepository.save(item);
 
                 // Increment sent counter
-                user.setSentToday(user.getSentToday() + 1);
+                user.setSentToday(sentToday + 1);
                 userRepository.save(user);
                 
                 log.info("Successfully sent email queue ID: {} for user ID: {}. Daily send progress: {}/{}", 

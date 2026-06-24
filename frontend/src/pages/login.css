@@ -1,34 +1,34 @@
 /* ==========================================================================
-   Premium Dark-Mode Glassmorphic Login/Register Page Stylesheet
+   Premium Light-Mode Elegant Login/Register Page Stylesheet
    ========================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
 :root {
   --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --bg-primary: #0b0f19;
-  --bg-card: rgba(17, 24, 39, 0.75);
-  --border-color: rgba(255, 255, 255, 0.08);
-  --border-active: #6366f1; /* Indigo */
-  --text-primary: #f3f4f6;
-  --text-secondary: #9ca3af;
-  --accent-color: #6366f1;
-  --accent-hover: #4f46e5;
-  --accent-glow: rgba(99, 102, 241, 0.25);
+  --bg-primary: #f1f2f6; /* Website base background */
+  --bg-card: #ffffff; /* Website card surface */
+  --border-color: #e2e8f0; /* Soft slate-200 border */
+  --border-active: #0984e3; /* Bright blue primary */
+  --text-primary: #2d3436; /* Slate gray base text */
+  --text-secondary: #64748b; /* Slate-500 secondary text */
+  --accent-color: #0984e3;
+  --accent-hover: #0873c4;
+  --accent-glow: rgba(9, 132, 227, 0.15);
   
   /* Role Brand Colors */
-  --candidate-color: #10b981; /* Emerald */
-  --candidate-bg: rgba(16, 185, 129, 0.1);
+  --candidate-color: #00b894; /* Success green */
+  --candidate-bg: rgba(0, 184, 148, 0.06);
   --recruiter-color: #8b5cf6; /* Violet */
-  --recruiter-bg: rgba(139, 92, 246, 0.1);
-  --company-color: #3b82f6; /* Blue */
-  --company-bg: rgba(59, 130, 246, 0.1);
+  --recruiter-bg: rgba(139, 92, 246, 0.06);
+  --company-color: #0984e3; /* Blue */
+  --company-bg: rgba(9, 132, 227, 0.06);
 }
 
 .auth-page-root {
   font-family: var(--font-main);
-  background-color: #ffffff;
-  color: #000000;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   min-height: 100vh;
   display: flex;
   justify-content: center;
@@ -53,7 +53,7 @@
   position: absolute;
   width: 500px;
   height: 500px;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+  background: radial-gradient(circle, rgba(9, 132, 227, 0.08) 0%, rgba(241, 242, 246, 0) 70%);
   top: -10%;
   right: -5%;
   border-radius: 50%;
@@ -64,7 +64,7 @@
   position: absolute;
   width: 600px;
   height: 600px;
-  background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
+  background: radial-gradient(circle, rgba(0, 184, 148, 0.06) 0%, rgba(241, 242, 246, 0) 70%);
   bottom: -20%;
   left: -10%;
   border-radius: 50%;
@@ -76,21 +76,19 @@
   position: relative;
   z-index: 10;
   width: 100%;
-  max-width: 540px;
+  max-width: 500px;
   background: var(--bg-card);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--border-color);
-  border-radius: 24px;
+  border-radius: 20px;
   padding: 3rem 2.5rem;
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.02);
   animation: authCardEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes authCardEntrance {
   0% {
     opacity: 0;
-    transform: translateY(20px) scale(0.98);
+    transform: translateY(15px) scale(0.99);
   }
   100% {
     opacity: 1;
@@ -105,9 +103,9 @@
 }
 
 .auth-logo {
-  font-size: 2rem;
+  font-size: 2.25rem;
   font-weight: 800;
-  background: linear-gradient(135deg, #a78bfa 0%, #6366f1 50%, #3b82f6 100%);
+  background: linear-gradient(135deg, #0984e3 0%, #00b894 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -118,12 +116,13 @@
 .auth-subtitle {
   color: var(--text-secondary);
   font-size: 0.95rem;
+  font-weight: 500;
 }
 
 /* Tabs: Login vs Register Toggle */
 .auth-tabs {
   display: flex;
-  background: rgba(255, 255, 255, 0.03);
+  background: #f8fafc;
   border: 1px solid var(--border-color);
   padding: 4px;
   border-radius: 12px;
@@ -141,7 +140,7 @@
   padding: 10px;
   cursor: pointer;
   border-radius: 8px;
-  transition: all 0.25s ease;
+  transition: all 0.2s ease;
 }
 
 .auth-tab-btn.active {
@@ -167,7 +166,7 @@
 .auth-label {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #d1d5db;
+  color: #475569;
   letter-spacing: 0.02em;
 }
 
@@ -179,9 +178,9 @@
 
 .auth-input {
   width: 100%;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
   padding: 12px 16px;
   color: var(--text-primary);
   font-family: var(--font-main);
@@ -193,7 +192,7 @@
 .auth-input:focus {
   outline: none;
   border-color: var(--border-active);
-  background: rgba(99, 102, 241, 0.02);
+  background: #ffffff;
   box-shadow: 0 0 0 4px var(--accent-glow);
 }
 
@@ -260,13 +259,13 @@
   color: #ffffff;
   border: none;
   font-family: var(--font-main);
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   padding: 14px;
-  border-radius: 12px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: all 0.25s ease;
-  box-shadow: 0 4px 14px var(--accent-glow);
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px var(--accent-glow);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -276,7 +275,7 @@
 .auth-submit-btn:hover:not(:disabled) {
   background: var(--accent-hover);
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px var(--accent-glow);
+  box-shadow: 0 6px 14px var(--accent-glow);
 }
 
 .auth-submit-btn:active:not(:disabled) {
@@ -308,12 +307,12 @@
   display: flex;
   align-items: center;
   gap: 1.25rem;
-  background: rgba(255, 255, 255, 0.02);
+  background: #ffffff;
   border: 1px solid var(--border-color);
-  border-radius: 16px;
+  border-radius: 12px;
   padding: 1.25rem;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   overflow: hidden;
 }
@@ -326,12 +325,12 @@
   width: 4px;
   height: 100%;
   background: transparent;
-  transition: background-color 0.25s ease;
+  transition: background-color 0.2s ease;
 }
 
 .role-card:hover {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.15);
+  background: #f8fafc;
+  border-color: #cbd5e1;
   transform: translateX(4px);
 }
 
@@ -339,7 +338,7 @@
 .role-card.selected.candidate {
   border-color: var(--candidate-color);
   background: var(--candidate-bg);
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+  box-shadow: 0 0 15px rgba(0, 184, 148, 0.08);
 }
 .role-card.selected.candidate::after {
   background-color: var(--candidate-color);
@@ -348,7 +347,7 @@
 .role-card.selected.recruiter {
   border-color: var(--recruiter-color);
   background: var(--recruiter-bg);
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.08);
 }
 .role-card.selected.recruiter::after {
   background-color: var(--recruiter-color);
@@ -357,7 +356,7 @@
 .role-card.selected.company {
   border-color: var(--company-color);
   background: var(--company-bg);
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+  box-shadow: 0 0 15px rgba(9, 132, 227, 0.08);
 }
 .role-card.selected.company::after {
   background-color: var(--company-color);
@@ -368,23 +367,23 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
-  font-size: 1.5rem;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  font-size: 1.35rem;
   flex-shrink: 0;
-  transition: all 0.25s ease;
+  transition: all 0.2s ease;
 }
 
 .role-card.selected.candidate .role-icon-wrapper {
-  background: rgba(16, 185, 129, 0.2);
+  background: rgba(0, 184, 148, 0.15);
 }
 .role-card.selected.recruiter .role-icon-wrapper {
-  background: rgba(139, 92, 246, 0.2);
+  background: rgba(139, 92, 246, 0.15);
 }
 .role-card.selected.company .role-icon-wrapper {
-  background: rgba(59, 130, 246, 0.2);
+  background: rgba(9, 132, 227, 0.15);
 }
 
 .role-meta {
@@ -392,7 +391,7 @@
 }
 
 .role-name {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   margin-bottom: 2px;
   color: var(--text-primary);
@@ -406,8 +405,8 @@
 
 /* Radio circle inside role card */
 .role-radio-indicator {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   border: 2px solid var(--text-secondary);
   display: flex;
@@ -423,8 +422,8 @@
 
 .role-radio-indicator::after {
   content: '';
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: transparent;
   transition: all 0.2s ease;
@@ -470,7 +469,7 @@
   display: flex;
   align-items: center;
   margin: 1.75rem 0;
-  color: rgba(255, 255, 255, 0.15);
+  color: #e2e8f0;
   font-size: 0.8rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -482,7 +481,7 @@
   content: '';
   flex: 1;
   height: 1px;
-  background: rgba(255, 255, 255, 0.08);
+  background: #e2e8f0;
 }
 
 .social-divider span {
@@ -501,13 +500,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.03);
+  background: #ffffff;
   border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: 10px;
   padding: 12px;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  color: var(--text-primary);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  color: #475569;
   font-size: 1.15rem;
 }
 
@@ -519,27 +518,30 @@
 
 .social-auth-btn:hover {
   transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.18);
+  background: #f8fafc;
+  border-color: #cbd5e1;
 }
 
 /* Specific Social Hover Effects */
 .social-auth-btn.google:hover {
   color: #ea4335;
-  box-shadow: 0 4px 14px rgba(234, 67, 53, 0.15);
+  box-shadow: 0 4px 12px rgba(234, 67, 53, 0.08);
   background: rgba(234, 67, 53, 0.04);
+  border-color: rgba(234, 67, 53, 0.2);
 }
 
 .social-auth-btn.github:hover {
-  color: #ffffff;
-  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.05);
+  color: #0f172a;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+  background: rgba(15, 23, 42, 0.04);
+  border-color: rgba(15, 23, 42, 0.2);
 }
 
 .social-auth-btn.linkedin:hover {
   color: #0077b5;
-  box-shadow: 0 4px 14px rgba(0, 119, 181, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 119, 181, 0.08);
   background: rgba(0, 119, 181, 0.04);
+  border-color: rgba(0, 119, 181, 0.2);
 }
 
 /* Back link for standard Register Details form */
@@ -568,7 +570,7 @@
 @media (max-width: 600px) {
   .auth-container {
     padding: 2.25rem 1.5rem;
-    border-radius: 20px;
+    border-radius: 16px;
   }
   
   .auth-logo {

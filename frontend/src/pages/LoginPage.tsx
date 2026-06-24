@@ -111,19 +111,22 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const handleSocialAuth = (provider: string) => {
+  const handleSocialAuth = async (provider: string) => {
     console.log(`Authenticating with ${provider}...`);
-    // Mock user login for social auth
-    const mockUser = {
-      token: "mock-social-token",
-      id: 999,
-      email: `social.${provider.toLowerCase()}@example.com`,
-      name: `Social ${provider} User`,
-      mobile: "+1234567890",
-      role: "CANDIDATE",
-    };
-    localStorage.setItem("user", JSON.stringify(mockUser));
-    navigate("/candidate-dashboard");
+    try {
+      setError("");
+      const userData = await profileService.register({
+        name: `Social ${provider} User`,
+        email: `social.${provider.toLowerCase()}@example.com`,
+        mobile: "1234567890",
+        password: "social-password-123",
+        role: "CANDIDATE",
+      });
+      localStorage.setItem("user", JSON.stringify(userData));
+      navigate("/candidate-dashboard");
+    } catch (err: any) {
+      setError(err.message || "Social login failed.");
+    }
   };
 
   return (

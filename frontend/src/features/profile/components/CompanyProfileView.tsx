@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { profileService } from "../services/profileService";
 import type { CompanyProfile } from "../services/profileService";
+import Input from "../../../components/ui/Input";
+import Button from "../../../components/ui/Button";
 
 interface Props {
   userId: number;
@@ -64,90 +66,75 @@ export const CompanyProfileView: React.FC<Props> = ({ userId }) => {
     }
   };
 
-  if (loading) return <div style={{ color: "#cbd5e1" }}>Loading profile details...</div>;
+  if (loading) return <div className="text-slate-500">Loading profile details...</div>;
 
   return (
-    <div className="profile-details-card" style={{ maxWidth: 600, margin: "0 auto" }}>
-      <h2>Company Profile Settings</h2>
-      {message && <div className="alert success" style={{ color: "#4ade80", marginBottom: 15 }}>{message}</div>}
-      {error && <div className="alert danger" style={{ color: "#f87171", marginBottom: 15 }}>{error}</div>}
+    <div className="w-full">
+      <div className="mb-6">
+        <h2 className="text-xl font-bold text-slate-800">Company Profile Settings</h2>
+      </div>
 
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        <div className="form-group">
-          <label style={{ display: "block", marginBottom: 6, fontWeight: 500 }}>Company Name</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="auth-input"
-            required
-            style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff" }}
-          />
+      {message && (
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-card mb-6 text-sm">
+          {message}
         </div>
-
-        <div className="form-group">
-          <label style={{ display: "block", marginBottom: 6, fontWeight: 500 }}>Primary Contact Email (Read-only)</label>
-          <input
-            type="email"
-            value={profile?.email || ""}
-            disabled
-            className="auth-input"
-            style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.02)", color: "#64748b", cursor: "not-allowed" }}
-          />
+      )}
+      {error && (
+        <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-card mb-6 text-sm">
+          {error}
         </div>
+      )}
 
-        <div className="form-group">
-          <label style={{ display: "block", marginBottom: 6, fontWeight: 500 }}>Industry</label>
-          <input
-            type="text"
-            value={industry}
-            placeholder="Software, Finance, Healthcare..."
-            onChange={(e) => setIndustry(e.target.value)}
-            className="auth-input"
-            style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff" }}
-          />
-        </div>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <Input
+          label="Company Name"
+          type="text"
+          value={name}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
+          required
+        />
 
-        <div className="form-group">
-          <label style={{ display: "block", marginBottom: 6, fontWeight: 500 }}>Website URL</label>
-          <input
-            type="url"
-            value={website}
-            placeholder="https://acme.com"
-            onChange={(e) => setWebsite(e.target.value)}
-            className="auth-input"
-            style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff" }}
-          />
-        </div>
+        <Input
+          label="Primary Contact Email (Read-only)"
+          type="email"
+          value={profile?.email || ""}
+          disabled
+        />
 
-        <div className="form-group">
-          <label style={{ display: "block", marginBottom: 6, fontWeight: 500 }}>Company Description</label>
+        <Input
+          label="Industry"
+          type="text"
+          value={industry}
+          placeholder="e.g. Software, Finance, Healthcare..."
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setIndustry(e.target.value)}
+        />
+
+        <Input
+          label="Website URL"
+          type="url"
+          value={website}
+          placeholder="https://acme.com"
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setWebsite(e.target.value)}
+        />
+
+        <div className="w-full">
+          <label className="block text-sm font-medium text-slate-600 mb-1">
+            Company Description
+          </label>
           <textarea
             value={description}
             placeholder="Describe your company culture, mission, and size..."
             onChange={(e) => setDescription(e.target.value)}
-            className="auth-input"
             rows={4}
-            style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff", fontFamily: "inherit", resize: "vertical" }}
+            className="w-full px-3 py-2 border border-[#b2bec3] rounded-input text-sm text-base-text bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
           />
         </div>
 
-        <button
-          type="submit"
-          className="btn"
-          style={{
-            padding: "12px",
-            background: "#4f46e5",
-            color: "#fff",
-            border: "none",
-            borderRadius: "6px",
-            cursor: "pointer",
-            fontWeight: 500,
-            marginTop: 10,
-          }}
-        >
-          Save Profile
-        </button>
+        <div className="flex justify-end pt-4">
+          <Button type="submit">
+            Save Profile
+          </Button>
+        </div>
       </form>
     </div>
   );

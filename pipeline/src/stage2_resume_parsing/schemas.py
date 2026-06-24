@@ -3,25 +3,25 @@ from typing import Optional, List
 from pydantic import BaseModel
 
 class ExperienceEntry(BaseModel):
-    title: str
-    company: str
+    title: Optional[str] = "Unknown Title"
+    company: Optional[str] = "Unknown Company"
     duration: Optional[str] = None
     description: Optional[str] = None
 
 class Education(BaseModel):
-    degree: str
-    institution: str
+    degree: Optional[str] = "Unknown Degree"
+    institution: Optional[str] = "Unknown Institution"
     graduation_year: Optional[int] = None
     field_of_study: Optional[str] = None
 
 class Candidate(BaseModel):
-    name: str
-    email: str
+    name: Optional[str] = "Unknown Candidate"
+    email: Optional[str] = "unknown@example.com"
     phone: Optional[str] = None
     location: Optional[str] = None
-    skills: List[str]
-    experience: List[ExperienceEntry]
-    education: List[Education]
+    skills: List[str] = []
+    experience: List[ExperienceEntry] = []
+    education: List[Education] = []
     certifications: List[str] = []
     summary: Optional[str] = None
     raw_text: str

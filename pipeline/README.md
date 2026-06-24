@@ -5,8 +5,8 @@ This subproject implements an agentic, multi-stage local pipeline designed to in
 ## Features
 
 1. **Stage 1: Job Description OCR & Extraction**
-   - Direct vision-based OCR on JD screenshots using `deepseek-vision` via Ollama.
-   - Structuring of extracted text using instruction LLM (`ollama3.1:8b`) to populate job details (title, company, skills, email).
+   - Direct vision-based OCR on JD screenshots using `deepseek-ocr` via Ollama.
+   - Structuring of extracted text using instruction LLM (`llama3.1:8b`) to populate job details (title, company, skills, email).
 
 2. **Stage 2: Resume Loading & Parsing**
    - Multi-format loader (supports PDF, DOCX, MD, TXT).
@@ -69,3 +69,21 @@ async def main():
         print(f"Pipeline Result Status: {result.status}")
         print(f"Stored Email ID: {result.stored_id}")
 ```
+
+## Running the FastAPI Web Server
+
+To start the FastAPI server to listen for requests from the Spring Boot Java backend:
+
+1. Run directly using the virtual environment:
+   ```bash
+   PYTHONPATH=. ./.venv/bin/python src/server.py
+   ```
+2. Or run via Poetry:
+   ```bash
+   poetry run uvicorn src.server:app --host 0.0.0.0 --port 8000 --reload
+   ```
+
+Once running, the service is accessible at `http://localhost:8000`. You can access the API documentation at `http://localhost:8000/docs`. The key endpoints are:
+* `POST /extract-job-details`: Extracts structured data from JD screenshots.
+* `POST /parse-resume`: Parses resumes to build Candidate profiles.
+* `POST /generate-email`: Generates cold recruitment outreach emails.

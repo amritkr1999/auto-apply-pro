@@ -460,9 +460,9 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
           )}
         </div>
 
-        <div className="form-group" style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 20, display: "flex", flexDirection: "column", gap: 8 }}>
-          <label style={{ display: "block", fontWeight: 500 }}>Upload Resume (PDF, DOC, DOCX)</label>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div className="w-full border-t border-slate-100 pt-5">
+          <h3 className="text-base font-semibold text-slate-800 mb-3">Upload Resume (PDF, DOC, DOCX)</h3>
+          <div className="flex items-center gap-3">
             <input
               type="file"
               accept=".pdf,.doc,.docx"
@@ -472,46 +472,28 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
                   handleUploadResume(file);
                 }
               }}
-              style={{ display: "none" }}
+              className="hidden"
               id="resume-upload-input"
             />
             <label
               htmlFor="resume-upload-input"
-              style={{
-                padding: "8px 16px",
-                background: "rgba(255, 255, 255, 0.05)",
-                border: "1px solid rgba(255, 255, 255, 0.15)",
-                borderRadius: "6px",
-                cursor: "pointer",
-                fontWeight: 500,
-                color: "#fff",
-                display: "inline-block"
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)"}
-              onMouseLeave={(e) => e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)"}
+              className="px-4 py-2 bg-primary text-white hover:bg-primary-hover text-sm font-semibold rounded-card cursor-pointer transition-colors inline-block"
             >
               {uploadingResume ? "Uploading..." : "Choose File"}
             </label>
             {profile?.resumeFilename ? (
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span style={{ color: "#94a3b8", fontSize: "0.9rem" }}>📄 {profile.resumeFilename}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-slate-600">📄 {profile.resumeFilename}</span>
                 <a
                   href={`http://localhost:8060/api/v1/profiles/candidate/${userId}/resume`}
                   download
-                  style={{
-                    color: "#6366f1",
-                    textDecoration: "none",
-                    fontSize: "0.85rem",
-                    fontWeight: 500
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.textDecoration = "underline"}
-                  onMouseLeave={(e) => e.currentTarget.style.textDecoration = "none"}
+                  className="text-sm text-primary hover:underline font-semibold"
                 >
                   Download
                 </a>
               </div>
             ) : (
-              <span style={{ color: "#64748b", fontSize: "0.9rem" }}>No resume uploaded</span>
+              <span className="text-sm text-slate-400 italic">No resume uploaded</span>
             )}
           </div>
         </div>
