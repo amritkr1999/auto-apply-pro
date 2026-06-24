@@ -44,13 +44,13 @@ class EmailGenerator:
                 parsed_json = json.loads(response_text)
                 
                 email = Email(
-                    recipient_email=jd.recruiter_email or "recruiter@example.com",
+                    recipient_email=getattr(jd, "recruiter_email", None) or "recruiter@example.com",
                     recipient_name=None,  # LLM can enrich this or we leave it empty
                     subject=parsed_json.get("subject", f"Application for {jd.job_title} at {jd.company}"),
                     body=parsed_json.get("body", ""),
                     generated_at=datetime.utcnow().isoformat(),
-                    jd_source=jd.source_filename,
-                    candidate_source=candidate.source_filename,
+                    jd_source=getattr(jd, "source_filename", "api_request"),
+                    candidate_source=getattr(candidate, "source_filename", "api_request"),
                     job_title=jd.job_title,
                     company=jd.company
                 )

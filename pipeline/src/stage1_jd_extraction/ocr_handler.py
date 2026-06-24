@@ -23,10 +23,13 @@ class OCRHandler:
             logger.error(f"Failed to read/encode image {image_path}: {e}")
             raise RuntimeError(f"Failed to read image: {e}")
 
-        prompt = (
-            "Perform OCR on this image. Extract all text content verbatim from this job description. "
-            "Do not add any preamble, comments, or summaries. Output only the extracted text."
-        )
+        if "deepseek-ocr" in self.config.ollama_deepseek_model.lower():
+            prompt = "Free OCR."
+        else:
+            prompt = (
+                "Perform OCR on this image. Extract all text content verbatim from this job description. "
+                "Do not add any preamble, comments, or summaries. Output only the extracted text."
+            )
 
         payload = {
             "model": self.config.ollama_deepseek_model,

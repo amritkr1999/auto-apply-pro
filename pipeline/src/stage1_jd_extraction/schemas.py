@@ -16,6 +16,7 @@ class JobDescription(BaseModel):
     experience_required: Optional[str] = None
     location: Optional[str] = None
     job_type: Optional[str] = None  # Full-time, Contract, etc
+    description: Optional[str] = None
     raw_ocr_text: str
     source_filename: str
     extracted_at: datetime
