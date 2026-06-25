@@ -40,6 +40,7 @@ export const ScreenshotUploader: React.FC = () => {
 
   // State for active candidate resume attachment info
   const [resumeFilename, setResumeFilename] = useState<string>("");
+  const [showConnectGmailBtn, setShowConnectGmailBtn] = useState<boolean>(false);
 
   useEffect(() => {
     const userStr = localStorage.getItem("user");
@@ -184,15 +185,30 @@ export const ScreenshotUploader: React.FC = () => {
   };
 
   const handleSendEmailDraft = async (subject: string, body: string, recipient: string) => {
+    const userStr = localStorage.getItem("user");
+    const userId = userStr ? JSON.parse(userStr).id : 1;
+
     try {
+      // 1. Always save the draft to queue first
       await outreachService.saveDraft({
         recipientEmail: recipient,
         subject,
         body
       });
+
+      // 2. Check if Gmail is connected
+      const status = await outreachService.getGmailStatus(userId);
+      if (!status.connected) {
+        setSaveMessage("Outreach email draft successfully saved!");
+        setError("Your Gmail account is not connected. The draft has been saved to your queue, but will not be sent. Please connect Gmail to dispatch this email.");
+        setShowConnectGmailBtn(true);
+        return;
+      }
+
       setSaveMessage("Outreach email draft successfully generated and queued for sending!");
+      setShowConnectGmailBtn(false);
     } catch (err: any) {
-      console.error("Error saving draft:", err);
+      console.error("Error saving draft or checking Gmail connection:", err);
       setError("Failed to register outreach draft in the queue.");
       throw err;
     }
@@ -250,7 +266,25 @@ export const ScreenshotUploader: React.FC = () => {
           marginBottom: "20px",
           textAlign: "center"
         }}>
-          {error}
+          <div>{error}</div>
+          {showConnectGmailBtn && (
+            <button
+              onClick={() => navigate("/candidate/profile")}
+              style={{
+                marginTop: "10px",
+                padding: "6px 12px",
+                borderRadius: "6px",
+                border: "none",
+                background: "#ef4444",
+                color: "#fff",
+                fontSize: "0.8rem",
+                fontWeight: 600,
+                cursor: "pointer"
+              }}
+            >
+              Connect Gmail Now
+            </button>
+          )}
         </div>
       )}
 

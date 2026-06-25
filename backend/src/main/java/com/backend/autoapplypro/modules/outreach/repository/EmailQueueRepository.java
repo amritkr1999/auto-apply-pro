@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface EmailQueueRepository extends JpaRepository<EmailQueue, Long> {
     List<EmailQueue> findByStatus(OutreachStatus status);
+    List<EmailQueue> findByUserId(Long userId);
 }

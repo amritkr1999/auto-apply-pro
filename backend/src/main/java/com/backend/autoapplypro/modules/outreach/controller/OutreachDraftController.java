@@ -149,4 +149,29 @@ public class OutreachDraftController {
         dto.setStatus(saved.getStatus().name());
         return ResponseEntity.ok(dto);
     }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<?> getQueueItems(@PathVariable Long userId) {
+        log.info("Fetching email queue items for user: {}", userId);
+        try {
+            java.util.List<EmailQueue> items = emailQueueRepository.findByUserId(userId);
+            java.util.List<OutreachDraftDto> dtos = new java.util.ArrayList<>();
+            for (EmailQueue item : items) {
+                OutreachDraftDto dto = new OutreachDraftDto();
+                dto.setId(item.getId().toString());
+                dto.setRecipientEmail(item.getRecipientEmail());
+                dto.setSubject(item.getSubject());
+                dto.setBody(item.getBody());
+                dto.setStatus(item.getStatus().name());
+                dto.setSentAt(item.getSentAt() != null ? item.getSentAt().toString() : null);
+                dto.setErrorMessage(item.getErrorMessage());
+                dtos.add(dto);
+            }
+            return ResponseEntity.ok(dtos);
+        } catch (Exception e) {
+            log.error("Failed to fetch email queue items", e);
+            return ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to fetch queue items: " + e.getMessage());
+        }
+    }
 }

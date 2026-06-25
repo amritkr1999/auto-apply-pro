@@ -19,6 +19,7 @@ export const CandidateDashboardView: React.FC = () => {
   const [showBanner, setShowBanner] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState(true);
   const [hasResume, setHasResume] = useState(true);
+  const [queueItems, setQueueItems] = useState<any[]>([]);
 
   useEffect(() => {
     const dismissed = localStorage.getItem("gmail_onboarding_dismissed") === "true";
@@ -42,6 +43,11 @@ export const CandidateDashboardView: React.FC = () => {
         console.error("Failed to fetch candidate profile", err);
         setHasResume(true);
       });
+
+    // Fetch candidate outreach queue history
+    outreachService.getOutreachQueue(userId)
+      .then((data) => setQueueItems(data))
+      .catch((err) => console.error("Failed to fetch outreach queue", err));
   }, [userId]);
 
   const handleDismissBanner = () => {
@@ -191,6 +197,72 @@ export const CandidateDashboardView: React.FC = () => {
               ))}
             </TableBody>
           </Table>
+        </section>
+
+        {/* Email Outreach Queue */}
+        <section className="mt-10" id="outreach-queue">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-lg font-bold text-slate-800">Email Outreach Queue</h2>
+              <p className="text-xs text-slate-500">Scheduled recruiter outreach emails and logs</p>
+            </div>
+            <Button size="sm" onClick={() => navigate("/jobs/parse")}>
+              Parse New Screenshot
+            </Button>
+          </div>
+
+          {queueItems.length === 0 ? (
+            <div className="text-center p-8 bg-slate-50 border border-slate-200 rounded-card text-slate-400 text-sm italic">
+              No outreach emails currently in the queue. Parse a screenshot and generate an email to get started!
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Recipient</TableHead>
+                  <TableHead>Subject</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Details / Error</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {queueItems.map((item) => {
+                  let statusText = "In Queue";
+                  let variant: "neutral" | "success" | "warning" | "error" | "info" = "neutral";
+                  
+                  if (item.status === "SENT") {
+                    statusText = "Sent";
+                    variant = "success";
+                  } else if (item.status === "FAILED") {
+                    statusText = "Failed";
+                    variant = "error";
+                  } else if (item.status === "BLACKLISTED") {
+                    statusText = "Blacklisted";
+                    variant = "error";
+                  } else if (item.status === "PAUSED") {
+                    statusText = "Paused";
+                    variant = "warning";
+                  } else if (item.status === "PENDING") {
+                    statusText = "In Queue";
+                    variant = "info";
+                  }
+
+                  return (
+                    <TableRow key={item.id}>
+                      <TableCell className="font-semibold text-slate-700">{item.recipientEmail}</TableCell>
+                      <TableCell className="text-slate-500 truncate max-w-[200px]">{item.subject}</TableCell>
+                      <TableCell>
+                        <Badge variant={variant}>{statusText}</Badge>
+                      </TableCell>
+                      <TableCell className="text-xs text-slate-400">
+                        {item.status === "SENT" && item.sentAt ? `Dispatched on ${new Date(item.sentAt).toLocaleString()}` : item.errorMessage || "Awaiting dispatch (cron scheduled every 5m)"}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
         </section>
       </div>
     </div>

@@ -181,6 +181,16 @@ export const outreachService = {
     return response.json();
   },
 
+  async getOutreachQueue(userId: number): Promise<OutreachDraft[]> {
+    const response = await fetch(`${API_BASE}/drafts/user/${userId}`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to load outreach queue history.");
+    }
+    return response.json();
+  },
+
   // Connect Gmail: returns the OAuth redirect URL
   async getConnectUrl(userId: number): Promise<string> {
     const response = await fetch(`http://localhost:8060/api/v1/outreach/connect/google?userId=${userId}`, {

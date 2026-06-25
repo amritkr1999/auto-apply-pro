@@ -13,4 +13,6 @@ public class OutreachDraftDto {
     private String subject;
     private String body;
     private String status;
+    private String sentAt;
+    private String errorMessage;
 }
