@@ -74,16 +74,24 @@ public class JobScreenshotController {
 
             log.info("Successfully received response from Python extraction service. Status: {}", response.getStatusCode());
             JobDetailsDto dto = response.getBody();
-            if (dto != null && dto.getSkills() != null) {
-                log.info("Extracted {} skills. Persisting/associating with master skills table...", dto.getSkills().size());
-                for (String skillName : dto.getSkills()) {
-                    String trimmedName = skillName.trim();
-                    if (!trimmedName.isEmpty()) {
-                        skillRepository.findByNameIgnoreCase(trimmedName)
-                            .orElseGet(() -> {
-                                Skill newSkill = Skill.builder().name(trimmedName).build();
-                                return skillRepository.save(newSkill);
-                            });
+            if (dto != null) {
+                if (dto.getHrEmail() == null || dto.getHrEmail().trim().isEmpty()) {
+                    dto.setStatus("INCOMPLETE_DATA");
+                } else {
+                    dto.setStatus("PARSED");
+                }
+
+                if (dto.getSkills() != null) {
+                    log.info("Extracted {} skills. Persisting/associating with master skills table...", dto.getSkills().size());
+                    for (String skillName : dto.getSkills()) {
+                        String trimmedName = skillName.trim();
+                        if (!trimmedName.isEmpty()) {
+                            skillRepository.findByNameIgnoreCase(trimmedName)
+                                .orElseGet(() -> {
+                                    Skill newSkill = Skill.builder().name(trimmedName).build();
+                                    return skillRepository.save(newSkill);
+                                });
+                        }
                     }
                 }
             }

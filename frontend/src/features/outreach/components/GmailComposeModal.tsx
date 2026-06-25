@@ -7,6 +7,7 @@ interface Props {
   subject: string;
   body: string;
   onSend: (subject: string, body: string, recipient: string) => Promise<void>;
+  attachmentFilename?: string;
 }
 
 export const GmailComposeModal: React.FC<Props> = ({
@@ -15,7 +16,8 @@ export const GmailComposeModal: React.FC<Props> = ({
   recipientEmail: initialRecipient,
   subject: initialSubject,
   body: initialBody,
-  onSend
+  onSend,
+  attachmentFilename
 }) => {
   const [recipient, setRecipient] = useState(initialRecipient);
   const [subject, setSubject] = useState(initialSubject);
@@ -107,6 +109,17 @@ export const GmailComposeModal: React.FC<Props> = ({
             placeholder="Subject"
           />
         </div>
+
+        {/* Attachment Row */}
+        {attachmentFilename && (
+          <div className="border-b border-slate-100 px-6 py-2 flex items-center gap-4 bg-slate-50/50">
+            <span className="text-slate-400 w-14 text-xs font-semibold uppercase tracking-wider">Attached</span>
+            <div className="flex items-center gap-1.5 px-3 py-1 bg-indigo-50 border border-indigo-100 text-indigo-700 rounded-full text-xs font-medium">
+              <span>📎</span>
+              <span>{attachmentFilename}</span>
+            </div>
+          </div>
+        )}
 
         {/* Body Rich Text Area */}
         <div className="flex-1 flex flex-col bg-white">

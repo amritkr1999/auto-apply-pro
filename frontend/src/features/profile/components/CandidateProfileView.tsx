@@ -3,6 +3,7 @@ import { profileService } from "../services/profileService";
 import type { CandidateProfile } from "../services/profileService";
 import Button from "../../../components/ui/Button";
 import Input from "../../../components/ui/Input";
+import { outreachService } from "../../outreach/services/outreachService";
 
 interface Props {
   userId: number;
@@ -24,6 +25,10 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
   const [masterSkills, setMasterSkills] = useState<{ id: number; name: string }[]>([]);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [uploadingResume, setUploadingResume] = useState(false);
+  const [syncingProfile, setSyncingProfile] = useState(false);
+  const [gmailConnected, setGmailConnected] = useState(false);
+  const [connectedEmail, setConnectedEmail] = useState<string | null>(null);
+  const [gmailLoading, setGmailLoading] = useState(true);
 
   const handleUploadResume = async (file: File) => {
     try {
@@ -31,6 +36,25 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
       setError("");
       setMessage("");
       await profileService.uploadCandidateResume(userId, file);
+      
+      // Refetch profile to show new filename
+      const data = await profileService.getCandidateProfile(userId);
+      setProfile(data);
+      
+      setMessage("Resume uploaded successfully! Click 'Sync Profile' to auto-populate fields from the new resume.");
+    } catch (err: any) {
+      setError(err.message || "Failed to upload resume.");
+    } finally {
+      setUploadingResume(false);
+    }
+  };
+
+  const handleSyncProfile = async () => {
+    try {
+      setSyncingProfile(true);
+      setError("");
+      setMessage("");
+      await profileService.syncCandidateProfile(userId);
       
       // Refetch profile to load parsed results
       const data = await profileService.getCandidateProfile(userId);
@@ -48,11 +72,11 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
       setExperience(data.experience || []);
       setCertifications(data.certifications || []);
       
-      setMessage("Resume uploaded and parsed successfully!");
+      setMessage("Profile successfully synchronized with your resume!");
     } catch (err: any) {
-      setError(err.message || "Failed to upload resume.");
+      setError(err.message || "Failed to sync profile.");
     } finally {
-      setUploadingResume(false);
+      setSyncingProfile(false);
     }
   };
   
@@ -65,6 +89,56 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
       .then((data) => setMasterSkills(data))
       .catch((err) => console.error("Failed to load master skills", err));
   }, []);
+
+  useEffect(() => {
+    // Check Gmail connection status
+    setGmailLoading(true);
+    outreachService.getGmailStatus(userId)
+      .then((data) => {
+        setGmailConnected(data.connected);
+        setConnectedEmail(data.connectedEmail);
+      })
+      .catch((err) => console.error("Failed to check Gmail status", err))
+      .finally(() => setGmailLoading(false));
+
+    // Check query params for Google OAuth redirection callback status
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get("status");
+    if (status === "success") {
+      setMessage("Gmail account connected successfully!");
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (status === "error") {
+      setError("Failed to connect Gmail account. Please try again.");
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [userId]);
+
+  const handleConnectGmail = async () => {
+    try {
+      setError("");
+      setMessage("");
+      const redirectUrl = await outreachService.getConnectUrl(userId);
+      window.location.href = redirectUrl;
+    } catch (err: any) {
+      setError(err.message || "Failed to initiate Gmail connection.");
+    }
+  };
+
+  const handleDisconnectGmail = async () => {
+    try {
+      setError("");
+      setMessage("");
+      setGmailLoading(true);
+      await outreachService.disconnectGmail(userId);
+      setGmailConnected(false);
+      setConnectedEmail(null);
+      setMessage("Gmail account disconnected successfully.");
+    } catch (err: any) {
+      setError(err.message || "Failed to disconnect Gmail.");
+    } finally {
+      setGmailLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!skills || masterSkills.length === 0) {
@@ -460,6 +534,54 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
           )}
         </div>
 
+        {/* Gmail Integration Section */}
+        <div className="w-full border-t border-slate-100 pt-5">
+          <h3 className="text-base font-semibold text-slate-800 mb-2">Gmail Integration</h3>
+          <p className="text-xs text-slate-500 mb-4">
+            Connect your personal Gmail account to automate sending application and follow-up emails directly from your own email address.
+          </p>
+          
+          {gmailLoading ? (
+            <div className="text-xs text-slate-400 italic py-2">Checking connection status...</div>
+          ) : gmailConnected ? (
+            <div className="flex items-center justify-between p-4 bg-emerald-50 border border-emerald-100 rounded-card">
+              <div className="flex items-center gap-3">
+                <span className="text-xl">📧</span>
+                <div>
+                  <p className="text-sm font-semibold text-emerald-800">Gmail Connected</p>
+                  <p className="text-xs text-emerald-600 font-medium">{connectedEmail}</p>
+                </div>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleDisconnectGmail}
+                className="text-rose-600 border-rose-200 hover:bg-rose-50 hover:text-rose-700"
+              >
+                Disconnect
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-card">
+              <div className="flex items-center gap-3">
+                <span className="text-xl">📧</span>
+                <div>
+                  <p className="text-sm font-semibold text-slate-700">Gmail Disconnected</p>
+                  <p className="text-xs text-slate-400">No account connected yet</p>
+                </div>
+              </div>
+              <Button
+                type="button"
+                size="sm"
+                onClick={handleConnectGmail}
+              >
+                Connect Gmail
+              </Button>
+            </div>
+          )}
+        </div>
+
         <div className="w-full border-t border-slate-100 pt-5">
           <h3 className="text-base font-semibold text-slate-800 mb-3">Upload Resume (PDF, DOC, DOCX)</h3>
           <div className="flex items-center gap-3">
@@ -482,15 +604,25 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
               {uploadingResume ? "Uploading..." : "Choose File"}
             </label>
             {profile?.resumeFilename ? (
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-slate-600">📄 {profile.resumeFilename}</span>
-                <a
-                  href={`http://localhost:8060/api/v1/profiles/candidate/${userId}/resume`}
-                  download
-                  className="text-sm text-primary hover:underline font-semibold"
-                >
-                  Download
-                </a>
+              <div className="flex items-center gap-4 flex-wrap">
+                <span className="text-sm text-slate-600 font-medium">📄 {profile.resumeFilename}</span>
+                <div className="flex items-center gap-3">
+                  <a
+                    href={`http://localhost:8060/api/v1/profiles/candidate/${userId}/resume`}
+                    download
+                    className="text-xs text-primary hover:underline font-semibold"
+                  >
+                    Download
+                  </a>
+                  <button
+                    type="button"
+                    onClick={handleSyncProfile}
+                    disabled={syncingProfile}
+                    className="px-2.5 py-1 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {syncingProfile ? "Syncing..." : "Sync Profile"}
+                  </button>
+                </div>
               </div>
             ) : (
               <span className="text-sm text-slate-400 italic">No resume uploaded</span>

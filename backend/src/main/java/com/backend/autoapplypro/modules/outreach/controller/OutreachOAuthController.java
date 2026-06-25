@@ -122,4 +122,39 @@ public class OutreachOAuthController {
             return new RedirectView("http://localhost:5173/candidate/profile?status=error");
         }
     }
+
+    /**
+     * Retrieves the Gmail connection status for a user.
+     */
+    @GetMapping("/status")
+    public ResponseEntity<?> getGmailStatus(@RequestParam("userId") Long userId) {
+        log.info("Checking Gmail connection status for user ID: {}", userId);
+        java.util.Optional<GmailCredential> credOpt = credentialRepository.findByUserId(userId);
+        
+        java.util.Map<String, Object> response = new java.util.HashMap<>();
+        if (credOpt.isPresent()) {
+            response.put("connected", true);
+            response.put("connectedEmail", credOpt.get().getConnectedEmail());
+        } else {
+            response.put("connected", false);
+            response.put("connectedEmail", null);
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Disconnects a user's connected Gmail account.
+     */
+    @PostMapping("/disconnect")
+    public ResponseEntity<?> disconnectGmail(@RequestParam("userId") Long userId) {
+        log.info("Disconnecting Gmail for user ID: {}", userId);
+        java.util.Optional<GmailCredential> credOpt = credentialRepository.findByUserId(userId);
+        if (credOpt.isPresent()) {
+            credentialRepository.delete(credOpt.get());
+            log.info("Gmail disconnected successfully for user ID: {}", userId);
+            return ResponseEntity.ok(java.util.Map.of("message", "Gmail disconnected successfully"));
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(java.util.Map.of("error", "Gmail connection not found"));
+    }
 }

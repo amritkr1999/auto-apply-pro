@@ -1,5 +1,6 @@
 package com.backend.autoapplypro.modules.users.service;
 
+import com.backend.autoapplypro.config.JwtUtil;
 import com.backend.autoapplypro.modules.users.dto.*;
 import com.backend.autoapplypro.modules.users.model.*;
 import com.backend.autoapplypro.modules.users.repository.*;
@@ -20,21 +21,13 @@ public class UserServiceImpl implements UserService {
     private final CompanyRepository companyRepository;
     private final PasswordEncoder passwordEncoder;
     private final SkillRepository skillRepository;
+    private final JwtUtil jwtUtil;
 
     @Override
     @Transactional
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            // Dev bypass: if user exists, just return them instead of throwing error
-            User existingUser = userRepository.findByEmail(request.getEmail()).get();
-            return AuthResponse.builder()
-                    .token("mock-jwt-token-for-" + existingUser.getEmail())
-                    .id(existingUser.getId())
-                    .email(existingUser.getEmail())
-                    .name(existingUser.getName())
-                    .mobile(existingUser.getMobile())
-                    .role(existingUser.getRole().name())
-                    .build();
+            throw new IllegalArgumentException("Email is already in use");
         }
 
         UserRole role;
@@ -79,8 +72,9 @@ public class UserServiceImpl implements UserService {
             companyRepository.save(company);
         }
 
+        String token = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getRole().name());
         return AuthResponse.builder()
-                .token("mock-jwt-token-for-" + user.getEmail())
+                .token(token)
                 .id(user.getId())
                 .email(user.getEmail())
                 .name(user.getName())
@@ -92,36 +86,16 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public AuthResponse login(LoginRequest request) {
-        // Find user by email or auto-register if not present during development
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseGet(() -> {
-                    User newUser = User.builder()
-                            .email(request.getEmail())
-                            .passwordHash(passwordEncoder.encode(request.getPassword() != null ? request.getPassword() : "password"))
-                            .role(UserRole.CANDIDATE)
-                            .name("Developer User")
-                            .mobile("1234567890")
-                            .build();
-                    newUser = userRepository.save(newUser);
-                    
-                    Candidate candidate = Candidate.builder()
-                            .user(newUser)
-                            .skills(new java.util.HashSet<>())
-                            .jobPreferences(new HashMap<>())
-                            .build();
-                    candidateRepository.save(candidate);
-                    return newUser;
-                });
+                .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
 
-        // Commented out for development to allow everything
-        /*
-        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+        if (request.getPassword() == null || !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new IllegalArgumentException("Invalid email or password");
         }
-        */
 
+        String token = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getRole().name());
         return AuthResponse.builder()
-                .token("mock-jwt-token-for-" + user.getEmail())
+                .token(token)
                 .id(user.getId())
                 .email(user.getEmail())
                 .name(user.getName())
@@ -322,6 +296,17 @@ public class UserServiceImpl implements UserService {
         candidate.setResumeContentType(file.getContentType());
         candidate.setResumeBytes(file.getBytes());
         candidateRepository.save(candidate);
+    }
+
+    @Override
+    @Transactional
+    public void syncProfileFromResume(Long userId) {
+        Candidate candidate = candidateRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Candidate profile not found"));
+        
+        if (candidate.getResumeBytes() == null || candidate.getResumeBytes().length == 0) {
+            throw new IllegalStateException("No resume uploaded to sync profile from.");
+        }
 
         try {
             org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
@@ -330,8 +315,8 @@ public class UserServiceImpl implements UserService {
             org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
             headers.setContentType(org.springframework.http.MediaType.MULTIPART_FORM_DATA);
 
-            final String filename = file.getOriginalFilename() != null ? file.getOriginalFilename() : "resume.pdf";
-            org.springframework.core.io.ByteArrayResource fileResource = new org.springframework.core.io.ByteArrayResource(file.getBytes()) {
+            final String filename = candidate.getResumeFilename() != null ? candidate.getResumeFilename() : "resume.pdf";
+            org.springframework.core.io.ByteArrayResource fileResource = new org.springframework.core.io.ByteArrayResource(candidate.getResumeBytes()) {
                 @Override
                 public String getFilename() {
                     return filename;
@@ -377,16 +362,23 @@ public class UserServiceImpl implements UserService {
                     candidate.setSkills(dbSkills);
                 }
                 candidateRepository.save(candidate);
+            } else {
+                throw new RuntimeException("Python AI parsing service returned an error status.");
             }
         } catch (Exception e) {
-            System.err.println("Warning: Failed to parse resume with Python AI service. File saved without parsing. Error: " + e.getMessage());
+            throw new RuntimeException("Failed to sync profile from resume: " + e.getMessage(), e);
         }
     }
 
     @Override
     @Transactional(readOnly = true)
     public Candidate getCandidateResume(Long userId) {
-        return candidateRepository.findByUserId(userId)
+        Candidate candidate = candidateRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Candidate profile not found"));
+        // Force eager initialization of lazy @Lob resumeBytes while the transaction is active
+        if (candidate.getResumeBytes() != null) {
+            int length = candidate.getResumeBytes().length;
+        }
+        return candidate;
     }
 }

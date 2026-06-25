@@ -1,5 +1,22 @@
 const API_BASE = "http://localhost:8060/api";
 
+const getAuthHeaders = (): Record<string, string> => {
+  const userStr = localStorage.getItem("user");
+  if (userStr) {
+    try {
+      const user = JSON.parse(userStr);
+      if (user.token) {
+        return {
+          "Authorization": `Bearer ${user.token}`
+        };
+      }
+    } catch (e) {
+      console.error("Failed to parse user from localStorage", e);
+    }
+  }
+  return {};
+};
+
 export interface EmailTemplate {
   id: string;
   name: string;
@@ -49,7 +66,9 @@ export const outreachService = {
   // Get all email templates
   async getTemplates(): Promise<EmailTemplate[]> {
     try {
-      const response = await fetch(`${API_BASE}/templates`);
+      const response = await fetch(`${API_BASE}/templates`, {
+        headers: getAuthHeaders(),
+      });
       if (response.ok) {
         return response.json();
       }
@@ -71,7 +90,10 @@ export const outreachService = {
     try {
       const response = await fetch(`${API_BASE}/templates`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...getAuthHeaders(),
+        },
         body: JSON.stringify(newTemplate)
       });
       if (response.ok) {
@@ -96,7 +118,8 @@ export const outreachService = {
   async deleteTemplate(id: string): Promise<boolean> {
     try {
       const response = await fetch(`${API_BASE}/templates/${id}`, {
-        method: "DELETE"
+        method: "DELETE",
+        headers: getAuthHeaders(),
       });
       if (response.ok) {
         return true;
@@ -122,7 +145,10 @@ export const outreachService = {
     try {
       const response = await fetch(`${API_BASE}/drafts`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...getAuthHeaders(),
+        },
         body: JSON.stringify(finalDraft)
       });
       if (response.ok) {
@@ -143,11 +169,48 @@ export const outreachService = {
   async generateOutreachEmail(userId: number, jobDetails: any): Promise<{ subject: string; body: string; recipientEmail: string }> {
     const response = await fetch(`${API_BASE}/drafts/generate`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        ...getAuthHeaders(),
+      },
       body: JSON.stringify({ userId, jobDetails })
     });
     if (!response.ok) {
       throw new Error("Failed to generate AI outreach email.");
+    }
+    return response.json();
+  },
+
+  // Connect Gmail: returns the OAuth redirect URL
+  async getConnectUrl(userId: number): Promise<string> {
+    const response = await fetch(`http://localhost:8060/api/v1/outreach/connect/google?userId=${userId}`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to get Gmail connection URL");
+    }
+    return response.text();
+  },
+
+  // Get Gmail Connection Status
+  async getGmailStatus(userId: number): Promise<{ connected: boolean; connectedEmail: string | null }> {
+    const response = await fetch(`http://localhost:8060/api/v1/outreach/status?userId=${userId}`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to get Gmail status");
+    }
+    return response.json();
+  },
+
+  // Disconnect Gmail
+  async disconnectGmail(userId: number): Promise<{ message: string }> {
+    const response = await fetch(`http://localhost:8060/api/v1/outreach/disconnect?userId=${userId}`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to disconnect Gmail");
     }
     return response.json();
   }

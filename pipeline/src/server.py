@@ -104,7 +104,8 @@ async def extract_job_details(file: UploadFile = File(...)):
             "requirements": requirements_str,
             "salary": salary_str,
             "sourceUrl": job_desc.source_filename,
-            "skills": job_desc.skills
+            "skills": job_desc.skills,
+            "hr_email": job_desc.recruiter_email
         }
         return response_data
     except Exception as e:

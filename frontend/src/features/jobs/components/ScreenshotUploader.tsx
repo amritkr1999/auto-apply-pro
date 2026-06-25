@@ -1,7 +1,9 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
+import { useNavigate } from "react-router-dom";
 import { outreachService } from "../../outreach/services/outreachService";
 import { GmailComposeModal } from "../../outreach/components/GmailComposeModal";
+import { profileService } from "../../profile/services/profileService";
 
 interface JobDetails {
   title: string;
@@ -12,9 +14,13 @@ interface JobDetails {
   salary: string;
   sourceUrl: string;
   skills: string[];
+  hr_email?: string;
+  status?: string;
 }
 
 export const ScreenshotUploader: React.FC = () => {
+  const navigate = useNavigate();
+
   // State for file upload
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -31,6 +37,29 @@ export const ScreenshotUploader: React.FC = () => {
   const [emailBody, setEmailBody] = useState<string>("");
   const [emailRecipient, setEmailRecipient] = useState<string>("");
   const [isEmailModalOpen, setIsEmailModalOpen] = useState<boolean>(false);
+
+  // State for active candidate resume attachment info
+  const [resumeFilename, setResumeFilename] = useState<string>("");
+
+  useEffect(() => {
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        if (user.id) {
+          profileService.getCandidateProfile(user.id)
+            .then(profile => {
+              if (profile && profile.resumeFilename) {
+                setResumeFilename(profile.resumeFilename);
+              }
+            })
+            .catch(err => console.error("Failed to load candidate profile for resume check", err));
+        }
+      } catch (e) {
+        console.error("Failed to parse user for profile fetching", e);
+      }
+    }
+  }, []);
 
   // react-dropzone callback
   const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -63,9 +92,23 @@ export const ScreenshotUploader: React.FC = () => {
     const formData = new FormData();
     formData.append("file", file);
 
+    const userStr = localStorage.getItem("user");
+    const headers: Record<string, string> = {};
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        if (user.token) {
+          headers["Authorization"] = `Bearer ${user.token}`;
+        }
+      } catch (e) {
+        console.error("Failed to parse user for auth header", e);
+      }
+    }
+
     try {
       const response = await fetch("http://localhost:8060/api/jobs/parse-screenshot", {
         method: "POST",
+        headers,
         body: formData,
       });
 
@@ -76,6 +119,9 @@ export const ScreenshotUploader: React.FC = () => {
 
       const data: JobDetails = await response.json();
       setJobDetails(data);
+      if (!data.hr_email || data.status === "INCOMPLETE_DATA") {
+        setError("Warning: Recruiter email address could not be extracted from the screenshot. Please enter it manually in the HR Email Address field.");
+      }
     } catch (err: any) {
       console.error("Error during screenshot processing:", err);
       setError(err.message || "An error occurred while connecting to the server.");
@@ -110,6 +156,11 @@ export const ScreenshotUploader: React.FC = () => {
 
   const handleGenerateEmail = async () => {
     if (!jobDetails) return;
+
+    if (!jobDetails.hr_email || jobDetails.status === "INCOMPLETE_DATA" || !/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(jobDetails.hr_email)) {
+      setError("Please provide a valid HR email address before generating an outreach email.");
+      return;
+    }
 
     setIsGeneratingEmail(true);
     setError(null);
@@ -153,6 +204,30 @@ export const ScreenshotUploader: React.FC = () => {
     setJobDetails(null);
     setError(null);
     setSaveMessage(null);
+  };
+
+  const handleDirectResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const uploadedFile = files[0];
+    const userStr = localStorage.getItem("user");
+    if (!userStr) return;
+
+    try {
+      const user = JSON.parse(userStr);
+      setError(null);
+      setSaveMessage("Uploading resume...");
+      
+      await profileService.uploadCandidateResume(user.id, uploadedFile);
+      
+      setResumeFilename(uploadedFile.name);
+      setSaveMessage("Resume uploaded successfully! It is now attached to your outreach emails.");
+    } catch (err: any) {
+      console.error("Direct resume upload failed:", err);
+      setError("Failed to upload resume. Please try again.");
+      setSaveMessage(null);
+    }
   };
 
   return (
@@ -294,6 +369,66 @@ export const ScreenshotUploader: React.FC = () => {
             </button>
           </div>
 
+          {!resumeFilename && (
+            <div style={{
+              background: "rgba(239, 68, 68, 0.08)",
+              border: "1px solid rgba(239, 68, 68, 0.2)",
+              borderRadius: "8px",
+              padding: "16px",
+              marginBottom: "20px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "12px"
+            }}>
+              <div>
+                <h4 style={{ color: "#f87171", margin: "0 0 4px 0", fontWeight: 600 }}>Please upload your updated resume</h4>
+                <p style={{ color: "#fca5a5", margin: 0, fontSize: "0.85rem" }}>
+                  No resume is currently uploaded in your profile. Upload it now to ensure it gets attached to your job outreach emails.
+                </p>
+              </div>
+              <div style={{ display: "flex", gap: "10px" }}>
+                <button
+                  type="button"
+                  onClick={() => document.getElementById("direct-resume-upload")?.click()}
+                  style={{
+                    padding: "6px 12px",
+                    borderRadius: "6px",
+                    border: "none",
+                    background: "#ef4444",
+                    color: "#fff",
+                    fontSize: "0.8rem",
+                    fontWeight: 600,
+                    cursor: "pointer"
+                  }}
+                >
+                  Upload Resume
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate("/candidate/profile")}
+                  style={{
+                    padding: "6px 12px",
+                    borderRadius: "6px",
+                    border: "1px solid rgba(255,255,255,0.15)",
+                    background: "rgba(255,255,255,0.05)",
+                    color: "#fff",
+                    fontSize: "0.8rem",
+                    cursor: "pointer"
+                  }}
+                >
+                  Go to Profile to Update
+                </button>
+                <input
+                  type="file"
+                  id="direct-resume-upload"
+                  accept=".pdf,.doc,.docx,.txt"
+                  onChange={handleDirectResumeUpload}
+                  style={{ display: "none" }}
+                />
+              </div>
+            </div>
+          )}
+
           <form onSubmit={handleSaveJob} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
               <div>
@@ -339,14 +474,46 @@ export const ScreenshotUploader: React.FC = () => {
               </div>
             </div>
 
-            <div>
-              <label style={{ display: "block", marginBottom: 6, fontWeight: 500, color: "#94a3b8" }}>Job Source URL</label>
-              <input
-                type="text"
-                value={jobDetails.sourceUrl}
-                onChange={(e) => handleFieldChange("sourceUrl", e.target.value)}
-                style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff" }}
-              />
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              <div>
+                <label style={{ display: "block", marginBottom: 6, fontWeight: 500, color: "#94a3b8" }}>Job Source URL</label>
+                <input
+                  type="text"
+                  value={jobDetails.sourceUrl}
+                  onChange={(e) => handleFieldChange("sourceUrl", e.target.value)}
+                  style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff" }}
+                />
+              </div>
+              <div>
+                <label style={{ display: "block", marginBottom: 6, fontWeight: 500, color: "#94a3b8" }}>HR Email Address</label>
+                <input
+                  type="email"
+                  value={jobDetails.hr_email || ""}
+                  onChange={(e) => {
+                    const newEmail = e.target.value;
+                    const updatedStatus = newEmail && /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(newEmail) ? "PARSED" : "INCOMPLETE_DATA";
+                    setJobDetails({
+                      ...jobDetails,
+                      hr_email: newEmail,
+                      status: updatedStatus
+                    });
+                  }}
+                  placeholder="recruiter@company.com"
+                  style={{
+                    width: "100%",
+                    padding: 10,
+                    borderRadius: 6,
+                    border: jobDetails.status === "INCOMPLETE_DATA" ? "1px solid #ef4444" : "1px solid rgba(255,255,255,0.1)",
+                    background: jobDetails.status === "INCOMPLETE_DATA" ? "rgba(239, 68, 68, 0.05)" : "rgba(255,255,255,0.05)",
+                    color: "#fff"
+                  }}
+                />
+                {jobDetails.status === "INCOMPLETE_DATA" && (
+                  <span style={{ color: "#ef4444", fontSize: "0.8rem", marginTop: 4, display: "block" }}>
+                    ⚠️ Missing or invalid HR email address.
+                  </span>
+                )}
+              </div>
             </div>
 
             <div>
@@ -408,6 +575,7 @@ export const ScreenshotUploader: React.FC = () => {
         subject={emailSubject}
         body={emailBody}
         onSend={handleSendEmailDraft}
+        attachmentFilename={resumeFilename}
       />
     </div>
   );

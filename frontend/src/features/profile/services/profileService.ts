@@ -1,5 +1,22 @@
 const API_BASE = "http://localhost:8060/api/v1";
 
+const getAuthHeaders = (): Record<string, string> => {
+  const userStr = localStorage.getItem("user");
+  if (userStr) {
+    try {
+      const user = JSON.parse(userStr);
+      if (user.token) {
+        return {
+          "Authorization": `Bearer ${user.token}`
+        };
+      }
+    } catch (e) {
+      console.error("Failed to parse user from localStorage", e);
+    }
+  }
+  return {};
+};
+
 export interface UserAuthData {
   token: string;
   id: number;
@@ -74,7 +91,9 @@ export const profileService = {
 
   // Profiles
   async getCandidateProfile(userId: number): Promise<CandidateProfile> {
-    const response = await fetch(`${API_BASE}/profiles/candidate/${userId}`);
+    const response = await fetch(`${API_BASE}/profiles/candidate/${userId}`, {
+      headers: getAuthHeaders(),
+    });
     if (!response.ok) {
       throw new Error("Failed to load candidate profile");
     }
@@ -84,7 +103,10 @@ export const profileService = {
   async updateCandidateProfile(userId: number, profile: CandidateProfile): Promise<CandidateProfile> {
     const response = await fetch(`${API_BASE}/profiles/candidate/${userId}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        ...getAuthHeaders(),
+      },
       body: JSON.stringify(profile),
     });
     if (!response.ok) {
@@ -98,6 +120,7 @@ export const profileService = {
     formData.append("file", file);
     const response = await fetch(`${API_BASE}/profiles/candidate/${userId}/resume`, {
       method: "POST",
+      headers: getAuthHeaders(),
       body: formData,
     });
     if (!response.ok) {
@@ -106,8 +129,22 @@ export const profileService = {
     return response.json();
   },
 
+  async syncCandidateProfile(userId: number): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE}/profiles/candidate/${userId}/resume/sync`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || "Failed to sync candidate profile from resume");
+    }
+    return response.json();
+  },
+
   async getRecruiterProfile(userId: number): Promise<RecruiterProfile> {
-    const response = await fetch(`${API_BASE}/profiles/recruiter/${userId}`);
+    const response = await fetch(`${API_BASE}/profiles/recruiter/${userId}`, {
+      headers: getAuthHeaders(),
+    });
     if (!response.ok) {
       throw new Error("Failed to load recruiter profile");
     }
@@ -117,7 +154,10 @@ export const profileService = {
   async updateRecruiterProfile(userId: number, profile: RecruiterProfile): Promise<RecruiterProfile> {
     const response = await fetch(`${API_BASE}/profiles/recruiter/${userId}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        ...getAuthHeaders(),
+      },
       body: JSON.stringify(profile),
     });
     if (!response.ok) {
@@ -127,7 +167,9 @@ export const profileService = {
   },
 
   async getCompanyProfile(userId: number): Promise<CompanyProfile> {
-    const response = await fetch(`${API_BASE}/profiles/company/${userId}`);
+    const response = await fetch(`${API_BASE}/profiles/company/${userId}`, {
+      headers: getAuthHeaders(),
+    });
     if (!response.ok) {
       throw new Error("Failed to load company profile");
     }
@@ -137,7 +179,10 @@ export const profileService = {
   async updateCompanyProfile(userId: number, profile: CompanyProfile): Promise<CompanyProfile> {
     const response = await fetch(`${API_BASE}/profiles/company/${userId}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        ...getAuthHeaders(),
+      },
       body: JSON.stringify(profile),
     });
     if (!response.ok) {
@@ -147,7 +192,9 @@ export const profileService = {
   },
 
   async getSkills(): Promise<{ id: number; name: string }[]> {
-    const response = await fetch(`${API_BASE}/skills`);
+    const response = await fetch(`${API_BASE}/skills`, {
+      headers: getAuthHeaders(),
+    });
     if (!response.ok) {
       throw new Error("Failed to load skills list");
     }

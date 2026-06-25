@@ -17,4 +17,5 @@ public interface UserService {
     
     void uploadResume(Long userId, org.springframework.web.multipart.MultipartFile file) throws java.io.IOException;
     com.backend.autoapplypro.modules.users.model.Candidate getCandidateResume(Long userId);
+    void syncProfileFromResume(Long userId);
 }

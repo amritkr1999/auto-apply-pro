@@ -25,7 +25,7 @@ class JDParser:
                 "max": int or null,
                 "currency": "string"
             }} or null,
-            "recruiter_email": "string" or null,
+            "recruiter_email": "string" or null (Search for email patterns matching [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{{2,}}),
             "experience_required": "string" or null,
             "location": "string" or null,
             "job_type": "string" or null (e.g. Full-time, Contract, Part-time, Internship),
@@ -67,6 +67,14 @@ class JDParser:
                 parsed_json["source_filename"] = source_filename
                 parsed_json["extracted_at"] = datetime.utcnow().isoformat()
                 
+                # Regex fallback check for email in raw OCR text if LLM failed to find it
+                if not parsed_json.get("recruiter_email"):
+                    import re
+                    email_pattern = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
+                    match = re.search(email_pattern, ocr_text)
+                    if match:
+                        parsed_json["recruiter_email"] = match.group(0)
+
                 # Enforce fallback defaults if required Pydantic fields are missing/null
                 if not parsed_json.get("job_title"):
                     parsed_json["job_title"] = "Unknown Job Title"

@@ -45,13 +45,16 @@ public class OutreachDraftController {
             jobDetailsMap.put("location", dto.getJobDetails().getLocation());
             jobDetailsMap.put("job_type", "Full-time"); // default fallback or parse if available
 
-            // Extract recruiter email from description if possible
-            String recruiterEmail = "recruiter@example.com";
-            if (dto.getJobDetails().getDescription() != null) {
-                java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}");
-                java.util.regex.Matcher matcher = pattern.matcher(dto.getJobDetails().getDescription());
-                if (matcher.find()) {
-                    recruiterEmail = matcher.group();
+            // Extract recruiter email from DTO, or fallback to description if missing
+            String recruiterEmail = dto.getJobDetails().getHrEmail();
+            if (recruiterEmail == null || recruiterEmail.trim().isEmpty()) {
+                recruiterEmail = "recruiter@example.com";
+                if (dto.getJobDetails().getDescription() != null) {
+                    java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}");
+                    java.util.regex.Matcher matcher = pattern.matcher(dto.getJobDetails().getDescription());
+                    if (matcher.find()) {
+                        recruiterEmail = matcher.group();
+                    }
                 }
             }
             jobDetailsMap.put("recruiter_email", recruiterEmail);

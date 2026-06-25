@@ -13,6 +13,11 @@ import com.google.api.services.gmail.model.Message;
 import jakarta.mail.Session;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeMultipart;
+import jakarta.mail.internet.MimeBodyPart;
+import jakarta.mail.util.ByteArrayDataSource;
+import jakarta.activation.DataHandler;
+import com.backend.autoapplypro.modules.users.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +32,7 @@ import java.util.Properties;
 public class GmailEmailSender implements EmailSender {
 
     private final GmailCredentialRepository credentialRepository;
+    private final UserService userService;
 
     @Value("${spring.security.oauth2.client.registration.google.client-id:dev-client-id}")
     private String clientId;
@@ -55,8 +61,26 @@ public class GmailEmailSender implements EmailSender {
                     .setApplicationName("AutoApplyPro")
                     .build();
 
+            // Fetch candidate resume details if uploaded
+            byte[] resumeBytes = null;
+            String resumeContentType = null;
+            String resumeFilename = null;
+            try {
+                com.backend.autoapplypro.modules.users.model.Candidate candidate = userService.getCandidateResume(userId);
+                if (candidate != null && candidate.getResumeBytes() != null) {
+                    resumeBytes = candidate.getResumeBytes();
+                    resumeContentType = candidate.getResumeContentType();
+                    resumeFilename = candidate.getResumeFilename();
+                    log.info("Found resume for user ID: {}. File: {}, Size: {} bytes. Preparing attachment.", 
+                            userId, resumeFilename, resumeBytes.length);
+                }
+            } catch (Exception e) {
+                log.warn("Failed to retrieve candidate resume for user ID: {}. Sending without attachment. Error: {}", userId, e.getMessage());
+            }
+
             // Construct MIME message
-            MimeMessage mimeMessage = createMimeMessage(credential.getConnectedEmail(), to, subject, body);
+            MimeMessage mimeMessage = createMimeMessage(credential.getConnectedEmail(), to, subject, body, 
+                    resumeBytes, resumeContentType, resumeFilename);
             
             // Serialize and Base64-encode
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -103,12 +127,33 @@ public class GmailEmailSender implements EmailSender {
         }
     }
 
-    private MimeMessage createMimeMessage(String from, String to, String subject, String body) throws Exception {
+    private MimeMessage createMimeMessage(String from, String to, String subject, String body, 
+                                           byte[] attachmentBytes, String contentType, String filename) throws Exception {
         MimeMessage mimeMessage = new MimeMessage(Session.getDefaultInstance(new Properties()));
         mimeMessage.setFrom(new InternetAddress(from));
         mimeMessage.addRecipient(MimeMessage.RecipientType.TO, new InternetAddress(to));
         mimeMessage.setSubject(subject, "UTF-8");
-        mimeMessage.setContent(body, "text/html; charset=UTF-8");
+
+        if (attachmentBytes != null && attachmentBytes.length > 0) {
+            MimeMultipart multipart = new MimeMultipart();
+
+            // 1. HTML body part
+            MimeBodyPart bodyPart = new MimeBodyPart();
+            bodyPart.setContent(body, "text/html; charset=UTF-8");
+            multipart.addBodyPart(bodyPart);
+
+            // 2. Attachment part
+            MimeBodyPart attachmentPart = new MimeBodyPart();
+            ByteArrayDataSource source = new ByteArrayDataSource(attachmentBytes, 
+                    contentType != null ? contentType : "application/octet-stream");
+            attachmentPart.setDataHandler(new DataHandler(source));
+            attachmentPart.setFileName(filename != null ? filename : "resume.pdf");
+            multipart.addBodyPart(attachmentPart);
+
+            mimeMessage.setContent(multipart);
+        } else {
+            mimeMessage.setContent(body, "text/html; charset=UTF-8");
+        }
         return mimeMessage;
     }
 }

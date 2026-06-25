@@ -93,6 +93,17 @@ public class ProfileController {
         }
     }
 
+    @PostMapping("/candidate/{userId}/resume/sync")
+    public ResponseEntity<?> syncProfile(@PathVariable Long userId) {
+        try {
+            userService.syncProfileFromResume(userId);
+            return ResponseEntity.ok(java.util.Map.of("message", "Profile successfully synchronized with resume."));
+        } catch (Exception e) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to sync profile: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/candidate/{userId}/resume")
     public ResponseEntity<org.springframework.core.io.ByteArrayResource> getResume(@PathVariable Long userId) {
         try {
