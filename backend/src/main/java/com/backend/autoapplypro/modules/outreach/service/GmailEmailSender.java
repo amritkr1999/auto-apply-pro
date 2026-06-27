@@ -116,8 +116,17 @@ public class GmailEmailSender implements EmailSender {
                 // Rate limits
                 throw new OutreachSendException(OutreachErrorType.RATE_LIMITED, "Gmail API rate limit hit", e);
             } else if (statusCode == 401 || statusCode == 403) {
-                // Unauthorized / connection revoked
-                throw new OutreachSendException(OutreachErrorType.UNAUTHORIZED, "Gmail OAuth credential revoked or expired", e);
+                // Unauthorized / connection revoked / API disabled
+                String msg = "Gmail OAuth credential revoked or expired";
+                if (e.getDetails() != null && e.getDetails().getMessage() != null) {
+                    String googleMsg = e.getDetails().getMessage();
+                    if (googleMsg.contains("Gmail API has not been used") || googleMsg.contains("disabled")) {
+                        msg = "Gmail API is disabled on the Google Developer Console project. Enable it by visiting the console link in the details: " + googleMsg;
+                    } else {
+                        msg = "Gmail API access denied: " + googleMsg;
+                    }
+                }
+                throw new OutreachSendException(OutreachErrorType.UNAUTHORIZED, msg, e);
             } else {
                 throw new OutreachSendException(OutreachErrorType.GENERIC, "Gmail API sending failed: " + e.getMessage(), e);
             }

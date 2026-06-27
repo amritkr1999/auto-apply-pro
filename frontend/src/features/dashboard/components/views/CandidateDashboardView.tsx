@@ -88,13 +88,13 @@ export const CandidateDashboardView: React.FC = () => {
             </div>
             <p className="text-sm text-slate-500 mt-1">Track your job applications and email outreach status</p>
           </div>
-          <Button
+          {/* <Button
             variant="outline"
             size="sm"
             onClick={() => setSidebarOpen((open) => !open)}
           >
             {sidebarOpen ? "Hide Sidebar" : "Show Sidebar"}
-          </Button>
+          </Button> */}
         </div>
 
         {!hasResume && (

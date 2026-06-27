@@ -38,6 +38,7 @@ backend/bin/
 backend/.classpath
 backend/.project
 backend/.settings/
+backend/src/main/resources/application-local.properties
 
 # Node / React (Frontend)
 frontend/node_modules/

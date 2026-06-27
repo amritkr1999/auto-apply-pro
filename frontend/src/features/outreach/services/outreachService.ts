@@ -31,6 +31,7 @@ export interface OutreachDraft {
   subject: string;
   body: string;
   status: "PENDING" | "SENT" | "FAILED" | "BLACKLISTED" | "PAUSED";
+  userId?: number;
 }
 
 const DEFAULT_TEMPLATES: EmailTemplate[] = [
@@ -136,7 +137,11 @@ export const outreachService = {
 
   // Save an outreach draft to the sending queue
   async saveDraft(draft: Omit<OutreachDraft, "status">): Promise<OutreachDraft> {
+    const userStr = localStorage.getItem("user");
+    const userId = userStr ? JSON.parse(userStr).id : 1;
+
     const finalDraft: OutreachDraft = {
+      userId,
       ...draft,
       id: `draft-${Date.now()}`,
       status: "PENDING"

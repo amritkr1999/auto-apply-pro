@@ -116,21 +116,27 @@ public class OutreachDraftController {
     public ResponseEntity<OutreachDraftDto> saveDraft(@RequestBody OutreachDraftDto dto) {
         log.info("Received request to queue email draft to: {}", dto.getRecipientEmail());
 
-        // Find or create default candidate user for testing/dev phase as auth is bypassed
-        User user = userRepository.findAll().stream()
-                .filter(u -> u.getRole() == UserRole.CANDIDATE)
-                .findFirst()
-                .orElseGet(() -> {
-                    log.info("No candidate user found in database. Creating default candidate user.");
-                    User newUser = User.builder()
-                            .email("guest@example.com")
-                            .passwordHash("$2a$10$abcdefghijklmnopqrstuv") // dummy password hash
-                            .role(UserRole.CANDIDATE)
-                            .name("Guest Developer")
-                            .mobile("1234567890")
-                            .build();
-                    return userRepository.save(newUser);
-                });
+        User user = null;
+        if (dto.getUserId() != null) {
+            user = userRepository.findById(dto.getUserId()).orElse(null);
+        }
+        if (user == null) {
+            log.info("No user ID provided or found. Bypassing auth check for test/dev fallback.");
+            user = userRepository.findAll().stream()
+                    .filter(u -> u.getRole() == UserRole.CANDIDATE)
+                    .findFirst()
+                    .orElseGet(() -> {
+                        log.info("No candidate user found in database. Creating default candidate user.");
+                        User newUser = User.builder()
+                                .email("guest@example.com")
+                                .passwordHash("$2a$10$abcdefghijklmnopqrstuv") // dummy password hash
+                                .role(UserRole.CANDIDATE)
+                                .name("Guest Developer")
+                                .mobile("1234567890")
+                                .build();
+                        return userRepository.save(newUser);
+                    });
+        }
 
         // Build queue entity
         EmailQueue queueItem = EmailQueue.builder()
@@ -165,6 +171,7 @@ public class OutreachDraftController {
                 dto.setStatus(item.getStatus().name());
                 dto.setSentAt(item.getSentAt() != null ? item.getSentAt().toString() : null);
                 dto.setErrorMessage(item.getErrorMessage());
+                dto.setUserId(item.getUser().getId());
                 dtos.add(dto);
             }
             return ResponseEntity.ok(dtos);

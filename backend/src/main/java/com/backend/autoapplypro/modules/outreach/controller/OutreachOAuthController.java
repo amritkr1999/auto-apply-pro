@@ -46,7 +46,7 @@ public class OutreachOAuthController {
      */
     @GetMapping("/connect/google")
     public ResponseEntity<String> connectGoogle(@RequestParam("userId") Long userId) {
-        log.info("Generating Google OAuth redirect URL for user ID: {}", userId);
+        log.info("Generating Google OAuth redirect URL for user ID: {} with client ID: {}", userId, clientId);
         
         // Build OAuth authorization URL
         String authUrl = new GoogleAuthorizationCodeRequestUrl(

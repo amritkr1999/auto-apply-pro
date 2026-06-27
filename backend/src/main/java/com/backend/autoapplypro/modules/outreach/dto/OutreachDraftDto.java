@@ -15,4 +15,5 @@ public class OutreachDraftDto {
     private String status;
     private String sentAt;
     private String errorMessage;
+    private Long userId;
 }
