@@ -41,6 +41,9 @@ public class EmailQueue {
     @Column(name = "sent_at")
     private LocalDateTime sentAt;
 
+    @Column(name = "scheduled_at")
+    private LocalDateTime scheduledAt;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

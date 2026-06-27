@@ -228,5 +228,49 @@ export const outreachService = {
       throw new Error("Failed to disconnect Gmail");
     }
     return response.json();
+  },
+
+  // Get outreach scheduling settings
+  async getOutreachSettings(userId: number): Promise<{
+    dailyLimit: number;
+    minIntervalMinutes: number;
+    maxIntervalMinutes: number;
+    slotStart: string;
+    slotEnd: string;
+    timezone: string;
+    skipWeekends: boolean;
+  }> {
+    const response = await fetch(`${API_BASE}/v1/outreach/settings?userId=${userId}`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to load outreach settings.");
+    }
+    return response.json();
+  },
+
+  // Save outreach scheduling settings
+  async saveOutreachSettings(userId: number, settings: {
+    dailyLimit: number;
+    minIntervalMinutes: number;
+    maxIntervalMinutes: number;
+    slotStart: string;
+    slotEnd: string;
+    timezone: string;
+    skipWeekends: boolean;
+  }): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE}/v1/outreach/settings?userId=${userId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify(settings)
+    });
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(errText || "Failed to save outreach settings.");
+    }
+    return response.json();
   }
 };

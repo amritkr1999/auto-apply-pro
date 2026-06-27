@@ -53,6 +53,30 @@ public class User {
     @Column(name = "last_sent_reset")
     private java.time.LocalDate lastSentReset;
 
+    @Builder.Default
+    @Column(name = "outreach_min_interval_min")
+    private Integer outreachMinIntervalMin = 10;
+
+    @Builder.Default
+    @Column(name = "outreach_max_interval_min")
+    private Integer outreachMaxIntervalMin = 30;
+
+    @Builder.Default
+    @Column(name = "outreach_slot_start")
+    private java.time.LocalTime outreachSlotStart = java.time.LocalTime.of(9, 0);
+
+    @Builder.Default
+    @Column(name = "outreach_slot_end")
+    private java.time.LocalTime outreachSlotEnd = java.time.LocalTime.of(17, 0);
+
+    @Builder.Default
+    @Column(name = "outreach_timezone")
+    private String outreachTimezone = "UTC";
+
+    @Builder.Default
+    @Column(name = "outreach_skip_weekends")
+    private Boolean outreachSkipWeekends = true;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -71,6 +95,24 @@ public class User {
         }
         if (lastSentReset == null) {
             lastSentReset = java.time.LocalDate.now();
+        }
+        if (outreachMinIntervalMin == null) {
+            outreachMinIntervalMin = 10;
+        }
+        if (outreachMaxIntervalMin == null) {
+            outreachMaxIntervalMin = 30;
+        }
+        if (outreachSlotStart == null) {
+            outreachSlotStart = java.time.LocalTime.of(9, 0);
+        }
+        if (outreachSlotEnd == null) {
+            outreachSlotEnd = java.time.LocalTime.of(17, 0);
+        }
+        if (outreachTimezone == null) {
+            outreachTimezone = "UTC";
+        }
+        if (outreachSkipWeekends == null) {
+            outreachSkipWeekends = true;
         }
     }
 

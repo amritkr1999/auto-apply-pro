@@ -10,6 +10,7 @@ import com.backend.autoapplypro.modules.users.model.User;
 import com.backend.autoapplypro.modules.users.model.UserRole;
 import com.backend.autoapplypro.modules.users.repository.UserRepository;
 import com.backend.autoapplypro.modules.users.service.UserService;
+import com.backend.autoapplypro.modules.outreach.service.OutreachSchedulerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,7 @@ public class OutreachDraftController {
     private final EmailQueueRepository emailQueueRepository;
     private final UserRepository userRepository;
     private final UserService userService;
+    private final OutreachSchedulerService schedulerService;
 
     @PostMapping("/generate")
     public ResponseEntity<?> generateEmail(@RequestBody EmailGenerationRequestDto dto) {
@@ -138,6 +140,9 @@ public class OutreachDraftController {
                     });
         }
 
+        // Calculate next scheduled send time
+        java.time.LocalDateTime scheduledAt = schedulerService.calculateNextScheduleTime(user);
+
         // Build queue entity
         EmailQueue queueItem = EmailQueue.builder()
                 .user(user)
@@ -145,6 +150,7 @@ public class OutreachDraftController {
                 .subject(dto.getSubject())
                 .body(dto.getBody())
                 .status(OutreachStatus.PENDING)
+                .scheduledAt(scheduledAt)
                 .build();
 
         EmailQueue saved = emailQueueRepository.save(queueItem);

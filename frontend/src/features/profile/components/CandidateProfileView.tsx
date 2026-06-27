@@ -30,6 +30,17 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
   const [connectedEmail, setConnectedEmail] = useState<string | null>(null);
   const [gmailLoading, setGmailLoading] = useState(true);
 
+  // Outreach Scheduling Settings State
+  const [dailyLimit, setDailyLimit] = useState(50);
+  const [minInterval, setMinInterval] = useState(10);
+  const [maxInterval, setMaxInterval] = useState(30);
+  const [slotStart, setSlotStart] = useState("09:00");
+  const [slotEnd, setSlotEnd] = useState("17:00");
+  const [timezone, setTimezone] = useState("UTC");
+  const [skipWeekends, setSkipWeekends] = useState(true);
+  const [settingsLoading, setSettingsLoading] = useState(true);
+  const [savingSettings, setSavingSettings] = useState(false);
+
   const handleUploadResume = async (file: File) => {
     try {
       setUploadingResume(true);
@@ -112,6 +123,54 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, [userId]);
+
+  useEffect(() => {
+    setSettingsLoading(true);
+    outreachService.getOutreachSettings(userId)
+      .then((data) => {
+        setDailyLimit(data.dailyLimit);
+        setMinInterval(data.minIntervalMinutes);
+        setMaxInterval(data.maxIntervalMinutes);
+        setSlotStart(data.slotStart ? data.slotStart.substring(0, 5) : "09:00");
+        setSlotEnd(data.slotEnd ? data.slotEnd.substring(0, 5) : "17:00");
+        setSkipWeekends(data.skipWeekends !== false);
+        if (data.timezone) {
+          setTimezone(data.timezone);
+        } else {
+          const localTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+          if (localTz) setTimezone(localTz);
+        }
+      })
+      .catch((err) => console.error("Failed to load outreach settings", err))
+      .finally(() => setSettingsLoading(false));
+  }, [userId]);
+
+  const handleSaveSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (minInterval > maxInterval) {
+      setError("Minimum interval cannot be greater than maximum interval.");
+      return;
+    }
+    try {
+      setSavingSettings(true);
+      setError("");
+      setMessage("");
+      const res = await outreachService.saveOutreachSettings(userId, {
+        dailyLimit,
+        minIntervalMinutes: minInterval,
+        maxIntervalMinutes: maxInterval,
+        slotStart,
+        slotEnd,
+        timezone,
+        skipWeekends
+      });
+      setMessage(res.message || "Outreach settings updated successfully.");
+    } catch (err: any) {
+      setError(err.message || "Failed to update outreach settings.");
+    } finally {
+      setSavingSettings(false);
+    }
+  };
 
   const handleConnectGmail = async () => {
     try {
@@ -579,6 +638,161 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
                 Connect Gmail
               </Button>
             </div>
+          )}
+        </div>
+
+        {/* Outreach Scheduling & Anti-Spam Settings */}
+        <div className="w-full border-t border-slate-100 pt-5 mt-5">
+          <h3 className="text-base font-semibold text-slate-800 mb-2">Outreach & Anti-Spam Scheduling</h3>
+          <p className="text-xs text-slate-500 mb-4">
+            Configure randomized dispatch intervals and time slot windows to simulate natural mailing behavior and keep your account safe from spam filters.
+          </p>
+
+          {settingsLoading ? (
+            <div className="text-xs text-slate-400 italic py-2">Loading scheduling settings...</div>
+          ) : (
+            <form onSubmit={handleSaveSettings} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">
+                      Daily Send Limit (emails/day)
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="500"
+                      value={dailyLimit}
+                      onChange={(e) => setDailyLimit(parseInt(e.target.value) || 50)}
+                      className="w-full px-3 py-1.5 border border-slate-200 rounded-md text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">
+                      Randomized Interval Range (minutes between emails)
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1">
+                        <span className="text-[10px] text-slate-400 block mb-0.5">Min Delay</span>
+                        <input
+                          type="number"
+                          min="1"
+                          max="1440"
+                          value={minInterval}
+                          onChange={(e) => setMinInterval(parseInt(e.target.value) || 10)}
+                          className="w-full px-3 py-1.5 border border-slate-200 rounded-md text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-primary"
+                        />
+                      </div>
+                      <span className="text-slate-400 mt-4 text-xs font-medium">to</span>
+                      <div className="flex-1">
+                        <span className="text-[10px] text-slate-400 block mb-0.5">Max Delay</span>
+                        <input
+                          type="number"
+                          min="1"
+                          max="1440"
+                          value={maxInterval}
+                          onChange={(e) => setMaxInterval(parseInt(e.target.value) || 30)}
+                          className="w-full px-3 py-1.5 border border-slate-200 rounded-md text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-primary"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2 pt-2">
+                    <input
+                      type="checkbox"
+                      id="skipWeekendsCheckbox"
+                      checked={skipWeekends}
+                      onChange={(e) => setSkipWeekends(e.target.checked)}
+                      className="mt-1 h-4 w-4 text-primary border-slate-200 rounded focus:ring-primary"
+                    />
+                    <label htmlFor="skipWeekendsCheckbox" className="select-none cursor-pointer">
+                      <span className="block text-xs font-semibold text-slate-600">Skip Weekends</span>
+                      <span className="block text-[10px] text-slate-400">Do not send any outreach emails on Saturday and Sunday.</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-xs font-semibold text-slate-600">
+                        Local Timezone
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const localTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                          if (localTz) setTimezone(localTz);
+                        }}
+                        className="text-[10px] text-primary hover:underline font-semibold"
+                      >
+                        Detect timezone
+                      </button>
+                    </div>
+                    <select
+                      value={timezone}
+                      onChange={(e) => setTimezone(e.target.value)}
+                      className="w-full px-3 py-1.5 border border-slate-200 rounded-md text-sm text-slate-700 bg-white focus:outline-none focus:ring-1 focus:ring-primary"
+                    >
+                      <option value="UTC">UTC (Coordinated Universal Time)</option>
+                      <option value="America/New_York">America/New_York (US Eastern Time)</option>
+                      <option value="America/Chicago">America/Chicago (US Central Time)</option>
+                      <option value="America/Denver">America/Denver (US Mountain Time)</option>
+                      <option value="America/Los_Angeles">America/Los_Angeles (US Pacific Time)</option>
+                      <option value="Europe/London">Europe/London (London, GMT/BST)</option>
+                      <option value="Europe/Paris">Europe/Paris (Paris, CET/CEST)</option>
+                      <option value="Asia/Kolkata">Asia/Kolkata (India Standard Time)</option>
+                      <option value="Asia/Singapore">Asia/Singapore (Singapore Time)</option>
+                      <option value="Asia/Tokyo">Asia/Tokyo (Japan Standard Time)</option>
+                      <option value="Australia/Sydney">Australia/Sydney (Sydney, AEST/AEDT)</option>
+                      {!["UTC", "America/New_York", "America/Chicago", "America/Denver", "America/Los_Angeles", "Europe/London", "Europe/Paris", "Asia/Kolkata", "Asia/Singapore", "Asia/Tokyo", "Australia/Sydney"].includes(timezone) && (
+                        <option value={timezone}>{timezone} (Detected)</option>
+                      )}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">
+                      Active Sending Slot (local user hours)
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1">
+                        <span className="text-[10px] text-slate-400 block mb-0.5">Start Time</span>
+                        <input
+                          type="time"
+                          value={slotStart}
+                          onChange={(e) => setSlotStart(e.target.value)}
+                          className="w-full px-3 py-1.5 border border-slate-200 rounded-md text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-primary"
+                        />
+                      </div>
+                      <span className="text-slate-400 mt-4 text-xs font-medium">to</span>
+                      <div className="flex-1">
+                        <span className="text-[10px] text-slate-400 block mb-0.5">End Time</span>
+                        <input
+                          type="time"
+                          value={slotEnd}
+                          onChange={(e) => setSlotEnd(e.target.value)}
+                          className="w-full px-3 py-1.5 border border-slate-200 rounded-md text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-primary"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-2 flex justify-end">
+                <Button
+                  type="submit"
+                  size="sm"
+                  disabled={savingSettings}
+                  className="bg-primary hover:bg-primary-hover text-white text-xs font-semibold px-4 py-1.5 shadow-sm"
+                >
+                  {savingSettings ? "Saving Settings..." : "Save Scheduling Settings"}
+                </Button>
+              </div>
+            </form>
           )}
         </div>
 

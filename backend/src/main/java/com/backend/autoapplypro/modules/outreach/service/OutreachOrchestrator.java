@@ -25,24 +25,30 @@ public class OutreachOrchestrator {
     private final EmailQueueRepository queueRepository;
     private final UserRepository userRepository;
     private final EmailSender emailSender; // Automatically wires GmailEmailSender implementation
+    private final OutreachSchedulerService schedulerService;
 
     /**
      * Strictly server-side scheduler (cron job) running every 5 minutes.
      * Pulls PENDING drafts from the queue, enforces user daily send limits,
      * dispatches email using the connected sender, and handles anti-spam/rejection errors.
      */
-    @Scheduled(cron = "0 */5 * * * *")
+    /**
+     * Strictly server-side scheduler (cron job) running every minute.
+     * Pulls PENDING drafts that are due from the queue, checks time slots,
+     * enforces daily send limits, spacing guardrails, and sends them.
+     */
+    @Scheduled(cron = "0 * * * * *")
     @Transactional
     public void processOutreachQueue() {
         log.info("Starting scheduled outreach queue processing run.");
         
-        List<EmailQueue> pendingEmails = queueRepository.findByStatus(OutreachStatus.PENDING);
+        List<EmailQueue> pendingEmails = queueRepository.findDueEmails(OutreachStatus.PENDING, LocalDateTime.now());
         if (pendingEmails.isEmpty()) {
-            log.info("No pending outreach emails found in the queue.");
+            log.info("No due pending outreach emails found in the queue.");
             return;
         }
 
-        log.info("Found {} pending outreach emails to process.", pendingEmails.size());
+        log.info("Found {} due pending outreach emails to process.", pendingEmails.size());
 
         for (EmailQueue item : pendingEmails) {
             User user = item.getUser();
@@ -55,6 +61,18 @@ public class OutreachOrchestrator {
                 user.setSentToday(0);
                 user.setLastSentReset(today);
                 userRepository.save(user);
+
+                // Auto-resume emails paused due to daily limits
+                List<EmailQueue> pausedEmails = queueRepository.findByUserIdAndStatus(user.getId(), OutreachStatus.PAUSED);
+                for (EmailQueue paused : pausedEmails) {
+                    if (paused.getErrorMessage() != null && paused.getErrorMessage().contains("Daily outreach send limit reached")) {
+                        log.info("Quota reset: Resuming paused email ID: {} for user ID: {}", paused.getId(), user.getId());
+                        paused.setStatus(OutreachStatus.PENDING);
+                        paused.setErrorMessage(null);
+                        paused.setScheduledAt(schedulerService.calculateNextScheduleTime(user));
+                        queueRepository.save(paused);
+                    }
+                }
             }
 
             int sentToday = user.getSentToday() != null ? user.getSentToday() : 0;
@@ -70,7 +88,41 @@ public class OutreachOrchestrator {
                 continue;
             }
 
-            // 2. Dispatch
+            // 2. Active Hours and Weekend restriction check
+            String tzId = user.getOutreachTimezone() != null ? user.getOutreachTimezone() : "UTC";
+            java.time.ZoneId userZone = java.time.ZoneId.of(tzId);
+            java.time.ZonedDateTime userNow = java.time.ZonedDateTime.now(userZone);
+
+            // Weekend check
+            if (Boolean.TRUE.equals(user.getOutreachSkipWeekends())) {
+                java.time.DayOfWeek day = userNow.getDayOfWeek();
+                if (day == java.time.DayOfWeek.SATURDAY || day == java.time.DayOfWeek.SUNDAY) {
+                    log.info("Skipping outreach for user ID {} - weekend restriction active in timezone {}.", user.getId(), tzId);
+                    continue;
+                }
+            }
+
+            // Time slot check
+            java.time.LocalTime localTime = userNow.toLocalTime();
+            java.time.LocalTime slotStart = user.getOutreachSlotStart() != null ? user.getOutreachSlotStart() : java.time.LocalTime.of(9, 0);
+            java.time.LocalTime slotEnd = user.getOutreachSlotEnd() != null ? user.getOutreachSlotEnd() : java.time.LocalTime.of(17, 0);
+            if (localTime.isBefore(slotStart) || localTime.isAfter(slotEnd)) {
+                log.info("Skipping outreach for user ID {} - outside configured active hours ({} to {}) in timezone {}. Local time: {}", 
+                        user.getId(), slotStart, slotEnd, tzId, localTime);
+                continue;
+            }
+
+            // 3. Spacing Safety Guardrail Check
+            int minInterval = user.getOutreachMinIntervalMin() != null ? user.getOutreachMinIntervalMin() : 10;
+            LocalDateTime lastSentThreshold = LocalDateTime.now().minusMinutes(minInterval);
+            boolean hasSentRecently = queueRepository.existsByUserIdAndStatusAndSentAtAfter(user.getId(), OutreachStatus.SENT, lastSentThreshold);
+            if (hasSentRecently) {
+                log.info("Safety guardrail active: Skipping email queue ID: {} for user ID: {} because another email was sent within the last {} minutes.", 
+                        item.getId(), user.getId(), minInterval);
+                continue;
+            }
+
+            // 4. Dispatch
             try {
                 emailSender.sendEmail(user.getId(), item.getRecipientEmail(), item.getSubject(), item.getBody());
                 
@@ -93,25 +145,21 @@ public class OutreachOrchestrator {
                 
                 item.setErrorMessage(e.getMessage());
                 
-                // 3. Anti-Spam Rejection Handling
+                // 5. Anti-Spam Rejection Handling
                 switch (e.getErrorType()) {
                     case INVALID_RECIPIENT:
-                        // 550 Analogous error -> Blacklist address
                         log.warn("BLACKLIST TRIGGERED: Recipient {} is invalid. Blacklisting entry in queue.", item.getRecipientEmail());
                         item.setStatus(OutreachStatus.BLACKLISTED);
                         break;
                     case RATE_LIMITED:
-                        // 429 Analogous error -> Pause sending
                         log.warn("RATE LIMIT TRIGGERED: Platform sending paused for user ID: {}.", user.getId());
                         item.setStatus(OutreachStatus.PAUSED);
                         break;
                     case UNAUTHORIZED:
-                        // OAuth Revoked -> Pause sending
                         log.warn("CREDENTIAL ERROR: Gmail connection invalid for user ID: {}. Pausing send.", user.getId());
                         item.setStatus(OutreachStatus.PAUSED);
                         break;
                     default:
-                        // Generic error -> Mark as failed
                         item.setStatus(OutreachStatus.FAILED);
                         break;
                 }
