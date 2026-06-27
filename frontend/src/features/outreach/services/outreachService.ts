@@ -30,8 +30,9 @@ export interface OutreachDraft {
   recipientEmail: string;
   subject: string;
   body: string;
-  status: "PENDING" | "SENT" | "FAILED" | "BLACKLISTED" | "PAUSED";
+  status: "DRAFT" | "PENDING" | "SENT" | "FAILED" | "BLACKLISTED" | "PAUSED";
   userId?: number;
+  scheduledAt?: string;
 }
 
 const DEFAULT_TEMPLATES: EmailTemplate[] = [
@@ -136,15 +137,15 @@ export const outreachService = {
   },
 
   // Save an outreach draft to the sending queue
-  async saveDraft(draft: Omit<OutreachDraft, "status">): Promise<OutreachDraft> {
+  async saveDraft(draft: Partial<OutreachDraft> & { recipientEmail: string; subject: string; body: string }): Promise<OutreachDraft> {
     const userStr = localStorage.getItem("user");
     const userId = userStr ? JSON.parse(userStr).id : 1;
 
     const finalDraft: OutreachDraft = {
       userId,
+      status: "PENDING",
       ...draft,
-      id: `draft-${Date.now()}`,
-      status: "PENDING"
+      id: draft.id || `draft-${Date.now()}`
     };
 
     try {
@@ -168,6 +169,36 @@ export const outreachService = {
     localQueue.push(finalDraft);
     localStorage.setItem("email_outreach_queue", JSON.stringify(localQueue));
     return finalDraft;
+  },
+
+  // Update/Approve draft
+  async updateDraft(id: string, draft: Partial<OutreachDraft>): Promise<OutreachDraft> {
+    const response = await fetch(`${API_BASE}/drafts/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify(draft)
+    });
+    if (!response.ok) {
+      throw new Error("Failed to update/approve email draft.");
+    }
+    return response.json();
+  },
+
+  // Delete draft
+  async deleteDraft(id: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${API_BASE}/drafts/${id}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
+      return response.ok;
+    } catch {
+      console.warn("Backend delete draft failed.");
+      return false;
+    }
   },
 
   // Generate outreach email draft using AI pipeline

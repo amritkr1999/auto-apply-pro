@@ -8,7 +8,7 @@ import { outreachService } from "../../../outreach/services/outreachService";
 import { profileService } from "../../../profile/services/profileService";
 
 export const CandidateDashboardView: React.FC = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen] = useState(true);
   const navigate = useNavigate();
 
   const userStr = localStorage.getItem("user");
@@ -20,6 +20,8 @@ export const CandidateDashboardView: React.FC = () => {
   const [loadingStatus, setLoadingStatus] = useState(true);
   const [hasResume, setHasResume] = useState(true);
   const [queueItems, setQueueItems] = useState<any[]>([]);
+  const [drafts, setDrafts] = useState<any[]>([]);
+  const [editingDraftId, setEditingDraftId] = useState<string | null>(null);
 
   useEffect(() => {
     const dismissed = localStorage.getItem("gmail_onboarding_dismissed") === "true";
@@ -46,7 +48,10 @@ export const CandidateDashboardView: React.FC = () => {
 
     // Fetch candidate outreach queue history
     outreachService.getOutreachQueue(userId)
-      .then((data) => setQueueItems(data))
+      .then((data) => {
+        setQueueItems(data.filter((item: any) => item.status !== "DRAFT"));
+        setDrafts(data.filter((item: any) => item.status === "DRAFT"));
+      })
       .catch((err) => console.error("Failed to fetch outreach queue", err));
   }, [userId]);
 
@@ -62,6 +67,36 @@ export const CandidateDashboardView: React.FC = () => {
     } catch (err) {
       console.error("Failed to connect Gmail", err);
     }
+  };
+
+  const handleApproveDraft = async (id: string, draft: any) => {
+    try {
+      await outreachService.updateDraft(id, {
+        subject: draft.subject,
+        body: draft.body,
+        recipientEmail: draft.recipientEmail,
+        status: "PENDING"
+      });
+      setDrafts(prev => prev.filter(d => d.id !== id));
+      // Re-fetch queue to get the scheduled send time correct
+      const updatedQueue = await outreachService.getOutreachQueue(userId);
+      setQueueItems(updatedQueue.filter((item: any) => item.status !== "DRAFT"));
+    } catch (err) {
+      console.error("Failed to approve draft", err);
+    }
+  };
+
+  const handleDiscardDraft = async (id: string) => {
+    try {
+      await outreachService.deleteDraft(id);
+      setDrafts(prev => prev.filter(d => d.id !== id));
+    } catch (err) {
+      console.error("Failed to discard draft", err);
+    }
+  };
+
+  const handleDraftFieldChange = (id: string, field: string, value: string) => {
+    setDrafts(prev => prev.map(d => d.id === id ? { ...d, [field]: value } : d));
   };
 
   const applications = [
@@ -88,13 +123,6 @@ export const CandidateDashboardView: React.FC = () => {
             </div>
             <p className="text-sm text-slate-500 mt-1">Track your job applications and email outreach status</p>
           </div>
-          {/* <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setSidebarOpen((open) => !open)}
-          >
-            {sidebarOpen ? "Hide Sidebar" : "Show Sidebar"}
-          </Button> */}
         </div>
 
         {!hasResume && (
@@ -165,6 +193,126 @@ export const CandidateDashboardView: React.FC = () => {
             <p className="text-3xl font-bold text-slate-800 mt-2">5 saved</p>
           </div>
         </div>
+
+        {/* Email Drafts Awaiting Approval */}
+        {drafts.length > 0 && (
+          <section className="mb-10" id="drafts-review">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                  <span>📨</span> Email Drafts Awaiting Approval
+                </h2>
+                <p className="text-xs text-slate-500">Verify email copy and approve drafts to add them to your sending queue</p>
+              </div>
+              <Badge variant="warning">{drafts.length} Action Required</Badge>
+            </div>
+            
+            <div className="space-y-4">
+              {drafts.map((draft) => {
+                const isEditing = editingDraftId === draft.id;
+                return (
+                  <div key={draft.id} className="bg-white border border-slate-200 rounded-card shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md">
+                    {/* Header preview row */}
+                    <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50 border-b border-slate-100">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-full uppercase">
+                            Draft
+                          </span>
+                          <span className="text-xs text-slate-400 font-medium">To: {draft.recipientEmail}</span>
+                        </div>
+                        <h4 className="text-sm font-bold text-slate-700 truncate">{draft.subject}</h4>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => setEditingDraftId(isEditing ? null : draft.id)}
+                          className="text-xs font-semibold px-3 py-1.5"
+                        >
+                          {isEditing ? "Cancel" : "Edit Draft"}
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => handleDiscardDraft(draft.id)}
+                          className="text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200 px-3 py-1.5"
+                        >
+                          Discard
+                        </Button>
+                        <Button 
+                          variant="success" 
+                          size="sm" 
+                          onClick={() => handleApproveDraft(draft.id, draft)}
+                          className="text-xs font-semibold px-4 py-1.5"
+                        >
+                          Approve
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Expandable editor panel */}
+                    {isEditing && (
+                      <div className="p-5 border-t border-slate-100 space-y-4 bg-slate-50/20">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Recipient Email</label>
+                          <input 
+                            type="email"
+                            value={draft.recipientEmail}
+                            onChange={(e) => handleDraftFieldChange(draft.id, "recipientEmail", e.target.value)}
+                            className="w-full px-3 py-2 border border-slate-200 rounded-input text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                            placeholder="recruiter@company.com"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Subject</label>
+                          <input 
+                            type="text"
+                            value={draft.subject}
+                            onChange={(e) => handleDraftFieldChange(draft.id, "subject", e.target.value)}
+                            className="w-full px-3 py-2 border border-slate-200 rounded-input text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                            placeholder="Subject line"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Body</label>
+                          <textarea 
+                            value={draft.body}
+                            onChange={(e) => handleDraftFieldChange(draft.id, "body", e.target.value)}
+                            rows={6}
+                            className="w-full px-3 py-2 border border-slate-200 rounded-input text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 font-mono leading-relaxed resize-vertical"
+                            placeholder="Write email body..."
+                          />
+                        </div>
+                        <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                          <Button 
+                            variant="secondary" 
+                            size="sm" 
+                            onClick={() => setEditingDraftId(null)}
+                            className="text-xs font-semibold px-4 py-1.5"
+                          >
+                            Close Editor
+                          </Button>
+                          <Button 
+                            variant="success" 
+                            size="sm" 
+                            onClick={() => {
+                              handleApproveDraft(draft.id, draft);
+                              setEditingDraftId(null);
+                            }}
+                            className="text-xs font-semibold px-4 py-1.5"
+                          >
+                            Save & Approve
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         {/* Recent Applications Table */}
         <section id="applications">

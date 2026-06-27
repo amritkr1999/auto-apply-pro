@@ -140,8 +140,20 @@ public class OutreachDraftController {
                     });
         }
 
-        // Calculate next scheduled send time
-        java.time.LocalDateTime scheduledAt = schedulerService.calculateNextScheduleTime(user);
+        OutreachStatus status = OutreachStatus.PENDING;
+        if (dto.getStatus() != null) {
+            try {
+                status = OutreachStatus.valueOf(dto.getStatus());
+            } catch (IllegalArgumentException e) {
+                log.warn("Invalid status provided: {}, defaulting to PENDING", dto.getStatus());
+            }
+        }
+
+        // Calculate next scheduled send time only if status is PENDING
+        java.time.LocalDateTime scheduledAt = null;
+        if (status == OutreachStatus.PENDING) {
+            scheduledAt = schedulerService.calculateNextScheduleTime(user);
+        }
 
         // Build queue entity
         EmailQueue queueItem = EmailQueue.builder()
@@ -149,17 +161,73 @@ public class OutreachDraftController {
                 .recipientEmail(dto.getRecipientEmail())
                 .subject(dto.getSubject())
                 .body(dto.getBody())
-                .status(OutreachStatus.PENDING)
+                .status(status)
                 .scheduledAt(scheduledAt)
                 .build();
 
         EmailQueue saved = emailQueueRepository.save(queueItem);
-        log.info("Saved queue item to database with ID: {}", saved.getId());
+        log.info("Saved queue item to database with ID: {}, status: {}", saved.getId(), saved.getStatus());
 
         // Return the input dto or updated dto
         dto.setId(saved.getId().toString());
         dto.setStatus(saved.getStatus().name());
+        dto.setScheduledAt(saved.getScheduledAt() != null ? saved.getScheduledAt().toString() : null);
         return ResponseEntity.ok(dto);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateAndApproveDraft(@PathVariable Long id, @RequestBody OutreachDraftDto dto) {
+        log.info("Received request to update/approve email draft ID: {}", id);
+        return emailQueueRepository.findById(id).map(item -> {
+            item.setRecipientEmail(dto.getRecipientEmail());
+            item.setSubject(dto.getSubject());
+            item.setBody(dto.getBody());
+
+            OutreachStatus newStatus = item.getStatus();
+            if (dto.getStatus() != null) {
+                try {
+                    newStatus = OutreachStatus.valueOf(dto.getStatus());
+                } catch (IllegalArgumentException e) {
+                    log.warn("Invalid status provided: {}", dto.getStatus());
+                }
+            }
+
+            // If transitioning to PENDING from DRAFT/other, schedule it
+            if (newStatus == OutreachStatus.PENDING && item.getStatus() != OutreachStatus.PENDING) {
+                item.setStatus(OutreachStatus.PENDING);
+                item.setScheduledAt(schedulerService.calculateNextScheduleTime(item.getUser()));
+            } else {
+                item.setStatus(newStatus);
+            }
+
+            EmailQueue saved = emailQueueRepository.save(item);
+            log.info("Updated draft ID: {}, status: {}", saved.getId(), saved.getStatus());
+
+            OutreachDraftDto responseDto = OutreachDraftDto.builder()
+                    .id(saved.getId().toString())
+                    .recipientEmail(saved.getRecipientEmail())
+                    .subject(saved.getSubject())
+                    .body(saved.getBody())
+                    .status(saved.getStatus().name())
+                    .sentAt(saved.getSentAt() != null ? saved.getSentAt().toString() : null)
+                    .scheduledAt(saved.getScheduledAt() != null ? saved.getScheduledAt().toString() : null)
+                    .errorMessage(saved.getErrorMessage())
+                    .userId(saved.getUser().getId())
+                    .build();
+
+            return ResponseEntity.ok(responseDto);
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteDraft(@PathVariable Long id) {
+        log.info("Received request to delete email draft ID: {}", id);
+        if (emailQueueRepository.existsById(id)) {
+            emailQueueRepository.deleteById(id);
+            return ResponseEntity.ok(java.util.Map.of("message", "Draft deleted successfully"));
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/user/{userId}")
@@ -176,6 +244,7 @@ public class OutreachDraftController {
                 dto.setBody(item.getBody());
                 dto.setStatus(item.getStatus().name());
                 dto.setSentAt(item.getSentAt() != null ? item.getSentAt().toString() : null);
+                dto.setScheduledAt(item.getScheduledAt() != null ? item.getScheduledAt().toString() : null);
                 dto.setErrorMessage(item.getErrorMessage());
                 dto.setUserId(item.getUser().getId());
                 dtos.add(dto);

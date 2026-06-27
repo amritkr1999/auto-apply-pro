@@ -1,225 +1,233 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { useNavigate } from "react-router-dom";
-import { outreachService } from "../../outreach/services/outreachService";
-import { GmailComposeModal } from "../../outreach/components/GmailComposeModal";
+import { outreachService, type OutreachDraft } from "../../outreach/services/outreachService";
 import { profileService } from "../../profile/services/profileService";
-
-interface JobDetails {
-  title: string;
-  company: string;
-  location: string;
-  description: string;
-  requirements: string;
-  salary: string;
-  sourceUrl: string;
-  skills: string[];
-  hr_email?: string;
-  status?: string;
-}
+import Button from "../../../components/ui/Button";
+import Badge from "../../../components/ui/Badge";
 
 export const ScreenshotUploader: React.FC = () => {
   const navigate = useNavigate();
 
-  // State for file upload
-  const [file, setFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const userStr = localStorage.getItem("user");
+  const user = userStr ? JSON.parse(userStr) : { id: 1 };
+  const userId = user.id;
 
-  // State for editable job form details
-  const [jobDetails, setJobDetails] = useState<JobDetails | null>(null);
-  const [saveMessage, setSaveMessage] = useState<string | null>(null);
-
-  // State for AI outreach email generation
-  const [isGeneratingEmail, setIsGeneratingEmail] = useState<boolean>(false);
-  const [emailSubject, setEmailSubject] = useState<string>("");
-  const [emailBody, setEmailBody] = useState<string>("");
-  const [emailRecipient, setEmailRecipient] = useState<string>("");
-  const [isEmailModalOpen, setIsEmailModalOpen] = useState<boolean>(false);
-
-  // State for active candidate resume attachment info
+  // States
+  const [drafts, setDrafts] = useState<OutreachDraft[]>([]);
+  const [isLoadingDrafts, setIsLoadingDrafts] = useState<boolean>(false);
   const [resumeFilename, setResumeFilename] = useState<string>("");
-  const [showConnectGmailBtn, setShowConnectGmailBtn] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [expandedDraftId, setExpandedDraftId] = useState<string | null>(null);
+  const [isApprovingAll, setIsApprovingAll] = useState<boolean>(false);
+
+  // File processing queue state
+  const [processingQueue, setProcessingQueue] = useState<Array<{
+    id: string;
+    fileName: string;
+    status: "parsing" | "generating" | "saving" | "completed" | "failed";
+    errorMessage?: string;
+  }>>([]);
+
+  // Fetch existing drafts on mount
+  const loadDrafts = useCallback(async () => {
+    setIsLoadingDrafts(true);
+    try {
+      const allQueue = await outreachService.getOutreachQueue(userId);
+      const activeDrafts = allQueue.filter(item => item.status === "DRAFT");
+      setDrafts(activeDrafts);
+    } catch (err) {
+      console.error("Failed to load drafts", err);
+    } finally {
+      setIsLoadingDrafts(false);
+    }
+  }, [userId]);
 
   useEffect(() => {
-    const userStr = localStorage.getItem("user");
-    if (userStr) {
-      try {
-        const user = JSON.parse(userStr);
-        if (user.id) {
-          profileService.getCandidateProfile(user.id)
-            .then(profile => {
-              if (profile && profile.resumeFilename) {
-                setResumeFilename(profile.resumeFilename);
-              }
-            })
-            .catch(err => console.error("Failed to load candidate profile for resume check", err));
+    // Check candidate profile for resume filename
+    profileService.getCandidateProfile(userId)
+      .then(profile => {
+        if (profile && profile.resumeFilename) {
+          setResumeFilename(profile.resumeFilename);
         }
-      } catch (e) {
-        console.error("Failed to parse user for profile fetching", e);
+      })
+      .catch(err => console.error("Failed to load profile for resume check", err));
+
+    loadDrafts();
+  }, [userId, loadDrafts]);
+
+  // Process files
+  const processFiles = async (files: File[]) => {
+    // Add all files to processingQueue state
+    const newItems = files.map(file => ({
+      id: `${file.name}-${Date.now()}-${Math.random()}`,
+      fileName: file.name,
+      status: "parsing" as const
+    }));
+    setProcessingQueue(prev => [...prev, ...newItems]);
+
+    // Process each file sequentially/concurrently
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const queueItem = newItems[i];
+
+      try {
+        // Step 1: Upload and Parse Screenshot
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const userStr = localStorage.getItem("user");
+        const headers: Record<string, string> = {};
+        if (userStr) {
+          try {
+            const parsedUser = JSON.parse(userStr);
+            if (parsedUser.token) {
+              headers["Authorization"] = `Bearer ${parsedUser.token}`;
+            }
+          } catch (e) {
+            console.error("Failed to parse user for auth header", e);
+          }
+        }
+
+        const parseResponse = await fetch("http://localhost:8060/api/jobs/parse-screenshot", {
+          method: "POST",
+          headers,
+          body: formData,
+        });
+
+        if (!parseResponse.ok) {
+          const errText = await parseResponse.text();
+          throw new Error(errText || "Failed to process screenshot OCR.");
+        }
+
+        const jobDetails = await parseResponse.json();
+
+        // Step 2: Generate Email Draft
+        setProcessingQueue(prev => prev.map(item => item.id === queueItem.id ? { ...item, status: "generating" } : item));
+        
+        const emailData = await outreachService.generateOutreachEmail(userId, jobDetails);
+
+        // Step 3: Save as DRAFT in DB
+        setProcessingQueue(prev => prev.map(item => item.id === queueItem.id ? { ...item, status: "saving" } : item));
+
+        const savedDraft = await outreachService.saveDraft({
+          recipientEmail: emailData.recipientEmail,
+          subject: emailData.subject,
+          body: emailData.body.replace(/\\n/g, "\n"), // format linebreaks
+          status: "DRAFT"
+        });
+
+        // Add to drafts list and update status
+        setDrafts(prev => [savedDraft, ...prev]);
+        setProcessingQueue(prev => prev.map(item => item.id === queueItem.id ? { ...item, status: "completed" } : item));
+
+      } catch (err: any) {
+        console.error("Error processing file " + file.name, err);
+        setProcessingQueue(prev => prev.map(item => item.id === queueItem.id ? { 
+          ...item, 
+          status: "failed", 
+          errorMessage: err.message || "Failed to process screenshot." 
+        } : item));
       }
     }
-  }, []);
+  };
 
-  // react-dropzone callback
+  // Dropzone setup
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
-      const selectedFile = acceptedFiles[0];
-      setFile(selectedFile);
-      setPreviewUrl(URL.createObjectURL(selectedFile));
-      setJobDetails(null); // Clear previous details on new upload
-      setError(null);
-      setSaveMessage(null);
+      processFiles(acceptedFiles);
     }
-  }, []);
+  }, [userId]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
       "image/*": [".png", ".jpg", ".jpeg", ".webp"],
     },
-    multiple: false,
+    multiple: true,
   });
 
-  // Call the Spring Boot backend to parse screenshot
-  const handleProcessScreenshot = async () => {
-    if (!file) return;
-
-    setIsProcessing(true);
-    setError(null);
-    setSaveMessage(null);
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const userStr = localStorage.getItem("user");
-    const headers: Record<string, string> = {};
-    if (userStr) {
-      try {
-        const user = JSON.parse(userStr);
-        if (user.token) {
-          headers["Authorization"] = `Bearer ${user.token}`;
-        }
-      } catch (e) {
-        console.error("Failed to parse user for auth header", e);
-      }
-    }
-
-    try {
-      const response = await fetch("http://localhost:8060/api/jobs/parse-screenshot", {
-        method: "POST",
-        headers,
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(errText || "Failed to process screenshot.");
-      }
-
-      const data: JobDetails = await response.json();
-      setJobDetails(data);
-      if (!data.hr_email || data.status === "INCOMPLETE_DATA") {
-        setError("Warning: Recruiter email address could not be extracted from the screenshot. Please enter it manually in the HR Email Address field.");
-      }
-    } catch (err: any) {
-      console.error("Error during screenshot processing:", err);
-      setError(err.message || "An error occurred while connecting to the server.");
-    } finally {
-      setIsProcessing(false);
-    }
+  const handleDraftFieldChange = (id: string, field: keyof OutreachDraft, value: string) => {
+    setDrafts(prev => prev.map(d => d.id === id ? { ...d, [field]: value } : d));
   };
 
-  // Handle editable input field changes
-  const handleFieldChange = (field: keyof JobDetails, value: any) => {
-    if (!jobDetails) return;
-    setJobDetails({
-      ...jobDetails,
-      [field]: value,
-    });
-  };
+  const handleApproveDraft = async (id: string) => {
+    const draft = drafts.find(d => d.id === id);
+    if (!draft || !draft.id) return;
 
-  const handleSaveJob = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!jobDetails) return;
-
-    // In a full implementation, this saves the job details to the database (POST /api/jobs)
-    console.log("Saving job details:", jobDetails);
-    
-    // Save to localStorage as mock database persistence
-    const savedJobs = JSON.parse(localStorage.getItem("parsedJobs") || "[]");
-    savedJobs.push({ ...jobDetails, id: Date.now() });
-    localStorage.setItem("parsedJobs", JSON.stringify(savedJobs));
-
-    setSaveMessage("Job details successfully validated and saved to dashboard!");
-  };
-
-  const handleGenerateEmail = async () => {
-    if (!jobDetails) return;
-
-    if (!jobDetails.hr_email || jobDetails.status === "INCOMPLETE_DATA" || !/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(jobDetails.hr_email)) {
-      setError("Please provide a valid HR email address before generating an outreach email.");
+    if (!draft.recipientEmail || !/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(draft.recipientEmail)) {
+      setError("Please provide a valid recipient email address before approving.");
       return;
     }
 
-    setIsGeneratingEmail(true);
-    setError(null);
-    setSaveMessage(null);
-
-    const userStr = localStorage.getItem("user");
-    const userId = userStr ? JSON.parse(userStr).id : 1;
-
     try {
-      const data = await outreachService.generateOutreachEmail(userId, jobDetails);
-      setEmailSubject(data.subject);
-      setEmailBody(data.body.replace(/\\n/g, "\n")); // format linebreaks
-      setEmailRecipient(data.recipientEmail);
-      setIsEmailModalOpen(true);
-    } catch (err: any) {
-      console.error("Error generating email:", err);
-      setError(err.message || "Failed to generate AI outreach email.");
-    } finally {
-      setIsGeneratingEmail(false);
-    }
-  };
-
-  const handleSendEmailDraft = async (subject: string, body: string, recipient: string) => {
-    const userStr = localStorage.getItem("user");
-    const userId = userStr ? JSON.parse(userStr).id : 1;
-
-    try {
-      // 1. Always save the draft to queue first
-      await outreachService.saveDraft({
-        recipientEmail: recipient,
-        subject,
-        body
+      setError(null);
+      await outreachService.updateDraft(draft.id, {
+        subject: draft.subject,
+        body: draft.body,
+        recipientEmail: draft.recipientEmail,
+        status: "PENDING"
       });
-
-      // 2. Check if Gmail is connected
-      const status = await outreachService.getGmailStatus(userId);
-      if (!status.connected) {
-        setSaveMessage("Outreach email draft successfully saved!");
-        setError("Your Gmail account is not connected. The draft has been saved to your queue, but will not be sent. Please connect Gmail to dispatch this email.");
-        setShowConnectGmailBtn(true);
-        return;
-      }
-
-      setSaveMessage("Outreach email draft successfully generated and queued for sending!");
-      setShowConnectGmailBtn(false);
+      
+      setDrafts(prev => prev.filter(d => d.id !== id));
+      setSaveMessage("Outreach draft approved and queued for sending!");
+      setTimeout(() => setSaveMessage(null), 3000);
     } catch (err: any) {
-      console.error("Error saving draft or checking Gmail connection:", err);
-      setError("Failed to register outreach draft in the queue.");
-      throw err;
+      console.error("Error approving draft:", err);
+      setError("Failed to approve draft.");
     }
   };
 
-  const handleReset = () => {
-    setFile(null);
-    setPreviewUrl(null);
-    setJobDetails(null);
+  const handleDiscardDraft = async (id: string) => {
+    try {
+      setError(null);
+      await outreachService.deleteDraft(id);
+      setDrafts(prev => prev.filter(d => d.id !== id));
+      setSaveMessage("Outreach draft discarded.");
+      setTimeout(() => setSaveMessage(null), 3000);
+    } catch (err: any) {
+      console.error("Error discarding draft:", err);
+      setError("Failed to discard draft.");
+    }
+  };
+
+  const handleApproveAll = async () => {
+    if (drafts.length === 0) return;
+    
+    // Check if there are invalid emails
+    const hasInvalidEmail = drafts.some(d => !d.recipientEmail || !/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(d.recipientEmail));
+    if (hasInvalidEmail) {
+      setError("One or more drafts have an invalid recipient email. Please verify them first.");
+      return;
+    }
+
+    setIsApprovingAll(true);
     setError(null);
     setSaveMessage(null);
+
+    let approvedCount = 0;
+    try {
+      for (const draft of drafts) {
+        if (!draft.id) continue;
+        await outreachService.updateDraft(draft.id, {
+          subject: draft.subject,
+          body: draft.body,
+          recipientEmail: draft.recipientEmail,
+          status: "PENDING"
+        });
+        approvedCount++;
+      }
+      setDrafts([]);
+      setSaveMessage(`Successfully approved and scheduled all ${approvedCount} email drafts!`);
+      setTimeout(() => setSaveMessage(null), 5000);
+    } catch (err: any) {
+      console.error("Error approving all drafts:", err);
+      setError(`Failed to approve all drafts: ${err.message || "Server error"}`);
+      loadDrafts();
+    } finally {
+      setIsApprovingAll(false);
+    }
   };
 
   const handleDirectResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -227,390 +235,309 @@ export const ScreenshotUploader: React.FC = () => {
     if (!files || files.length === 0) return;
 
     const uploadedFile = files[0];
-    const userStr = localStorage.getItem("user");
-    if (!userStr) return;
-
     try {
-      const user = JSON.parse(userStr);
       setError(null);
       setSaveMessage("Uploading resume...");
-      
-      await profileService.uploadCandidateResume(user.id, uploadedFile);
-      
+      await profileService.uploadCandidateResume(userId, uploadedFile);
       setResumeFilename(uploadedFile.name);
-      setSaveMessage("Resume uploaded successfully! It is now attached to your outreach emails.");
+      setSaveMessage("Resume uploaded successfully!");
+      setTimeout(() => setSaveMessage(null), 3000);
     } catch (err: any) {
       console.error("Direct resume upload failed:", err);
       setError("Failed to upload resume. Please try again.");
-      setSaveMessage(null);
     }
   };
 
+  const clearProcessingLogs = () => {
+    setProcessingQueue([]);
+  };
+
   return (
-    <div style={{ maxWidth: 800, margin: "0 auto", padding: "20px", color: "#cbd5e1" }}>
-      <header style={{ marginBottom: 24, textAlign: "center" }}>
-        <h1 style={{ fontSize: "2rem", color: "#fff", marginBottom: 8 }}>AI Screenshot Job Parser</h1>
-        <p style={{ color: "#94a3b8" }}>
-          Upload a screenshot of a job posting (LinkedIn, Indeed, etc.) to automatically extract job details.
+    <div className="max-w-[900px] mx-auto w-full px-4 py-8 text-slate-300">
+      <header className="mb-8 text-center">
+        <h1 className="text-3xl font-bold text-white mb-2">AI Multi-Screenshot Job Parser</h1>
+        <p className="text-sm text-slate-400">
+          Upload multiple screenshots of job postings (LinkedIn, Indeed, etc.) to instantly parse them, generate cold outreach drafts, and schedule them sequentially.
         </p>
       </header>
 
       {/* error message alert */}
       {error && (
-        <div style={{
-          background: "rgba(239, 68, 68, 0.1)",
-          border: "1px solid rgba(239, 68, 68, 0.2)",
-          color: "#f87171",
-          padding: "12px",
-          borderRadius: "8px",
-          marginBottom: "20px",
-          textAlign: "center"
-        }}>
-          <div>{error}</div>
-          {showConnectGmailBtn && (
-            <button
-              onClick={() => navigate("/candidate/profile")}
-              style={{
-                marginTop: "10px",
-                padding: "6px 12px",
-                borderRadius: "6px",
-                border: "none",
-                background: "#ef4444",
-                color: "#fff",
-                fontSize: "0.8rem",
-                fontWeight: 600,
-                cursor: "pointer"
-              }}
-            >
-              Connect Gmail Now
-            </button>
-          )}
+        <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 p-4 rounded-xl mb-6 text-center text-sm shadow-sm">
+          {error}
         </div>
       )}
 
       {/* success message alert */}
       {saveMessage && (
-        <div style={{
-          background: "rgba(74, 222, 128, 0.1)",
-          border: "1px solid rgba(74, 222, 128, 0.2)",
-          color: "#4ade80",
-          padding: "12px",
-          borderRadius: "8px",
-          marginBottom: "20px",
-          textAlign: "center"
-        }}>
+        <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-4 rounded-xl mb-6 text-center text-sm shadow-sm">
           {saveMessage}
         </div>
       )}
 
-      {/* 1. Upload & Drag area */}
-      {!jobDetails && !isProcessing && (
-        <div style={{
-          background: "rgba(15, 23, 42, 0.4)",
-          backdropFilter: "blur(10px)",
-          border: "1px dashed rgba(255,255,255,0.15)",
-          borderRadius: "12px",
-          padding: "40px 20px",
-          textAlign: "center",
-          cursor: "pointer",
-          transition: "all 0.2s"
-        }} {...getRootProps()}>
-          <input {...getInputProps()} />
-          <div style={{ fontSize: "3rem", marginBottom: 12 }}>📸</div>
-          {isDragActive ? (
-            <p style={{ color: "#6366f1", fontWeight: 500 }}>Drop the screenshot here...</p>
-          ) : (
-            <p style={{ fontWeight: 500 }}>
-              Drag & drop a job listing screenshot here, or <span style={{ color: "#6366f1" }}>browse files</span>
+      {/* Resume Missing Warning */}
+      {!resumeFilename && (
+        <div className="bg-rose-500/5 border border-rose-500/20 rounded-xl p-5 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-inner">
+          <div>
+            <h4 className="text-sm font-semibold text-rose-400 mb-1">Please upload your updated resume</h4>
+            <p className="text-xs text-rose-300/80 leading-relaxed">
+              No resume is currently uploaded in your profile. Upload it now to ensure it gets parsed and attached to your outreach emails.
             </p>
-          )}
-          <p style={{ fontSize: "0.8rem", color: "#64748b", marginTop: 8 }}>Supports PNG, JPG, JPEG, WEBP</p>
-        </div>
-      )}
-
-      {/* 2. File Preview & Process CTA */}
-      {previewUrl && !jobDetails && (
-        <div style={{
-          marginTop: 20,
-          background: "rgba(15, 23, 42, 0.5)",
-          borderRadius: "12px",
-          padding: 20,
-          border: "1px solid rgba(255,255,255,0.06)",
-          textAlign: "center"
-        }}>
-          <h3 style={{ marginBottom: 12, color: "#fff" }}>Selected Screenshot</h3>
-          <div style={{ maxHeight: "300px", overflow: "hidden", display: "inline-block", borderRadius: 8, border: "1px solid rgba(255,255,255,0.1)", marginBottom: 16 }}>
-            <img src={previewUrl} alt="Job Screenshot Preview" style={{ maxWidth: "100%", maxHeight: "300px", display: "block" }} />
           </div>
-          
-          {!isProcessing && (
-            <div style={{ display: "flex", justifyContent: "center", gap: 12 }}>
-              <button onClick={handleReset} style={{ padding: "10px 16px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff", cursor: "pointer" }}>
-                Cancel
-              </button>
-              <button onClick={handleProcessScreenshot} style={{ padding: "10px 20px", borderRadius: 6, border: "none", background: "#4f46e5", color: "#fff", cursor: "pointer", fontWeight: 500 }}>
-                Process Screenshot
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* 3. Loader State */}
-      {isProcessing && (
-        <div style={{
-          textAlign: "center",
-          padding: "50px 20px",
-          background: "rgba(15, 23, 42, 0.5)",
-          borderRadius: "12px",
-          border: "1px solid rgba(255,255,255,0.06)"
-        }}>
-          <div className="spinner" style={{
-            width: 40,
-            height: 40,
-            border: "3px solid rgba(99, 102, 241, 0.1)",
-            borderTop: "3px solid #6366f1",
-            borderRadius: "50%",
-            animation: "spin 1s linear infinite",
-            margin: "0 auto 16px auto"
-          }}></div>
-          <h3 style={{ color: "#fff", marginBottom: 6 }}>Processing Screenshot...</h3>
-          <p style={{ color: "#64748b" }}>Running AI OCR and job field extraction on local server.</p>
-          
-          <style>{`
-            @keyframes spin {
-              0% { transform: rotate(0deg); }
-              100% { transform: rotate(360deg); }
-            }
-          `}</style>
-        </div>
-      )}
-
-      {/* 4. Editable Extracted Job Form */}
-      {jobDetails && (
-        <div style={{
-          background: "rgba(15, 23, 42, 0.5)",
-          backdropFilter: "blur(12px)",
-          border: "1px solid rgba(255,255,255,0.06)",
-          padding: 24,
-          borderRadius: 12,
-          boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)"
-        }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, borderBottom: "1px solid rgba(255,255,255,0.06)", paddingBottom: 12 }}>
-            <h2 style={{ color: "#fff", margin: 0 }}>Extracted Job details</h2>
-            <button onClick={handleReset} style={{ padding: "6px 12px", borderRadius: 6, border: "1px solid rgba(239, 68, 68, 0.2)", background: "rgba(239, 68, 68, 0.1)", color: "#f87171", cursor: "pointer", fontSize: "0.85rem" }}>
-              Upload Another
+          <div className="flex items-center gap-3 self-end sm:self-center shrink-0">
+            <button
+              type="button"
+              onClick={() => document.getElementById("direct-resume-upload")?.click()}
+              className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-all"
+            >
+              Upload Resume
             </button>
+            <button
+              type="button"
+              onClick={() => navigate("/candidate/profile")}
+              className="px-4 py-2 border border-slate-700 bg-slate-800/50 hover:bg-slate-800 text-slate-300 rounded-lg text-xs transition-all"
+            >
+              Go to Profile
+            </button>
+            <input
+              type="file"
+              id="direct-resume-upload"
+              accept=".pdf,.doc,.docx,.txt"
+              onChange={handleDirectResumeUpload}
+              className="hidden"
+            />
           </div>
-
-          {!resumeFilename && (
-            <div style={{
-              background: "rgba(239, 68, 68, 0.08)",
-              border: "1px solid rgba(239, 68, 68, 0.2)",
-              borderRadius: "8px",
-              padding: "16px",
-              marginBottom: "20px",
-              display: "flex",
-              flexDirection: "column",
-              gap: "12px"
-            }}>
-              <div>
-                <h4 style={{ color: "#f87171", margin: "0 0 4px 0", fontWeight: 600 }}>Please upload your updated resume</h4>
-                <p style={{ color: "#fca5a5", margin: 0, fontSize: "0.85rem" }}>
-                  No resume is currently uploaded in your profile. Upload it now to ensure it gets attached to your job outreach emails.
-                </p>
-              </div>
-              <div style={{ display: "flex", gap: "10px" }}>
-                <button
-                  type="button"
-                  onClick={() => document.getElementById("direct-resume-upload")?.click()}
-                  style={{
-                    padding: "6px 12px",
-                    borderRadius: "6px",
-                    border: "none",
-                    background: "#ef4444",
-                    color: "#fff",
-                    fontSize: "0.8rem",
-                    fontWeight: 600,
-                    cursor: "pointer"
-                  }}
-                >
-                  Upload Resume
-                </button>
-                <button
-                  type="button"
-                  onClick={() => navigate("/candidate/profile")}
-                  style={{
-                    padding: "6px 12px",
-                    borderRadius: "6px",
-                    border: "1px solid rgba(255,255,255,0.15)",
-                    background: "rgba(255,255,255,0.05)",
-                    color: "#fff",
-                    fontSize: "0.8rem",
-                    cursor: "pointer"
-                  }}
-                >
-                  Go to Profile to Update
-                </button>
-                <input
-                  type="file"
-                  id="direct-resume-upload"
-                  accept=".pdf,.doc,.docx,.txt"
-                  onChange={handleDirectResumeUpload}
-                  style={{ display: "none" }}
-                />
-              </div>
-            </div>
-          )}
-
-          <form onSubmit={handleSaveJob} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-              <div>
-                <label style={{ display: "block", marginBottom: 6, fontWeight: 500, color: "#94a3b8" }}>Job Title</label>
-                <input
-                  type="text"
-                  value={jobDetails.title}
-                  onChange={(e) => handleFieldChange("title", e.target.value)}
-                  style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff" }}
-                  required
-                />
-              </div>
-              <div>
-                <label style={{ display: "block", marginBottom: 6, fontWeight: 500, color: "#94a3b8" }}>Company Name</label>
-                <input
-                  type="text"
-                  value={jobDetails.company}
-                  onChange={(e) => handleFieldChange("company", e.target.value)}
-                  style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff" }}
-                  required
-                />
-              </div>
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-              <div>
-                <label style={{ display: "block", marginBottom: 6, fontWeight: 500, color: "#94a3b8" }}>Location</label>
-                <input
-                  type="text"
-                  value={jobDetails.location}
-                  onChange={(e) => handleFieldChange("location", e.target.value)}
-                  style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff" }}
-                />
-              </div>
-              <div>
-                <label style={{ display: "block", marginBottom: 6, fontWeight: 500, color: "#94a3b8" }}>Salary Range / Compensation</label>
-                <input
-                  type="text"
-                  value={jobDetails.salary}
-                  onChange={(e) => handleFieldChange("salary", e.target.value)}
-                  style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff" }}
-                />
-              </div>
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-              <div>
-                <label style={{ display: "block", marginBottom: 6, fontWeight: 500, color: "#94a3b8" }}>Job Source URL</label>
-                <input
-                  type="text"
-                  value={jobDetails.sourceUrl}
-                  onChange={(e) => handleFieldChange("sourceUrl", e.target.value)}
-                  style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff" }}
-                />
-              </div>
-              <div>
-                <label style={{ display: "block", marginBottom: 6, fontWeight: 500, color: "#94a3b8" }}>HR Email Address</label>
-                <input
-                  type="email"
-                  value={jobDetails.hr_email || ""}
-                  onChange={(e) => {
-                    const newEmail = e.target.value;
-                    const updatedStatus = newEmail && /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(newEmail) ? "PARSED" : "INCOMPLETE_DATA";
-                    setJobDetails({
-                      ...jobDetails,
-                      hr_email: newEmail,
-                      status: updatedStatus
-                    });
-                  }}
-                  placeholder="recruiter@company.com"
-                  style={{
-                    width: "100%",
-                    padding: 10,
-                    borderRadius: 6,
-                    border: jobDetails.status === "INCOMPLETE_DATA" ? "1px solid #ef4444" : "1px solid rgba(255,255,255,0.1)",
-                    background: jobDetails.status === "INCOMPLETE_DATA" ? "rgba(239, 68, 68, 0.05)" : "rgba(255,255,255,0.05)",
-                    color: "#fff"
-                  }}
-                />
-                {jobDetails.status === "INCOMPLETE_DATA" && (
-                  <span style={{ color: "#ef4444", fontSize: "0.8rem", marginTop: 4, display: "block" }}>
-                    ⚠️ Missing or invalid HR email address.
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <label style={{ display: "block", marginBottom: 6, fontWeight: 500, color: "#94a3b8" }}>Description</label>
-              <textarea
-                value={jobDetails.description}
-                onChange={(e) => handleFieldChange("description", e.target.value)}
-                rows={4}
-                style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff", resize: "vertical", fontFamily: "inherit" }}
-              />
-            </div>
-
-            <div>
-              <label style={{ display: "block", marginBottom: 6, fontWeight: 500, color: "#94a3b8" }}>Job Requirements</label>
-              <textarea
-                value={jobDetails.requirements}
-                onChange={(e) => handleFieldChange("requirements", e.target.value)}
-                rows={4}
-                style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff", resize: "vertical", fontFamily: "inherit" }}
-              />
-            </div>
-
-            <div>
-              <label style={{ display: "block", marginBottom: 6, fontWeight: 500, color: "#94a3b8" }}>Required Skills (comma-separated)</label>
-              <input
-                type="text"
-                value={jobDetails.skills ? jobDetails.skills.join(", ") : ""}
-                onChange={(e) => {
-                  const val = e.target.value.split(",").map(s => s.trim());
-                  handleFieldChange("skills", val);
-                }}
-                placeholder="e.g. React, TypeScript, Java"
-                style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff" }}
-              />
-            </div>
-
-            <div style={{ display: "flex", gap: "12px" }}>
-              <button type="submit" style={{ flex: 1, padding: "12px", borderRadius: 6, border: "none", background: "#4f46e5", color: "#fff", cursor: "pointer", fontWeight: 500, fontSize: "1rem" }}>
-                Verify & Save Job Listing
-              </button>
-              <button 
-                type="button" 
-                onClick={handleGenerateEmail}
-                disabled={isGeneratingEmail}
-                style={{ flex: 1, padding: "12px", borderRadius: 6, border: "1px solid #4f46e5", background: "transparent", color: "#818cf8", cursor: "pointer", fontWeight: 500, fontSize: "1rem" }}
-              >
-                {isGeneratingEmail ? "Generating Email..." : "AI Generate Outreach Email"}
-              </button>
-            </div>
-          </form>
         </div>
       )}
 
-      {/* Gmail Compose Modal */}
-      <GmailComposeModal
-        isOpen={isEmailModalOpen}
-        onClose={() => setIsEmailModalOpen(false)}
-        recipientEmail={emailRecipient}
-        subject={emailSubject}
-        body={emailBody}
-        onSend={handleSendEmailDraft}
-        attachmentFilename={resumeFilename}
-      />
+      {/* 1. Drag & Drop Multi-Image Area */}
+      <div 
+        {...getRootProps()} 
+        className={`bg-slate-900/40 backdrop-blur-md border border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all duration-300 hover:border-indigo-500/50 hover:bg-slate-900/50 ${
+          isDragActive ? "border-indigo-500 bg-slate-950/60" : "border-slate-800"
+        }`}
+      >
+        <input {...getInputProps()} />
+        <div className="text-4xl mb-4">📸</div>
+        {isDragActive ? (
+          <p className="text-indigo-400 font-semibold text-sm">Drop the screenshots here...</p>
+        ) : (
+          <p className="font-semibold text-sm text-slate-200">
+            Drag & drop job posting screenshots here, or <span className="text-indigo-400 hover:underline">browse files</span>
+          </p>
+        )}
+        <p className="text-[11px] text-slate-500 mt-2">Supports PNG, JPG, JPEG, WEBP. You can select multiple files.</p>
+      </div>
+
+      {/* 2. Processing Queue Log */}
+      {processingQueue.length > 0 && (
+        <div className="mt-8 bg-slate-900/30 border border-slate-800/80 rounded-2xl p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-4 border-b border-slate-800/50 pb-3">
+            <h3 className="text-sm font-bold text-white flex items-center gap-2">
+              <span>🔄</span> Processing Pipeline Logs ({processingQueue.filter(q => q.status === "completed").length}/{processingQueue.length})
+            </h3>
+            {processingQueue.every(q => q.status === "completed" || q.status === "failed") && (
+              <button 
+                onClick={clearProcessingLogs} 
+                className="text-[11px] text-slate-400 hover:text-white underline transition-all"
+              >
+                Clear logs
+              </button>
+            )}
+          </div>
+          <div className="space-y-3 max-h-[220px] overflow-y-auto pr-2 scrollbar-thin">
+            {processingQueue.map(item => {
+              let statusText = "Preparing...";
+              let textClass = "text-slate-400";
+              let badgeVariant: "neutral" | "info" | "warning" | "success" | "error" = "neutral";
+              
+              if (item.status === "parsing") {
+                statusText = "Extracting job fields (AI OCR)...";
+                textClass = "text-amber-400";
+                badgeVariant = "warning";
+              } else if (item.status === "generating") {
+                statusText = "Crafting custom cold outreach...";
+                textClass = "text-indigo-400";
+                badgeVariant = "info";
+              } else if (item.status === "saving") {
+                statusText = "Saving draft in database...";
+                textClass = "text-cyan-400";
+                badgeVariant = "info";
+              } else if (item.status === "completed") {
+                statusText = "Completed successfully!";
+                textClass = "text-emerald-400";
+                badgeVariant = "success";
+              } else if (item.status === "failed") {
+                statusText = item.errorMessage || "Failed";
+                textClass = "text-rose-400";
+                badgeVariant = "error";
+              }
+
+              return (
+                <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-slate-950/40 rounded-xl border border-slate-800/30">
+                  <span className="text-xs font-medium text-slate-300 truncate max-w-[280px]" title={item.fileName}>
+                    📄 {item.fileName}
+                  </span>
+                  <div className="flex items-center gap-3 self-end sm:self-center shrink-0">
+                    <span className={`text-[11px] ${textClass}`}>{statusText}</span>
+                    <Badge variant={badgeVariant}>
+                      {item.status.toUpperCase()}
+                    </Badge>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* 3. Generated Email Drafts Verification Section */}
+      <section className="mt-12">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-slate-800/80 pb-4">
+          <div>
+            <h2 className="text-xl font-bold text-white">Generated Email Drafts</h2>
+            <p className="text-xs text-slate-500 mt-1">Review, personalize, and approve drafts before queuing them for send</p>
+          </div>
+          {drafts.length > 0 && (
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="success" 
+                size="sm" 
+                onClick={handleApproveAll} 
+                disabled={isApprovingAll}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-sm text-xs px-4 py-2"
+              >
+                {isApprovingAll ? "Approving All..." : `Approve All (${drafts.length})`}
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {isLoadingDrafts ? (
+          <div className="text-center py-10 text-slate-500 text-sm italic">
+            Loading active email drafts...
+          </div>
+        ) : drafts.length === 0 ? (
+          <div className="text-center py-12 bg-slate-900/10 border border-slate-800/60 rounded-2xl text-slate-500 text-sm italic shadow-inner">
+            No drafts currently awaiting review. Upload screenshots above to auto-generate outreach drafts!
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {drafts.map((draft, idx) => {
+              const isExpanded = expandedDraftId === draft.id;
+              // Extract preview text
+              const bodyPreview = draft.body ? draft.body.substring(0, 120).replace(/<[^>]*>/g, '') + "..." : "";
+              
+              return (
+                <div 
+                  key={draft.id || idx} 
+                  className={`bg-slate-900/30 border rounded-2xl overflow-hidden transition-all duration-300 shadow-sm ${
+                    isExpanded ? "border-slate-700 bg-slate-900/40" : "border-slate-800/60 hover:border-slate-700 hover:bg-slate-900/40"
+                  }`}
+                >
+                  {/* Card Header Accordion */}
+                  <div 
+                    onClick={() => setExpandedDraftId(isExpanded ? null : (draft.id || null))}
+                    className="p-5 flex items-center justify-between cursor-pointer select-none"
+                  >
+                    <div className="flex-1 min-w-0 pr-4">
+                      <div className="flex flex-wrap items-center gap-2.5 mb-1.5">
+                        <span className="text-[11px] font-semibold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                          Draft #{drafts.length - idx}
+                        </span>
+                        <span className="text-xs text-slate-400 font-medium truncate max-w-[200px]" title={draft.recipientEmail}>
+                          To: {draft.recipientEmail || "recruiter@example.com"}
+                        </span>
+                      </div>
+                      <h3 className="text-sm font-bold text-slate-200 truncate" title={draft.subject}>
+                        {draft.subject || "(No Subject)"}
+                      </h3>
+                      {!isExpanded && (
+                        <p className="text-xs text-slate-500 mt-1 truncate max-w-full">
+                          {bodyPreview}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-4 shrink-0">
+                      <span className="text-slate-500 text-xs">
+                        {isExpanded ? "Collapse ▲" : "Expand/Edit ▼"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Card Body - Editable Form fields */}
+                  {isExpanded && (
+                    <div className="px-5 pb-6 border-t border-slate-800/40 pt-5 bg-slate-950/20 space-y-4">
+                      {/* Recipient Input */}
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">Recipient Email</label>
+                        <input 
+                          type="email"
+                          value={draft.recipientEmail}
+                          onChange={(e) => handleDraftFieldChange(draft.id!, "recipientEmail", e.target.value)}
+                          className="w-full px-3 py-2 bg-slate-900/60 border border-slate-800 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                          placeholder="recruiter@company.com"
+                          required
+                        />
+                      </div>
+
+                      {/* Subject Input */}
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">Email Subject</label>
+                        <input 
+                          type="text"
+                          value={draft.subject}
+                          onChange={(e) => handleDraftFieldChange(draft.id!, "subject", e.target.value)}
+                          className="w-full px-3 py-2 bg-slate-900/60 border border-slate-800 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                          placeholder="Subject line"
+                          required
+                        />
+                      </div>
+
+                      {/* Body Rich-ish editor */}
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">Email Body (HTML/text)</label>
+                        <textarea 
+                          value={draft.body}
+                          onChange={(e) => handleDraftFieldChange(draft.id!, "body", e.target.value)}
+                          rows={8}
+                          className="w-full px-3 py-2.5 bg-slate-900/60 border border-slate-800 rounded-lg text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors font-mono leading-relaxed resize-vertical"
+                          placeholder="Compose cold outreach email body..."
+                          required
+                        />
+                      </div>
+
+                      {/* Controls Footer */}
+                      <div className="flex flex-wrap items-center justify-between gap-4 pt-3 border-t border-slate-800/40">
+                        <span className="text-[10px] text-slate-500 italic">
+                          Approved drafts are queued and spaced by your outreach settings interval.
+                        </span>
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => handleDiscardDraft(draft.id!)}
+                            className="px-4 py-2 border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 text-rose-400 rounded-lg text-xs font-semibold transition-all"
+                          >
+                            Discard Draft
+                          </button>
+                          <Button
+                            variant="success"
+                            size="sm"
+                            onClick={() => handleApproveDraft(draft.id!)}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs px-5 py-2 shadow-sm"
+                          >
+                            Verify & Approve
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
     </div>
   );
 };
