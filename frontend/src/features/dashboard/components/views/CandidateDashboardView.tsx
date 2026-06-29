@@ -6,6 +6,7 @@ import Badge from "../../../../components/ui/Badge";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../../../../components/ui/Table";
 import { outreachService } from "../../../outreach/services/outreachService";
 import { profileService } from "../../../profile/services/profileService";
+import ReferralSection from "./ReferralSection";
 
 export const CandidateDashboardView: React.FC = () => {
   const [sidebarOpen] = useState(true);
@@ -340,6 +341,8 @@ export const CandidateDashboardView: React.FC = () => {
             </Button>
           </div>
         </div>
+
+        <ReferralSection userId={userId} />
 
         {/* Email Suggestions (Job Matches) */}
         {suggestions.length > 0 && (

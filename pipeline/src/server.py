@@ -184,6 +184,46 @@ async def generate_email(req: EmailGenerationRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+class JobParseRequest(BaseModel):
+    url: str
+
+@app.post("/parse-job-url")
+async def parse_job_url(req: JobParseRequest):
+    logger.info(f"Received request to parse job URL: {req.url}")
+    try:
+        # Fetch the URL content
+        async with session.get(req.url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}) as resp:
+            if resp.status != 200:
+                raise HTTPException(status_code=400, detail=f"Failed to fetch URL: status {resp.status}")
+            html_content = await resp.text()
+
+        # Simple HTML tag stripper to get clean text for LLM
+        import re
+        # Remove scripts, styles
+        clean_html = re.sub(r'<(script|style).*?>.*?</\1>', '', html_content, flags=re.DOTALL | re.IGNORECASE)
+        # Strip HTML tags
+        clean_text = re.sub(r'<[^>]*>', ' ', clean_html)
+        # Normalize whitespace
+        clean_text = re.sub(r'\s+', ' ', clean_text).strip()
+        # Cap the clean text length to prevent context window overflow
+        clean_text = clean_text[:8000]
+
+        # Call the existing JDParser to parse the text
+        job_desc = await jd_parser.parse(clean_text, req.url)
+
+        # Return formatted response
+        return {
+            "title": job_desc.job_title,
+            "company": job_desc.company,
+            "skills": job_desc.skills,
+            "experience_required": job_desc.experience_required or "Not specified",
+            "description": job_desc.description or clean_text[:2000]
+        }
+    except Exception as e:
+        logger.error(f"Error parsing job URL {req.url}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("src.server:app", host="0.0.0.0", port=8000, reload=True)
