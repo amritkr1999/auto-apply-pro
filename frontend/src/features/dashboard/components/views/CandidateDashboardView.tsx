@@ -27,6 +27,32 @@ export const CandidateDashboardView: React.FC = () => {
   const [hrOutreachCampaignEnabled, setHrOutreachCampaignEnabled] = useState(false);
   const [togglingCampaign, setTogglingCampaign] = useState(false);
 
+  // Timeframe state
+  const [timeframe, setTimeframe] = useState<"all" | "24h" | "7d" | "30d">("all");
+
+  const filterByTimeframe = (items: any[]) => {
+    if (timeframe === "all") return items;
+    const now = Date.now();
+    let msLimit = 0;
+    if (timeframe === "24h") msLimit = 24 * 60 * 60 * 1000;
+    else if (timeframe === "7d") msLimit = 7 * 24 * 60 * 60 * 1000;
+    else if (timeframe === "30d") msLimit = 30 * 24 * 60 * 60 * 1000;
+    
+    return items.filter(item => {
+      const dateStr = item.sentAt || item.createdAt;
+      if (!dateStr) return false;
+      const itemTime = new Date(dateStr).getTime();
+      return (now - itemTime) <= msLimit;
+    });
+  };
+
+  const filteredQueueItems = filterByTimeframe(queueItems);
+  const filteredDrafts = filterByTimeframe(drafts);
+
+  const sentCount = filteredQueueItems.filter(item => item.status === "SENT").length;
+  const pendingApprovalCount = filteredDrafts.length;
+  const totalApplications = filteredQueueItems.length;
+
 
   useEffect(() => {
     const dismissed = localStorage.getItem("gmail_onboarding_dismissed") === "true";
@@ -129,13 +155,6 @@ export const CandidateDashboardView: React.FC = () => {
     }
   };
 
-  const applications = [
-    { id: 1, title: "Frontend Engineer", company: "ACME Corp", date: "3 days ago", status: "Applied", statusVariant: "info" as const },
-    { id: 2, title: "Fullstack Developer", company: "Beta LLC", date: "7 days ago", status: "Interviewing", statusVariant: "warning" as const },
-    { id: 3, title: "UI Developer", company: "Stripe", date: "10 days ago", status: "Saved", statusVariant: "neutral" as const },
-    { id: 4, title: "Software Engineer", company: "Google", date: "14 days ago", status: "Rejected", statusVariant: "error" as const },
-  ];
-
   return (
     <div className="flex-1 flex gap-8">
       {sidebarOpen && <DashboardSidebar />}
@@ -208,19 +227,37 @@ export const CandidateDashboardView: React.FC = () => {
           </div>
         )}
 
+        {/* Timeframe selector header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+          <h2 className="text-lg font-bold text-slate-800">Overview Metrics</h2>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Timeframe:</span>
+            <select
+              value={timeframe}
+              onChange={(e) => setTimeframe(e.target.value as any)}
+              className="px-3 py-1.5 border border-slate-200 bg-white rounded-card text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+            >
+              <option value="all">All Time</option>
+              <option value="24h">Last 24 Hours</option>
+              <option value="7d">Last 7 Days</option>
+              <option value="30d">Last 30 Days</option>
+            </select>
+          </div>
+        </div>
+
         {/* Overview Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
           <div className="bg-white rounded-card shadow-sm border border-slate-200 p-5">
             <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Total Applications</h3>
-            <p className="text-3xl font-bold text-slate-800 mt-2">12 submitted</p>
+            <p className="text-3xl font-bold text-slate-800 mt-2">{totalApplications} submitted</p>
           </div>
           <div className="bg-white rounded-card shadow-sm border border-slate-200 p-5">
-            <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Active Interviews</h3>
-            <p className="text-3xl font-bold text-slate-800 mt-2">2 upcoming</p>
+            <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Pending Approval</h3>
+            <p className="text-3xl font-bold text-slate-800 mt-2">{pendingApprovalCount} drafts</p>
           </div>
           <div className="bg-white rounded-card shadow-sm border border-slate-200 p-5">
-            <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Saved Positions</h3>
-            <p className="text-3xl font-bold text-slate-800 mt-2">5 saved</p>
+            <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Sent Emails</h3>
+            <p className="text-3xl font-bold text-slate-800 mt-2">{sentCount} sent</p>
           </div>
         </div>
 
@@ -397,38 +434,6 @@ export const CandidateDashboardView: React.FC = () => {
           </section>
         )}
 
-        {/* Recent Applications Table */}
-        <section id="applications">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-slate-800">Recent Applications</h2>
-            <Button size="sm" onClick={() => navigate("/outreach/draft")}>
-              New Outreach
-            </Button>
-          </div>
-          
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Job Title</TableHead>
-                <TableHead>Company</TableHead>
-                <TableHead>Applied On</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {applications.map((app) => (
-                <TableRow key={app.id}>
-                  <TableCell className="font-semibold text-slate-700">{app.title}</TableCell>
-                  <TableCell className="text-slate-500">{app.company}</TableCell>
-                  <TableCell className="text-slate-400">{app.date}</TableCell>
-                  <TableCell>
-                    <Badge variant={app.statusVariant}>{app.status}</Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </section>
 
         {/* Email Outreach Queue */}
         <section className="mt-10" id="outreach-queue">
