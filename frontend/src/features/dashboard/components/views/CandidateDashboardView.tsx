@@ -27,6 +27,7 @@ export const CandidateDashboardView: React.FC = () => {
   const [hrOutreachCampaignEnabled, setHrOutreachCampaignEnabled] = useState(false);
   const [togglingCampaign, setTogglingCampaign] = useState(false);
 
+
   useEffect(() => {
     const dismissed = localStorage.getItem("gmail_onboarding_dismissed") === "true";
     
@@ -277,7 +278,7 @@ export const CandidateDashboardView: React.FC = () => {
             </div>
             
             <div className="space-y-4">
-              {drafts.map((draft) => {
+              {drafts.slice(0, 5).map((draft) => {
                 const isEditing = editingDraftId === draft.id;
                 return (
                   <div key={draft.id} className="bg-white border border-slate-200 rounded-card shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md">
@@ -380,6 +381,19 @@ export const CandidateDashboardView: React.FC = () => {
                 );
               })}
             </div>
+
+            {drafts.length > 5 && (
+              <div className="flex justify-center mt-4">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => navigate("/outreach/drafts/review")}
+                  className="text-xs font-semibold px-4 py-1.5"
+                >
+                  View All Drafts ({drafts.length})
+                </Button>
+              </div>
+            )}
           </section>
         )}
 
@@ -433,52 +447,67 @@ export const CandidateDashboardView: React.FC = () => {
               No outreach emails currently in the queue. Parse a screenshot and generate an email to get started!
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Recipient</TableHead>
-                  <TableHead>Subject</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Details / Error</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {queueItems.map((item) => {
-                  let statusText = "In Queue";
-                  let variant: "neutral" | "success" | "warning" | "error" | "info" = "neutral";
-                  
-                  if (item.status === "SENT") {
-                    statusText = "Sent";
-                    variant = "success";
-                  } else if (item.status === "FAILED") {
-                    statusText = "Failed";
-                    variant = "error";
-                  } else if (item.status === "BLACKLISTED") {
-                    statusText = "Blacklisted";
-                    variant = "error";
-                  } else if (item.status === "PAUSED") {
-                    statusText = "Paused";
-                    variant = "warning";
-                  } else if (item.status === "PENDING") {
-                    statusText = "In Queue";
-                    variant = "info";
-                  }
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Recipient</TableHead>
+                    <TableHead>Subject</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Details / Error</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {queueItems.slice(0, 5).map((item) => {
+                    let statusText = "In Queue";
+                    let variant: "neutral" | "success" | "warning" | "error" | "info" = "neutral";
+                    
+                    if (item.status === "SENT") {
+                      statusText = "Sent";
+                      variant = "success";
+                    } else if (item.status === "FAILED") {
+                      statusText = "Failed";
+                      variant = "error";
+                    } else if (item.status === "BLACKLISTED") {
+                      statusText = "Blacklisted";
+                      variant = "error";
+                    } else if (item.status === "PAUSED") {
+                      statusText = "Paused";
+                      variant = "warning";
+                    } else if (item.status === "PENDING") {
+                      statusText = "In Queue";
+                      variant = "info";
+                    }
 
-                  return (
-                    <TableRow key={item.id}>
-                      <TableCell className="font-semibold text-slate-700">{item.recipientEmail}</TableCell>
-                      <TableCell className="text-slate-500 truncate max-w-[200px]">{item.subject}</TableCell>
-                      <TableCell>
-                        <Badge variant={variant}>{statusText}</Badge>
-                      </TableCell>
-                      <TableCell className="text-xs text-slate-400">
-                        {item.status === "SENT" && item.sentAt ? `Dispatched on ${new Date(item.sentAt).toLocaleString()}` : item.errorMessage || "Awaiting dispatch (cron scheduled every 5m)"}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+                    return (
+                      <TableRow key={item.id}>
+                        <TableCell className="font-semibold text-slate-700">{item.recipientEmail}</TableCell>
+                        <TableCell className="text-slate-500 truncate max-w-[200px]">{item.subject}</TableCell>
+                        <TableCell>
+                          <Badge variant={variant}>{statusText}</Badge>
+                        </TableCell>
+                        <TableCell className="text-xs text-slate-400">
+                          {item.status === "SENT" && item.sentAt ? `Dispatched on ${new Date(item.sentAt).toLocaleString()}` : item.errorMessage || "Awaiting dispatch (cron scheduled every 5m)"}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+              
+              {queueItems.length > 5 && (
+                <div className="flex justify-center mt-4">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => navigate("/outreach/queue")}
+                    className="text-xs font-semibold px-4 py-1.5"
+                  >
+                    View Full Outreach Queue ({queueItems.length})
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </section>
       </div>

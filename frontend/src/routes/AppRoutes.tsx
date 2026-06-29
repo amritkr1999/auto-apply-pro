@@ -9,6 +9,8 @@ import CandidateProfile from "../features/profile/CandidateProfile";
 import ScreenshotUploader from "../features/jobs/components/ScreenshotUploader";
 import { TemplateManager } from "../features/outreach/components/TemplateManager";
 import { OutreachDraftSection } from "../features/outreach/components/OutreachDraftSection";
+import DraftsReviewPage from "../pages/DraftsReviewPage";
+import QueueDetailsPage from "../pages/QueueDetailsPage";
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -31,6 +33,8 @@ export const AppRoutes: React.FC = () => {
         <Route path="/jobs/parse" element={<ScreenshotUploader />} />
         <Route path="/outreach/templates" element={<TemplateManager />} />
         <Route path="/outreach/draft" element={<OutreachDraftSection />} />
+        <Route path="/outreach/drafts/review" element={<DraftsReviewPage />} />
+        <Route path="/outreach/queue" element={<QueueDetailsPage />} />
       </Route>
     </Routes>
   );
