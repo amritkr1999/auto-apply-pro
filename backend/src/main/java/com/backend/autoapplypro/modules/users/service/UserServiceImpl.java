@@ -79,6 +79,7 @@ public class UserServiceImpl implements UserService {
                 .email(user.getEmail())
                 .name(user.getName())
                 .mobile(user.getMobile())
+                .officialEmail(user.getOfficialEmail())
                 .role(user.getRole().name())
                 .build();
     }
@@ -100,6 +101,7 @@ public class UserServiceImpl implements UserService {
                 .email(user.getEmail())
                 .name(user.getName())
                 .mobile(user.getMobile())
+                .officialEmail(user.getOfficialEmail())
                 .role(user.getRole().name())
                 .build();
     }
@@ -116,6 +118,7 @@ public class UserServiceImpl implements UserService {
                 .email(user.getEmail())
                 .name(user.getName())
                 .mobile(user.getMobile())
+                .officialEmail(user.getOfficialEmail())
                 .skills(candidate.getSkills() != null ? candidate.getSkills().stream().map(Skill::getName).collect(java.util.stream.Collectors.toList()) : new ArrayList<>())
                 .jobPreferences(candidate.getJobPreferences())
                 .resumeFilename(candidate.getResumeFilename())
@@ -135,6 +138,7 @@ public class UserServiceImpl implements UserService {
         
         user.setName(dto.getName());
         user.setMobile(dto.getMobile());
+        user.setOfficialEmail(dto.getOfficialEmail());
         userRepository.save(user);
 
         java.util.Set<Skill> dbSkills = new java.util.HashSet<>();
@@ -165,6 +169,7 @@ public class UserServiceImpl implements UserService {
                 .email(user.getEmail())
                 .name(user.getName())
                 .mobile(user.getMobile())
+                .officialEmail(user.getOfficialEmail())
                 .skills(candidate.getSkills().stream().map(Skill::getName).collect(java.util.stream.Collectors.toList()))
                 .jobPreferences(candidate.getJobPreferences())
                 .resumeFilename(candidate.getResumeFilename())
@@ -191,6 +196,7 @@ public class UserServiceImpl implements UserService {
                 .email(user.getEmail())
                 .name(user.getName())
                 .mobile(user.getMobile())
+                .officialEmail(user.getOfficialEmail())
                 .companyId(companyId)
                 .companyName(companyName)
                 .build();
@@ -205,6 +211,7 @@ public class UserServiceImpl implements UserService {
 
         user.setName(dto.getName());
         user.setMobile(dto.getMobile());
+        user.setOfficialEmail(dto.getOfficialEmail());
         userRepository.save(user);
 
         recruiter.setName(dto.getName());
@@ -235,6 +242,7 @@ public class UserServiceImpl implements UserService {
                 .email(user.getEmail())
                 .name(user.getName())
                 .mobile(user.getMobile())
+                .officialEmail(user.getOfficialEmail())
                 .companyId(companyId)
                 .companyName(companyName)
                 .build();
@@ -251,6 +259,7 @@ public class UserServiceImpl implements UserService {
                 .id(company.getId())
                 .userId(user.getId())
                 .email(user.getEmail())
+                .officialEmail(user.getOfficialEmail())
                 .name(company.getName())
                 .industry(company.getIndustry())
                 .website(company.getWebsite())
@@ -267,6 +276,7 @@ public class UserServiceImpl implements UserService {
         // Update user (owner) name & mobile if desired, or keep it.
         User user = company.getUser();
         user.setName(dto.getName()); // Owner's name or company name update
+        user.setOfficialEmail(dto.getOfficialEmail());
         userRepository.save(user);
 
         company.setName(dto.getName());
@@ -280,6 +290,7 @@ public class UserServiceImpl implements UserService {
                 .id(company.getId())
                 .userId(user.getId())
                 .email(user.getEmail())
+                .officialEmail(user.getOfficialEmail())
                 .name(company.getName())
                 .industry(company.getIndustry())
                 .website(company.getWebsite())

@@ -12,6 +12,7 @@ export const RecruiterProfileView: React.FC<Props> = ({ userId }) => {
   const [profile, setProfile] = useState<RecruiterProfile | null>(null);
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
+  const [officialEmail, setOfficialEmail] = useState("");
   const [companyName, setCompanyName] = useState("");
   
   const [loading, setLoading] = useState(true);
@@ -25,6 +26,7 @@ export const RecruiterProfileView: React.FC<Props> = ({ userId }) => {
         setProfile(data);
         setName(data.name || "");
         setMobile(data.mobile || "");
+        setOfficialEmail(data.officialEmail || "");
         setCompanyName(data.companyName || "");
       })
       .catch(() => setError("Failed to load profile details."))
@@ -43,6 +45,7 @@ export const RecruiterProfileView: React.FC<Props> = ({ userId }) => {
         ...profile,
         name,
         mobile,
+        officialEmail,
         companyName,
       };
 
@@ -55,6 +58,7 @@ export const RecruiterProfileView: React.FC<Props> = ({ userId }) => {
         const u = JSON.parse(userStr);
         u.name = name;
         u.mobile = mobile;
+        u.officialEmail = officialEmail;
         localStorage.setItem("user", JSON.stringify(u));
       }
 
@@ -97,6 +101,14 @@ export const RecruiterProfileView: React.FC<Props> = ({ userId }) => {
           type="email"
           value={profile?.email || ""}
           disabled
+        />
+
+        <Input
+          label="Official Email Address"
+          type="email"
+          value={officialEmail}
+          placeholder="yourname@company.com"
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setOfficialEmail(e.target.value)}
         />
 
         <Input

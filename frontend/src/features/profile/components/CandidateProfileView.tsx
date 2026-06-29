@@ -13,6 +13,7 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
   const [profile, setProfile] = useState<CandidateProfile | null>(null);
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
+  const [officialEmail, setOfficialEmail] = useState("");
   const [skills, setSkills] = useState("");
   const [locationPreference, setLocationPreference] = useState("");
   const [expectedSalary, setExpectedSalary] = useState("");
@@ -79,6 +80,7 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
       setProfile(data);
       setName(data.name || "");
       setMobile(data.mobile || "");
+      setOfficialEmail(data.officialEmail || "");
       setSkills(data.skills ? data.skills.join(", ") : "");
       
       const prefs = data.jobPreferences || {};
@@ -267,6 +269,7 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
         setProfile(data);
         setName(data.name || "");
         setMobile(data.mobile || "");
+        setOfficialEmail(data.officialEmail || "");
         setSkills(data.skills ? data.skills.join(", ") : "");
         
         const prefs = data.jobPreferences || {};
@@ -294,6 +297,7 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
         ...profile,
         name,
         mobile,
+        officialEmail,
         skills: skills.split(",").map((s) => s.trim()).filter((s) => s.length > 0),
         jobPreferences: {
           locationPreference,
@@ -314,6 +318,7 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
         const u = JSON.parse(userStr);
         u.name = name;
         u.mobile = mobile;
+        u.officialEmail = officialEmail;
         localStorage.setItem("user", JSON.stringify(u));
       }
 
@@ -391,6 +396,14 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
           type="email"
           value={profile?.email || ""}
           disabled
+        />
+
+        <Input
+          label="Official Email Address"
+          type="email"
+          value={officialEmail}
+          placeholder="yourname@company.com"
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setOfficialEmail(e.target.value)}
         />
 
         <Input

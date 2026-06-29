@@ -13,6 +13,7 @@ export const CompanyProfileView: React.FC<Props> = ({ userId }) => {
   const [name, setName] = useState("");
   const [industry, setIndustry] = useState("");
   const [website, setWebsite] = useState("");
+  const [officialEmail, setOfficialEmail] = useState("");
   const [description, setDescription] = useState("");
   
   const [loading, setLoading] = useState(true);
@@ -27,6 +28,7 @@ export const CompanyProfileView: React.FC<Props> = ({ userId }) => {
         setName(data.name || "");
         setIndustry(data.industry || "");
         setWebsite(data.website || "");
+        setOfficialEmail(data.officialEmail || "");
         setDescription(data.description || "");
       })
       .catch(() => setError("Failed to load profile details."))
@@ -46,6 +48,7 @@ export const CompanyProfileView: React.FC<Props> = ({ userId }) => {
         name,
         industry,
         website,
+        officialEmail,
         description,
       };
 
@@ -57,6 +60,7 @@ export const CompanyProfileView: React.FC<Props> = ({ userId }) => {
       if (userStr) {
         const u = JSON.parse(userStr);
         u.name = name;
+        u.officialEmail = officialEmail;
         localStorage.setItem("user", JSON.stringify(u));
       }
 
@@ -99,6 +103,14 @@ export const CompanyProfileView: React.FC<Props> = ({ userId }) => {
           type="email"
           value={profile?.email || ""}
           disabled
+        />
+
+        <Input
+          label="Official Email Address"
+          type="email"
+          value={officialEmail}
+          placeholder="yourname@company.com"
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setOfficialEmail(e.target.value)}
         />
 
         <Input

@@ -21,7 +21,9 @@ export const CandidateDashboardView: React.FC = () => {
   const [hasResume, setHasResume] = useState(true);
   const [queueItems, setQueueItems] = useState<any[]>([]);
   const [drafts, setDrafts] = useState<any[]>([]);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
   const [editingDraftId, setEditingDraftId] = useState<string | null>(null);
+  const [editingSuggestionId, setEditingSuggestionId] = useState<string | null>(null);
   
   // Campaign State
   const [hrOutreachCampaignEnabled, setHrOutreachCampaignEnabled] = useState(false);
@@ -48,9 +50,11 @@ export const CandidateDashboardView: React.FC = () => {
 
   const filteredQueueItems = filterByTimeframe(queueItems);
   const filteredDrafts = filterByTimeframe(drafts);
+  const filteredSuggestions = filterByTimeframe(suggestions);
 
   const sentCount = filteredQueueItems.filter(item => item.status === "SENT").length;
   const pendingApprovalCount = filteredDrafts.length;
+  const suggestionCount = filteredSuggestions.length;
   const totalApplications = filteredQueueItems.length;
 
 
@@ -87,8 +91,9 @@ export const CandidateDashboardView: React.FC = () => {
     // Fetch candidate outreach queue history
     outreachService.getOutreachQueue(userId)
       .then((data) => {
-        setQueueItems(data.filter((item: any) => item.status !== "DRAFT"));
+        setQueueItems(data.filter((item: any) => item.status !== "DRAFT" && item.status !== "SUGGESTION"));
         setDrafts(data.filter((item: any) => item.status === "DRAFT"));
+        setSuggestions(data.filter((item: any) => item.status === "SUGGESTION"));
       })
       .catch((err) => console.error("Failed to fetch outreach queue", err));
   }, [userId]);
@@ -118,7 +123,7 @@ export const CandidateDashboardView: React.FC = () => {
       setDrafts(prev => prev.filter(d => d.id !== id));
       // Re-fetch queue to get the scheduled send time correct
       const updatedQueue = await outreachService.getOutreachQueue(userId);
-      setQueueItems(updatedQueue.filter((item: any) => item.status !== "DRAFT"));
+      setQueueItems(updatedQueue.filter((item: any) => item.status !== "DRAFT" && item.status !== "SUGGESTION"));
     } catch (err) {
       console.error("Failed to approve draft", err);
     }
@@ -137,6 +142,36 @@ export const CandidateDashboardView: React.FC = () => {
     setDrafts(prev => prev.map(d => d.id === id ? { ...d, [field]: value } : d));
   };
 
+  const handleApproveSuggestion = async (id: string, suggestion: any) => {
+    try {
+      await outreachService.updateDraft(id, {
+        subject: suggestion.subject,
+        body: suggestion.body,
+        recipientEmail: suggestion.recipientEmail,
+        status: "PENDING"
+      });
+      setSuggestions(prev => prev.filter(s => s.id !== id));
+      // Re-fetch queue to get the scheduled send time correct
+      const updatedQueue = await outreachService.getOutreachQueue(userId);
+      setQueueItems(updatedQueue.filter((item: any) => item.status !== "DRAFT" && item.status !== "SUGGESTION"));
+    } catch (err) {
+      console.error("Failed to approve suggestion", err);
+    }
+  };
+
+  const handleDiscardSuggestion = async (id: string) => {
+    try {
+      await outreachService.deleteDraft(id);
+      setSuggestions(prev => prev.filter(s => s.id !== id));
+    } catch (err) {
+      console.error("Failed to discard suggestion", err);
+    }
+  };
+
+  const handleSuggestionFieldChange = (id: string, field: string, value: string) => {
+    setSuggestions(prev => prev.map(s => s.id === id ? { ...s, [field]: value } : s));
+  };
+
   const handleToggleCampaign = async () => {
     try {
       setTogglingCampaign(true);
@@ -146,8 +181,9 @@ export const CandidateDashboardView: React.FC = () => {
       
       // Re-fetch email queue to reflect changes immediately
       const updatedQueue = await outreachService.getOutreachQueue(userId);
-      setQueueItems(updatedQueue.filter((item: any) => item.status !== "DRAFT"));
+      setQueueItems(updatedQueue.filter((item: any) => item.status !== "DRAFT" && item.status !== "SUGGESTION"));
       setDrafts(updatedQueue.filter((item: any) => item.status === "DRAFT"));
+      setSuggestions(updatedQueue.filter((item: any) => item.status === "SUGGESTION"));
     } catch (err) {
       console.error("Failed to toggle campaign", err);
     } finally {
@@ -246,7 +282,7 @@ export const CandidateDashboardView: React.FC = () => {
         </div>
 
         {/* Overview Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           <div className="bg-white rounded-card shadow-sm border border-slate-200 p-5">
             <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Total Applications</h3>
             <p className="text-3xl font-bold text-slate-800 mt-2">{totalApplications} submitted</p>
@@ -254,6 +290,10 @@ export const CandidateDashboardView: React.FC = () => {
           <div className="bg-white rounded-card shadow-sm border border-slate-200 p-5">
             <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Pending Approval</h3>
             <p className="text-3xl font-bold text-slate-800 mt-2">{pendingApprovalCount} drafts</p>
+          </div>
+          <div className="bg-white rounded-card shadow-sm border border-slate-200 p-5">
+            <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Match Suggestions</h3>
+            <p className="text-3xl font-bold text-slate-800 mt-2">{suggestionCount} suggestions</p>
           </div>
           <div className="bg-white rounded-card shadow-sm border border-slate-200 p-5">
             <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Sent Emails</h3>
@@ -300,6 +340,126 @@ export const CandidateDashboardView: React.FC = () => {
             </Button>
           </div>
         </div>
+
+        {/* Email Suggestions (Job Matches) */}
+        {suggestions.length > 0 && (
+          <section className="mb-10" id="suggestions-review">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                  <span>🎯</span> Job Match Suggestions
+                </h2>
+                <p className="text-xs text-slate-500">Tailored outreach drafts generated automatically for jobs matching your skillset</p>
+              </div>
+              <Badge variant="info">{suggestions.length} Matches Found</Badge>
+            </div>
+            
+            <div className="space-y-4">
+              {suggestions.slice(0, 5).map((suggestion) => {
+                const isEditing = editingSuggestionId === suggestion.id;
+                return (
+                  <div key={suggestion.id} className="bg-white border border-l-4 border-l-indigo-500 border-slate-200 rounded-card shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md">
+                    {/* Header preview row */}
+                    <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50 border-b border-slate-100">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-full uppercase">
+                            Suggestion
+                          </span>
+                          <span className="text-xs text-slate-400 font-medium">To: {suggestion.recipientEmail}</span>
+                        </div>
+                        <h4 className="text-sm font-bold text-slate-700 truncate">{suggestion.subject}</h4>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => setEditingSuggestionId(isEditing ? null : suggestion.id)}
+                          className="text-xs font-semibold px-3 py-1.5"
+                        >
+                          {isEditing ? "Cancel" : "Edit Suggestion"}
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => handleDiscardSuggestion(suggestion.id)}
+                          className="text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200 px-3 py-1.5"
+                        >
+                          Discard
+                        </Button>
+                        <Button 
+                          variant="success" 
+                          size="sm" 
+                          onClick={() => handleApproveSuggestion(suggestion.id, suggestion)}
+                          className="text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 border-none"
+                        >
+                          Approve
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Expandable editor panel */}
+                    {isEditing && (
+                      <div className="p-5 border-t border-slate-100 space-y-4 bg-slate-50/20">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Recipient Email</label>
+                          <input 
+                            type="email"
+                            value={suggestion.recipientEmail}
+                            onChange={(e) => handleSuggestionFieldChange(suggestion.id, "recipientEmail", e.target.value)}
+                            className="w-full px-3 py-2 border border-slate-200 rounded-input text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                            placeholder="recruiter@company.com"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Subject</label>
+                          <input 
+                            type="text"
+                            value={suggestion.subject}
+                            onChange={(e) => handleSuggestionFieldChange(suggestion.id, "subject", e.target.value)}
+                            className="w-full px-3 py-2 border border-slate-200 rounded-input text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                            placeholder="Subject line"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Body</label>
+                          <textarea 
+                            value={suggestion.body}
+                            onChange={(e) => handleSuggestionFieldChange(suggestion.id, "body", e.target.value)}
+                            rows={6}
+                            className="w-full px-3 py-2 border border-slate-200 rounded-input text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 font-mono leading-relaxed resize-vertical"
+                            placeholder="Write email body..."
+                          />
+                        </div>
+                        <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                          <Button 
+                            variant="secondary" 
+                            size="sm" 
+                            onClick={() => setEditingSuggestionId(null)}
+                            className="text-xs font-semibold px-4 py-1.5"
+                          >
+                            Close Editor
+                          </Button>
+                          <Button 
+                            variant="success" 
+                            size="sm" 
+                            onClick={() => {
+                              handleApproveSuggestion(suggestion.id, suggestion);
+                              setEditingSuggestionId(null);
+                            }}
+                            className="text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 border-none"
+                          >
+                            Save & Approve
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         {/* Email Drafts Awaiting Approval */}
         {drafts.length > 0 && (

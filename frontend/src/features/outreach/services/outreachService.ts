@@ -30,7 +30,7 @@ export interface OutreachDraft {
   recipientEmail: string;
   subject: string;
   body: string;
-  status: "DRAFT" | "PENDING" | "SENT" | "FAILED" | "BLACKLISTED" | "PAUSED";
+  status: "DRAFT" | "SUGGESTION" | "PENDING" | "SENT" | "FAILED" | "BLACKLISTED" | "PAUSED";
   userId?: number;
   scheduledAt?: string;
 }

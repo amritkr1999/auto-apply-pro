@@ -15,6 +15,7 @@ public class RecruiterProfileDto {
     private String email;
     private String name;
     private String mobile;
+    private String officialEmail;
     private Long companyId;
     private String companyName;
 }

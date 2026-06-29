@@ -17,6 +17,7 @@ public class CandidateProfileDto {
     private String email;
     private String name;
     private String mobile;
+    private String officialEmail;
     private List<String> skills;
     private Map<String, Object> jobPreferences;
     private String resumeFilename;

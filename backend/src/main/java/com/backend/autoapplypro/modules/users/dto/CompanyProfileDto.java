@@ -13,6 +13,7 @@ public class CompanyProfileDto {
     private Long id;
     private Long userId;
     private String email; // Owner email
+    private String officialEmail;
     private String name;
     private String industry;
     private String website;

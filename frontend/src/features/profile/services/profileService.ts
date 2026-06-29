@@ -23,6 +23,7 @@ export interface UserAuthData {
   email: string;
   name: string;
   mobile: string;
+  officialEmail?: string;
   role: string;
 }
 
@@ -32,6 +33,7 @@ export interface CandidateProfile {
   email: string;
   name: string;
   mobile: string;
+  officialEmail?: string;
   skills: string[];
   jobPreferences: Record<string, any>;
   resumeFilename?: string;
@@ -47,6 +49,7 @@ export interface RecruiterProfile {
   email: string;
   name: string;
   mobile: string;
+  officialEmail?: string;
   companyId?: number | null;
   companyName?: string | null;
 }
@@ -55,6 +58,7 @@ export interface CompanyProfile {
   id?: number;
   userId: number;
   email: string;
+  officialEmail?: string;
   name: string;
   industry: string;
   website: string;

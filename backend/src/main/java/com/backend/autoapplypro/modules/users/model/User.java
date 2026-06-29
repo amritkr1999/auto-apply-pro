@@ -33,6 +33,9 @@ public class User {
     @Column(nullable = false)
     private String mobile;
 
+    @Column(name = "official_email")
+    private String officialEmail;
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Candidate candidate;
 

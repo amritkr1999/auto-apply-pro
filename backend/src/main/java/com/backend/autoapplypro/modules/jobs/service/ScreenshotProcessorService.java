@@ -184,7 +184,7 @@ public class ScreenshotProcessorService {
                                     .recipientEmail(matchedEmailData.getRecipientEmail())
                                     .subject(matchedEmailData.getSubject())
                                     .body(matchedEmailData.getBody())
-                                    .status(OutreachStatus.DRAFT)
+                                    .status(OutreachStatus.SUGGESTION)
                                     .scheduledAt(null)
                                     .build();
 
