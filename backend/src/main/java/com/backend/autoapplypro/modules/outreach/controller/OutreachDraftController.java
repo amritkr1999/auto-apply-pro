@@ -14,6 +14,7 @@ import com.backend.autoapplypro.modules.outreach.service.OutreachSchedulerServic
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -114,6 +115,7 @@ public class OutreachDraftController {
         }
     }
 
+    @Transactional
     @PostMapping
     public ResponseEntity<OutreachDraftDto> saveDraft(@RequestBody OutreachDraftDto dto) {
         log.info("Received request to queue email draft to: {}", dto.getRecipientEmail());
@@ -175,6 +177,7 @@ public class OutreachDraftController {
         return ResponseEntity.ok(dto);
     }
 
+    @Transactional
     @PutMapping("/{id}")
     public ResponseEntity<?> updateAndApproveDraft(@PathVariable Long id, @RequestBody OutreachDraftDto dto) {
         log.info("Received request to update/approve email draft ID: {}", id);
@@ -219,6 +222,7 @@ public class OutreachDraftController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
+    @Transactional
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteDraft(@PathVariable Long id) {
         log.info("Received request to delete email draft ID: {}", id);

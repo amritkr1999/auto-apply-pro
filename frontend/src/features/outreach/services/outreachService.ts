@@ -270,6 +270,10 @@ export const outreachService = {
     slotEnd: string;
     timezone: string;
     skipWeekends: boolean;
+    hrOutreachCampaignEnabled: boolean;
+    hrOutreachTargetRole: string;
+    hrOutreachTemplateId: string;
+    hrOutreachSourceTable: string;
   }> {
     const response = await fetch(`${API_BASE}/v1/outreach/settings?userId=${userId}`, {
       headers: getAuthHeaders(),
@@ -289,6 +293,10 @@ export const outreachService = {
     slotEnd: string;
     timezone: string;
     skipWeekends: boolean;
+    hrOutreachCampaignEnabled?: boolean;
+    hrOutreachTargetRole?: string;
+    hrOutreachTemplateId?: string;
+    hrOutreachSourceTable?: string;
   }): Promise<{ message: string }> {
     const response = await fetch(`${API_BASE}/v1/outreach/settings?userId=${userId}`, {
       method: "POST",
@@ -301,6 +309,77 @@ export const outreachService = {
     if (!response.ok) {
       const errText = await response.text();
       throw new Error(errText || "Failed to save outreach settings.");
+    }
+    return response.json();
+  },
+
+  // Quick toggle HR outreach campaign
+  async toggleHrCampaign(userId: number, enable: boolean): Promise<{ enabled: boolean; message: string }> {
+    const response = await fetch(`${API_BASE}/v1/outreach/settings/campaign/toggle?userId=${userId}&enable=${enable}`, {
+      method: "POST",
+      headers: {
+        ...getAuthHeaders(),
+      }
+    });
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(errText || "Failed to toggle campaign.");
+    }
+    return response.json();
+  },
+
+  // Upload multiple screenshots to the backend queue
+  async uploadScreenshots(userId: number, files: File[]): Promise<any[]> {
+    const formData = new FormData();
+    files.forEach(file => {
+      formData.append("files", file);
+    });
+    formData.append("userId", userId.toString());
+
+    const response = await fetch(`${API_BASE}/screenshots/upload`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: formData
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(errText || "Failed to upload screenshots to backend queue.");
+    }
+    return response.json();
+  },
+
+  // Get screenshot upload logs/statuses for a user
+  async getScreenshotUploads(userId: number): Promise<any[]> {
+    const response = await fetch(`${API_BASE}/screenshots/user/${userId}`, {
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) {
+      throw new Error("Failed to fetch screenshot uploads.");
+    }
+    return response.json();
+  },
+
+  // Clear completed and failed screenshot upload logs
+  async clearScreenshotUploadLogs(userId: number): Promise<any> {
+    const response = await fetch(`${API_BASE}/screenshots/user/${userId}/clear`, {
+      method: "DELETE",
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) {
+      throw new Error("Failed to clear screenshot uploads logs.");
+    }
+    return response.json();
+  },
+
+  // Delete a screenshot upload log by ID
+  async deleteScreenshotUpload(id: number): Promise<any> {
+    const response = await fetch(`${API_BASE}/screenshots/${id}`, {
+      method: "DELETE",
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) {
+      throw new Error("Failed to delete screenshot upload log.");
     }
     return response.json();
   }

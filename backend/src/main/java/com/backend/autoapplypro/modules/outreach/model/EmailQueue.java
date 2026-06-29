@@ -47,11 +47,18 @@ public class EmailQueue {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    @Builder.Default
+    @Column(name = "is_campaign")
+    private Boolean isCampaign = false;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         if (status == null) {
             status = OutreachStatus.PENDING;
+        }
+        if (isCampaign == null) {
+            isCampaign = false;
         }
     }
 }

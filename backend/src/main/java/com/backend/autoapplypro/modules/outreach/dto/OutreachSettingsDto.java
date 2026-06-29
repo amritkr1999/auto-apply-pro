@@ -17,4 +17,10 @@ public class OutreachSettingsDto {
     private String slotEnd;   // e.g. "17:00"
     private String timezone;  // e.g. "America/New_York"
     private Boolean skipWeekends;
+    
+    // Campaign Settings
+    private Boolean hrOutreachCampaignEnabled;
+    private String hrOutreachTargetRole;
+    private String hrOutreachTemplateId;
+    private String hrOutreachSourceTable;
 }

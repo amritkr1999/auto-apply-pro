@@ -2,6 +2,7 @@ package com.backend.autoapplypro.modules.outreach.controller;
 
 import com.backend.autoapplypro.modules.outreach.dto.OutreachSettingsDto;
 import com.backend.autoapplypro.modules.outreach.service.OutreachSchedulerService;
+import com.backend.autoapplypro.modules.outreach.service.HrOutreachCampaignService;
 import com.backend.autoapplypro.modules.users.model.User;
 import com.backend.autoapplypro.modules.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ public class OutreachSettingsController {
 
     private final UserRepository userRepository;
     private final OutreachSchedulerService schedulerService;
+    private final HrOutreachCampaignService campaignService;
 
     @GetMapping
     public ResponseEntity<OutreachSettingsDto> getSettings(@RequestParam("userId") Long userId) {
@@ -36,6 +38,11 @@ public class OutreachSettingsController {
                 .slotEnd(user.getOutreachSlotEnd() != null ? user.getOutreachSlotEnd().toString() : "17:00")
                 .timezone(user.getOutreachTimezone() != null ? user.getOutreachTimezone() : "UTC")
                 .skipWeekends(user.getOutreachSkipWeekends() != null ? user.getOutreachSkipWeekends() : true)
+                // Campaign settings
+                .hrOutreachCampaignEnabled(user.getHrOutreachCampaignEnabled() != null ? user.getHrOutreachCampaignEnabled() : false)
+                .hrOutreachTargetRole(user.getHrOutreachTargetRole() != null ? user.getHrOutreachTargetRole() : "Software Engineer")
+                .hrOutreachTemplateId(user.getHrOutreachTemplateId() != null ? user.getHrOutreachTemplateId() : "default-1")
+                .hrOutreachSourceTable(user.getHrOutreachSourceTable() != null ? user.getHrOutreachSourceTable() : "TESTING")
                 .build();
 
         return ResponseEntity.ok(dto);
@@ -92,12 +99,54 @@ public class OutreachSettingsController {
             user.setOutreachSkipWeekends(dto.getSkipWeekends());
         }
 
+        // Campaign settings logic
+        boolean isCampaignToggled = dto.getHrOutreachCampaignEnabled() != null &&
+                !dto.getHrOutreachCampaignEnabled().equals(user.getHrOutreachCampaignEnabled());
+        
+        boolean isCampaignActive = Boolean.TRUE.equals(user.getHrOutreachCampaignEnabled());
+        boolean hasCampaignParamsChanged = false;
+        
+        if (dto.getHrOutreachTargetRole() != null && !dto.getHrOutreachTargetRole().equals(user.getHrOutreachTargetRole())) {
+            user.setHrOutreachTargetRole(dto.getHrOutreachTargetRole());
+            hasCampaignParamsChanged = true;
+        }
+        if (dto.getHrOutreachTemplateId() != null && !dto.getHrOutreachTemplateId().equals(user.getHrOutreachTemplateId())) {
+            user.setHrOutreachTemplateId(dto.getHrOutreachTemplateId());
+            hasCampaignParamsChanged = true;
+        }
+        if (dto.getHrOutreachSourceTable() != null && !dto.getHrOutreachSourceTable().equals(user.getHrOutreachSourceTable())) {
+            user.setHrOutreachSourceTable(dto.getHrOutreachSourceTable());
+            hasCampaignParamsChanged = true;
+        }
+
         userRepository.save(user);
-        log.info("User settings saved to database. Triggering reschedule for pending queue items.");
+        log.info("User settings saved to database.");
+
+        // If explicitly toggled or settings changed while campaign is active, toggle/regenerate the campaign
+        if (isCampaignToggled || (isCampaignActive && hasCampaignParamsChanged)) {
+            boolean nextEnabled = dto.getHrOutreachCampaignEnabled() != null ? dto.getHrOutreachCampaignEnabled() : isCampaignActive;
+            campaignService.toggleCampaign(user, nextEnabled, user.getHrOutreachTargetRole(), user.getHrOutreachTemplateId(), user.getHrOutreachSourceTable());
+        }
 
         // Reschedule all pending emails for this user to align with the new intervals & window constraints
         schedulerService.reschedulePendingEmails(user);
 
         return ResponseEntity.ok(Map.of("message", "Outreach settings updated successfully"));
+    }
+
+    @PostMapping("/campaign/toggle")
+    public ResponseEntity<?> toggleCampaign(
+            @RequestParam("userId") Long userId,
+            @RequestParam("enable") boolean enable) {
+        log.info("Request to toggle HR outreach campaign for user ID: {} to {}", userId, enable);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        campaignService.toggleCampaign(user, enable, user.getHrOutreachTargetRole(), user.getHrOutreachTemplateId(), user.getHrOutreachSourceTable());
+
+        return ResponseEntity.ok(Map.of(
+                "enabled", enable,
+                "message", "Campaign " + (enable ? "activated" : "deactivated") + " successfully"
+        ));
     }
 }

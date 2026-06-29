@@ -130,6 +130,9 @@ public class GmailEmailSender implements EmailSender {
             } else {
                 throw new OutreachSendException(OutreachErrorType.GENERIC, "Gmail API sending failed: " + e.getMessage(), e);
             }
+        } catch (jakarta.mail.internet.AddressException e) {
+            log.error("Invalid email address format: {}", to, e);
+            throw new OutreachSendException(OutreachErrorType.INVALID_RECIPIENT, "Invalid email address format: " + to, e);
         } catch (Exception e) {
             log.error("Unexpected exception during delegated Gmail sending", e);
             throw new OutreachSendException(OutreachErrorType.GENERIC, "Unexpected sending failure: " + e.getMessage(), e);

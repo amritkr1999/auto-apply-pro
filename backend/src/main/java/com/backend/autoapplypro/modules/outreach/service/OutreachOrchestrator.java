@@ -26,6 +26,7 @@ public class OutreachOrchestrator {
     private final UserRepository userRepository;
     private final EmailSender emailSender; // Automatically wires GmailEmailSender implementation
     private final OutreachSchedulerService schedulerService;
+    private final HrOutreachCampaignService campaignService;
 
     /**
      * Strictly server-side scheduler (cron job) running every 5 minutes.
@@ -148,8 +149,9 @@ public class OutreachOrchestrator {
                 // 5. Anti-Spam Rejection Handling
                 switch (e.getErrorType()) {
                     case INVALID_RECIPIENT:
-                        log.warn("BLACKLIST TRIGGERED: Recipient {} is invalid. Blacklisting entry in queue.", item.getRecipientEmail());
+                        log.warn("BLACKLIST TRIGGERED: Recipient {} is invalid. Blacklisting entry in queue and cleaning from contact lists.", item.getRecipientEmail());
                         item.setStatus(OutreachStatus.BLACKLISTED);
+                        campaignService.deleteContactFromLists(item.getRecipientEmail());
                         break;
                     case RATE_LIMITED:
                         log.warn("RATE LIMIT TRIGGERED: Platform sending paused for user ID: {}.", user.getId());
@@ -164,6 +166,23 @@ public class OutreachOrchestrator {
                         break;
                 }
                 queueRepository.save(item);
+            }
+
+            // 6. JIT Campaign Queue Chaining: If the sent email was a campaign email and has completed execution,
+            // check if we need to schedule the next contact.
+            if (Boolean.TRUE.equals(item.getIsCampaign()) && Boolean.TRUE.equals(user.getHrOutreachCampaignEnabled())) {
+                if (item.getStatus() == OutreachStatus.SENT || 
+                    item.getStatus() == OutreachStatus.BLACKLISTED || 
+                    item.getStatus() == OutreachStatus.FAILED) {
+                    
+                    // Safety check: ensure no other campaign emails are currently pending or paused for this user
+                    boolean hasPendingCampaign = queueRepository.findByUserId(user.getId()).stream()
+                            .anyMatch(e -> Boolean.TRUE.equals(e.getIsCampaign()) && 
+                                    (e.getStatus() == OutreachStatus.PENDING || e.getStatus() == OutreachStatus.PAUSED));
+                    if (!hasPendingCampaign) {
+                        campaignService.queueNextCampaignEmail(user);
+                    }
+                }
             }
         }
         log.info("Finished outreach queue processing run.");

@@ -7,4 +7,7 @@ import java.util.List;
 @Repository
 public interface HrRepository extends JpaRepository<HrDetails, Long> {
     List<HrDetails> findByCompanyNameContainingIgnoreCase(String companyName);
+
+    @org.springframework.transaction.annotation.Transactional
+    void deleteByEmailIgnoreCase(String email);
 }

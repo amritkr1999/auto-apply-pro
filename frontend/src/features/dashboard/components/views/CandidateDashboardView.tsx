@@ -22,6 +22,10 @@ export const CandidateDashboardView: React.FC = () => {
   const [queueItems, setQueueItems] = useState<any[]>([]);
   const [drafts, setDrafts] = useState<any[]>([]);
   const [editingDraftId, setEditingDraftId] = useState<string | null>(null);
+  
+  // Campaign State
+  const [hrOutreachCampaignEnabled, setHrOutreachCampaignEnabled] = useState(false);
+  const [togglingCampaign, setTogglingCampaign] = useState(false);
 
   useEffect(() => {
     const dismissed = localStorage.getItem("gmail_onboarding_dismissed") === "true";
@@ -45,6 +49,13 @@ export const CandidateDashboardView: React.FC = () => {
         console.error("Failed to fetch candidate profile", err);
         setHasResume(true);
       });
+
+    // Fetch campaign active settings status
+    outreachService.getOutreachSettings(userId)
+      .then((data) => {
+        setHrOutreachCampaignEnabled(!!data.hrOutreachCampaignEnabled);
+      })
+      .catch((err) => console.error("Failed to fetch campaign settings", err));
 
     // Fetch candidate outreach queue history
     outreachService.getOutreachQueue(userId)
@@ -97,6 +108,24 @@ export const CandidateDashboardView: React.FC = () => {
 
   const handleDraftFieldChange = (id: string, field: string, value: string) => {
     setDrafts(prev => prev.map(d => d.id === id ? { ...d, [field]: value } : d));
+  };
+
+  const handleToggleCampaign = async () => {
+    try {
+      setTogglingCampaign(true);
+      const nextState = !hrOutreachCampaignEnabled;
+      const res = await outreachService.toggleHrCampaign(userId, nextState);
+      setHrOutreachCampaignEnabled(res.enabled);
+      
+      // Re-fetch email queue to reflect changes immediately
+      const updatedQueue = await outreachService.getOutreachQueue(userId);
+      setQueueItems(updatedQueue.filter((item: any) => item.status !== "DRAFT"));
+      setDrafts(updatedQueue.filter((item: any) => item.status === "DRAFT"));
+    } catch (err) {
+      console.error("Failed to toggle campaign", err);
+    } finally {
+      setTogglingCampaign(false);
+    }
   };
 
   const applications = [
@@ -191,6 +220,46 @@ export const CandidateDashboardView: React.FC = () => {
           <div className="bg-white rounded-card shadow-sm border border-slate-200 p-5">
             <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Saved Positions</h3>
             <p className="text-3xl font-bold text-slate-800 mt-2">5 saved</p>
+          </div>
+        </div>
+
+        {/* HR Cold Email Campaign Status Widget */}
+        <div className="mb-10 p-6 bg-white border border-slate-200 rounded-card shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 hover:shadow-md transition-shadow duration-200">
+          <div className="flex gap-4">
+            <div className="w-12 h-12 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-2xl shrink-0">
+              🚀
+            </div>
+            <div>
+              <div className="flex items-center gap-3">
+                <h4 className="text-base font-bold text-slate-800">Automated HR Cold Email Campaign</h4>
+                <Badge variant={hrOutreachCampaignEnabled ? "success" : "neutral"}>
+                  {hrOutreachCampaignEnabled ? "Active" : "Inactive"}
+                </Badge>
+              </div>
+              <p className="text-xs text-slate-500 mt-1 max-w-xl">
+                Automatically draft and dispatch cold outreach emails to HR contacts in random order. Respects daily quotas, intervals, and active slot windows.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 self-end md:self-center shrink-0">
+            <button
+              onClick={() => navigate("/candidate/profile")}
+              className="px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-800 transition-colors border border-slate-200 rounded-card hover:bg-slate-50"
+            >
+              Configure Settings
+            </button>
+            <Button
+              size="sm"
+              disabled={togglingCampaign}
+              onClick={handleToggleCampaign}
+              className={`text-xs font-semibold px-4 py-1.5 shadow-sm ${
+                hrOutreachCampaignEnabled
+                  ? "bg-rose-600 hover:bg-rose-700 text-white"
+                  : "bg-emerald-600 hover:bg-emerald-700 text-white"
+              }`}
+            >
+              {togglingCampaign ? "Toggling..." : hrOutreachCampaignEnabled ? "Pause Campaign" : "Activate Campaign"}
+            </Button>
           </div>
         </div>
 

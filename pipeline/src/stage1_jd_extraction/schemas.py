@@ -5,7 +5,7 @@ from pydantic import BaseModel
 class Salary(BaseModel):
     min: Optional[int] = None
     max: Optional[int] = None
-    currency: str = "USD"
+    currency: Optional[str] = "USD"
 
 class JobDescription(BaseModel):
     job_title: str

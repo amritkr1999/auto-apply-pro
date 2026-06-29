@@ -77,6 +77,22 @@ public class User {
     @Column(name = "outreach_skip_weekends")
     private Boolean outreachSkipWeekends = true;
 
+    @Builder.Default
+    @Column(name = "hr_outreach_campaign_enabled")
+    private Boolean hrOutreachCampaignEnabled = false;
+
+    @Builder.Default
+    @Column(name = "hr_outreach_target_role")
+    private String hrOutreachTargetRole = "Software Engineer";
+
+    @Builder.Default
+    @Column(name = "hr_outreach_template_id")
+    private String hrOutreachTemplateId = "default-1";
+
+    @Builder.Default
+    @Column(name = "hr_outreach_source_table")
+    private String hrOutreachSourceTable = "TESTING";
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -113,6 +129,18 @@ public class User {
         }
         if (outreachSkipWeekends == null) {
             outreachSkipWeekends = true;
+        }
+        if (hrOutreachCampaignEnabled == null) {
+            hrOutreachCampaignEnabled = false;
+        }
+        if (hrOutreachTargetRole == null) {
+            hrOutreachTargetRole = "Software Engineer";
+        }
+        if (hrOutreachTemplateId == null) {
+            hrOutreachTemplateId = "default-1";
+        }
+        if (hrOutreachSourceTable == null) {
+            hrOutreachSourceTable = "TESTING";
         }
     }
 

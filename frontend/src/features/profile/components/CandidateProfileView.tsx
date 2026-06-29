@@ -41,6 +41,13 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [savingSettings, setSavingSettings] = useState(false);
 
+  // HR Outreach Campaign Settings State
+  const [hrOutreachCampaignEnabled, setHrOutreachCampaignEnabled] = useState(false);
+  const [hrOutreachTargetRole, setHrOutreachTargetRole] = useState("Software Engineer");
+  const [hrOutreachTemplateId, setHrOutreachTemplateId] = useState("default-1");
+  const [hrOutreachSourceTable, setHrOutreachSourceTable] = useState("TESTING");
+  const [templatesList, setTemplatesList] = useState<any[]>([]);
+
   const handleUploadResume = async (file: File) => {
     try {
       setUploadingResume(true);
@@ -126,6 +133,14 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
 
   useEffect(() => {
     setSettingsLoading(true);
+    
+    // Fetch email templates for selection dropdown
+    outreachService.getTemplates()
+      .then((templates) => {
+        setTemplatesList(templates);
+      })
+      .catch((err) => console.error("Failed to load templates list", err));
+
     outreachService.getOutreachSettings(userId)
       .then((data) => {
         setDailyLimit(data.dailyLimit);
@@ -134,6 +149,13 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
         setSlotStart(data.slotStart ? data.slotStart.substring(0, 5) : "09:00");
         setSlotEnd(data.slotEnd ? data.slotEnd.substring(0, 5) : "17:00");
         setSkipWeekends(data.skipWeekends !== false);
+        
+        // Populate campaign settings
+        setHrOutreachCampaignEnabled(!!data.hrOutreachCampaignEnabled);
+        setHrOutreachTargetRole(data.hrOutreachTargetRole || "Software Engineer");
+        setHrOutreachTemplateId(data.hrOutreachTemplateId || "default-1");
+        setHrOutreachSourceTable(data.hrOutreachSourceTable || "TESTING");
+
         if (data.timezone) {
           setTimezone(data.timezone);
         } else {
@@ -145,8 +167,8 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
       .finally(() => setSettingsLoading(false));
   }, [userId]);
 
-  const handleSaveSettings = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSaveSettings = async (e?: React.FormEvent | React.MouseEvent) => {
+    if (e) e.preventDefault();
     if (minInterval > maxInterval) {
       setError("Minimum interval cannot be greater than maximum interval.");
       return;
@@ -162,7 +184,11 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
         slotStart,
         slotEnd,
         timezone,
-        skipWeekends
+        skipWeekends,
+        hrOutreachCampaignEnabled,
+        hrOutreachTargetRole,
+        hrOutreachTemplateId,
+        hrOutreachSourceTable
       });
       setMessage(res.message || "Outreach settings updated successfully.");
     } catch (err: any) {
@@ -651,7 +677,7 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
           {settingsLoading ? (
             <div className="text-xs text-slate-400 italic py-2">Loading scheduling settings...</div>
           ) : (
-            <form onSubmit={handleSaveSettings} className="space-y-4">
+            <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="space-y-4">
                   <div>
@@ -782,17 +808,93 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
                 </div>
               </div>
 
-              <div className="pt-2 flex justify-end">
+              {/* Automated HR Cold Email Campaign Settings */}
+              <div className="border-t border-slate-100 pt-5 mt-5">
+                <h4 className="text-sm font-bold text-slate-800 mb-1">Automated HR Cold Email Campaign</h4>
+                <p className="text-xs text-slate-500 mb-4">
+                  Send cold email outreach to list of HR contacts automatically one by one in randomized order, respecting limits and intervals.
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-2 pt-1">
+                      <input
+                        type="checkbox"
+                        id="campaignEnabledCheckbox"
+                        checked={hrOutreachCampaignEnabled}
+                        onChange={(e) => setHrOutreachCampaignEnabled(e.target.checked)}
+                        className="mt-1 h-4 w-4 text-primary border-slate-200 rounded focus:ring-primary"
+                      />
+                      <label htmlFor="campaignEnabledCheckbox" className="select-none cursor-pointer">
+                        <span className="block text-xs font-semibold text-slate-600">Activate HR Outreach Campaign</span>
+                        <span className="block text-[10px] text-slate-400">
+                          Start sending cold emails in a random sequence to the chosen HR list.
+                        </span>
+                      </label>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1">
+                        Source HR Contacts Database Table
+                      </label>
+                      <select
+                        value={hrOutreachSourceTable}
+                        onChange={(e) => setHrOutreachSourceTable(e.target.value)}
+                        className="w-full px-3 py-1.5 border border-slate-200 rounded-md text-sm text-slate-700 bg-white focus:outline-none focus:ring-1 focus:ring-primary"
+                      >
+                        <option value="TESTING">Testing Emails Table (testing_emails)</option>
+                        <option value="MAIN">Main HR Details Table (hr_details)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1">
+                        Target Job Role for Template ({"{{jobRole}}"})
+                      </label>
+                      <input
+                        type="text"
+                        value={hrOutreachTargetRole}
+                        onChange={(e) => setHrOutreachTargetRole(e.target.value)}
+                        className="w-full px-3 py-1.5 border border-slate-200 rounded-md text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                        placeholder="e.g. Software Engineer"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1">
+                        Outreach Email Template
+                      </label>
+                      <select
+                        value={hrOutreachTemplateId}
+                        onChange={(e) => setHrOutreachTemplateId(e.target.value)}
+                        className="w-full px-3 py-1.5 border border-slate-200 rounded-md text-sm text-slate-700 bg-white focus:outline-none focus:ring-1 focus:ring-primary"
+                      >
+                        {templatesList.map(t => (
+                          <option key={t.id} value={t.id}>{t.name}</option>
+                        ))}
+                        {templatesList.length === 0 && (
+                          <option value="default-1">General Application Outreach</option>
+                        )}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4 flex justify-end">
                 <Button
-                  type="submit"
+                  type="button"
                   size="sm"
                   disabled={savingSettings}
+                  onClick={handleSaveSettings}
                   className="bg-primary hover:bg-primary-hover text-white text-xs font-semibold px-4 py-1.5 shadow-sm"
                 >
                   {savingSettings ? "Saving Settings..." : "Save Scheduling Settings"}
                 </Button>
               </div>
-            </form>
+            </div>
           )}
         </div>
 
