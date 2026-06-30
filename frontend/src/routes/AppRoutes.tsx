@@ -14,6 +14,8 @@ import QueueDetailsPage from "../pages/QueueDetailsPage";
 import LearningSpaceDashboard from "../features/learning/components/LearningSpaceDashboard";
 import TopicDetailsView from "../features/learning/components/TopicDetailsView";
 import RoadmapDetailsView from "../features/learning/components/RoadmapDetailsView";
+import PricingPage from "../features/billing/components/PricingPage";
+import BillingPortal from "../features/billing/components/BillingPortal";
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -41,6 +43,8 @@ export const AppRoutes: React.FC = () => {
         <Route path="/learning" element={<LearningSpaceDashboard />} />
         <Route path="/learning/topic/:topicId" element={<TopicDetailsView />} />
         <Route path="/learning/roadmap/:roadmapId" element={<RoadmapDetailsView />} />
+        <Route path="/billing/pricing" element={<PricingPage />} />
+        <Route path="/billing/portal" element={<BillingPortal />} />
       </Route>
     </Routes>
   );

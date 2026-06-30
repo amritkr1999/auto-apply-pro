@@ -24,6 +24,8 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/api/v1/auth/**",
                     "/api/v1/outreach/oauth2/callback",
+                    "/api/v1/billing/plans",
+                    "/api/v1/billing/webhook",
                     "/v3/api-docs/**",
                     "/swagger-ui/**",
                     "/swagger-ui.html",
