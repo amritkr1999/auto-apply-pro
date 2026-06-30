@@ -5,7 +5,9 @@ import com.backend.autoapplypro.modules.outreach.model.EmailQueue;
 import com.backend.autoapplypro.modules.outreach.model.OutreachStatus;
 import com.backend.autoapplypro.modules.outreach.repository.EmailQueueRepository;
 import com.backend.autoapplypro.modules.users.model.User;
+import com.backend.autoapplypro.modules.users.model.UserActivityLog;
 import com.backend.autoapplypro.modules.users.repository.UserRepository;
+import com.backend.autoapplypro.modules.users.repository.UserActivityLogRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -27,6 +29,7 @@ public class OutreachOrchestrator {
     private final EmailSender emailSender; // Automatically wires GmailEmailSender implementation
     private final OutreachSchedulerService schedulerService;
     private final HrOutreachCampaignService campaignService;
+    private final UserActivityLogRepository userActivityLogRepository;
 
     /**
      * Strictly server-side scheduler (cron job) running every 5 minutes.
@@ -136,6 +139,14 @@ public class OutreachOrchestrator {
                 // Increment sent counter
                 user.setSentToday(sentToday + 1);
                 userRepository.save(user);
+
+                // Save EMAIL_SENT activity log
+                userActivityLogRepository.save(UserActivityLog.builder()
+                        .user(user)
+                        .activityType("EMAIL_SENT")
+                        .activityDate(LocalDate.now())
+                        .referenceId(item.getId())
+                        .build());
                 
                 log.info("Successfully sent email queue ID: {} for user ID: {}. Daily send progress: {}/{}", 
                         item.getId(), user.getId(), user.getSentToday(), user.getDailyLimit());

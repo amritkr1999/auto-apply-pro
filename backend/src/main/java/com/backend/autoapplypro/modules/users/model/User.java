@@ -96,6 +96,13 @@ public class User {
     @Column(name = "hr_outreach_source_table")
     private String hrOutreachSourceTable = "TESTING";
 
+    @Builder.Default
+    @Column(name = "login_streak")
+    private Integer loginStreak = 0;
+
+    @Column(name = "last_login_date")
+    private java.time.LocalDate lastLoginDate;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -144,6 +151,9 @@ public class User {
         }
         if (hrOutreachSourceTable == null) {
             hrOutreachSourceTable = "TESTING";
+        }
+        if (loginStreak == null) {
+            loginStreak = 0;
         }
     }
 

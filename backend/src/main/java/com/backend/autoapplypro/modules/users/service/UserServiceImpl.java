@@ -22,6 +22,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final SkillRepository skillRepository;
     private final JwtUtil jwtUtil;
+    private final UserActivityLogRepository userActivityLogRepository;
 
     @Override
     @Transactional
@@ -37,6 +38,8 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Invalid role: " + request.getRole());
         }
 
+        java.time.LocalDate today = java.time.LocalDate.now();
+
         // Create User
         User user = User.builder()
                 .email(request.getEmail())
@@ -44,16 +47,25 @@ public class UserServiceImpl implements UserService {
                 .role(role)
                 .name(request.getName())
                 .mobile(request.getMobile())
+                .loginStreak(1)
+                .lastLoginDate(today)
                 .build();
 
         user = userRepository.save(user);
+
+        // Log LOGIN activity
+        userActivityLogRepository.save(UserActivityLog.builder()
+                .user(user)
+                .activityType("LOGIN")
+                .activityDate(today)
+                .build());
 
         // Create associated profile based on role
         if (role == UserRole.CANDIDATE) {
             Candidate candidate = Candidate.builder()
                     .user(user)
                     .skills(new java.util.HashSet<>())
-                    .jobPreferences(new HashMap<>())
+                    .jobPreferences(new java.util.HashMap<>())
                     .build();
             candidateRepository.save(candidate);
         } else if (role == UserRole.RECRUITER) {
@@ -81,6 +93,7 @@ public class UserServiceImpl implements UserService {
                 .mobile(user.getMobile())
                 .officialEmail(user.getOfficialEmail())
                 .role(user.getRole().name())
+                .loginStreak(user.getLoginStreak())
                 .build();
     }
 
@@ -94,6 +107,31 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Invalid email or password");
         }
 
+        // Calculate login streak
+        java.time.LocalDate today = java.time.LocalDate.now();
+        if (user.getLastLoginDate() == null) {
+            user.setLoginStreak(1);
+            user.setLastLoginDate(today);
+        } else {
+            long daysBetween = java.time.temporal.ChronoUnit.DAYS.between(user.getLastLoginDate(), today);
+            if (daysBetween == 1) {
+                user.setLoginStreak(user.getLoginStreak() + 1);
+                user.setLastLoginDate(today);
+            } else if (daysBetween > 1) {
+                user.setLoginStreak(1);
+                user.setLastLoginDate(today);
+            }
+            // if daysBetween == 0, keep current streak and date (already logged in today)
+        }
+        user = userRepository.save(user);
+
+        // Save LOGIN activity log
+        userActivityLogRepository.save(UserActivityLog.builder()
+                .user(user)
+                .activityType("LOGIN")
+                .activityDate(today)
+                .build());
+
         String token = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getRole().name());
         return AuthResponse.builder()
                 .token(token)
@@ -103,6 +141,7 @@ public class UserServiceImpl implements UserService {
                 .mobile(user.getMobile())
                 .officialEmail(user.getOfficialEmail())
                 .role(user.getRole().name())
+                .loginStreak(user.getLoginStreak())
                 .build();
     }
 

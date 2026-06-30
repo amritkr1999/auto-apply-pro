@@ -8,6 +8,9 @@ import { profileService } from "../../../profile/services/profileService";
 import ReferralSection from "./ReferralSection";
 import { learningService } from "../../../learning/services/learningService";
 import type { DailyContent } from "../../../learning/services/learningService";
+import { StreakWidget } from "../StreakWidget";
+import { ActivityChart } from "../ActivityChart";
+import { dashboardService } from "../../services/dashboardService";
 
 export const CandidateDashboardView: React.FC = () => {
   const navigate = useNavigate();
@@ -36,6 +39,10 @@ export const CandidateDashboardView: React.FC = () => {
 
   // Timeframe state
   const [timeframe, setTimeframe] = useState<"all" | "24h" | "7d" | "30d">("all");
+
+  // Metrics State
+  const [metrics, setMetrics] = useState<any>(null);
+  const [metricsLoading, setMetricsLoading] = useState(true);
 
   const filterByTimeframe = (items: any[]) => {
     if (timeframe === "all") return items;
@@ -108,6 +115,15 @@ export const CandidateDashboardView: React.FC = () => {
         setDailyContent(data);
       })
       .catch((err) => console.error("Failed to fetch daily content on dashboard", err));
+
+    // Fetch dashboard stats metrics (streaks, activity logs)
+    setMetricsLoading(true);
+    dashboardService.getDashboardMetrics(userId)
+      .then((data) => {
+        setMetrics(data);
+      })
+      .catch((err) => console.error("Failed to fetch dashboard metrics", err))
+      .finally(() => setMetricsLoading(false));
   }, [userId]);
 
   const handleDismissBanner = () => {
@@ -236,6 +252,14 @@ export const CandidateDashboardView: React.FC = () => {
           </div>
         </div>
 
+        <div className="mb-8">
+          <StreakWidget
+            loginStreak={metrics?.loginStreak || 0}
+            dailyActivity={metrics?.dailyActivity || []}
+            loading={metricsLoading}
+          />
+        </div>
+
         {!hasResume && (
           <div className="mb-8 p-5 bg-gradient-to-r from-rose-50 to-orange-50 border border-rose-100 rounded-card shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-300">
             <div className="flex gap-3">
@@ -325,6 +349,11 @@ export const CandidateDashboardView: React.FC = () => {
             <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Sent Emails</h3>
             <p className="text-3xl font-bold text-slate-800 mt-2">{sentCount} sent</p>
           </div>
+        </div>
+
+        {/* Activity Chart */}
+        <div className="mb-10">
+          <ActivityChart data={metrics?.dailyActivity || []} loading={metricsLoading} />
         </div>
 
         {/* HR Cold Email Campaign Status Widget */}

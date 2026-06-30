@@ -4,7 +4,9 @@ import com.backend.autoapplypro.modules.learning.dto.*;
 import com.backend.autoapplypro.modules.learning.model.*;
 import com.backend.autoapplypro.modules.learning.repository.*;
 import com.backend.autoapplypro.modules.users.model.User;
+import com.backend.autoapplypro.modules.users.model.UserActivityLog;
 import com.backend.autoapplypro.modules.users.repository.UserRepository;
+import com.backend.autoapplypro.modules.users.repository.UserActivityLogRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,7 @@ public class LearningServiceImpl implements LearningService {
     private final UserLearningProgressRepository progressRepository;
     private final UserRepository userRepository;
     private final RoadmapRepository roadmapRepository;
+    private final UserActivityLogRepository userActivityLogRepository;
 
     @Override
     public List<TopicResponseDto> getAllTopicsHierarchy() {
@@ -99,6 +102,22 @@ public class LearningServiceImpl implements LearningService {
             UserLearningProgress progress = getOrCreateProgress(userEmail);
             progress.getCompletedQuestions().add(question);
             progressRepository.save(progress);
+
+            User user = userRepository.findByEmail(userEmail)
+                    .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + userEmail));
+
+            // Log QUESTION_SOLVED activity
+            userActivityLogRepository.save(UserActivityLog.builder()
+                    .user(user)
+                    .activityType("QUESTION_SOLVED")
+                    .activityDate(LocalDate.now())
+                    .referenceId(questionId)
+                    .build());
+
+            // Check if topic is completed
+            if (question.getTopic() != null) {
+                checkAndLogTopicCompletion(user, question.getTopic());
+            }
         }
 
         return SubmitResponseDto.builder()
@@ -106,6 +125,44 @@ public class LearningServiceImpl implements LearningService {
                 .correctAnswer(question.getCorrectAnswer())
                 .explanation(question.getExplanation())
                 .build();
+    }
+
+    private void checkAndLogTopicCompletion(User user, Topic topic) {
+        if (topic == null) return;
+
+        List<Long> topicIds = new ArrayList<>();
+        collectTopicIds(topic, topicIds);
+
+        List<PracticeQuestion> topicQuestions = questionRepository.findAll().stream()
+                .filter(q -> q.getTopic() != null && topicIds.contains(q.getTopic().getId()))
+                .toList();
+
+        List<Resource> topicResources = resourceRepository.findAll().stream()
+                .filter(r -> r.getTopic() != null && topicIds.contains(r.getTopic().getId()))
+                .toList();
+
+        int topicTotalItems = topicQuestions.size() + topicResources.size();
+        if (topicTotalItems == 0) return;
+
+        Set<Long> completedQuestionIds = getCompletedQuestionIds(user.getEmail());
+        Set<Long> completedResourceIds = getCompletedResourceIds(user.getEmail());
+
+        long completedCount = topicQuestions.stream().filter(q -> completedQuestionIds.contains(q.getId())).count() +
+                topicResources.stream().filter(r -> completedResourceIds.contains(r.getId())).count();
+
+        if (completedCount == topicTotalItems) {
+            boolean alreadyLogged = userActivityLogRepository.existsByUserIdAndActivityTypeAndReferenceId(
+                    user.getId(), "TOPIC_COMPLETED", topic.getId());
+            if (!alreadyLogged) {
+                userActivityLogRepository.save(UserActivityLog.builder()
+                        .user(user)
+                        .activityType("TOPIC_COMPLETED")
+                        .activityDate(LocalDate.now())
+                        .referenceId(topic.getId())
+                        .build());
+                log.info("Logged TOPIC_COMPLETED for user ID {} and topic ID {}", user.getId(), topic.getId());
+            }
+        }
     }
 
     @Override
@@ -126,6 +183,15 @@ public class LearningServiceImpl implements LearningService {
         }
 
         progressRepository.save(progress);
+
+        if (isCompletedNow) {
+            User user = userRepository.findByEmail(userEmail)
+                    .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + userEmail));
+            if (resource.getTopic() != null) {
+                checkAndLogTopicCompletion(user, resource.getTopic());
+            }
+        }
+
         return isCompletedNow;
     }
 

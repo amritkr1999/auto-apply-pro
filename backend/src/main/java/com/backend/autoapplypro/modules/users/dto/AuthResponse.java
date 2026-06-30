@@ -17,4 +17,5 @@ public class AuthResponse {
     private String mobile;
     private String officialEmail;
     private String role;
+    private Integer loginStreak;
 }
