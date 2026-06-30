@@ -7,6 +7,8 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from ".
 import { outreachService } from "../../../outreach/services/outreachService";
 import { profileService } from "../../../profile/services/profileService";
 import ReferralSection from "./ReferralSection";
+import { learningService } from "../../../learning/services/learningService";
+import type { DailyContent } from "../../../learning/services/learningService";
 
 export const CandidateDashboardView: React.FC = () => {
   const [sidebarOpen] = useState(true);
@@ -29,6 +31,10 @@ export const CandidateDashboardView: React.FC = () => {
   // Campaign State
   const [hrOutreachCampaignEnabled, setHrOutreachCampaignEnabled] = useState(false);
   const [togglingCampaign, setTogglingCampaign] = useState(false);
+
+  // Daily learning content state
+  const [dailyContent, setDailyContent] = useState<DailyContent | null>(null);
+  const [showTipModal, setShowTipModal] = useState(false);
 
   // Timeframe state
   const [timeframe, setTimeframe] = useState<"all" | "24h" | "7d" | "30d">("all");
@@ -97,6 +103,13 @@ export const CandidateDashboardView: React.FC = () => {
         setSuggestions(data.filter((item: any) => item.status === "SUGGESTION"));
       })
       .catch((err) => console.error("Failed to fetch outreach queue", err));
+
+    // Fetch daily learning preview
+    learningService.getDailyContent()
+      .then((data) => {
+        setDailyContent(data);
+      })
+      .catch((err) => console.error("Failed to fetch daily content on dashboard", err));
   }, [userId]);
 
   const handleDismissBanner = () => {
@@ -191,6 +204,23 @@ export const CandidateDashboardView: React.FC = () => {
       setTogglingCampaign(false);
     }
   };
+
+  useEffect(() => {
+    if (dailyContent?.tip) {
+      const todayStr = new Date().toDateString();
+      const lastDismissed = localStorage.getItem("last_tip_dismissed_date");
+      if (lastDismissed !== todayStr) {
+        setShowTipModal(true);
+      }
+    }
+  }, [dailyContent]);
+
+  const handleCloseTipModal = () => {
+    const todayStr = new Date().toDateString();
+    localStorage.setItem("last_tip_dismissed_date", todayStr);
+    setShowTipModal(false);
+  };
+
 
   return (
     <div className="flex-1 flex gap-8">
@@ -341,6 +371,68 @@ export const CandidateDashboardView: React.FC = () => {
             </Button>
           </div>
         </div>
+
+        {/* Daily Learning Preview Widget */}
+        {dailyContent && (
+          <div className="mb-10 grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-900 text-white rounded-card p-6 shadow-sm border border-slate-800 relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-5">
+              <svg className="w-24 h-24" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+              </svg>
+            </div>
+            
+            <div className="space-y-3 relative border-b md:border-b-0 md:border-r border-slate-800 pb-4 md:pb-0 md:pr-6 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">
+                    Daily Tip
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-semibold">Tip of the Day</span>
+                </div>
+                {dailyContent.tip ? (
+                  <>
+                    <h4 className="text-xs sm:text-sm font-bold text-indigo-100 line-clamp-1">{dailyContent.tip.title}</h4>
+                    <p className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{dailyContent.tip.content}</p>
+                  </>
+                ) : (
+                  <p className="text-xs text-slate-400">Loading daily tip...</p>
+                )}
+              </div>
+              <button
+                onClick={() => navigate("/learning")}
+                className="mt-4 self-start text-xs font-bold text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1 focus:outline-none"
+              >
+                View Tip Details →
+              </button>
+            </div>
+
+            <div className="space-y-3 relative pl-0 md:pl-6 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">
+                    Daily Challenge
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-semibold">Question of the Day</span>
+                </div>
+                {dailyContent.question ? (
+                  <>
+                    <h4 className="text-xs sm:text-sm font-bold text-rose-100 line-clamp-1">{dailyContent.question.title}</h4>
+                    <p className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{dailyContent.question.content}</p>
+                  </>
+                ) : (
+                  <p className="text-xs text-slate-400">Loading daily question...</p>
+                )}
+              </div>
+              <Button
+                size="sm"
+                onClick={() => navigate("/learning")}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-semibold px-4 py-1 shadow-sm mt-4 self-start border-none"
+              >
+                Solve Question
+              </Button>
+            </div>
+          </div>
+        )}
 
         <ReferralSection userId={userId} />
 
@@ -679,6 +771,55 @@ export const CandidateDashboardView: React.FC = () => {
           )}
         </section>
       </div>
+
+      {/* Tip of the Day Pop-up Modal */}
+      {showTipModal && dailyContent?.tip && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-xl border border-slate-100 shadow-2xl max-w-md w-full overflow-hidden transform transition-all duration-300 animate-in zoom-in-95 duration-200">
+            {/* Header / Accent Bar */}
+            <div className="h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-rose-500"></div>
+            
+            {/* Content Area */}
+            <div className="p-6 space-y-6">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-lg">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 18a3.75 3.75 0 00.495-7.467 5.99 5.99 0 00-1.925 3.546 5.974 5.974 0 01-2.133-1A3.75 3.75 0 0012 18z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364.364l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-extrabold text-indigo-500 uppercase tracking-widest block">Daily Advice</span>
+                    <h3 className="text-lg font-bold text-slate-800">Tip of the Day</h3>
+                  </div>
+                </div>
+                
+                <button
+                  onClick={handleCloseTipModal}
+                  className="text-slate-400 hover:text-slate-600 p-1 hover:bg-slate-100 rounded-lg transition-colors focus:outline-none"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="font-extrabold text-indigo-950 text-base">{dailyContent.tip.title}</h4>
+                <p className="text-slate-600 text-sm leading-relaxed whitespace-pre-line">{dailyContent.tip.content}</p>
+              </div>
+
+              <button
+                onClick={handleCloseTipModal}
+                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 px-4 rounded-btn text-sm shadow-md transition-all duration-200"
+              >
+                Got it, thanks!
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

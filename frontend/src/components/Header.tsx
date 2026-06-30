@@ -32,6 +32,9 @@ export const Header: React.FC = () => {
               <Link to="/candidate/profile" className="text-sm font-medium text-slate-600 hover:text-primary transition-colors">
                 Profile
               </Link>
+              <Link to="/learning" className="text-sm font-medium text-slate-600 hover:text-primary transition-colors">
+                Learning Space
+              </Link>
             </nav>
           )}
         </div>
