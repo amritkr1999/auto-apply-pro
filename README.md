@@ -15,6 +15,7 @@ This project is structured as a monorepo containing the following components:
 * **[frontend](file:///Users/amrit/Development/work/auto-apply-pro/frontend)**: A React frontend application built with TypeScript and Vite, providing a modern SaaS dashboard and profile/job pipeline interfaces.
 * **[pipeline](file:///Users/amrit/Development/work/auto-apply-pro/pipeline)**: A local Python-based AI pipeline utilizing Poetry, Alembic, and FastAPI. It orchestrates job description OCR/extraction (via local Ollama/deepseek-ocr) and resume parsing.
 * **[pipeline_architecture](file:///Users/amrit/Development/work/auto-apply-pro/pipeline_architecture)**: Detailed architecture specifications and diagrams for the local AI pipeline.
+* **[mobile](file:///Users/amrit/Development/work/auto-apply-pro/mobile)**: A React Native mobile application built with Expo, Expo Router, and NativeWind, offering local biometric authentication (FaceID/Fingerprint) and synchronized mobile dashboards.
 
 ---
 
@@ -51,10 +52,30 @@ This project is structured as a monorepo containing the following components:
 * **System Health:** Email deliverability rate (percentage of successfully sent emails without bounce-backs).
 * **User Efficiency:** Time saved per application compared to manual processing.
 
-### 5. Recent System Updates
+### 5. Feature Breakdown
+
+#### 📚 Learning Space & Career Roadmaps
+Auto Apply Pro features an integrated educational subsystem designed to help candidates upskill while executing their job search.
+* **Curriculum Roadmaps**: Step-by-step career path progression tracks (e.g., "Frontend Developer", "AI Engineer") composed of sequential learning milestones.
+* **Hierarchical Topic Explorer**: Interactive catalog of technical domains (e.g., Java, Databases, Machine Learning) divided into granular subtopics.
+* **Resource Completion Tracking**: Built-in support for bookmarking and completing tutorials (videos, documentations).
+* **Practice Quizzes**: Multiple-choice testing engines with immediate AI grading, correct answers, and thorough conceptual explanations.
+* **Progress Analytics**: Dashboard metrics displaying completed resources, solved questions, and overall path completion percentages.
+* **Daily Content**: Integrated daily tips and mock interview advice popups displayed dynamically on the Candidate Dashboard.
+
+#### 📱 Mobile Application (React Native & Expo)
+A cross-platform mobile client enabling on-the-go tracking and management of outreach campaigns.
+* **Expo-based Architecture**: Fast, modern React Native code styled with NativeWind (Tailwind CSS for React Native) and state managed via TanStack React Query.
+* **Secure Storage & Biometrics**: Local secure storage (`expo-secure-store`) for credentials and native biometric authentication (FaceID/TouchID) support via `expo-local-authentication`.
+* **Outreach Queue & Upload Tracker**: Real-time interface to monitor pipeline statuses, active screenshot uploads, and background AI OCR parse logs.
+* **Profile Management**: Profile page mapping active skills, candidate info, and uploaded resume assets.
+
+### 6. Recent System Updates
 * **Skills Database Refactoring**: Created a separate `skills` database table and established a many-to-many relationship (`candidate_skills`) with the `candidates` table. This allows dynamic skill categorization and autocomplete features.
 * **Resume Upload & DB Storage**: Implemented file upload for resumes, saving them directly as a byte array (BLOB) (`resume_bytes`) in the PostgreSQL candidate profile.
 * **UI Redesign**: Refactored the dashboard layout and candidate profile pages to match the Figma designs.
+* **Global Responsive Layout & Sidebar Drawer**: Moved the dashboard sidebar to the global layout layer. Created a responsive mobile navigation sliding drawer triggered by a header hamburger menu button, ensuring fluid compatibility across all devices and screen sizes.
+* **Light Theme UI/UX Polish**: Remedied readability bugs by refactoring low-contrast text strings to clear slate shades. Polished the drag-and-drop screenshot uploader, background queue logs, verification drafts, and styled the interactive image crop/rotate editor modal for light theme.
 
 ---
 
@@ -145,6 +166,28 @@ The AI outreach pipeline is a Python-based asynchronous service that handles job
    poetry run uvicorn src.server:app --host 0.0.0.0 --port 8000 --reload
    ```
 6. Once running, the service starts on port `8000`. You can access the API endpoints (e.g., `/extract-job-details`, `/parse-resume`, and `/generate-email`) to interact with the pipeline.
+
+---
+
+### 5. Mobile Application Setup & Run
+The mobile app is built with React Native and Expo. You can run it on your iOS/Android simulator or directly on your physical mobile device using the **Expo Go** application.
+
+1. Navigate to the mobile directory:
+   ```bash
+   cd mobile
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the Expo development server:
+   ```bash
+   npm run start
+   ```
+4. Once running:
+   - **For iOS Simulator**: Press `i` in the terminal command line.
+   - **For Android Emulator**: Press `a` in the terminal command line (make sure an emulator is running).
+   - **For Physical Device**: Download **Expo Go** from the Apple App Store or Google Play Store, and scan the QR code displayed in your terminal.
 
 ---
 
