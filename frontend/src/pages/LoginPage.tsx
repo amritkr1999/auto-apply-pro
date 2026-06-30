@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./login.css";
 import { profileService } from "../features/profile/services/profileService";
 
@@ -8,9 +8,22 @@ type UserRole = "candidate" | "recruiter" | "company";
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Tab State: 'login' or 'register'
-  const [tab, setTab] = useState<AuthTab>("login");
+  const [tab, setTab] = useState<AuthTab>(() => {
+    const params = new URLSearchParams(location.search);
+    const tabParam = params.get("tab");
+    return tabParam === "register" ? "register" : "login";
+  });
+
+  React.useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tabParam = params.get("tab");
+    if (tabParam === "register" || tabParam === "login") {
+      setTab(tabParam);
+    }
+  }, [location.search]);
 
   // Registration step state: 1 (role selection) or 2 (details form)
   const [regStep, setRegStep] = useState<number>(1);

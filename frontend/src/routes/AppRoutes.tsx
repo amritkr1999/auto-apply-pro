@@ -2,6 +2,7 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Layout from "../components/Layout";
 import LoginPage from "../pages/LoginPage";
+import LandingPage from "../pages/LandingPage";
 import CandidateDashboardView from "../features/dashboard/components/views/CandidateDashboardView";
 import RecruiterDashboardView from "../features/dashboard/components/views/RecruiterDashboardView";
 import CompanyDashboardView from "../features/dashboard/components/views/CompanyDashboardView";
@@ -20,7 +21,8 @@ import BillingPortal from "../features/billing/components/BillingPortal";
 export const AppRoutes: React.FC = () => {
   return (
     <Routes>
-      <Route path="/" element={<LoginPage />} />
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<LoginPage />} />
       <Route element={<Layout />}>
         <Route
           path="/candidate-dashboard"

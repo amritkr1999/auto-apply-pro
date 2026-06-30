@@ -1,51 +1,475 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import "./landing.css";
 
 export const LandingPage: React.FC = () => {
+  const userStr = localStorage.getItem("user");
+  const user = userStr ? JSON.parse(userStr) : null;
+
+  const getDashboardPath = () => {
+    if (!user) return "/login";
+    switch (user.role) {
+      case "RECRUITER":
+        return "/recruiter-dashboard";
+      case "COMPANY":
+        return "/company-dashboard";
+      default:
+        return "/candidate-dashboard";
+    }
+  };
+
   return (
-    <main className="landing-root">
-      <header className="hero">
-        <div className="hero-inner">
-          <h1 className="title">Auto Apply Pro</h1>
-          <p className="subtitle">
-            Automate your job applications and focus on interviews.
-          </p>
-          <div className="cta-row">
-            <a className="btn primary" href="#features">
-              Explore features
-            </a>
-            <a className="btn" href="/dashboard">
-              Go to dashboard
-            </a>
+    <div className="landing-root">
+      {/* ==================== Navigation Navbar ==================== */}
+      <nav className="landing-nav">
+        <div className="nav-container">
+          <a href="#" className="nav-logo">
+            <span>⚡</span> Auto Apply Pro
+          </a>
+          <ul className="nav-links">
+            <li className="nav-link-item"><a href="#what-we-do">What We Do</a></li>
+            <li className="nav-link-item"><a href="#benefits">Benefits</a></li>
+            <li className="nav-link-item"><a href="#pricing">Plans</a></li>
+            <li className="nav-link-item"><a href="#testimonials">Testimonials</a></li>
+            <li className="nav-link-item"><a href="#faqs">FAQs</a></li>
+          </ul>
+          <div className="nav-ctas">
+            {user ? (
+              <Link to={getDashboardPath()} className="landing-btn btn-primary">
+                Go to Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link to="/login" className="landing-btn btn-text">
+                  Login
+                </Link>
+                <Link to="/login?tab=register" className="landing-btn btn-outline">
+                  Get Started
+                </Link>
+              </>
+            )}
           </div>
         </div>
-        <div className="hero-graphic" aria-hidden>
-          <div className="card">Your job hunt, simplified</div>
+      </nav>
+
+      {/* ==================== Hero Section ==================== */}
+      <header className="hero-section">
+        <div className="hero-content">
+          <span className="hero-tagline">Now in Public Beta</span>
+          <h1 className="hero-title">
+            Automate Your Job Hunt. <br />
+            <span>Land More Interviews.</span>
+          </h1>
+          <p className="hero-subtitle">
+            Auto Apply Pro is your personal AI-driven job application autopilot. 
+            We automatically tailor resumes, fill out application forms, and track 
+            your application queues on autopilot while you focus on preparing for interviews.
+          </p>
+          <div className="hero-ctas">
+            {user ? (
+              <Link to={getDashboardPath()} className="landing-btn btn-primary">
+                Back to Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link to="/login?tab=register" className="landing-btn btn-primary">
+                  Get Started Free
+                </Link>
+                <a href="#what-we-do" className="landing-btn btn-outline">
+                  How it works
+                </a>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="hero-graphic-container">
+          <div className="glow-orb-hero" aria-hidden="true"></div>
+          <div className="hero-mockup-card">
+            <div className="mockup-header">
+              <div className="mockup-dots">
+                <span className="mockup-dot"></span>
+                <span className="mockup-dot"></span>
+                <span className="mockup-dot"></span>
+              </div>
+              <span className="mockup-status">AI Autopilot Running</span>
+            </div>
+            
+            <div className="mockup-row">
+              <span className="mockup-label">Match Score Threshold</span>
+              <span className="mockup-val">85% +</span>
+            </div>
+            <div className="mockup-row">
+              <span className="mockup-label">Daily Submission Limit</span>
+              <span className="mockup-val">15 / day</span>
+            </div>
+            
+            <div className="mockup-row" style={{ marginTop: "1rem" }}>
+              <span className="mockup-label">Weekly Queue Progress</span>
+              <span className="mockup-val">72% Completed</span>
+            </div>
+            <div className="mockup-progress-bar">
+              <div className="mockup-progress-fill"></div>
+            </div>
+
+            <div className="mockup-job-card">
+              <div className="mockup-job-icon">⚛️</div>
+              <div className="mockup-job-info">
+                <h4>Frontend Developer</h4>
+                <p>Vercel Inc. • Remote • 94% Skills Match</p>
+              </div>
+              <span style={{ marginLeft: "auto", fontSize: "0.75rem", color: "#22c55e", fontWeight: 600 }}>
+                Submitted
+              </span>
+            </div>
+          </div>
+
+          <div className="floating-overlay-card">
+            <div className="floating-icon">✓</div>
+            <div className="floating-details">
+              <h5>Applications Submitted</h5>
+              <p>1,482 this month</p>
+            </div>
+          </div>
         </div>
       </header>
 
-      <section id="features" className="features">
-        <h2>Features</h2>
-        <div className="feature-list">
-          <div className="feature">
-            <h3>Automated Applications</h3>
-            <p>Submit tailored applications to multiple roles quickly.</p>
+      {/* ==================== What We Do Section ==================== */}
+      <section id="what-we-do" className="landing-section">
+        <div className="section-header">
+          <span className="section-label">Workflow Automation</span>
+          <h2 className="section-title">How Auto Apply Pro Works</h2>
+          <p className="section-subtitle">
+            Let our AI assistant manage the entire job hunting pipeline, 
+            working behind the scenes to get you noticed.
+          </p>
+        </div>
+
+        <div className="steps-container">
+          <div className="step-card">
+            <span className="step-number">1</span>
+            <div className="step-icon">📄</div>
+            <h3 className="step-title">Upload & Analyze</h3>
+            <p className="step-description">
+              Drop in your resume and profile details. Our system extracts your key skills, 
+              experience levels, and target job parameters.
+            </p>
           </div>
-          <div className="feature">
-            <h3>Smart Matching</h3>
-            <p>Find roles that match your skills and preferences.</p>
+
+          <div className="step-card">
+            <span className="step-number">2</span>
+            <div className="step-icon">🎯</div>
+            <h3 className="step-title">Smart Matching</h3>
+            <p className="step-description">
+              Our matching engine evaluates job descriptions across major websites 
+              to isolate listings that maximize your hiring potential.
+            </p>
           </div>
-          <div className="feature">
-            <h3>Track Progress</h3>
-            <p>Monitor where you applied and upcoming interviews.</p>
+
+          <div className="step-card">
+            <span className="step-number">3</span>
+            <div className="step-icon">🤖</div>
+            <h3 className="step-title">Autopilot Applying</h3>
+            <p className="step-description">
+              The AI dynamically creates tailored answers, customizes your resume 
+              to match keywords, and submits the applications for you.
+            </p>
           </div>
         </div>
       </section>
 
+      {/* ==================== Benefits Section ==================== */}
+      <section id="benefits" className="landing-section">
+        <div className="section-header">
+          <span className="section-label">Key Advantages</span>
+          <h2 className="section-title">Designed to Save Your Time</h2>
+          <p className="section-subtitle">
+            Job hunting doesn't have to be a full-time job. Get the competitive edge 
+            needed to succeed.
+          </p>
+        </div>
+
+        <div className="benefits-grid">
+          <div className="benefit-card">
+            <div className="benefit-icon-wrapper">⏱️</div>
+            <div className="benefit-info">
+              <h3 className="benefit-title">Save 80+ Hours Monthly</h3>
+              <p className="benefit-description">
+                Skip filling repeating application forms on job boards. Spend your time 
+                preparing for upcoming interviews instead.
+              </p>
+            </div>
+          </div>
+
+          <div className="benefit-card">
+            <div className="benefit-icon-wrapper">🎯</div>
+            <div className="benefit-info">
+              <h3 className="benefit-title">ATS-Optimized Customization</h3>
+              <p className="benefit-description">
+                We rewrite application responses and highlight relevant skills 
+                to ensure your profiles pass automated ATS screening filters.
+              </p>
+            </div>
+          </div>
+
+          <div className="benefit-card">
+            <div className="benefit-icon-wrapper">📈</div>
+            <div className="benefit-info">
+              <h3 className="benefit-title">Unified Tracking Dashboard</h3>
+              <p className="benefit-description">
+                Keep tabs on all applications, upcoming stages, and offers in one centralized, 
+                high-fidelity dashboard.
+              </p>
+            </div>
+          </div>
+
+          <div className="benefit-card">
+            <div className="benefit-icon-wrapper">💼</div>
+            <div className="benefit-info">
+              <h3 className="benefit-title">Recruiter Partnerships</h3>
+              <p className="benefit-description">
+                Connect directly with recruiters and businesses looking for verified candidates 
+                matching your specific skillset.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ==================== Pricing Plans Section ==================== */}
+      <section id="pricing" className="landing-section">
+        <div className="section-header">
+          <span className="section-label">Pricing Tiers</span>
+          <h2 className="section-title">Select the Perfect Plan</h2>
+          <p className="section-subtitle">
+            Start free and upgrade as you scale your search. No hidden fees, cancel anytime.
+          </p>
+        </div>
+
+        <div className="pricing-grid">
+          {/* Free Tier */}
+          <div className="pricing-card">
+            <h3 className="pricing-tier">Candidate Free</h3>
+            <div className="pricing-price">$0<span>/month</span></div>
+            <p className="pricing-desc">Perfect for testing the system and getting familiar with automation.</p>
+            <div className="pricing-divider"></div>
+            <ul className="pricing-features">
+              <li className="pricing-feature-item">
+                <span className="pricing-feature-check">✓</span> 3 Submissions per day
+              </li>
+              <li className="pricing-feature-item">
+                <span className="pricing-feature-check">✓</span> Standard matching algorithm
+              </li>
+              <li className="pricing-feature-item">
+                <span className="pricing-feature-check">✓</span> Basic interview tracking
+              </li>
+              <li className="pricing-feature-item" style={{ opacity: 0.4 }}>
+                <span style={{ marginRight: "0.75rem" }}>✕</span> Custom cover letters
+              </li>
+            </ul>
+            <Link to="/login?tab=register" className="landing-btn btn-outline pricing-btn">
+              Get Started Free
+            </Link>
+          </div>
+
+          {/* Premium Tier */}
+          <div className="pricing-card featured">
+            <span className="pricing-badge">Most Popular</span>
+            <h3 className="pricing-tier">Candidate Pro</h3>
+            <div className="pricing-price">$19<span>/month</span></div>
+            <p className="pricing-desc">For serious job seekers looking to land multiple interviews quickly.</p>
+            <div className="pricing-divider"></div>
+            <ul className="pricing-features">
+              <li className="pricing-feature-item">
+                <span className="pricing-feature-check">✓</span> 20 Submissions per day
+              </li>
+              <li className="pricing-feature-item">
+                <span className="pricing-feature-check">✓</span> High-priority matching
+              </li>
+              <li className="pricing-feature-item">
+                <span className="pricing-feature-check">✓</span> Automated Cover Letter tailoring
+              </li>
+              <li className="pricing-feature-item">
+                <span className="pricing-feature-check">✓</span> Custom dashboard statistics
+              </li>
+              <li className="pricing-feature-item">
+                <span className="pricing-feature-check">✓</span> Priority email support
+              </li>
+            </ul>
+            <Link to="/login?tab=register" className="landing-btn btn-primary pricing-btn">
+              Upgrade to Pro
+            </Link>
+          </div>
+
+          {/* Recruiter Tier */}
+          <div className="pricing-card">
+            <h3 className="pricing-tier">Recruiter Elite</h3>
+            <div className="pricing-price">$49<span>/month</span></div>
+            <p className="pricing-desc">For professional recruiters and companies targeting top-tier talents.</p>
+            <div className="pricing-divider"></div>
+            <ul className="pricing-features">
+              <li className="pricing-feature-item">
+                <span className="pricing-feature-check">✓</span> Unlimited candidate search
+              </li>
+              <li className="pricing-feature-item">
+                <span className="pricing-feature-check">✓</span> Advanced talent filter pipeline
+              </li>
+              <li className="pricing-feature-item">
+                <span className="pricing-feature-check">✓</span> Outreach drafts manager
+              </li>
+              <li className="pricing-feature-item">
+                <span className="pricing-feature-check">✓</span> Direct messaging to candidates
+              </li>
+              <li className="pricing-feature-item">
+                <span className="pricing-feature-check">✓</span> Dedicated account manager
+              </li>
+            </ul>
+            <Link to="/login?tab=register" className="landing-btn btn-outline pricing-btn">
+              Get Recruiter License
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ==================== Testimonials Section ==================== */}
+      <section id="testimonials" className="landing-section">
+        <div className="section-header">
+          <span className="section-label">Success Stories</span>
+          <h2 className="section-title">Loved by Job Seekers</h2>
+          <p className="section-subtitle">
+            Hear from developers and professionals who automated their job hunt and succeeded.
+          </p>
+        </div>
+
+        <div className="testimonials-grid">
+          <div className="testimonial-card">
+            <div className="testimonial-stars">★★★★★</div>
+            <p className="testimonial-quote">
+              Auto Apply Pro saved me weeks of manual copy-pasting. I was able to target 
+              top companies with customized submissions and landed a Senior Frontend Developer 
+              role at a startup within 14 days!
+            </p>
+            <div className="testimonial-user">
+              <div className="testimonial-avatar">SM</div>
+              <div className="testimonial-meta">
+                <h4>Sarah Jenkins</h4>
+                <p>Senior Frontend Developer</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="testimonial-card">
+            <div className="testimonial-stars">★★★★★</div>
+            <p className="testimonial-quote">
+              The AI resume tailoring works like magic. My response rate increased from less 
+              than 5% to almost 35%. Having a single dashboard to track all of my interview invitations 
+              made the organization a breeze.
+            </p>
+            <div className="testimonial-user">
+              <div className="testimonial-avatar">DK</div>
+              <div className="testimonial-meta">
+                <h4>David Kim</h4>
+                <p>Technical Product Manager</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ==================== FAQs Section ==================== */}
+      <section id="faqs" className="landing-section">
+        <div className="section-header">
+          <span className="section-label">Questions & Answers</span>
+          <h2 className="section-title">Frequently Asked Questions</h2>
+          <p className="section-subtitle">
+            Find answers to commonly asked questions about our automation features and policies.
+          </p>
+        </div>
+
+        <div className="faqs-container">
+          <details className="faq-item" name="landing-faqs" open>
+            <summary>How does the automated application process work?</summary>
+            <p className="faq-content">
+              After you upload your resume and set your target preferences (e.g. roles, location, salary), 
+              our AI agents scan job postings, identify optimal fits, adapt your skills text to matching keywords, 
+              and automatically fill form fields on target websites on your behalf.
+            </p>
+          </details>
+
+          <details className="faq-item" name="landing-faqs">
+            <summary>Can I review applications before they are sent?</summary>
+            <p className="faq-content">
+              Yes! You can choose to enable "Review Mode" in your profile. When enabled, applications 
+              will be drafted in your Outreach Queue, where you can check the customized response, 
+              adjust cover letters, and confirm submission manually.
+            </p>
+          </details>
+
+          <details className="faq-item" name="landing-faqs">
+            <summary>Which job boards and systems do you support?</summary>
+            <p className="faq-content">
+              Auto Apply Pro supports major job sites like LinkedIn, Indeed, ZipRecruiter, Greenhouse, 
+              and Lever applicant tracking systems (ATS), with support for more portals being updated weekly.
+            </p>
+          </details>
+
+          <details className="faq-item" name="landing-faqs">
+            <summary>Is my personal information secure?</summary>
+            <p className="faq-content">
+              Your security is our priority. We encrypt your personal data and documents during transit 
+              and at rest. We never sell your personal information or resume files to third-party data brokers.
+            </p>
+          </details>
+        </div>
+      </section>
+
+      {/* ==================== Footer ==================== */}
       <footer className="landing-footer">
-        <small>© {new Date().getFullYear()} Auto Apply Pro</small>
+        <div className="footer-container">
+          <div className="footer-brand">
+            <h3>Auto Apply Pro</h3>
+            <p>Automate your application pipelines, track interviews, and focus on preparing for the hiring call.</p>
+            <div className="footer-socials">
+              <a href="#" className="footer-social-link" aria-label="X (Twitter)">𝕏</a>
+              <a href="#" className="footer-social-link" aria-label="GitHub">🐙</a>
+              <a href="#" className="footer-social-link" aria-label="LinkedIn">in</a>
+            </div>
+          </div>
+
+          <div className="footer-column">
+            <h4>Product</h4>
+            <ul className="footer-links">
+              <li className="footer-link-item"><a href="#what-we-do">Features</a></li>
+              <li className="footer-link-item"><a href="#pricing">Pricing Plans</a></li>
+              <li className="footer-link-item"><a href="#faqs">Q&A Support</a></li>
+            </ul>
+          </div>
+
+          <div className="footer-column">
+            <h4>Legal</h4>
+            <ul className="footer-links">
+              <li className="footer-link-item"><a href="#">Privacy Policy</a></li>
+              <li className="footer-link-item"><a href="#">Terms of Service</a></li>
+              <li className="footer-link-item"><a href="#">Security Audits</a></li>
+            </ul>
+          </div>
+
+          <div className="footer-column">
+            <h4>Company</h4>
+            <ul className="footer-links">
+              <li className="footer-link-item"><a href="#">About Us</a></li>
+              <li className="footer-link-item"><a href="#">Careers</a></li>
+              <li className="footer-link-item"><a href="#">Contact Us</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="footer-bottom">
+          <span>© {new Date().getFullYear()} Auto Apply Pro. All rights reserved.</span>
+          <span>Designed with high-fidelity glassmorphism.</span>
+        </div>
       </footer>
-    </main>
+    </div>
   );
 };
 
