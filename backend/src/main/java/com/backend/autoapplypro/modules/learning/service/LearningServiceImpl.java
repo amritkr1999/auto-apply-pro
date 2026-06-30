@@ -26,6 +26,7 @@ public class LearningServiceImpl implements LearningService {
     private final DailyTipRepository dailyTipRepository;
     private final UserLearningProgressRepository progressRepository;
     private final UserRepository userRepository;
+    private final RoadmapRepository roadmapRepository;
 
     @Override
     public List<TopicResponseDto> getAllTopicsHierarchy() {
@@ -270,4 +271,106 @@ public class LearningServiceImpl implements LearningService {
                         .collect(Collectors.toSet()))
                 .orElse(Collections.emptySet());
     }
+
+    @Override
+    public List<RoadmapResponseDto> getAllRoadmaps(String userEmail) {
+        List<Roadmap> roadmaps = roadmapRepository.findAll();
+        Set<Long> completedQuestionIds = getCompletedQuestionIds(userEmail);
+        Set<Long> completedResourceIds = getCompletedResourceIds(userEmail);
+
+        return roadmaps.stream()
+                .map(rm -> {
+                    double progress = calculateRoadmapProgress(rm, completedQuestionIds, completedResourceIds);
+                    List<RoadmapStepDto> steps = rm.getSteps().stream()
+                            .map(step -> mapToStepDto(step, completedQuestionIds, completedResourceIds))
+                            .collect(Collectors.toList());
+
+                    return RoadmapResponseDto.builder()
+                            .id(rm.getId())
+                            .title(rm.getTitle())
+                            .description(rm.getDescription())
+                            .icon(rm.getIcon())
+                            .progressPercentage(progress)
+                            .steps(steps)
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public RoadmapResponseDto getRoadmapById(Long roadmapId, String userEmail) {
+        Roadmap rm = roadmapRepository.findById(roadmapId)
+                .orElseThrow(() -> new IllegalArgumentException("Roadmap not found with ID: " + roadmapId));
+        Set<Long> completedQuestionIds = getCompletedQuestionIds(userEmail);
+        Set<Long> completedResourceIds = getCompletedResourceIds(userEmail);
+
+        double progress = calculateRoadmapProgress(rm, completedQuestionIds, completedResourceIds);
+        List<RoadmapStepDto> steps = rm.getSteps().stream()
+                .map(step -> mapToStepDto(step, completedQuestionIds, completedResourceIds))
+                .collect(Collectors.toList());
+
+        return RoadmapResponseDto.builder()
+                .id(rm.getId())
+                .title(rm.getTitle())
+                .description(rm.getDescription())
+                .icon(rm.getIcon())
+                .progressPercentage(progress)
+                .steps(steps)
+                .build();
+    }
+
+    private RoadmapStepDto mapToStepDto(RoadmapStep step, Set<Long> completedQuestionIds, Set<Long> completedResourceIds) {
+        double progress = calculateTopicsProgress(step.getTopics(), completedQuestionIds, completedResourceIds);
+        List<TopicResponseDto> topics = step.getTopics().stream()
+                .map(this::mapToTopicResponseDto)
+                .collect(Collectors.toList());
+
+        return RoadmapStepDto.builder()
+                .id(step.getId())
+                .stepOrder(step.getStepOrder())
+                .title(step.getTitle())
+                .description(step.getDescription())
+                .progressPercentage(progress)
+                .topics(topics)
+                .build();
+    }
+
+    private double calculateRoadmapProgress(Roadmap rm, Set<Long> completedQuestionIds, Set<Long> completedResourceIds) {
+        List<Topic> allTopics = new ArrayList<>();
+        for (RoadmapStep step : rm.getSteps()) {
+            allTopics.addAll(step.getTopics());
+        }
+        return calculateTopicsProgress(allTopics, completedQuestionIds, completedResourceIds);
+    }
+
+    private double calculateTopicsProgress(List<Topic> topics, Set<Long> completedQuestionIds, Set<Long> completedResourceIds) {
+        List<Long> allTopicIds = new ArrayList<>();
+        for (Topic topic : topics) {
+            collectTopicIds(topic, allTopicIds);
+        }
+
+        if (allTopicIds.isEmpty()) {
+            return 0.0;
+        }
+
+        List<PracticeQuestion> questions = questionRepository.findAll().stream()
+                .filter(q -> q.getTopic() != null && allTopicIds.contains(q.getTopic().getId()))
+                .toList();
+
+        List<Resource> resources = resourceRepository.findAll().stream()
+                .filter(r -> r.getTopic() != null && allTopicIds.contains(r.getTopic().getId()))
+                .toList();
+
+        int totalCount = questions.size() + resources.size();
+        if (totalCount == 0) {
+            return 0.0;
+        }
+
+        long completedCount = questions.stream().filter(q -> completedQuestionIds.contains(q.getId())).count() +
+                resources.stream().filter(r -> completedResourceIds.contains(r.getId())).count();
+
+        double percentage = ((double) completedCount / totalCount) * 100.0;
+        return Math.round(percentage * 10.0) / 10.0;
+    }
+
 }

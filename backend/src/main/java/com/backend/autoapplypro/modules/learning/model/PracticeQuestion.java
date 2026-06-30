@@ -39,11 +39,11 @@ public class PracticeQuestion {
         name = "practice_question_choices",
         joinColumns = @JoinColumn(name = "question_id")
     )
-    @Column(name = "choice", nullable = false)
+    @Column(name = "choice", nullable = false, columnDefinition = "TEXT")
     @Builder.Default
     private List<String> choices = new ArrayList<>();
 
-    @Column(name = "correct_answer", nullable = false)
+    @Column(name = "correct_answer", nullable = false, columnDefinition = "TEXT")
     private String correctAnswer;
 
     @Column(columnDefinition = "TEXT")

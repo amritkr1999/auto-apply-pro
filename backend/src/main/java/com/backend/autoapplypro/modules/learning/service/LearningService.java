@@ -12,4 +12,6 @@ public interface LearningService {
     boolean toggleResourceCompletion(Long resourceId, String userEmail);
     DailyContentDto getDailyContent(String userEmail);
     ProgressDto getProgress(String userEmail);
+    List<RoadmapResponseDto> getAllRoadmaps(String userEmail);
+    RoadmapResponseDto getRoadmapById(Long roadmapId, String userEmail);
 }

@@ -77,4 +77,20 @@ public class LearningController {
         log.info("Fetching progress for user: {}", email);
         return ResponseEntity.ok(learningService.getProgress(email));
     }
+
+    @GetMapping("/roadmaps")
+    public ResponseEntity<List<RoadmapResponseDto>> getAllRoadmaps(Authentication authentication) {
+        String email = authentication != null ? authentication.getName() : null;
+        log.info("Fetching all roadmaps for user: {}", email);
+        return ResponseEntity.ok(learningService.getAllRoadmaps(email));
+    }
+
+    @GetMapping("/roadmaps/{roadmapId}")
+    public ResponseEntity<RoadmapResponseDto> getRoadmapById(
+            @PathVariable Long roadmapId,
+            Authentication authentication) {
+        String email = authentication != null ? authentication.getName() : null;
+        log.info("Fetching roadmap details for ID: {} for user: {}", roadmapId, email);
+        return ResponseEntity.ok(learningService.getRoadmapById(roadmapId, email));
+    }
 }

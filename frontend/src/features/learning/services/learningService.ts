@@ -25,6 +25,24 @@ export interface Topic {
   subtopics?: Topic[];
 }
 
+export interface Roadmap {
+  id: number;
+  title: string;
+  description: string;
+  icon?: string;
+  progressPercentage: number;
+  steps?: RoadmapStep[];
+}
+
+export interface RoadmapStep {
+  id: number;
+  stepOrder: number;
+  title: string;
+  description: string;
+  progressPercentage: number;
+  topics: Topic[];
+}
+
 export interface Resource {
   id: number;
   title: string;
@@ -151,6 +169,26 @@ export const learningService = {
     });
     if (!response.ok) {
       throw new Error("Failed to load learning progress");
+    }
+    return response.json();
+  },
+
+  async getRoadmaps(): Promise<Roadmap[]> {
+    const response = await fetch(`${API_BASE}/learning/roadmaps`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to load roadmaps");
+    }
+    return response.json();
+  },
+
+  async getRoadmapDetails(id: number): Promise<Roadmap> {
+    const response = await fetch(`${API_BASE}/learning/roadmaps/${id}`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to load roadmap details");
     }
     return response.json();
   },

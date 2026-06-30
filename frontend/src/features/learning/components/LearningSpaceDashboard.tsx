@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { learningService } from "../services/learningService";
-import type { Topic, DailyContent, Progress } from "../services/learningService";
+import type { Topic, DailyContent, Progress, Roadmap } from "../services/learningService";
 
 export const LearningSpaceDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [topics, setTopics] = useState<Topic[]>([]);
+  const [roadmaps, setRoadmaps] = useState<Roadmap[]>([]);
+  const [activeView, setActiveView] = useState<"topics" | "roadmaps">("topics");
   const [daily, setDaily] = useState<DailyContent | null>(null);
   const [progress, setProgress] = useState<Progress | null>(null);
   const [selectedAnswer, setSelectedAnswer] = useState<string>("");
@@ -17,14 +19,16 @@ export const LearningSpaceDashboard: React.FC = () => {
     const loadDashboardData = async () => {
       try {
         setLoading(true);
-        const [topicsData, dailyData, progressData] = await Promise.all([
+        const [topicsData, dailyData, progressData, roadmapsData] = await Promise.all([
           learningService.getTopics(),
           learningService.getDailyContent(),
-          learningService.getProgress()
+          learningService.getProgress(),
+          learningService.getRoadmaps()
         ]);
         setTopics(topicsData);
         setDaily(dailyData);
         setProgress(progressData);
+        setRoadmaps(roadmapsData);
       } catch (err: any) {
         console.error(err);
         setError("Failed to load learning space. Please make sure the backend is running.");
@@ -370,80 +374,201 @@ export const LearningSpaceDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* 3. Tech Stack Subjects Grid */}
-      <div className="space-y-4">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-800">Choose a Topic</h2>
-          <p className="text-slate-500 text-sm">Select a language or framework to access reference links and subtopic worksheets.</p>
+      {/* 3. Toggleable Subjects & Roadmaps View */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+          <div className="flex items-center gap-6">
+            <button
+              onClick={() => setActiveView("topics")}
+              className={`pb-3 font-extrabold text-sm border-b-2 transition-all duration-200 focus:outline-none ${
+                activeView === "topics"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              Core Subjects
+            </button>
+            <button
+              onClick={() => setActiveView("roadmaps")}
+              className={`pb-3 font-extrabold text-sm border-b-2 transition-all duration-200 focus:outline-none ${
+                activeView === "roadmaps"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              Career Roadmaps
+            </button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {topics.map((topic) => {
-            const theme = getTopicColorTheme(topic.icon);
-            // Fetch topic-specific progress detail if available
-            const topicProgress = progress?.topicProgress?.find((p) => p.topicId === topic.id);
-            const solvedCount = topicProgress?.solvedQuestions || 0;
-            const totalCount = topicProgress?.totalQuestions || 0;
-            const resSolved = topicProgress?.completedResources || 0;
-            const resTotal = topicProgress?.totalResources || 0;
-            const percent = topicProgress?.percentage || 0;
+        {activeView === "topics" ? (
+          <div className="space-y-4 animate-in fade-in duration-300">
+            <div>
+              <h2 className="text-xl font-bold text-slate-800">Choose a Topic</h2>
+              <p className="text-slate-500 text-xs sm:text-sm">Select a language or framework to access reference links and subtopic worksheets.</p>
+            </div>
 
-            return (
-              <div
-                key={topic.id}
-                onClick={() => navigate(`/learning/topic/${topic.id}`)}
-                className={`bg-white border border-slate-200 rounded-xl p-5 hover:shadow-md cursor-pointer transition-all duration-300 flex flex-col justify-between ${theme.border} group`}
-              >
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className={`p-3 rounded-lg ${theme.bg} group-hover:scale-110 transition-transform duration-300`}>
-                      {getTopicIcon(topic.icon)}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {topics.map((topic) => {
+                const theme = getTopicColorTheme(topic.icon);
+                const topicProgress = progress?.topicProgress?.find((p) => p.topicId === topic.id);
+                const solvedCount = topicProgress?.solvedQuestions || 0;
+                const totalCount = topicProgress?.totalQuestions || 0;
+                const resSolved = topicProgress?.completedResources || 0;
+                const resTotal = topicProgress?.totalResources || 0;
+                const percent = topicProgress?.percentage || 0;
+
+                return (
+                  <div
+                    key={topic.id}
+                    onClick={() => navigate(`/learning/topic/${topic.id}`)}
+                    className={`bg-white border border-slate-200 rounded-xl p-5 hover:shadow-md cursor-pointer transition-all duration-300 flex flex-col justify-between ${theme.border} group`}
+                  >
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className={`p-3 rounded-lg ${theme.bg} group-hover:scale-110 transition-transform duration-300`}>
+                          {getTopicIcon(topic.icon)}
+                        </div>
+                        <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest group-hover:text-primary transition-colors">
+                          Enter Space →
+                        </span>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <h3 className="font-bold text-slate-800 group-hover:text-slate-900 text-base">{topic.name}</h3>
+                        <p className="text-slate-500 text-xs leading-relaxed line-clamp-2">{topic.description}</p>
+                      </div>
                     </div>
-                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest group-hover:text-primary transition-colors">
-                      Enter Space →
-                    </span>
-                  </div>
 
-                  <div className="space-y-1.5">
-                    <h3 className="font-bold text-slate-800 group-hover:text-slate-900 text-base">{topic.name}</h3>
-                    <p className="text-slate-500 text-xs leading-relaxed line-clamp-2">{topic.description}</p>
-                  </div>
-                </div>
+                    <div className="space-y-3 mt-6 pt-4 border-t border-slate-100">
+                      <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium">
+                        <span>Progress: {percent}%</span>
+                        <span>Q: {solvedCount}/{totalCount} | R: {resSolved}/{resTotal}</span>
+                      </div>
 
-                <div className="space-y-3 mt-6 pt-4 border-t border-slate-100">
-                  <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium">
-                    <span>Progress: {percent}%</span>
-                    <span>Q: {solvedCount}/{totalCount} | R: {resSolved}/{resTotal}</span>
-                  </div>
+                      <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                        <div
+                          className={`h-full ${theme.accent} rounded-full transition-all duration-500`}
+                          style={{ width: `${percent}%` }}
+                        ></div>
+                      </div>
 
-                  {/* Micro Progress Bar */}
-                  <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                    <div
-                      className={`h-full ${theme.accent} rounded-full transition-all duration-500`}
-                      style={{ width: `${percent}%` }}
-                    ></div>
-                  </div>
-
-                  {/* Subtopics list preview */}
-                  {topic.subtopics && topic.subtopics.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mt-2">
-                      {topic.subtopics.slice(0, 2).map((sub) => (
-                        <span key={sub.id} className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-medium truncate max-w-[100px]">
-                          {sub.name}
-                        </span>
-                      ))}
-                      {topic.subtopics.length > 2 && (
-                        <span className="text-[10px] bg-slate-50 text-slate-400 px-2 py-0.5 rounded-full font-bold">
-                          +{topic.subtopics.length - 2} more
-                        </span>
+                      {topic.subtopics && topic.subtopics.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {topic.subtopics.slice(0, 2).map((sub) => (
+                            <span key={sub.id} className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-medium truncate max-w-[100px]">
+                              {sub.name}
+                            </span>
+                          ))}
+                          {topic.subtopics.length > 2 && (
+                            <span className="text-[10px] bg-slate-50 text-slate-400 px-2 py-0.5 rounded-full font-bold">
+                              +{topic.subtopics.length - 2} more
+                            </span>
+                          )}
+                        </div>
                       )}
                     </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4 animate-in fade-in duration-300">
+            <div>
+              <h2 className="text-xl font-bold text-slate-800">Select a Career Path</h2>
+              <p className="text-slate-500 text-xs sm:text-sm">Structured learning timelines combining multiple topics to master a specialization.</p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {roadmaps.map((rm) => {
+                const percent = rm.progressPercentage || 0;
+                
+                let cardTheme = "hover:border-indigo-300";
+                let progressAccent = "bg-indigo-500";
+                let iconColor = "text-indigo-600 bg-indigo-50";
+                
+                const titleLower = rm.title.toLowerCase();
+                if (titleLower.includes("java full stack") || titleLower.includes("java backend")) {
+                  cardTheme = "hover:border-orange-300";
+                  progressAccent = "bg-orange-500";
+                  iconColor = "text-orange-600 bg-orange-50";
+                } else if (titleLower.includes("python")) {
+                  cardTheme = "hover:border-blue-300";
+                  progressAccent = "bg-blue-500";
+                  iconColor = "text-blue-600 bg-blue-50";
+                } else if (titleLower.includes("ai engineer")) {
+                  cardTheme = "hover:border-purple-300";
+                  progressAccent = "bg-purple-500";
+                  iconColor = "text-purple-600 bg-purple-50";
+                } else if (titleLower.includes("frontend")) {
+                  cardTheme = "hover:border-rose-300";
+                  progressAccent = "bg-rose-500";
+                  iconColor = "text-rose-600 bg-rose-50";
+                } else if (titleLower.includes("data analyst")) {
+                  cardTheme = "hover:border-emerald-300";
+                  progressAccent = "bg-emerald-500";
+                  iconColor = "text-emerald-600 bg-emerald-50";
+                }
+
+                return (
+                  <div
+                    key={rm.id}
+                    onClick={() => navigate(`/learning/roadmap/${rm.id}`)}
+                    className={`bg-white border border-slate-200 rounded-xl p-5 hover:shadow-md cursor-pointer transition-all duration-300 flex flex-col justify-between ${cardTheme} group`}
+                  >
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className={`p-3 rounded-lg ${iconColor} group-hover:scale-110 transition-transform duration-300`}>
+                          {rm.icon === "cpu" ? (
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 3v1.5M4.5 8.25H3m10.5-5.25v1.5M3 12h1.5m16.5-.75h-1.5M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                            </svg>
+                          ) : rm.icon === "chart" ? (
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
+                            </svg>
+                          ) : rm.icon === "database" ? (
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75M3.75 10.125v3.75m16.5 0v3.75m-16.5-3.75v3.75" />
+                            </svg>
+                          ) : (
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.03 0 1.9.693 2.166 1.638m-7.377 0A48.536 48.536 0 0112 3m0 0c2.917 0 5.747.294 8.5.862m-21 10.398c0-.552.448-1 1-1h6.25a1 1 0 011 1v3.834a1 1 0 01-1 1H2.5a1 1 0 01-1-1v-3.834z" />
+                            </svg>
+                          )}
+                        </div>
+                        <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest group-hover:text-primary transition-colors">
+                          View Roadmap →
+                        </span>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <h3 className="font-bold text-slate-800 group-hover:text-slate-900 text-base">{rm.title}</h3>
+                        <p className="text-slate-500 text-xs leading-relaxed line-clamp-3">{rm.description}</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3 mt-6 pt-4 border-t border-slate-100">
+                      <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium">
+                        <span>Completion: {percent}%</span>
+                        <span>Structured Learning Path</span>
+                      </div>
+
+                      {/* Micro Progress Bar */}
+                      <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                        <div
+                          className={`h-full ${progressAccent} rounded-full transition-all duration-500`}
+                          style={{ width: `${percent}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

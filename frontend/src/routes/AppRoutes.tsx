@@ -13,6 +13,7 @@ import DraftsReviewPage from "../pages/DraftsReviewPage";
 import QueueDetailsPage from "../pages/QueueDetailsPage";
 import LearningSpaceDashboard from "../features/learning/components/LearningSpaceDashboard";
 import TopicDetailsView from "../features/learning/components/TopicDetailsView";
+import RoadmapDetailsView from "../features/learning/components/RoadmapDetailsView";
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -39,6 +40,7 @@ export const AppRoutes: React.FC = () => {
         <Route path="/outreach/queue" element={<QueueDetailsPage />} />
         <Route path="/learning" element={<LearningSpaceDashboard />} />
         <Route path="/learning/topic/:topicId" element={<TopicDetailsView />} />
+        <Route path="/learning/roadmap/:roadmapId" element={<RoadmapDetailsView />} />
       </Route>
     </Routes>
   );
