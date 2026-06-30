@@ -42,6 +42,11 @@ public class GmailEmailSender implements EmailSender {
 
     @Override
     public void sendEmail(Long userId, String to, String subject, String body) {
+        sendEmail(userId, to, null, subject, body);
+    }
+
+    @Override
+    public void sendEmail(Long userId, String to, String cc, String subject, String body) {
         GmailCredential credential = credentialRepository.findByUserId(userId)
                 .orElseThrow(() -> new OutreachSendException(OutreachErrorType.UNAUTHORIZED, 
                         "Gmail account not connected for user ID: " + userId));
@@ -79,7 +84,7 @@ public class GmailEmailSender implements EmailSender {
             }
 
             // Construct MIME message
-            MimeMessage mimeMessage = createMimeMessage(credential.getConnectedEmail(), to, subject, body, 
+            MimeMessage mimeMessage = createMimeMessage(credential.getConnectedEmail(), to, cc, subject, body, 
                     resumeBytes, resumeContentType, resumeFilename);
             
             // Serialize and Base64-encode
@@ -139,11 +144,14 @@ public class GmailEmailSender implements EmailSender {
         }
     }
 
-    private MimeMessage createMimeMessage(String from, String to, String subject, String body, 
+    private MimeMessage createMimeMessage(String from, String to, String cc, String subject, String body, 
                                            byte[] attachmentBytes, String contentType, String filename) throws Exception {
         MimeMessage mimeMessage = new MimeMessage(Session.getDefaultInstance(new Properties()));
         mimeMessage.setFrom(new InternetAddress(from));
         mimeMessage.addRecipient(MimeMessage.RecipientType.TO, new InternetAddress(to));
+        if (cc != null && !cc.trim().isEmpty()) {
+            mimeMessage.addRecipients(MimeMessage.RecipientType.CC, InternetAddress.parse(cc));
+        }
         mimeMessage.setSubject(subject, "UTF-8");
 
         if (attachmentBytes != null && attachmentBytes.length > 0) {

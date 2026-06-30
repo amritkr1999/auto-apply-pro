@@ -105,7 +105,7 @@ async def extract_job_details(file: UploadFile = File(...)):
             "salary": salary_str,
             "sourceUrl": job_desc.source_filename,
             "skills": job_desc.skills,
-            "hr_email": job_desc.recruiter_email
+            "hr_emails": job_desc.recruiter_emails
         }
         return response_data
     except Exception as e:
@@ -149,7 +149,7 @@ class EmailJobDetails(BaseModel):
     skills: List[str] = []
     location: Optional[str] = None
     job_type: Optional[str] = None
-    recruiter_email: Optional[str] = None
+    recruiter_emails: List[str] = []
 
 class EmailExperienceEntry(BaseModel):
     title: str

@@ -20,7 +20,7 @@ public class JobDetailsDto {
     private String sourceUrl;
     private java.util.List<String> skills;
 
-    @JsonProperty("hr_email")
-    private String hrEmail;
+    @JsonProperty("hr_emails")
+    private java.util.List<String> hrEmails;
     private String status;
 }

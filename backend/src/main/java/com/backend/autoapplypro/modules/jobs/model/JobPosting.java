@@ -41,6 +41,9 @@ public class JobPosting {
     @Column(name = "hr_email")
     private String hrEmail;
 
+    @Column(name = "hr_emails")
+    private String hrEmails;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "job_posting_skills",

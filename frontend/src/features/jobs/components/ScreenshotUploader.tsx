@@ -365,6 +365,8 @@ export const ScreenshotUploader: React.FC = () => {
         subject: draft.subject,
         body: draft.body,
         recipientEmail: draft.recipientEmail,
+        ccEmails: draft.ccEmails,
+        parsedEmails: draft.parsedEmails,
         status: "PENDING"
       });
       
@@ -411,6 +413,8 @@ export const ScreenshotUploader: React.FC = () => {
           subject: draft.subject,
           body: draft.body,
           recipientEmail: draft.recipientEmail,
+          ccEmails: draft.ccEmails,
+          parsedEmails: draft.parsedEmails,
           status: "PENDING"
         });
         approvedCount++;
@@ -1002,8 +1006,8 @@ export const ScreenshotUploader: React.FC = () => {
                         <span className="text-[11px] font-semibold text-indigo-650 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
                           Draft #{drafts.length - idx}
                         </span>
-                        <span className="text-xs text-slate-500 font-medium truncate max-w-[200px]" title={draft.recipientEmail}>
-                          To: {draft.recipientEmail || "recruiter@example.com"}
+                        <span className="text-xs text-slate-500 font-medium truncate max-w-[300px]" title={draft.recipientEmail}>
+                          To: {draft.recipientEmail || "recruiter@example.com"} {draft.ccEmails ? `(CC: ${draft.ccEmails})` : ''}
                         </span>
                       </div>
                       <h3 className="text-sm font-bold text-slate-750 truncate" title={draft.subject}>
@@ -1026,16 +1030,87 @@ export const ScreenshotUploader: React.FC = () => {
                   {isExpanded && (
                     <div className="px-5 pb-6 border-t border-slate-100 pt-5 bg-slate-50/30 space-y-4">
                       {/* Recipient Input */}
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Recipient Email</label>
-                        <input 
-                          type="email"
-                          value={draft.recipientEmail}
-                          onChange={(e) => handleDraftFieldChange(draft.id!, "recipientEmail", e.target.value)}
-                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
-                          placeholder="recruiter@company.com"
-                          required
-                        />
+                      {/* Interactive Recipient Management */}
+                      <div className="space-y-3">
+                        {draft.parsedEmails && (
+                          <div className="bg-slate-100/60 p-3 rounded-lg border border-slate-200/50">
+                            <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Parsed Emails from posting:</span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {draft.parsedEmails.split(',').map((email: string) => {
+                                const trimmed = email.trim();
+                                if (!trimmed) return null;
+                                const isPrimary = draft.recipientEmail === trimmed;
+                                const ccList = draft.ccEmails ? draft.ccEmails.split(',').map((c: string) => c.trim()) : [];
+                                const isCC = ccList.includes(trimmed);
+                                
+                                return (
+                                  <button
+                                    key={trimmed}
+                                    type="button"
+                                    onClick={() => {
+                                      if (isPrimary) {
+                                        // Toggle off primary
+                                      } else {
+                                        // Set as primary, and remove from CC
+                                        const newCc = ccList.filter((c: string) => c !== trimmed).join(', ');
+                                        handleDraftFieldChange(draft.id!, "recipientEmail", trimmed);
+                                        handleDraftFieldChange(draft.id!, "ccEmails", newCc);
+                                      }
+                                    }}
+                                    className={`text-xs px-2.5 py-1 rounded-full transition-all border font-medium flex items-center gap-1 ${
+                                      isPrimary 
+                                        ? "bg-indigo-50 border-indigo-200 text-indigo-700 shadow-sm"
+                                        : isCC 
+                                          ? "bg-emerald-50 border-emerald-100 text-emerald-700"
+                                          : "bg-white border-slate-200 text-slate-650 hover:bg-slate-50"
+                                    }`}
+                                  >
+                                    <span>{trimmed}</span>
+                                    {isPrimary && <span className="text-[9px] bg-indigo-200 text-indigo-800 px-1 rounded-full uppercase">To</span>}
+                                    {isCC && <span className="text-[9px] bg-emerald-200 text-emerald-800 px-1 rounded-full uppercase">CC</span>}
+                                    {!isPrimary && !isCC && (
+                                      <span 
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          const updatedCc = [...ccList, trimmed].join(', ');
+                                          handleDraftFieldChange(draft.id!, "ccEmails", updatedCc);
+                                        }}
+                                        className="hover:bg-slate-200 rounded px-1 text-[10px]"
+                                        title="Add to CC"
+                                      >
+                                        +CC
+                                      </span>
+                                    )}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Recipient Email (To)</label>
+                            <input 
+                              type="email"
+                              value={draft.recipientEmail || ''}
+                              onChange={(e) => handleDraftFieldChange(draft.id!, "recipientEmail", e.target.value)}
+                              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                              placeholder="recruiter@company.com"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">CC Emails (Comma-separated)</label>
+                            <input 
+                              type="text"
+                              value={draft.ccEmails || ''}
+                              onChange={(e) => handleDraftFieldChange(draft.id!, "ccEmails", e.target.value)}
+                              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                              placeholder="cc1@company.com, cc2@company.com"
+                            />
+                          </div>
+                        </div>
                       </div>
 
                       {/* Subject Input */}

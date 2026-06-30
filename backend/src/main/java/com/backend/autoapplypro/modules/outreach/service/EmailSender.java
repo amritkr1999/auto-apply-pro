@@ -10,4 +10,5 @@ public interface EmailSender {
      * @param body     The email body content.
      */
     void sendEmail(Long userId, String to, String subject, String body);
+    void sendEmail(Long userId, String to, String cc, String subject, String body);
 }

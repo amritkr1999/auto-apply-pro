@@ -28,6 +28,8 @@ export interface OutreachDraft {
   id?: string;
   templateId?: string;
   recipientEmail: string;
+  ccEmails?: string;
+  parsedEmails?: string;
   subject: string;
   body: string;
   status: "DRAFT" | "SUGGESTION" | "PENDING" | "SENT" | "FAILED" | "BLACKLISTED" | "PAUSED";

@@ -103,16 +103,35 @@ public class ScreenshotProcessorService {
                 }
             }
 
-            String recruiterEmail = jobDetails.getHrEmail();
-            if (recruiterEmail == null || recruiterEmail.trim().isEmpty()) {
-                recruiterEmail = "recruiter@example.com";
-                if (jobDetails.getDescription() != null) {
-                    java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}");
-                    java.util.regex.Matcher matcher = pattern.matcher(jobDetails.getDescription());
-                    if (matcher.find()) {
-                        recruiterEmail = matcher.group();
+            List<String> emails = new ArrayList<>();
+            if (jobDetails.getHrEmails() != null) {
+                for (String email : jobDetails.getHrEmails()) {
+                    if (email != null && !email.trim().isEmpty() && !emails.contains(email.trim())) {
+                        emails.add(email.trim());
                     }
                 }
+            }
+            
+            // Fallback to regex in description if list is empty
+            if (emails.isEmpty() && jobDetails.getDescription() != null) {
+                java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}");
+                java.util.regex.Matcher matcher = pattern.matcher(jobDetails.getDescription());
+                while (matcher.find()) {
+                    String match = matcher.group();
+                    if (!emails.contains(match)) {
+                        emails.add(match);
+                    }
+                }
+            }
+            if (emails.isEmpty()) {
+                emails.add("recruiter@example.com");
+            }
+
+            String primaryEmail = emails.get(0);
+            String commaSeparatedEmails = String.join(",", emails);
+            String draftCc = "";
+            if (emails.size() > 1) {
+                draftCc = String.join(",", emails.subList(1, emails.size()));
             }
 
             JobPosting jobPosting = JobPosting.builder()
@@ -123,7 +142,8 @@ public class ScreenshotProcessorService {
                     .requirements(jobDetails.getRequirements())
                     .salary(jobDetails.getSalary())
                     .sourceUrl(jobDetails.getSourceUrl())
-                    .hrEmail(recruiterEmail)
+                    .hrEmail(primaryEmail)
+                    .hrEmails(commaSeparatedEmails)
                     .skills(jobSkills)
                     .build();
 
@@ -142,7 +162,9 @@ public class ScreenshotProcessorService {
             if (emailData != null) {
                 EmailQueue queueItem = EmailQueue.builder()
                         .user(upload.getUser())
-                        .recipientEmail(emailData.getRecipientEmail())
+                        .recipientEmail(emailData.getRecipientEmail() != null ? emailData.getRecipientEmail() : primaryEmail)
+                        .ccEmails(draftCc)
+                        .parsedEmails(commaSeparatedEmails)
                         .subject(emailData.getSubject())
                         .body(emailData.getBody())
                         .status(OutreachStatus.DRAFT)
@@ -181,7 +203,9 @@ public class ScreenshotProcessorService {
                         if (matchedEmailData != null) {
                             EmailQueue matchedQueueItem = EmailQueue.builder()
                                     .user(candidate.getUser())
-                                    .recipientEmail(matchedEmailData.getRecipientEmail())
+                                    .recipientEmail(matchedEmailData.getRecipientEmail() != null ? matchedEmailData.getRecipientEmail() : primaryEmail)
+                                    .ccEmails(draftCc)
+                                    .parsedEmails(commaSeparatedEmails)
                                     .subject(matchedEmailData.getSubject())
                                     .body(matchedEmailData.getBody())
                                     .status(OutreachStatus.SUGGESTION)

@@ -25,6 +25,12 @@ public class EmailQueue {
     @Column(name = "recipient_email", nullable = false)
     private String recipientEmail;
 
+    @Column(name = "cc_emails")
+    private String ccEmails;
+
+    @Column(name = "parsed_emails")
+    private String parsedEmails;
+
     @Column(nullable = false)
     private String subject;
 

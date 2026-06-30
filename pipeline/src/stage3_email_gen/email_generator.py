@@ -44,7 +44,7 @@ class EmailGenerator:
                 parsed_json = json.loads(response_text)
                 
                 email = Email(
-                    recipient_email=getattr(jd, "recruiter_email", None) or "recruiter@example.com",
+                    recipient_email=jd.recruiter_emails[0] if (getattr(jd, "recruiter_emails", None) and len(jd.recruiter_emails) > 0) else "recruiter@example.com",
                     recipient_name=None,  # LLM can enrich this or we leave it empty
                     subject=parsed_json.get("subject", f"Application for {jd.job_title} at {jd.company}"),
                     body=parsed_json.get("body", ""),

@@ -49,7 +49,10 @@ public class OutreachDraftController {
             jobDetailsMap.put("job_type", "Full-time"); // default fallback or parse if available
 
             // Extract recruiter email from DTO, or fallback to description if missing
-            String recruiterEmail = dto.getJobDetails().getHrEmail();
+            String recruiterEmail = null;
+            if (dto.getJobDetails().getHrEmails() != null && !dto.getJobDetails().getHrEmails().isEmpty()) {
+                recruiterEmail = dto.getJobDetails().getHrEmails().get(0);
+            }
             if (recruiterEmail == null || recruiterEmail.trim().isEmpty()) {
                 recruiterEmail = "recruiter@example.com";
                 if (dto.getJobDetails().getDescription() != null) {
@@ -161,6 +164,8 @@ public class OutreachDraftController {
         EmailQueue queueItem = EmailQueue.builder()
                 .user(user)
                 .recipientEmail(dto.getRecipientEmail())
+                .ccEmails(dto.getCcEmails())
+                .parsedEmails(dto.getParsedEmails())
                 .subject(dto.getSubject())
                 .body(dto.getBody())
                 .status(status)
@@ -173,6 +178,8 @@ public class OutreachDraftController {
         // Return the input dto or updated dto
         dto.setId(saved.getId().toString());
         dto.setStatus(saved.getStatus().name());
+        dto.setCcEmails(saved.getCcEmails());
+        dto.setParsedEmails(saved.getParsedEmails());
         dto.setScheduledAt(saved.getScheduledAt() != null ? saved.getScheduledAt().toString() : null);
         return ResponseEntity.ok(dto);
     }
@@ -183,6 +190,8 @@ public class OutreachDraftController {
         log.info("Received request to update/approve email draft ID: {}", id);
         return emailQueueRepository.findById(id).map(item -> {
             item.setRecipientEmail(dto.getRecipientEmail());
+            item.setCcEmails(dto.getCcEmails());
+            item.setParsedEmails(dto.getParsedEmails());
             item.setSubject(dto.getSubject());
             item.setBody(dto.getBody());
 
@@ -209,6 +218,8 @@ public class OutreachDraftController {
             OutreachDraftDto responseDto = OutreachDraftDto.builder()
                     .id(saved.getId().toString())
                     .recipientEmail(saved.getRecipientEmail())
+                    .ccEmails(saved.getCcEmails())
+                    .parsedEmails(saved.getParsedEmails())
                     .subject(saved.getSubject())
                     .body(saved.getBody())
                     .status(saved.getStatus().name())
@@ -244,6 +255,8 @@ public class OutreachDraftController {
                 OutreachDraftDto dto = new OutreachDraftDto();
                 dto.setId(item.getId().toString());
                 dto.setRecipientEmail(item.getRecipientEmail());
+                dto.setCcEmails(item.getCcEmails());
+                dto.setParsedEmails(item.getParsedEmails());
                 dto.setSubject(item.getSubject());
                 dto.setBody(item.getBody());
                 dto.setStatus(item.getStatus().name());

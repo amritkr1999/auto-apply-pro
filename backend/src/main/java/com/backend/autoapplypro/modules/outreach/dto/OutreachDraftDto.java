@@ -10,6 +10,8 @@ public class OutreachDraftDto {
     private String id;
     private String templateId;
     private String recipientEmail;
+    private String ccEmails;
+    private String parsedEmails;
     private String subject;
     private String body;
     private String status;

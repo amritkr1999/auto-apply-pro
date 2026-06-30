@@ -146,6 +146,8 @@ export const CandidateDashboardView: React.FC = () => {
         subject: draft.subject,
         body: draft.body,
         recipientEmail: draft.recipientEmail,
+        ccEmails: draft.ccEmails,
+        parsedEmails: draft.parsedEmails,
         status: "PENDING"
       });
       setDrafts(prev => prev.filter(d => d.id !== id));
@@ -176,6 +178,8 @@ export const CandidateDashboardView: React.FC = () => {
         subject: suggestion.subject,
         body: suggestion.body,
         recipientEmail: suggestion.recipientEmail,
+        ccEmails: suggestion.ccEmails,
+        parsedEmails: suggestion.parsedEmails,
         status: "PENDING"
       });
       setSuggestions(prev => prev.filter(s => s.id !== id));
@@ -485,7 +489,7 @@ export const CandidateDashboardView: React.FC = () => {
                           <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-full uppercase">
                             Suggestion
                           </span>
-                          <span className="text-xs text-slate-400 font-medium">To: {suggestion.recipientEmail}</span>
+                          <span className="text-xs text-slate-400 font-medium">To: {suggestion.recipientEmail} {suggestion.ccEmails ? `(CC: ${suggestion.ccEmails})` : ''}</span>
                         </div>
                         <h4 className="text-sm font-bold text-slate-700 truncate">{suggestion.subject}</h4>
                       </div>
@@ -520,15 +524,87 @@ export const CandidateDashboardView: React.FC = () => {
                     {/* Expandable editor panel */}
                     {isEditing && (
                       <div className="p-5 border-t border-slate-100 space-y-4 bg-slate-50/20">
-                        <div>
-                          <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Recipient Email</label>
-                          <input 
-                            type="email"
-                            value={suggestion.recipientEmail}
-                            onChange={(e) => handleSuggestionFieldChange(suggestion.id, "recipientEmail", e.target.value)}
-                            className="w-full px-3 py-2 border border-slate-200 rounded-input text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
-                            placeholder="recruiter@company.com"
-                          />
+                        {/* Interactive Recipient Management */}
+                        <div className="space-y-3">
+                          {suggestion.parsedEmails && (
+                            <div className="bg-slate-100/60 p-3 rounded-lg border border-slate-200/50">
+                              <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Parsed Emails from posting:</span>
+                              <div className="flex flex-wrap gap-1.5">
+                                {suggestion.parsedEmails.split(',').map((email: string) => {
+                                  const trimmed = email.trim();
+                                  if (!trimmed) return null;
+                                  const isPrimary = suggestion.recipientEmail === trimmed;
+                                  const ccList = suggestion.ccEmails ? suggestion.ccEmails.split(',').map((c: string) => c.trim()) : [];
+                                  const isCC = ccList.includes(trimmed);
+                                  
+                                  return (
+                                    <button
+                                      key={trimmed}
+                                      type="button"
+                                      onClick={() => {
+                                        if (isPrimary) {
+                                          // Toggle off primary
+                                        } else {
+                                          // Set as primary, and remove from CC
+                                          const newCc = ccList.filter((c: string) => c !== trimmed).join(', ');
+                                          handleSuggestionFieldChange(suggestion.id, "recipientEmail", trimmed);
+                                          handleSuggestionFieldChange(suggestion.id, "ccEmails", newCc);
+                                        }
+                                      }}
+                                      className={`text-xs px-2.5 py-1 rounded-full transition-all border font-medium flex items-center gap-1 ${
+                                        isPrimary 
+                                          ? "bg-indigo-50 border-indigo-200 text-indigo-700 shadow-sm"
+                                          : isCC 
+                                            ? "bg-emerald-50 border-emerald-100 text-emerald-700"
+                                            : "bg-white border-slate-200 text-slate-650 hover:bg-slate-50"
+                                      }`}
+                                    >
+                                      <span>{trimmed}</span>
+                                      {isPrimary && <span className="text-[9px] bg-indigo-200 text-indigo-800 px-1 rounded-full uppercase">To</span>}
+                                      {isCC && <span className="text-[9px] bg-emerald-200 text-emerald-800 px-1 rounded-full uppercase">CC</span>}
+                                      {!isPrimary && !isCC && (
+                                        <span 
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            const updatedCc = [...ccList, trimmed].join(', ');
+                                            handleSuggestionFieldChange(suggestion.id, "ccEmails", updatedCc);
+                                          }}
+                                          className="hover:bg-slate-200 rounded px-1 text-[10px]"
+                                          title="Add to CC"
+                                        >
+                                          +CC
+                                        </span>
+                                      )}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Recipient Email (To)</label>
+                              <input 
+                                type="email"
+                                value={suggestion.recipientEmail || ''}
+                                onChange={(e) => handleSuggestionFieldChange(suggestion.id, "recipientEmail", e.target.value)}
+                                className="w-full px-3 py-2 border border-slate-200 rounded-input text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                                placeholder="recruiter@company.com"
+                                required
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">CC Emails (Comma-separated)</label>
+                              <input 
+                                type="text"
+                                value={suggestion.ccEmails || ''}
+                                onChange={(e) => handleSuggestionFieldChange(suggestion.id, "ccEmails", e.target.value)}
+                                className="w-full px-3 py-2 border border-slate-200 rounded-input text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                                placeholder="cc1@company.com, cc2@company.com"
+                              />
+                            </div>
+                          </div>
                         </div>
                         <div>
                           <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Subject</label>
@@ -605,7 +681,7 @@ export const CandidateDashboardView: React.FC = () => {
                           <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-full uppercase">
                             Draft
                           </span>
-                          <span className="text-xs text-slate-400 font-medium">To: {draft.recipientEmail}</span>
+                          <span className="text-xs text-slate-400 font-medium">To: {draft.recipientEmail} {draft.ccEmails ? `(CC: ${draft.ccEmails})` : ''}</span>
                         </div>
                         <h4 className="text-sm font-bold text-slate-700 truncate">{draft.subject}</h4>
                       </div>
@@ -640,15 +716,87 @@ export const CandidateDashboardView: React.FC = () => {
                     {/* Expandable editor panel */}
                     {isEditing && (
                       <div className="p-5 border-t border-slate-100 space-y-4 bg-slate-50/20">
-                        <div>
-                          <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Recipient Email</label>
-                          <input 
-                            type="email"
-                            value={draft.recipientEmail}
-                            onChange={(e) => handleDraftFieldChange(draft.id, "recipientEmail", e.target.value)}
-                            className="w-full px-3 py-2 border border-slate-200 rounded-input text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
-                            placeholder="recruiter@company.com"
-                          />
+                        {/* Interactive Recipient Management */}
+                        <div className="space-y-3">
+                          {draft.parsedEmails && (
+                            <div className="bg-slate-100/60 p-3 rounded-lg border border-slate-200/50">
+                              <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Parsed Emails from posting:</span>
+                              <div className="flex flex-wrap gap-1.5">
+                                {draft.parsedEmails.split(',').map((email: string) => {
+                                  const trimmed = email.trim();
+                                  if (!trimmed) return null;
+                                  const isPrimary = draft.recipientEmail === trimmed;
+                                  const ccList = draft.ccEmails ? draft.ccEmails.split(',').map((c: string) => c.trim()) : [];
+                                  const isCC = ccList.includes(trimmed);
+                                  
+                                  return (
+                                    <button
+                                      key={trimmed}
+                                      type="button"
+                                      onClick={() => {
+                                        if (isPrimary) {
+                                          // Toggle off primary
+                                        } else {
+                                          // Set as primary, and remove from CC
+                                          const newCc = ccList.filter((c: string) => c !== trimmed).join(', ');
+                                          handleDraftFieldChange(draft.id, "recipientEmail", trimmed);
+                                          handleDraftFieldChange(draft.id, "ccEmails", newCc);
+                                        }
+                                      }}
+                                      className={`text-xs px-2.5 py-1 rounded-full transition-all border font-medium flex items-center gap-1 ${
+                                        isPrimary 
+                                          ? "bg-indigo-50 border-indigo-200 text-indigo-700 shadow-sm"
+                                          : isCC 
+                                            ? "bg-emerald-50 border-emerald-100 text-emerald-700"
+                                            : "bg-white border-slate-200 text-slate-650 hover:bg-slate-50"
+                                      }`}
+                                    >
+                                      <span>{trimmed}</span>
+                                      {isPrimary && <span className="text-[9px] bg-indigo-200 text-indigo-800 px-1 rounded-full uppercase">To</span>}
+                                      {isCC && <span className="text-[9px] bg-emerald-200 text-emerald-800 px-1 rounded-full uppercase">CC</span>}
+                                      {!isPrimary && !isCC && (
+                                        <span 
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            const updatedCc = [...ccList, trimmed].join(', ');
+                                            handleDraftFieldChange(draft.id, "ccEmails", updatedCc);
+                                          }}
+                                          className="hover:bg-slate-200 rounded px-1 text-[10px]"
+                                          title="Add to CC"
+                                        >
+                                          +CC
+                                        </span>
+                                      )}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Recipient Email (To)</label>
+                              <input 
+                                type="email"
+                                value={draft.recipientEmail || ''}
+                                onChange={(e) => handleDraftFieldChange(draft.id, "recipientEmail", e.target.value)}
+                                className="w-full px-3 py-2 border border-slate-200 rounded-input text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                                placeholder="recruiter@company.com"
+                                required
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">CC Emails (Comma-separated)</label>
+                              <input 
+                                type="text"
+                                value={draft.ccEmails || ''}
+                                onChange={(e) => handleDraftFieldChange(draft.id, "ccEmails", e.target.value)}
+                                className="w-full px-3 py-2 border border-slate-200 rounded-input text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                                placeholder="cc1@company.com, cc2@company.com"
+                              />
+                            </div>
+                          </div>
                         </div>
                         <div>
                           <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Subject</label>

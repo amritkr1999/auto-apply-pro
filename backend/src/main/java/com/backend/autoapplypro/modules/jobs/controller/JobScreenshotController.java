@@ -75,7 +75,7 @@ public class JobScreenshotController {
             log.info("Successfully received response from Python extraction service. Status: {}", response.getStatusCode());
             JobDetailsDto dto = response.getBody();
             if (dto != null) {
-                if (dto.getHrEmail() == null || dto.getHrEmail().trim().isEmpty()) {
+                if (dto.getHrEmails() == null || dto.getHrEmails().isEmpty()) {
                     dto.setStatus("INCOMPLETE_DATA");
                 } else {
                     dto.setStatus("PARSED");
