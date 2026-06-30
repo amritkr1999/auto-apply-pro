@@ -112,84 +112,71 @@ export const TemplateManager: React.FC = () => {
   };
 
   return (
-    <div className="outreach-root">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+    <div className="max-w-[1000px] mx-auto w-full">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 border-b border-slate-200 pb-5">
         <div>
-          <h1 style={{ margin: 0, fontSize: "1.8rem", color: "#f8fafc" }}>Email Templates</h1>
-          <p style={{ margin: "4px 0 0 0", color: "#94a3b8" }}>Manage and customize your cold email outreach templates</p>
+          <h1 className="text-3xl font-bold text-slate-800">Email Templates</h1>
+          <p className="text-sm text-slate-500 mt-1">Manage and customize your cold email outreach templates</p>
         </div>
         {!editingTemplate && (
           <button
             onClick={handleCreateNew}
-            className="btn"
-            style={{
-              padding: "10px 20px",
-              background: "#4f46e5",
-              color: "#fff",
-              border: "none",
-              borderRadius: "6px",
-              cursor: "pointer",
-              fontWeight: 500,
-              transition: "background 0.2s"
-            }}
+            className="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-btn text-xs font-semibold shadow-sm transition-all duration-150 shrink-0"
           >
             Create New Template
           </button>
         )}
       </div>
 
-      {message && <div style={{ color: "#4ade80", marginBottom: 16, padding: "10px 14px", borderRadius: 6, background: "rgba(74, 222, 128, 0.1)", border: "1px solid rgba(74, 222, 128, 0.2)" }}>{message}</div>}
-      {error && <div style={{ color: "#f87171", marginBottom: 16, padding: "10px 14px", borderRadius: 6, background: "rgba(248, 113, 113, 0.1)", border: "1px solid rgba(248, 113, 113, 0.2)" }}>{error}</div>}
+      {message && (
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-card mb-6 text-sm">
+          {message}
+        </div>
+      )}
+      {error && (
+        <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-card mb-6 text-sm">
+          {error}
+        </div>
+      )}
 
       {editingTemplate ? (
-        <div
-          className="draft-editor-container"
-          style={{
-            background: "rgba(15, 23, 42, 0.6)",
-            backdropFilter: "blur(12px)",
-            border: "1px solid rgba(255, 255, 255, 0.08)",
-            padding: 24,
-            borderRadius: 12,
-            maxWidth: 800,
-            margin: "0 auto"
-          }}
-        >
-          <h2 style={{ marginTop: 0, color: "#fff", borderBottom: "1px solid rgba(255,255,255,0.06)", paddingBottom: 12 }}>
+        <div className="bg-white border border-slate-200 p-6 rounded-card shadow-sm max-w-2xl mx-auto space-y-6">
+          <h2 className="text-xl font-bold text-slate-800 border-b border-slate-100 pb-3">
             {editingTemplate.id ? "Edit Template" : "New Email Template"}
           </h2>
-          <form onSubmit={handleSave} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            <div className="form-group">
-              <label style={{ display: "block", marginBottom: 6, fontWeight: 500, color: "#cbd5e1" }}>Template Name</label>
+          <form onSubmit={handleSave} className="flex flex-col gap-5">
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-slate-600 mb-1.5">Template Name</label>
               <input
                 type="text"
                 placeholder="e.g., General Referral Request"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                style={{ width: "100%", padding: "10px 12px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff", outline: "none" }}
+                className="w-full px-3 py-2 border border-slate-200 rounded-input text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
                 required
               />
             </div>
 
-            <div className="form-group">
-              <label style={{ display: "block", marginBottom: 6, fontWeight: 500, color: "#cbd5e1" }}>Email Subject</label>
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-slate-600 mb-1.5">Email Subject</label>
               <input
                 type="text"
                 placeholder="e.g., Application for {{jobRole}} | {{companyName}}"
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
-                style={{ width: "100%", padding: "10px 12px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff", outline: "none" }}
+                className="w-full px-3 py-2 border border-slate-200 rounded-input text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
                 required
               />
             </div>
 
-            <div className="form-group">
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                <label style={{ fontWeight: 500, color: "#cbd5e1" }}>Template Body (HTML Supported)</label>
-                <div>
-                  <span style={{ fontSize: "0.8rem", color: "#94a3b8", marginRight: 8 }}>Insert tags:</span>
-                  <button type="button" className="placeholder-badge" onClick={() => insertPlaceholder("{{hrName}}")}>{"{{hrName}}"}</button>
-                  <button type="button" className="placeholder-badge" onClick={() => insertPlaceholder("{{companyName}}")}>{"{{companyName}}"}</button>
-                  <button type="button" className="placeholder-badge" onClick={() => insertPlaceholder("{{jobRole}}")}>{"{{jobRole}}"}</button>
+            <div className="flex flex-col">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1.5">
+                <label className="text-sm font-medium text-slate-600">Template Body (HTML Supported)</label>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="text-xs text-slate-400 font-medium">Insert tags:</span>
+                  <button type="button" className="text-[10px] font-bold text-indigo-650 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 px-2 py-0.5 rounded transition-colors" onClick={() => insertPlaceholder("{{hrName}}")}>{"{{hrName}}"}</button>
+                  <button type="button" className="text-[10px] font-bold text-indigo-650 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 px-2 py-0.5 rounded transition-colors" onClick={() => insertPlaceholder("{{companyName}}")}>{"{{companyName}}"}</button>
+                  <button type="button" className="text-[10px] font-bold text-indigo-650 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 px-2 py-0.5 rounded transition-colors" onClick={() => insertPlaceholder("{{jobRole}}")}>{"{{jobRole}}"}</button>
                 </div>
               </div>
               <textarea
@@ -198,37 +185,22 @@ export const TemplateManager: React.FC = () => {
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
                 rows={10}
-                style={{ width: "100%", padding: "12px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#fff", outline: "none", resize: "vertical", fontFamily: "monospace" }}
+                className="w-full px-3 py-2 border border-slate-200 rounded-input text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 font-mono leading-relaxed resize-vertical"
                 required
               />
             </div>
 
-            <div style={{ display: "flex", gap: 12, justifyContent: "flex-end", marginTop: 8 }}>
+            <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
               <button
                 type="button"
                 onClick={() => setEditingTemplate(null)}
-                style={{
-                  padding: "10px 20px",
-                  background: "rgba(255, 255, 255, 0.05)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: "6px",
-                  color: "#cbd5e1",
-                  cursor: "pointer"
-                }}
+                className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-500 rounded-btn text-xs font-semibold transition-all"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                style={{
-                  padding: "10px 20px",
-                  background: "#4f46e5",
-                  border: "none",
-                  borderRadius: "6px",
-                  color: "#fff",
-                  cursor: "pointer",
-                  fontWeight: 500
-                }}
+                className="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-btn text-xs font-semibold shadow-sm transition-all"
               >
                 Save Template
               </button>
@@ -236,57 +208,32 @@ export const TemplateManager: React.FC = () => {
           </form>
         </div>
       ) : loading ? (
-        <div style={{ color: "#94a3b8" }}>Loading templates...</div>
+        <div className="text-slate-500 italic text-sm py-10 text-center">Loading templates...</div>
       ) : (
-        <div className="template-card-grid">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {templates.map((tpl) => (
-            <div key={tpl.id} className="template-card">
-              <div>
-                <h3 style={{ margin: "0 0 8px 0", color: "#fff", fontSize: "1.1rem" }}>{tpl.name}</h3>
-                <div style={{ fontSize: "0.85rem", color: "#6366f1", marginBottom: 12, fontWeight: 500 }}>
-                  Subject: <span style={{ color: "#cbd5e1" }}>{tpl.subject}</span>
+            <div key={tpl.id} className="bg-white border border-slate-200 rounded-card p-5 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col justify-between h-full">
+              <div className="min-w-0">
+                <h3 className="text-base font-bold text-slate-800 truncate mb-1" title={tpl.name}>{tpl.name}</h3>
+                <div className="text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-100/50 px-2 py-0.5 rounded inline-block mb-3 max-w-full truncate" title={tpl.subject}>
+                  Subject: <span className="text-slate-600 font-normal">{tpl.subject}</span>
                 </div>
                 <div
-                  style={{
-                    fontSize: "0.85rem",
-                    color: "#94a3b8",
-                    display: "-webkit-box",
-                    WebkitLineClamp: 3,
-                    WebkitBoxOrient: "vertical",
-                    overflow: "hidden",
-                    lineHeight: 1.5,
-                    marginBottom: 16
-                  }}
+                  className="text-xs text-slate-500 leading-relaxed font-mono whitespace-pre-line overflow-hidden line-clamp-4 bg-slate-50 p-2.5 rounded border border-slate-100"
                   dangerouslySetInnerHTML={{ __html: tpl.body.replace(/\n/g, "<br/>") }}
                 />
               </div>
-              <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", borderTop: "1px solid rgba(255,255,255,0.04)", paddingTop: 12 }}>
+              <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
                 <button
                   onClick={() => handleEdit(tpl)}
-                  style={{
-                    padding: "6px 12px",
-                    background: "rgba(99, 102, 241, 0.1)",
-                    border: "1px solid rgba(99, 102, 241, 0.2)",
-                    borderRadius: "4px",
-                    color: "#a5b4fc",
-                    cursor: "pointer",
-                    fontSize: "0.8rem"
-                  }}
+                  className="px-3 py-1.5 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 text-indigo-650 rounded text-xs font-semibold transition-all"
                 >
                   Edit
                 </button>
                 {!tpl.id.startsWith("default-") && (
                   <button
                     onClick={() => handleDelete(tpl.id)}
-                    style={{
-                      padding: "6px 12px",
-                      background: "rgba(239, 68, 68, 0.1)",
-                      border: "1px solid rgba(239, 68, 68, 0.2)",
-                      borderRadius: "4px",
-                      color: "#f87171",
-                      cursor: "pointer",
-                      fontSize: "0.8rem"
-                    }}
+                    className="px-3 py-1.5 bg-rose-50 border border-rose-100 hover:bg-rose-100 text-rose-600 rounded text-xs font-semibold transition-all"
                   >
                     Delete
                   </button>

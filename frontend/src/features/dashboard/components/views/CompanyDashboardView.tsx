@@ -1,11 +1,8 @@
-import React, { useState } from "react";
-import DashboardSidebar from "../DashboardSidebar";
-import Button from "../../../../components/ui/Button";
+import React from "react";
 import Badge from "../../../../components/ui/Badge";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../../../../components/ui/Table";
 
 export const CompanyDashboardView: React.FC = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const postings = [
     { id: 1, title: "Senior Product Manager", applicants: "12 applicants", status: "Active", variant: "success" as const },
@@ -13,22 +10,13 @@ export const CompanyDashboardView: React.FC = () => {
   ];
 
   return (
-    <div className="flex-1 flex gap-8">
-      {sidebarOpen && <DashboardSidebar />}
-      
-      <div className="flex-1 min-w-0">
+    <>
+      <div className="flex-grow min-w-0">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-slate-800">Company Dashboard</h1>
             <p className="text-sm text-slate-500 mt-1">Manage active corporate job postings and internal recruiters</p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setSidebarOpen((open) => !open)}
-          >
-            {sidebarOpen ? "Hide Sidebar" : "Show Sidebar"}
-          </Button>
         </div>
 
         {/* Stats Grid */}
@@ -72,7 +60,7 @@ export const CompanyDashboardView: React.FC = () => {
           </Table>
         </section>
       </div>
-    </div>
+    </>
   );
 };
 

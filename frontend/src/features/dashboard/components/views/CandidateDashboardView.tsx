@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import DashboardSidebar from "../DashboardSidebar";
 import Button from "../../../../components/ui/Button";
 import Badge from "../../../../components/ui/Badge";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../../../../components/ui/Table";
@@ -11,7 +10,6 @@ import { learningService } from "../../../learning/services/learningService";
 import type { DailyContent } from "../../../learning/services/learningService";
 
 export const CandidateDashboardView: React.FC = () => {
-  const [sidebarOpen] = useState(true);
   const navigate = useNavigate();
 
   const userStr = localStorage.getItem("user");
@@ -223,11 +221,8 @@ export const CandidateDashboardView: React.FC = () => {
 
 
   return (
-    <div className="flex-1 flex gap-8">
-      {sidebarOpen && <DashboardSidebar />}
-      
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between mb-8">
+    <>
+      <div className="flex items-center justify-between mb-8">
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-3xl font-bold text-slate-800">Candidate Dashboard</h1>
@@ -770,7 +765,6 @@ export const CandidateDashboardView: React.FC = () => {
             </>
           )}
         </section>
-      </div>
 
       {/* Tip of the Day Pop-up Modal */}
       {showTipModal && dailyContent?.tip && (
@@ -820,7 +814,7 @@ export const CandidateDashboardView: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

@@ -69,7 +69,12 @@ const LogoutIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-export const DashboardSidebar: React.FC = () => {
+interface DashboardSidebarProps {
+  isMobile?: boolean;
+  onClose?: () => void;
+}
+
+export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isMobile = false, onClose }) => {
   const navigate = useNavigate();
   const [isMinimized, setIsMinimized] = useState(false);
   const userStr = localStorage.getItem("user");
@@ -78,6 +83,7 @@ export const DashboardSidebar: React.FC = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("user");
+    if (onClose) onClose();
     navigate("/");
   };
 
@@ -92,106 +98,121 @@ export const DashboardSidebar: React.FC = () => {
     }
   };
 
-  const iconClass = isMinimized ? "w-5 h-5 shrink-0" : "w-5 h-5 mr-3 shrink-0";
+  const minimizedState = isMobile ? false : isMinimized;
+  const iconClass = minimizedState ? "w-5 h-5 shrink-0" : "w-5 h-5 mr-3 shrink-0";
 
   const linkStyle = ({ isActive }: { isActive: boolean }) =>
-    `flex items-center ${isMinimized ? "justify-center px-2" : "px-3"} py-2.5 text-sm font-medium rounded-btn transition-all duration-150 ${
+    `flex items-center ${minimizedState ? "justify-center px-2" : "px-3"} py-2.5 text-sm font-medium rounded-btn transition-all duration-150 ${
       isActive
         ? "bg-slate-100 text-primary border-l-4 border-primary pl-2"
         : "text-slate-600 hover:bg-slate-50 hover:text-primary"
     }`;
 
-  const anchorStyle = `flex items-center ${isMinimized ? "justify-center px-2" : "px-3"} py-2.5 text-sm font-medium rounded-btn text-slate-600 hover:bg-slate-50 hover:text-primary transition-all duration-150`;
+  const anchorStyle = `flex items-center ${minimizedState ? "justify-center px-2" : "px-3"} py-2.5 text-sm font-medium rounded-btn text-slate-600 hover:bg-slate-50 hover:text-primary transition-all duration-150`;
+
+  const handleLinkClick = () => {
+    if (isMobile && onClose) {
+      onClose();
+    }
+  };
 
   return (
-    <aside className={`${isMinimized ? "w-[72px]" : "w-[240px]"} shrink-0 p-4 border-r border-slate-200 bg-white flex flex-col justify-between min-h-[calc(100vh-64px)] transition-all duration-300`}>
+    <aside className={`${
+      isMobile 
+        ? "w-full h-full" 
+        : minimizedState ? "w-[72px]" : "w-[240px]"
+    } shrink-0 p-4 ${
+      isMobile ? "" : "border-r border-slate-200 min-h-[calc(100vh-64px)]"
+    } bg-white flex flex-col justify-between transition-all duration-300`}>
       <div className="flex-1">
         {/* Sidebar Toggle & Header */}
-        <div className={`flex items-center ${isMinimized ? "justify-center" : "justify-between"} mb-6`}>
-          {!isMinimized && (
+        <div className={`flex items-center ${minimizedState ? "justify-center" : "justify-between"} mb-6`}>
+          {!minimizedState && (
             <h3 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
               Menu ({role.toLowerCase()})
             </h3>
           )}
-          <button
-            type="button"
-            onClick={() => setIsMinimized(!isMinimized)}
-            className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
-            title={isMinimized ? "Expand Sidebar" : "Minimize Sidebar"}
-          >
-            {isMinimized ? (
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-              </svg>
-            ) : (
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M11 19l-7-7 7-7M19 19l-7-7 7-7" />
-              </svg>
-            )}
-          </button>
+          {!isMobile && (
+            <button
+              type="button"
+              onClick={() => setIsMinimized(!isMinimized)}
+              className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+              title={minimizedState ? "Expand Sidebar" : "Minimize Sidebar"}
+            >
+              {minimizedState ? (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M11 19l-7-7 7-7M19 19l-7-7 7-7" />
+                </svg>
+              )}
+            </button>
+          )}
         </div>
 
         {/* Navigation links */}
         <nav className="space-y-1">
-          <NavLink to={getOverviewPath()} className={linkStyle} end title={isMinimized ? "Overview" : undefined}>
+          <NavLink to={getOverviewPath()} className={linkStyle} end title={minimizedState ? "Overview" : undefined} onClick={handleLinkClick}>
             <OverviewIcon className={iconClass} />
-            {!isMinimized && <span>Overview</span>}
+            {!minimizedState && <span>Overview</span>}
           </NavLink>
 
           {role === "CANDIDATE" && (
             <>
-              <a href="#applications" className={anchorStyle} title={isMinimized ? "Applications" : undefined}>
+              <a href="#applications" className={anchorStyle} title={minimizedState ? "Applications" : undefined} onClick={handleLinkClick}>
                 <ApplicationsIcon className={iconClass} />
-                {!isMinimized && <span>Applications</span>}
+                {!minimizedState && <span>Applications</span>}
               </a>
-              <a href="#saved" className={anchorStyle} title={isMinimized ? "Saved Jobs" : undefined}>
+              <a href="#saved" className={anchorStyle} title={minimizedState ? "Saved Jobs" : undefined} onClick={handleLinkClick}>
                 <SavedJobsIcon className={iconClass} />
-                {!isMinimized && <span>Saved Jobs</span>}
+                {!minimizedState && <span>Saved Jobs</span>}
               </a>
-              <NavLink to="/jobs/parse" className={linkStyle} title={isMinimized ? "Parse Screenshot" : undefined}>
+              <NavLink to="/jobs/parse" className={linkStyle} title={minimizedState ? "Parse Screenshot" : undefined} onClick={handleLinkClick}>
                 <ParseIcon className={iconClass} />
-                {!isMinimized && <span>Parse Screenshot</span>}
+                {!minimizedState && <span>Parse Screenshot</span>}
               </NavLink>
-              <NavLink to="/outreach/templates" className={linkStyle} title={isMinimized ? "Email Templates" : undefined}>
+              <NavLink to="/outreach/templates" className={linkStyle} title={minimizedState ? "Email Templates" : undefined} onClick={handleLinkClick}>
                 <TemplatesIcon className={iconClass} />
-                {!isMinimized && <span>Email Templates</span>}
+                {!minimizedState && <span>Email Templates</span>}
               </NavLink>
-              <NavLink to="/outreach/draft" className={linkStyle} title={isMinimized ? "Draft Outreach" : undefined}>
+              <NavLink to="/outreach/draft" className={linkStyle} title={minimizedState ? "Draft Outreach" : undefined} onClick={handleLinkClick}>
                 <OutreachIcon className={iconClass} />
-                {!isMinimized && <span>Draft Outreach</span>}
+                {!minimizedState && <span>Draft Outreach</span>}
               </NavLink>
             </>
           )}
 
           {role === "RECRUITER" && (
             <>
-              <a href="#outreach" className={anchorStyle} title={isMinimized ? "Outreach" : undefined}>
+              <a href="#outreach" className={anchorStyle} title={minimizedState ? "Outreach" : undefined} onClick={handleLinkClick}>
                 <OutreachIcon className={iconClass} />
-                {!isMinimized && <span>Outreach</span>}
+                {!minimizedState && <span>Outreach</span>}
               </a>
-              <a href="#candidates" className={anchorStyle} title={isMinimized ? "Candidates" : undefined}>
+              <a href="#candidates" className={anchorStyle} title={minimizedState ? "Candidates" : undefined} onClick={handleLinkClick}>
                 <CandidatesIcon className={iconClass} />
-                {!isMinimized && <span>Candidates</span>}
+                {!minimizedState && <span>Candidates</span>}
               </a>
             </>
           )}
 
           {role === "COMPANY" && (
             <>
-              <a href="#jobs" className={anchorStyle} title={isMinimized ? "Job Listings" : undefined}>
+              <a href="#jobs" className={anchorStyle} title={minimizedState ? "Job Listings" : undefined} onClick={handleLinkClick}>
                 <ListingsIcon className={iconClass} />
-                {!isMinimized && <span>Job Listings</span>}
+                {!minimizedState && <span>Job Listings</span>}
               </a>
-              <a href="#recruiters" className={anchorStyle} title={isMinimized ? "Recruiters" : undefined}>
+              <a href="#recruiters" className={anchorStyle} title={minimizedState ? "Recruiters" : undefined} onClick={handleLinkClick}>
                 <RecruitersIcon className={iconClass} />
-                {!isMinimized && <span>Recruiters</span>}
+                {!minimizedState && <span>Recruiters</span>}
               </a>
             </>
           )}
 
-          <NavLink to="/candidate/profile" className={linkStyle} title={isMinimized ? "Profile Settings" : undefined}>
+          <NavLink to="/candidate/profile" className={linkStyle} title={minimizedState ? "Profile Settings" : undefined} onClick={handleLinkClick}>
             <ProfileIcon className={iconClass} />
-            {!isMinimized && <span>Profile Settings</span>}
+            {!minimizedState && <span>Profile Settings</span>}
           </NavLink>
         </nav>
       </div>
@@ -200,11 +221,11 @@ export const DashboardSidebar: React.FC = () => {
         <button
           type="button"
           onClick={handleLogout}
-          className={`flex items-center justify-center ${isMinimized ? "w-10 h-10 p-0" : "w-full py-2.5 px-4"} rounded-btn border border-rose-200 bg-rose-50 text-rose-600 font-medium hover:bg-rose-100 transition-colors text-sm mx-auto`}
-          title={isMinimized ? "Logout" : undefined}
+          className={`flex items-center justify-center ${minimizedState ? "w-10 h-10 p-0" : "w-full py-2.5 px-4"} rounded-btn border border-rose-200 bg-rose-50 text-rose-600 font-medium hover:bg-rose-100 transition-colors text-sm mx-auto`}
+          title={minimizedState ? "Logout" : undefined}
         >
           <LogoutIcon />
-          {!isMinimized && <span className="ml-2">Logout</span>}
+          {!minimizedState && <span className="ml-2">Logout</span>}
         </button>
       </div>
     </aside>

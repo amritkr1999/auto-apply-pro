@@ -1,11 +1,8 @@
-import React, { useState } from "react";
-import DashboardSidebar from "../DashboardSidebar";
-import Button from "../../../../components/ui/Button";
+import React from "react";
 import Badge from "../../../../components/ui/Badge";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../../../../components/ui/Table";
 
 export const RecruiterDashboardView: React.FC = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const campaigns = [
     { id: 1, role: "React Developer", company: "Acme Corp", date: "2 days ago", openRate: "80% opened", variant: "success" as const },
@@ -13,22 +10,13 @@ export const RecruiterDashboardView: React.FC = () => {
   ];
 
   return (
-    <div className="flex-1 flex gap-8">
-      {sidebarOpen && <DashboardSidebar />}
-      
-      <div className="flex-1 min-w-0">
+    <>
+      <div className="flex-grow min-w-0">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-slate-800">Recruiter Dashboard</h1>
             <p className="text-sm text-slate-500 mt-1">Manage sourcing pipelines and candidate outreach campaigns</p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setSidebarOpen((open) => !open)}
-          >
-            {sidebarOpen ? "Hide Sidebar" : "Show Sidebar"}
-          </Button>
         </div>
 
         {/* Stats Grid */}
@@ -74,7 +62,7 @@ export const RecruiterDashboardView: React.FC = () => {
           </Table>
         </section>
       </div>
-    </div>
+    </>
   );
 };
 

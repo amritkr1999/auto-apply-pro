@@ -475,22 +475,22 @@ export const ScreenshotUploader: React.FC = () => {
   const hasActiveUploads = uploadQueue.some(item => item.status === "QUEUED" || item.status === "UPLOADING");
 
   return (
-    <div className="max-w-[900px] mx-auto w-full px-4 py-8 text-slate-300">
+    <div className="max-w-[900px] mx-auto w-full px-4 py-8">
       {/* 0. Image Editor Modal */}
       {filesToEdit.length > 0 && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-[950px] overflow-hidden flex flex-col md:flex-row h-[90vh] max-h-[750px] shadow-2xl">
+          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-[950px] overflow-hidden flex flex-col md:flex-row h-[90vh] max-h-[750px] shadow-2xl text-slate-800 animate-in zoom-in-95 duration-200">
             {/* Sidebar with thumbnails */}
-            <div className="w-full md:w-[220px] bg-slate-950/50 border-r border-slate-850 p-4 flex flex-row md:flex-col gap-3 overflow-x-auto md:overflow-y-auto shrink-0 md:h-full">
-              <h3 className="hidden md:block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">Screenshots ({filesToEdit.length})</h3>
+            <div className="w-full md:w-[220px] bg-slate-50 border-r border-slate-200 p-4 flex flex-row md:flex-col gap-3 overflow-x-auto md:overflow-y-auto shrink-0 md:h-full">
+              <h3 className="hidden md:block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Screenshots ({filesToEdit.length})</h3>
               {filesToEdit.map((item, idx) => (
                 <div 
                   key={item.id}
                   onClick={() => setEditingIndex(idx)}
-                  className={`relative p-1.5 rounded-xl cursor-pointer border transition-all shrink-0 w-[80px] h-[80px] md:w-auto md:h-auto md:aspect-video flex items-center justify-center bg-slate-900 ${
+                  className={`relative p-1.5 rounded-xl cursor-pointer border transition-all shrink-0 w-[80px] h-[80px] md:w-auto md:h-auto md:aspect-video flex items-center justify-center bg-slate-100 ${
                     idx === editingIndex 
-                      ? "border-indigo-500 bg-indigo-500/5 shadow-inner" 
-                      : "border-slate-800 hover:border-slate-700 hover:bg-slate-950/30"
+                      ? "border-primary bg-primary/5 shadow-inner" 
+                      : "border-slate-200 hover:border-slate-300 hover:bg-slate-200/50"
                   }`}
                 >
                   <img 
@@ -500,7 +500,7 @@ export const ScreenshotUploader: React.FC = () => {
                     style={{ transform: `rotate(${item.rotation}deg)` }}
                   />
                   {/* Badge */}
-                  <span className="absolute bottom-1 right-1 text-[9px] bg-slate-950/80 text-slate-300 px-1.5 py-0.5 rounded-md font-mono">
+                  <span className="absolute bottom-1 right-1 text-[9px] bg-slate-900/80 text-white px-1.5 py-0.5 rounded-md font-mono">
                     #{idx + 1}
                   </span>
                   {/* Delete button on thumbnail */}
@@ -525,11 +525,11 @@ export const ScreenshotUploader: React.FC = () => {
             </div>
 
             {/* Main editing area */}
-            <div className="flex-1 flex flex-col min-w-0 md:h-full bg-slate-900">
+            <div className="flex-1 flex flex-col min-w-0 md:h-full bg-white">
               {/* Active Image Canvas/Preview Wrapper */}
-              <div className="flex-1 min-h-0 p-6 flex items-center justify-center bg-slate-950/40 relative">
+              <div className="flex-1 min-h-0 p-6 flex items-center justify-center bg-slate-900 relative">
                 {filesToEdit[editingIndex] && (
-                  <div className="relative overflow-hidden inline-block border border-slate-850 rounded-lg max-w-full shadow-inner">
+                  <div className="relative overflow-hidden inline-block border border-slate-800 rounded-lg max-w-full shadow-inner">
                     {/* Rendered Preview image */}
                     <img 
                       src={filesToEdit[editingIndex].previewUrl} 
@@ -585,7 +585,7 @@ export const ScreenshotUploader: React.FC = () => {
 
               {/* Editing Controls */}
               {filesToEdit[editingIndex] && (
-                <div className="p-5 border-t border-slate-800 bg-slate-950/20 space-y-4 shrink-0">
+                <div className="p-5 border-t border-slate-200 bg-slate-50 space-y-4 shrink-0">
                   {/* Rotation & Reset Buttons */}
                   <div className="flex flex-wrap items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
@@ -596,7 +596,7 @@ export const ScreenshotUploader: React.FC = () => {
                           const nextRot = (currentRot - 90 + 360) % 360;
                           updateActiveItem("rotation", nextRot);
                         }}
-                        className="px-3.5 py-1.5 border border-slate-800 hover:border-slate-700 bg-slate-900 hover:bg-slate-900/80 text-slate-300 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all"
+                        className="px-3.5 py-1.5 border border-slate-200 hover:bg-slate-100 text-slate-700 bg-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all"
                       >
                         ↺ Rotate Left
                       </button>
@@ -607,7 +607,7 @@ export const ScreenshotUploader: React.FC = () => {
                           const nextRot = (currentRot + 90) % 360;
                           updateActiveItem("rotation", nextRot);
                         }}
-                        className="px-3.5 py-1.5 border border-slate-800 hover:border-slate-700 bg-slate-900 hover:bg-slate-900/80 text-slate-300 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all"
+                        className="px-3.5 py-1.5 border border-slate-200 hover:bg-slate-100 text-slate-700 bg-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all"
                       >
                         ↻ Rotate Right
                       </button>
@@ -622,7 +622,7 @@ export const ScreenshotUploader: React.FC = () => {
                             : item
                         ));
                       }}
-                      className="px-3 py-1.5 text-xs text-slate-500 hover:text-slate-300 font-medium hover:underline transition-colors"
+                      className="px-3 py-1.5 text-xs text-slate-500 hover:text-slate-700 font-medium hover:underline transition-colors"
                     >
                       Reset Changes
                     </button>
@@ -633,7 +633,7 @@ export const ScreenshotUploader: React.FC = () => {
                     <div className="space-y-1">
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Crop Left</span>
-                        <span className="text-[11px] font-semibold text-indigo-400 font-mono">{filesToEdit[editingIndex].cropLeft}%</span>
+                        <span className="text-[11px] font-semibold text-indigo-650 font-mono">{filesToEdit[editingIndex].cropLeft}%</span>
                       </div>
                       <input
                         type="range"
@@ -641,14 +641,14 @@ export const ScreenshotUploader: React.FC = () => {
                         max="45"
                         value={filesToEdit[editingIndex].cropLeft}
                         onChange={(e) => updateActiveItem("cropLeft", parseInt(e.target.value))}
-                        className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                        className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-500"
                       />
                     </div>
 
                     <div className="space-y-1">
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Crop Right</span>
-                        <span className="text-[11px] font-semibold text-indigo-400 font-mono">{filesToEdit[editingIndex].cropRight}%</span>
+                        <span className="text-[11px] font-semibold text-indigo-650 font-mono">{filesToEdit[editingIndex].cropRight}%</span>
                       </div>
                       <input
                         type="range"
@@ -656,14 +656,14 @@ export const ScreenshotUploader: React.FC = () => {
                         max="45"
                         value={filesToEdit[editingIndex].cropRight}
                         onChange={(e) => updateActiveItem("cropRight", parseInt(e.target.value))}
-                        className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                        className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-500"
                       />
                     </div>
 
                     <div className="space-y-1">
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Crop Top</span>
-                        <span className="text-[11px] font-semibold text-indigo-400 font-mono">{filesToEdit[editingIndex].cropTop}%</span>
+                        <span className="text-[11px] font-semibold text-indigo-650 font-mono">{filesToEdit[editingIndex].cropTop}%</span>
                       </div>
                       <input
                         type="range"
@@ -671,14 +671,14 @@ export const ScreenshotUploader: React.FC = () => {
                         max="45"
                         value={filesToEdit[editingIndex].cropTop}
                         onChange={(e) => updateActiveItem("cropTop", parseInt(e.target.value))}
-                        className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                        className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-500"
                       />
                     </div>
 
                     <div className="space-y-1">
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Crop Bottom</span>
-                        <span className="text-[11px] font-semibold text-indigo-400 font-mono">{filesToEdit[editingIndex].cropBottom}%</span>
+                        <span className="text-[11px] font-semibold text-indigo-650 font-mono">{filesToEdit[editingIndex].cropBottom}%</span>
                       </div>
                       <input
                         type="range"
@@ -686,7 +686,7 @@ export const ScreenshotUploader: React.FC = () => {
                         max="45"
                         value={filesToEdit[editingIndex].cropBottom}
                         onChange={(e) => updateActiveItem("cropBottom", parseInt(e.target.value))}
-                        className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                        className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-500"
                       />
                     </div>
                   </div>
@@ -694,11 +694,11 @@ export const ScreenshotUploader: React.FC = () => {
               )}
 
               {/* Modal Footer actions */}
-              <div className="p-5 border-t border-slate-800 bg-slate-950/40 flex items-center justify-between shrink-0">
+              <div className="p-5 border-t border-slate-200 bg-slate-50 flex items-center justify-between shrink-0">
                 <button
                   type="button"
                   onClick={handleCancelEditing}
-                  className="px-4 py-2 border border-slate-850 bg-slate-900/60 hover:bg-slate-900 hover:border-slate-800 text-slate-400 hover:text-slate-300 rounded-xl text-xs font-semibold transition-all"
+                  className="px-4 py-2 border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 text-slate-650 rounded-xl text-xs font-semibold transition-all"
                 >
                   Cancel
                 </button>
@@ -716,31 +716,31 @@ export const ScreenshotUploader: React.FC = () => {
       )}
 
       <header className="mb-8 text-center">
-        <h1 className="text-3xl font-bold text-white mb-2">AI Multi-Screenshot Job Parser</h1>
-        <p className="text-sm text-slate-400">
+        <h1 className="text-3xl font-bold text-slate-800 mb-2">AI Multi-Screenshot Job Parser</h1>
+        <p className="text-sm text-slate-500">
           Upload multiple screenshots of job postings. The system processes them in the background, generates cold outreach drafts, and schedules approved emails sequentially.
         </p>
       </header>
 
       {/* alerts */}
       {error && (
-        <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 p-4 rounded-xl mb-6 text-center text-sm shadow-sm animate-in fade-in duration-300">
+        <div className="bg-rose-50 border border-rose-200 text-rose-700 p-4 rounded-xl mb-6 text-center text-sm shadow-sm animate-in fade-in duration-300">
           {error}
         </div>
       )}
 
       {saveMessage && (
-        <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-4 rounded-xl mb-6 text-center text-sm shadow-sm animate-in fade-in duration-300">
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 p-4 rounded-xl mb-6 text-center text-sm shadow-sm animate-in fade-in duration-300">
           {saveMessage}
         </div>
       )}
 
       {/* Resume Warning */}
       {!resumeFilename && (
-        <div className="bg-rose-500/5 border border-rose-500/20 rounded-xl p-5 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-inner animate-in fade-in duration-300">
+        <div className="bg-rose-50 border border-rose-100 rounded-card p-5 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm animate-in fade-in duration-300">
           <div>
-            <h4 className="text-sm font-semibold text-rose-400 mb-1">Please upload your updated resume</h4>
-            <p className="text-xs text-rose-300/80 leading-relaxed">
+            <h4 className="text-sm font-semibold text-rose-800 mb-1">Please upload your updated resume</h4>
+            <p className="text-xs text-rose-600 leading-relaxed">
               No resume is currently uploaded in your profile. Upload it now to ensure it gets parsed and attached to your outreach emails.
             </p>
           </div>
@@ -755,7 +755,7 @@ export const ScreenshotUploader: React.FC = () => {
             <button
               type="button"
               onClick={() => navigate("/candidate/profile")}
-              className="px-4 py-2 border border-slate-700 bg-slate-800/50 hover:bg-slate-800 text-slate-300 rounded-lg text-xs transition-all"
+              className="px-4 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-650 rounded-lg text-xs transition-all"
             >
               Go to Profile
             </button>
@@ -773,25 +773,25 @@ export const ScreenshotUploader: React.FC = () => {
       {/* 1. Drag & Drop Multi-Image Area */}
       <div 
         {...getRootProps()} 
-        className="bg-slate-900/40 backdrop-blur-md border border-dashed border-slate-800 rounded-2xl p-10 text-center cursor-pointer transition-all duration-300 hover:border-indigo-500/50 hover:bg-slate-900/50"
+        className="bg-white border-2 border-dashed border-slate-200 rounded-2xl p-10 text-center cursor-pointer transition-all duration-300 hover:border-primary hover:bg-slate-50/50 shadow-sm"
       >
         <input {...getInputProps()} />
         <div className="text-4xl mb-4">📸</div>
         {isDragActive ? (
-          <p className="text-indigo-400 font-semibold text-sm">Drop the screenshots here...</p>
+          <p className="text-primary font-semibold text-sm">Drop the screenshots here...</p>
         ) : (
-          <p className="font-semibold text-sm text-slate-200">
-            Drag & drop job posting screenshots here, or <span className="text-indigo-400 hover:underline">browse files</span>
+          <p className="font-semibold text-sm text-slate-750">
+            Drag & drop job posting screenshots here, or <span className="text-primary hover:underline">browse files</span>
           </p>
         )}
-        <p className="text-[11px] text-slate-500 mt-2">Supports PNG, JPG, JPEG, WEBP. You can select multiple files.</p>
+        <p className="text-[11px] text-slate-450 mt-2">Supports PNG, JPG, JPEG, WEBP. You can select multiple files.</p>
       </div>
 
       {/* 2. Frontend Queue (Uploader) with Pause/Resume */}
       {uploadQueue.length > 0 && (
-        <div className="mt-8 bg-slate-900/30 border border-slate-800/80 rounded-2xl p-5 shadow-sm animate-in fade-in duration-300">
-          <div className="flex items-center justify-between mb-4 border-b border-slate-800/50 pb-3">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
+        <div className="mt-8 bg-white border border-slate-200 rounded-2xl p-5 shadow-sm animate-in fade-in duration-300">
+          <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+            <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
               <span>📤</span> Browser Upload Queue ({uploadQueue.filter(q => q.status === "COMPLETED").length}/{uploadQueue.length})
             </h3>
             <div className="flex items-center gap-3">
@@ -811,7 +811,7 @@ export const ScreenshotUploader: React.FC = () => {
               {!hasActiveUploads && (
                 <button 
                   onClick={handleClearUploadQueue} 
-                  className="text-[11px] text-slate-400 hover:text-white underline transition-all"
+                  className="text-[11px] text-slate-400 hover:text-slate-655 underline transition-all"
                 >
                   Clear queue
                 </button>
@@ -820,7 +820,7 @@ export const ScreenshotUploader: React.FC = () => {
           </div>
           
           {isUploadPaused && (
-            <div className="bg-amber-500/10 border border-amber-500/20 text-amber-400 p-2.5 rounded-xl mb-3 text-center text-xs">
+            <div className="bg-amber-50 border border-amber-200 text-amber-800 p-2.5 rounded-xl mb-3 text-center text-xs">
               ⚠️ Uploading has been paused. Any currently active file upload will finish, but subsequent files are held. Click "Resume Uploads" to continue.
             </div>
           )}
@@ -833,25 +833,25 @@ export const ScreenshotUploader: React.FC = () => {
 
               if (item.status === "QUEUED") {
                 statusText = "Waiting in queue...";
-                textClass = "text-slate-400";
+                textClass = "text-slate-450";
                 badgeVariant = "neutral";
               } else if (item.status === "UPLOADING") {
                 statusText = "Sending file to server...";
-                textClass = "text-indigo-400 animate-pulse";
+                textClass = "text-indigo-600 animate-pulse";
                 badgeVariant = "info";
               } else if (item.status === "COMPLETED") {
                 statusText = "Uploaded to server!";
-                textClass = "text-emerald-400";
+                textClass = "text-emerald-600";
                 badgeVariant = "success";
               } else if (item.status === "FAILED") {
                 statusText = item.errorMessage || "Upload failed";
-                textClass = "text-rose-400";
+                textClass = "text-rose-600";
                 badgeVariant = "error";
               }
 
               return (
-                <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 bg-slate-950/40 rounded-xl border border-slate-800/30">
-                  <span className="text-xs text-slate-300 truncate max-w-[280px]" title={item.file.name}>
+                <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 bg-slate-50 rounded-xl border border-slate-150">
+                  <span className="text-xs text-slate-700 truncate max-w-[280px]" title={item.file.name}>
                     📄 {item.file.name}
                   </span>
                   <div className="flex items-center gap-3.5 self-end sm:self-center shrink-0">
@@ -862,7 +862,7 @@ export const ScreenshotUploader: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => handleCancelBrowserUpload(item.id)}
-                      className="text-slate-500 hover:text-rose-500 font-bold px-1 py-0.5 rounded text-xs transition-colors"
+                      className="text-slate-400 hover:text-rose-600 font-bold px-1 py-0.5 rounded text-xs transition-colors"
                       title="Cancel/Remove"
                     >
                       ✕
@@ -877,15 +877,15 @@ export const ScreenshotUploader: React.FC = () => {
 
       {/* 3. Background Processing Logs */}
       {processingQueue.length > 0 && (
-        <div className="mt-8 bg-slate-900/30 border border-slate-800/80 rounded-2xl p-5 shadow-sm animate-in fade-in duration-300">
-          <div className="flex items-center justify-between mb-4 border-b border-slate-800/50 pb-3">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
+        <div className="mt-8 bg-white border border-slate-200 rounded-2xl p-5 shadow-sm animate-in fade-in duration-300">
+          <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+            <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
               <span>🔄</span> Background Processing Pipeline ({processingQueue.filter(q => q.status === "COMPLETED").length}/{processingQueue.length})
             </h3>
             {processingQueue.every(q => q.status === "COMPLETED" || q.status === "FAILED") && (
               <button 
                 onClick={handleClearLogs} 
-                className="text-[11px] text-slate-400 hover:text-white underline transition-all"
+                className="text-[11px] text-slate-400 hover:text-slate-655 underline transition-all"
               >
                 Clear logs
               </button>
@@ -894,38 +894,38 @@ export const ScreenshotUploader: React.FC = () => {
           <div className="space-y-3 max-h-[220px] overflow-y-auto pr-2 scrollbar-thin">
             {processingQueue.map((item, idx) => {
               let statusText = "Preparing...";
-              let textClass = "text-slate-400";
+              let textClass = "text-slate-450";
               let badgeVariant: "neutral" | "info" | "warning" | "success" | "error" = "neutral";
               
               if (item.status === "PENDING") {
                 statusText = "Queued for background analysis...";
-                textClass = "text-slate-400";
+                textClass = "text-slate-450";
                 badgeVariant = "neutral";
               } else if (item.status === "PARSING") {
                 statusText = "Extracting job details (AI OCR)...";
-                textClass = "text-amber-400";
+                textClass = "text-amber-600";
                 badgeVariant = "warning";
               } else if (item.status === "GENERATING") {
                 statusText = "Crafting custom cold outreach...";
-                textClass = "text-indigo-400";
+                textClass = "text-indigo-650";
                 badgeVariant = "info";
               } else if (item.status === "SAVING") {
                 statusText = "Saving drafts in database...";
-                textClass = "text-cyan-400";
+                textClass = "text-cyan-600";
                 badgeVariant = "info";
               } else if (item.status === "COMPLETED") {
                 statusText = "Completed successfully! Image deleted to clear space.";
-                textClass = "text-emerald-400";
+                textClass = "text-emerald-650";
                 badgeVariant = "success";
               } else if (item.status === "FAILED") {
                 statusText = item.errorMessage || "Failed";
-                textClass = "text-rose-400";
+                textClass = "text-rose-650";
                 badgeVariant = "error";
               }
 
               return (
-                <div key={item.id || idx} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-slate-950/40 rounded-xl border border-slate-800/30">
-                  <span className="text-xs font-medium text-slate-300 truncate max-w-[280px]" title={item.fileName}>
+                <div key={item.id || idx} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-slate-50 rounded-xl border border-slate-150">
+                  <span className="text-xs font-medium text-slate-700 truncate max-w-[280px]" title={item.fileName}>
                     📄 {item.fileName}
                   </span>
                   <div className="flex items-center gap-3.5 self-end sm:self-center shrink-0">
@@ -936,7 +936,7 @@ export const ScreenshotUploader: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => handleCancelBackgroundUpload(item.id)}
-                      className="text-slate-500 hover:text-rose-500 font-bold px-1 py-0.5 rounded text-xs transition-colors"
+                      className="text-slate-400 hover:text-rose-600 font-bold px-1 py-0.5 rounded text-xs transition-colors"
                       title="Cancel/Delete log"
                     >
                       ✕
@@ -951,9 +951,9 @@ export const ScreenshotUploader: React.FC = () => {
 
       {/* 4. Generated Email Drafts Verification Section */}
       <section className="mt-12">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-slate-800/80 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-slate-200 pb-4">
           <div>
-            <h2 className="text-xl font-bold text-white">Generated Email Drafts</h2>
+            <h2 className="text-xl font-bold text-slate-800">Generated Email Drafts</h2>
             <p className="text-xs text-slate-500 mt-1">Review, personalize, and approve drafts before queuing them for send</p>
           </div>
           {drafts.length > 0 && (
@@ -976,7 +976,7 @@ export const ScreenshotUploader: React.FC = () => {
             Loading active email drafts...
           </div>
         ) : drafts.length === 0 ? (
-          <div className="text-center py-12 bg-slate-900/10 border border-slate-800/60 rounded-2xl text-slate-500 text-sm italic shadow-inner">
+          <div className="text-center py-12 bg-slate-50 border border-slate-200 rounded-2xl text-slate-550 text-sm italic shadow-inner">
             No drafts currently awaiting review. Upload screenshots above to auto-generate outreach drafts!
           </div>
         ) : (
@@ -988,8 +988,8 @@ export const ScreenshotUploader: React.FC = () => {
               return (
                 <div 
                   key={draft.id || idx} 
-                  className={`bg-slate-900/30 border rounded-2xl overflow-hidden transition-all duration-300 shadow-sm ${
-                    isExpanded ? "border-slate-700 bg-slate-900/40" : "border-slate-800/60 hover:border-slate-700 hover:bg-slate-900/40"
+                  className={`bg-white border rounded-2xl overflow-hidden transition-all duration-300 shadow-sm ${
+                    isExpanded ? "border-primary bg-white shadow-md" : "border-slate-200 hover:border-slate-350 hover:shadow"
                   }`}
                 >
                   {/* Card Header Accordion */}
@@ -999,14 +999,14 @@ export const ScreenshotUploader: React.FC = () => {
                   >
                     <div className="flex-1 min-w-0 pr-4">
                       <div className="flex flex-wrap items-center gap-2.5 mb-1.5">
-                        <span className="text-[11px] font-semibold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                        <span className="text-[11px] font-semibold text-indigo-650 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
                           Draft #{drafts.length - idx}
                         </span>
-                        <span className="text-xs text-slate-400 font-medium truncate max-w-[200px]" title={draft.recipientEmail}>
+                        <span className="text-xs text-slate-500 font-medium truncate max-w-[200px]" title={draft.recipientEmail}>
                           To: {draft.recipientEmail || "recruiter@example.com"}
                         </span>
                       </div>
-                      <h3 className="text-sm font-bold text-slate-200 truncate" title={draft.subject}>
+                      <h3 className="text-sm font-bold text-slate-750 truncate" title={draft.subject}>
                         {draft.subject || "(No Subject)"}
                       </h3>
                       {!isExpanded && (
@@ -1016,7 +1016,7 @@ export const ScreenshotUploader: React.FC = () => {
                       )}
                     </div>
                     <div className="flex items-center gap-4 shrink-0">
-                      <span className="text-slate-500 text-xs">
+                      <span className="text-slate-400 text-xs">
                         {isExpanded ? "Collapse ▲" : "Expand/Edit ▼"}
                       </span>
                     </div>
@@ -1024,15 +1024,15 @@ export const ScreenshotUploader: React.FC = () => {
 
                   {/* Card Body */}
                   {isExpanded && (
-                    <div className="px-5 pb-6 border-t border-slate-800/40 pt-5 bg-slate-950/20 space-y-4">
+                    <div className="px-5 pb-6 border-t border-slate-100 pt-5 bg-slate-50/30 space-y-4">
                       {/* Recipient Input */}
                       <div>
-                        <label className="block text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">Recipient Email</label>
+                        <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Recipient Email</label>
                         <input 
                           type="email"
                           value={draft.recipientEmail}
                           onChange={(e) => handleDraftFieldChange(draft.id!, "recipientEmail", e.target.value)}
-                          className="w-full px-3 py-2 bg-slate-900/60 border border-slate-800 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
                           placeholder="recruiter@company.com"
                           required
                         />
@@ -1040,12 +1040,12 @@ export const ScreenshotUploader: React.FC = () => {
 
                       {/* Subject Input */}
                       <div>
-                        <label className="block text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">Email Subject</label>
+                        <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Email Subject</label>
                         <input 
                           type="text"
                           value={draft.subject}
                           onChange={(e) => handleDraftFieldChange(draft.id!, "subject", e.target.value)}
-                          className="w-full px-3 py-2 bg-slate-900/60 border border-slate-800 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
                           placeholder="Subject line"
                           required
                         />
@@ -1053,27 +1053,27 @@ export const ScreenshotUploader: React.FC = () => {
 
                       {/* Body editor */}
                       <div>
-                        <label className="block text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">Email Body (HTML/text)</label>
+                        <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Email Body (HTML/text)</label>
                         <textarea 
                           value={draft.body}
                           onChange={(e) => handleDraftFieldChange(draft.id!, "body", e.target.value)}
                           rows={8}
-                          className="w-full px-3 py-2.5 bg-slate-900/60 border border-slate-800 rounded-lg text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors font-mono leading-relaxed resize-vertical"
+                          className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 font-mono leading-relaxed resize-vertical"
                           placeholder="Compose cold outreach email body..."
                           required
                         />
                       </div>
 
                       {/* Controls Footer */}
-                      <div className="flex flex-wrap items-center justify-between gap-4 pt-3 border-t border-slate-800/40">
-                        <span className="text-[10px] text-slate-500 italic">
+                      <div className="flex flex-wrap items-center justify-between gap-4 pt-3 border-t border-slate-100">
+                        <span className="text-[10px] text-slate-450 italic">
                           Approved drafts are queued and spaced by your outreach settings interval.
                         </span>
                         <div className="flex items-center gap-3">
                           <button
                             type="button"
                             onClick={() => handleDiscardDraft(draft.id!)}
-                            className="px-4 py-2 border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 text-rose-400 rounded-lg text-xs font-semibold transition-all"
+                            className="px-4 py-2 border border-rose-100 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-semibold transition-all"
                           >
                             Discard Draft
                           </button>
