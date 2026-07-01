@@ -8,6 +8,7 @@ import com.backend.autoapplypro.modules.users.model.User;
 import com.backend.autoapplypro.modules.users.model.UserActivityLog;
 import com.backend.autoapplypro.modules.users.repository.UserRepository;
 import com.backend.autoapplypro.modules.users.repository.UserActivityLogRepository;
+import com.backend.autoapplypro.modules.jobs.service.JobApplicationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -30,6 +31,7 @@ public class OutreachOrchestrator {
     private final OutreachSchedulerService schedulerService;
     private final HrOutreachCampaignService campaignService;
     private final UserActivityLogRepository userActivityLogRepository;
+    private final JobApplicationService jobApplicationService;
 
     /**
      * Strictly server-side scheduler (cron job) running every 5 minutes.
@@ -147,6 +149,9 @@ public class OutreachOrchestrator {
                         .activityDate(LocalDate.now())
                         .referenceId(item.getId())
                         .build());
+                
+                // Auto-log to Job Application CRM
+                jobApplicationService.createApplicationFromOutreach(user, item.getRecipientEmail(), item.getSubject());
                 
                 log.info("Successfully sent email queue ID: {} for user ID: {}. Daily send progress: {}/{}", 
                         item.getId(), user.getId(), user.getSentToday(), user.getDailyLimit());

@@ -12,6 +12,7 @@ import { TemplateManager } from "../features/outreach/components/TemplateManager
 import { OutreachDraftSection } from "../features/outreach/components/OutreachDraftSection";
 import DraftsReviewPage from "../pages/DraftsReviewPage";
 import QueueDetailsPage from "../pages/QueueDetailsPage";
+import JobTrackerPage from "../pages/JobTrackerPage";
 import LearningSpaceDashboard from "../features/learning/components/LearningSpaceDashboard";
 import TopicDetailsView from "../features/learning/components/TopicDetailsView";
 import RoadmapDetailsView from "../features/learning/components/RoadmapDetailsView";
@@ -37,6 +38,7 @@ export const AppRoutes: React.FC = () => {
           element={<CompanyDashboardView />}
         />
         <Route path="/candidate/profile" element={<CandidateProfile />} />
+        <Route path="/jobs/applications" element={<JobTrackerPage />} />
         <Route path="/jobs/parse" element={<ScreenshotUploader />} />
         <Route path="/outreach/templates" element={<TemplateManager />} />
         <Route path="/outreach/draft" element={<OutreachDraftSection />} />

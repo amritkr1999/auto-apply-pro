@@ -167,10 +167,10 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isMobile = f
 
           {role === "CANDIDATE" && (
             <>
-              <a href="#applications" className={anchorStyle} title={minimizedState ? "Applications" : undefined} onClick={handleLinkClick}>
+              <NavLink to="/jobs/applications" className={linkStyle} title={minimizedState ? "Applications" : undefined} onClick={handleLinkClick}>
                 <ApplicationsIcon className={iconClass} />
                 {!minimizedState && <span>Applications</span>}
-              </a>
+              </NavLink>
               <a href="#saved" className={anchorStyle} title={minimizedState ? "Saved Jobs" : undefined} onClick={handleLinkClick}>
                 <SavedJobsIcon className={iconClass} />
                 {!minimizedState && <span>Saved Jobs</span>}
