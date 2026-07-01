@@ -32,6 +32,7 @@ public class OutreachOrchestrator {
     private final HrOutreachCampaignService campaignService;
     private final UserActivityLogRepository userActivityLogRepository;
     private final JobApplicationService jobApplicationService;
+    private final com.backend.autoapplypro.modules.users.service.MarketingEmailCampaignService marketingCampaignService;
 
     /**
      * Strictly server-side scheduler (cron job) running every 5 minutes.
@@ -59,9 +60,9 @@ public class OutreachOrchestrator {
         for (EmailQueue item : pendingEmails) {
             User user = item.getUser();
             
-            // 1. Throttling Check: Reset count if date has changed
+            // 1. Reset daily limits check if needed
             LocalDate today = LocalDate.now();
-            if (user.getLastSentReset() == null || !user.getLastSentReset().isEqual(today)) {
+            if (user.getLastSentReset() == null || !user.getLastSentReset().equals(today)) {
                 log.info("Resetting daily send counter for user ID: {} (previous reset date: {})", 
                         user.getId(), user.getLastSentReset());
                 user.setSentToday(0);
@@ -91,6 +92,7 @@ public class OutreachOrchestrator {
                 item.setStatus(OutreachStatus.PAUSED);
                 item.setErrorMessage("Daily outreach send limit reached. Paused until next quota reset.");
                 queueRepository.save(item);
+                marketingCampaignService.sendDailyLimitExceededEmail(user.getId());
                 continue;
             }
 
@@ -141,6 +143,11 @@ public class OutreachOrchestrator {
                 // Increment sent counter
                 user.setSentToday(sentToday + 1);
                 userRepository.save(user);
+
+                // Trigger limit warning if they just hit the quota
+                if (user.getSentToday() >= user.getDailyLimit()) {
+                    marketingCampaignService.sendDailyLimitExceededEmail(user.getId());
+                }
 
                 // Save EMAIL_SENT activity log
                 userActivityLogRepository.save(UserActivityLog.builder()

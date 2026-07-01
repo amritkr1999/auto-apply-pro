@@ -23,4 +23,6 @@ public class OutreachSettingsDto {
     private String hrOutreachTargetRole;
     private String hrOutreachTemplateId;
     private String hrOutreachSourceTable;
+
+    private Boolean marketingEmailsEnabled;
 }

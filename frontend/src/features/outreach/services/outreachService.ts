@@ -299,6 +299,7 @@ export const outreachService = {
     hrOutreachTargetRole?: string;
     hrOutreachTemplateId?: string;
     hrOutreachSourceTable?: string;
+    marketingEmailsEnabled?: boolean;
   }): Promise<{ message: string }> {
     const response = await fetch(`${API_BASE}/v1/outreach/settings?userId=${userId}`, {
       method: "POST",

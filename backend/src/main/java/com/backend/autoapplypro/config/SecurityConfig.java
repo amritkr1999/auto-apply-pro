@@ -23,6 +23,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/api/v1/auth/**",
+                    "/api/v1/marketing/**",
                     "/api/v1/outreach/oauth2/callback",
                     "/api/v1/billing/plans",
                     "/api/v1/billing/webhook",

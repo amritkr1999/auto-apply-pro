@@ -39,6 +39,7 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
   const [slotEnd, setSlotEnd] = useState("17:00");
   const [timezone, setTimezone] = useState("UTC");
   const [skipWeekends, setSkipWeekends] = useState(true);
+  const [marketingEmailsEnabled, setMarketingEmailsEnabled] = useState(true);
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [savingSettings, setSavingSettings] = useState(false);
 
@@ -151,6 +152,7 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
         setSlotStart(data.slotStart ? data.slotStart.substring(0, 5) : "09:00");
         setSlotEnd(data.slotEnd ? data.slotEnd.substring(0, 5) : "17:00");
         setSkipWeekends(data.skipWeekends !== false);
+        setMarketingEmailsEnabled(data.marketingEmailsEnabled !== false);
         
         // Populate campaign settings
         setHrOutreachCampaignEnabled(!!data.hrOutreachCampaignEnabled);
@@ -187,6 +189,7 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
         slotEnd,
         timezone,
         skipWeekends,
+        marketingEmailsEnabled,
         hrOutreachCampaignEnabled,
         hrOutreachTargetRole,
         hrOutreachTemplateId,
@@ -749,6 +752,20 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
                     <label htmlFor="skipWeekendsCheckbox" className="select-none cursor-pointer">
                       <span className="block text-xs font-semibold text-slate-600">Skip Weekends</span>
                       <span className="block text-[10px] text-slate-400">Do not send any outreach emails on Saturday and Sunday.</span>
+                    </label>
+                  </div>
+
+                  <div className="flex items-start gap-2 pt-2">
+                    <input
+                      type="checkbox"
+                      id="marketingEmailsCheckbox"
+                      checked={marketingEmailsEnabled}
+                      onChange={(e) => setMarketingEmailsEnabled(e.target.checked)}
+                      className="mt-1 h-4 w-4 text-primary border-slate-200 rounded focus:ring-primary"
+                    />
+                    <label htmlFor="marketingEmailsCheckbox" className="select-none cursor-pointer">
+                      <span className="block text-xs font-semibold text-slate-600">Marketing Notifications</span>
+                      <span className="block text-[10px] text-slate-400">Receive updates on job matches, tips, and subscription offers.</span>
                     </label>
                   </div>
                 </div>

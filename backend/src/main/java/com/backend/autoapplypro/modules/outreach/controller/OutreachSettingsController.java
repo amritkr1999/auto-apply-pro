@@ -43,6 +43,7 @@ public class OutreachSettingsController {
                 .hrOutreachTargetRole(user.getHrOutreachTargetRole() != null ? user.getHrOutreachTargetRole() : "Software Engineer")
                 .hrOutreachTemplateId(user.getHrOutreachTemplateId() != null ? user.getHrOutreachTemplateId() : "default-1")
                 .hrOutreachSourceTable(user.getHrOutreachSourceTable() != null ? user.getHrOutreachSourceTable() : "TESTING")
+                .marketingEmailsEnabled(user.getMarketingEmailsEnabled() != null ? user.getMarketingEmailsEnabled() : true)
                 .build();
 
         return ResponseEntity.ok(dto);
@@ -97,6 +98,10 @@ public class OutreachSettingsController {
 
         if (dto.getSkipWeekends() != null) {
             user.setOutreachSkipWeekends(dto.getSkipWeekends());
+        }
+
+        if (dto.getMarketingEmailsEnabled() != null) {
+            user.setMarketingEmailsEnabled(dto.getMarketingEmailsEnabled());
         }
 
         // Campaign settings logic

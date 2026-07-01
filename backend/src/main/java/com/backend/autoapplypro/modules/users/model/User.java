@@ -109,6 +109,20 @@ public class User {
     @Column(name = "reset_token_expiry")
     private LocalDateTime resetTokenExpiry;
 
+    @Builder.Default
+    @Column(name = "marketing_emails_enabled", nullable = false)
+    private Boolean marketingEmailsEnabled = true;
+
+    @Column(name = "unsubscribe_token")
+    private String unsubscribeToken;
+
+    @Builder.Default
+    @Column(name = "marketing_campaign_step")
+    private Integer marketingCampaignStep = 0;
+
+    @Column(name = "last_marketing_email_sent_at")
+    private LocalDateTime lastMarketingEmailSentAt;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -160,6 +174,15 @@ public class User {
         }
         if (loginStreak == null) {
             loginStreak = 0;
+        }
+        if (marketingEmailsEnabled == null) {
+            marketingEmailsEnabled = true;
+        }
+        if (unsubscribeToken == null) {
+            unsubscribeToken = java.util.UUID.randomUUID().toString();
+        }
+        if (marketingCampaignStep == null) {
+            marketingCampaignStep = 0;
         }
     }
 
