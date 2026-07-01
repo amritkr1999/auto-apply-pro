@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import "./login.css";
 import { profileService } from "../features/profile/services/profileService";
 
@@ -280,9 +280,9 @@ export const LoginPage: React.FC = () => {
                 />
                 Remember me
               </label>
-              <a href="#forgot" className="forgot-link">
+              <Link to="/forgot-password" className="forgot-link">
                 Forgot password?
-              </a>
+              </Link>
             </div>
 
             <button type="submit" className="auth-submit-btn">

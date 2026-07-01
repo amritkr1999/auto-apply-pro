@@ -10,6 +10,7 @@ import {
   ScrollView,
   SafeAreaView,
   Alert,
+  Linking,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -42,6 +43,11 @@ export default function LoginScreen() {
     }
     checkCapabilities();
   }, []);
+
+  const handleForgotPassword = () => {
+    Linking.openURL('http://localhost:5173/forgot-password')
+      .catch(() => Alert.alert('Error', 'Unable to open browser to reset password. Please visit http://localhost:5173/forgot-password'));
+  };
 
   const handleAuth = async () => {
     if (!email || !password) {
@@ -215,6 +221,16 @@ export default function LoginScreen() {
                       </TouchableOpacity>
                     </View>
                   </View>
+
+                  {!isRegistering && (
+                    <TouchableOpacity 
+                      onPress={handleForgotPassword}
+                      className="mt-2.5 active:opacity-75"
+                      style={{ alignSelf: 'flex-end' }}
+                    >
+                      <Text className="text-emerald-400 text-xs font-semibold">Forgot Password?</Text>
+                    </TouchableOpacity>
+                  )}
 
                   {isRegistering && (
                     <View className="mt-3">

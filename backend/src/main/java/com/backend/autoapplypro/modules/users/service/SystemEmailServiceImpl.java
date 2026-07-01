@@ -1,0 +1,50 @@
+package com.backend.autoapplypro.modules.users.service;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.stereotype.Service;
+
+@Service
+@Slf4j
+public class SystemEmailServiceImpl implements SystemEmailService {
+
+    @Autowired(required = false)
+    private JavaMailSender mailSender;
+
+    @Override
+    public void sendPasswordResetEmail(String recipientEmail, String resetLink) {
+        String subject = "Auto Apply Pro - Reset Your Password";
+        String body = "Hello,\n\n"
+                + "We received a request to reset the password for your Auto Apply Pro account.\n"
+                + "Please click the link below to set a new password. This link is valid for 15 minutes:\n\n"
+                + resetLink + "\n\n"
+                + "If you did not request a password reset, please ignore this email.\n\n"
+                + "Best regards,\n"
+                + "The Auto Apply Pro Team";
+
+        // Console Logging (Simplicity & Security as requested)
+        log.info("\n==================================================\n"
+                + "[SYSTEM EMAIL OUTBOX]\n"
+                + "To: {}\n"
+                + "Subject: {}\n"
+                + "Body:\n{}\n"
+                + "==================================================",
+                recipientEmail, subject, body);
+
+        // Real mail sending fallback if JavaMailSender is configured
+        if (mailSender != null) {
+            try {
+                SimpleMailMessage message = new SimpleMailMessage();
+                message.setTo(recipientEmail);
+                message.setSubject(subject);
+                message.setText(body);
+                mailSender.send(message);
+                log.info("Successfully sent password reset email to: {}", recipientEmail);
+            } catch (Exception e) {
+                log.error("Failed to send real email via SMTP, fell back to console logging: {}", e.getMessage());
+            }
+        }
+    }
+}

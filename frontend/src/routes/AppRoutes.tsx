@@ -3,6 +3,8 @@ import { Routes, Route } from "react-router-dom";
 import Layout from "../components/Layout";
 import LoginPage from "../pages/LoginPage";
 import LandingPage from "../pages/LandingPage";
+import ForgotPasswordPage from "../pages/ForgotPasswordPage";
+import ResetPasswordPage from "../pages/ResetPasswordPage";
 import CandidateDashboardView from "../features/dashboard/components/views/CandidateDashboardView";
 import RecruiterDashboardView from "../features/dashboard/components/views/RecruiterDashboardView";
 import CompanyDashboardView from "../features/dashboard/components/views/CompanyDashboardView";
@@ -24,6 +26,8 @@ export const AppRoutes: React.FC = () => {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route element={<Layout />}>
         <Route
           path="/candidate-dashboard"

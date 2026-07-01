@@ -93,6 +93,32 @@ export const profileService = {
     return response.json();
   },
 
+  async forgotPassword(email: string): Promise<any> {
+    const response = await fetch(`${API_BASE}/auth/forgot-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to process forgot password request.");
+    }
+    return data;
+  },
+
+  async resetPassword(requestData: any): Promise<any> {
+    const response = await fetch(`${API_BASE}/auth/reset-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestData),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to reset password.");
+    }
+    return data;
+  },
+
   // Profiles
   async getCandidateProfile(userId: number): Promise<CandidateProfile> {
     const response = await fetch(`${API_BASE}/profiles/candidate/${userId}`, {

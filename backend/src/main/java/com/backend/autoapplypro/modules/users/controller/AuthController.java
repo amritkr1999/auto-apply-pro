@@ -3,6 +3,8 @@ package com.backend.autoapplypro.modules.users.controller;
 import com.backend.autoapplypro.modules.users.dto.AuthResponse;
 import com.backend.autoapplypro.modules.users.dto.LoginRequest;
 import com.backend.autoapplypro.modules.users.dto.RegisterRequest;
+import com.backend.autoapplypro.modules.users.dto.ForgotPasswordRequest;
+import com.backend.autoapplypro.modules.users.dto.ResetPasswordRequest;
 import com.backend.autoapplypro.modules.users.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -32,6 +34,26 @@ public class AuthController {
             return ResponseEntity.ok(userService.login(request));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(AuthResponse.builder().token(e.getMessage()).build());
+        }
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        try {
+            userService.initiatePasswordReset(request);
+            return ResponseEntity.ok(java.util.Map.of("message", "If the email is registered, we have sent a reset password link to it."));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
+        try {
+            userService.resetPassword(request);
+            return ResponseEntity.ok(java.util.Map.of("message", "Password has been reset successfully."));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("message", e.getMessage()));
         }
     }
 }

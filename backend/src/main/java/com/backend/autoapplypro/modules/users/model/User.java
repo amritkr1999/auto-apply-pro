@@ -103,6 +103,12 @@ public class User {
     @Column(name = "last_login_date")
     private java.time.LocalDate lastLoginDate;
 
+    @Column(name = "reset_token")
+    private String resetToken;
+
+    @Column(name = "reset_token_expiry")
+    private LocalDateTime resetTokenExpiry;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

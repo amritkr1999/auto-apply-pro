@@ -23,6 +23,7 @@ public class UserServiceImpl implements UserService {
     private final SkillRepository skillRepository;
     private final JwtUtil jwtUtil;
     private final UserActivityLogRepository userActivityLogRepository;
+    private final SystemEmailService systemEmailService;
 
     @Override
     @Transactional
@@ -430,5 +431,59 @@ public class UserServiceImpl implements UserService {
             int length = candidate.getResumeBytes().length;
         }
         return candidate;
+    }
+
+    @Override
+    @Transactional
+    public void initiatePasswordReset(ForgotPasswordRequest request) {
+        if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
+            throw new IllegalArgumentException("Email is required");
+        }
+        
+        java.util.Optional<User> userOpt = userRepository.findByEmail(request.getEmail().trim());
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            String token = java.util.UUID.randomUUID().toString();
+            user.setResetToken(token);
+            user.setResetTokenExpiry(java.time.LocalDateTime.now().plusMinutes(15));
+            userRepository.save(user);
+
+            String resetLink = "http://localhost:5173/reset-password?token=" + token;
+            systemEmailService.sendPasswordResetEmail(user.getEmail(), resetLink);
+        } else {
+            // Log for security auditing without exposing to client
+            System.out.println("[SECURITY] Password reset requested for non-existent email: " + request.getEmail());
+        }
+    }
+
+    @Override
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
+        if (request.getToken() == null || request.getToken().trim().isEmpty()) {
+            throw new IllegalArgumentException("Token is required");
+        }
+        if (request.getNewPassword() == null || request.getNewPassword().length() < 6) {
+            throw new IllegalArgumentException("Password must be at least 6 characters long");
+        }
+
+        User user = userRepository.findByResetToken(request.getToken().trim())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid password reset token"));
+
+        if (user.getResetTokenExpiry() == null || user.getResetTokenExpiry().isBefore(java.time.LocalDateTime.now())) {
+            throw new IllegalArgumentException("Password reset token has expired");
+        }
+
+        // Reset password
+        user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        user.setResetToken(null);
+        user.setResetTokenExpiry(null);
+        userRepository.save(user);
+
+        // Save activity log
+        userActivityLogRepository.save(UserActivityLog.builder()
+                .user(user)
+                .activityType("PASSWORD_RESET")
+                .activityDate(java.time.LocalDate.now())
+                .build());
     }
 }
