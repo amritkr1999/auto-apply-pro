@@ -25,4 +25,8 @@ public class CandidateProfileDto {
     private List<Map<String, Object>> education;
     private List<Map<String, Object>> experience;
     private List<String> certifications;
+    private String githubUsername;
+    private String githubProfileUrl;
+    private String linkedinProfileUrl;
+    private String linkedinName;
 }

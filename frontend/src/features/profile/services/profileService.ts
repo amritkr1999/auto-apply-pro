@@ -41,6 +41,10 @@ export interface CandidateProfile {
   education?: any[];
   experience?: any[];
   certifications?: string[];
+  githubUsername?: string;
+  githubProfileUrl?: string;
+  linkedinProfileUrl?: string;
+  linkedinName?: string;
 }
 
 export interface RecruiterProfile {
@@ -227,6 +231,44 @@ export const profileService = {
     });
     if (!response.ok) {
       throw new Error("Failed to load skills list");
+    }
+    return response.json();
+  },
+
+  async getGithubConnectUrl(userId: number): Promise<string> {
+    const response = await fetch(`${API_BASE}/auth/connect/github?userId=${userId}`);
+    if (!response.ok) {
+      throw new Error("Failed to get GitHub redirect URL");
+    }
+    return response.text();
+  },
+
+  async disconnectGithub(userId: number): Promise<any> {
+    const response = await fetch(`${API_BASE}/auth/disconnect/github?userId=${userId}`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to disconnect GitHub");
+    }
+    return response.json();
+  },
+
+  async getLinkedinConnectUrl(userId: number): Promise<string> {
+    const response = await fetch(`${API_BASE}/auth/connect/linkedin?userId=${userId}`);
+    if (!response.ok) {
+      throw new Error("Failed to get LinkedIn redirect URL");
+    }
+    return response.text();
+  },
+
+  async disconnectLinkedin(userId: number): Promise<any> {
+    const response = await fetch(`${API_BASE}/auth/disconnect/linkedin?userId=${userId}`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to disconnect LinkedIn");
     }
     return response.json();
   },

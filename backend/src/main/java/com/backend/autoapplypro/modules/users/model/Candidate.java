@@ -64,4 +64,16 @@ public class Candidate {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "certifications", columnDefinition = "jsonb")
     private List<String> certifications;
+
+    @Column(name = "github_username")
+    private String githubUsername;
+
+    @Column(name = "github_profile_url")
+    private String githubProfileUrl;
+
+    @Column(name = "linkedin_profile_url")
+    private String linkedinProfileUrl;
+
+    @Column(name = "linkedin_name")
+    private String linkedinName;
 }

@@ -276,6 +276,7 @@ export const outreachService = {
     hrOutreachTargetRole: string;
     hrOutreachTemplateId: string;
     hrOutreachSourceTable: string;
+    marketingEmailsEnabled: boolean;
   }> {
     const response = await fetch(`${API_BASE}/v1/outreach/settings?userId=${userId}`, {
       headers: getAuthHeaders(),

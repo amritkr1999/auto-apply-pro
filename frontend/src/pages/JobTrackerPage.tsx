@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import { jobApplicationService, type JobApplication, type JobApplicationStats } from "../features/jobs/services/jobApplicationService";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
-import Badge from "../components/ui/Badge";
 
 // Platform colors configuration
 const PLATFORM_CONFIG: Record<string, { bg: string; text: string; stroke: string; logo: string }> = {
@@ -75,8 +74,7 @@ export const JobTrackerPage: React.FC = () => {
     platformResponseRates: {},
     platformApplicationsCount: {},
   });
-  
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
   // Modal & Drawer State
@@ -244,6 +242,14 @@ export const JobTrackerPage: React.FC = () => {
 
   return (
     <div className="flex-1 flex flex-col gap-6 text-slate-800">
+      {error && (
+        <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-btn text-sm font-semibold">
+          {error}
+        </div>
+      )}
+      {loading && (
+        <div className="text-xs text-slate-400 italic px-1">Refreshing tracker data...</div>
+      )}
       {/* Top Header Section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>

@@ -166,6 +166,10 @@ public class UserServiceImpl implements UserService {
                 .education(candidate.getEducation())
                 .experience(candidate.getExperience())
                 .certifications(candidate.getCertifications())
+                .githubUsername(candidate.getGithubUsername())
+                .githubProfileUrl(candidate.getGithubProfileUrl())
+                .linkedinProfileUrl(candidate.getLinkedinProfileUrl())
+                .linkedinName(candidate.getLinkedinName())
                 .build();
     }
 
@@ -201,6 +205,10 @@ public class UserServiceImpl implements UserService {
         candidate.setEducation(dto.getEducation());
         candidate.setExperience(dto.getExperience());
         candidate.setCertifications(dto.getCertifications());
+        candidate.setGithubUsername(dto.getGithubUsername());
+        candidate.setGithubProfileUrl(dto.getGithubProfileUrl());
+        candidate.setLinkedinProfileUrl(dto.getLinkedinProfileUrl());
+        candidate.setLinkedinName(dto.getLinkedinName());
         candidate = candidateRepository.save(candidate);
 
         return CandidateProfileDto.builder()
@@ -217,6 +225,10 @@ public class UserServiceImpl implements UserService {
                 .education(candidate.getEducation())
                 .experience(candidate.getExperience())
                 .certifications(candidate.getCertifications())
+                .githubUsername(candidate.getGithubUsername())
+                .githubProfileUrl(candidate.getGithubProfileUrl())
+                .linkedinProfileUrl(candidate.getLinkedinProfileUrl())
+                .linkedinName(candidate.getLinkedinName())
                 .build();
     }
 

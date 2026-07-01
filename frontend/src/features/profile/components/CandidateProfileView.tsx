@@ -5,6 +5,18 @@ import Button from "../../../components/ui/Button";
 import Input from "../../../components/ui/Input";
 import { outreachService } from "../../outreach/services/outreachService";
 
+const GithubIcon = () => (
+  <svg className="w-5 h-5 text-slate-800" fill="currentColor" viewBox="0 0 24 24">
+    <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0012 2z" />
+  </svg>
+);
+
+const LinkedinIcon = () => (
+  <svg className="w-5 h-5 text-[#0A66C2]" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+  </svg>
+);
+
 interface Props {
   userId: number;
 }
@@ -22,6 +34,10 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
   const [experience, setExperience] = useState<any[]>([]);
   const [certifications, setCertifications] = useState<string[]>([]);
   const [newCert, setNewCert] = useState("");
+  const [githubUsername, setGithubUsername] = useState("");
+  const [githubProfileUrl, setGithubProfileUrl] = useState("");
+  const [linkedinName, setLinkedinName] = useState("");
+  const [linkedinProfileUrl, setLinkedinProfileUrl] = useState("");
   
   const [masterSkills, setMasterSkills] = useState<{ id: number; name: string }[]>([]);
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -92,6 +108,10 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
       setEducation(data.education || []);
       setExperience(data.experience || []);
       setCertifications(data.certifications || []);
+      setGithubUsername(data.githubUsername || "");
+      setGithubProfileUrl(data.githubProfileUrl || "");
+      setLinkedinName(data.linkedinName || "");
+      setLinkedinProfileUrl(data.linkedinProfileUrl || "");
       
       setMessage("Profile successfully synchronized with your resume!");
     } catch (err: any) {
@@ -122,14 +142,29 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
       .catch((err) => console.error("Failed to check Gmail status", err))
       .finally(() => setGmailLoading(false));
 
-    // Check query params for Google OAuth redirection callback status
+    // Check query params for OAuth redirection callback status
     const params = new URLSearchParams(window.location.search);
     const status = params.get("status");
+    const provider = params.get("provider");
+    const errorMsg = params.get("errorMsg");
     if (status === "success") {
-      setMessage("Gmail account connected successfully!");
+      if (provider === "github") {
+        setMessage("GitHub account connected successfully!");
+      } else if (provider === "linkedin") {
+        setMessage("LinkedIn account connected successfully!");
+      } else {
+        setMessage("Gmail account connected successfully!");
+      }
       window.history.replaceState({}, document.title, window.location.pathname);
     } else if (status === "error") {
-      setError("Failed to connect Gmail account. Please try again.");
+      const displayErr = errorMsg ? decodeURIComponent(errorMsg) : "Please try again.";
+      if (provider === "github") {
+        setError("Failed to connect GitHub account: " + displayErr);
+      } else if (provider === "linkedin") {
+        setError("Failed to connect LinkedIn account: " + displayErr);
+      } else {
+        setError("Failed to connect Gmail account: " + displayErr);
+      }
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, [userId]);
@@ -230,6 +265,86 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
     }
   };
 
+  const handleConnectGithub = async () => {
+    try {
+      console.log("handleConnectGithub called");
+      setError("");
+      setMessage("");
+      const resolvedUserId = userId || JSON.parse(localStorage.getItem("user") || "{}").id;
+      console.log("resolvedUserId:", resolvedUserId);
+      if (!resolvedUserId) {
+        throw new Error("User ID is not found. Please log in again.");
+      }
+      const redirectUrl = await profileService.getGithubConnectUrl(resolvedUserId);
+      console.log("redirectUrl received:", redirectUrl);
+      window.location.href = redirectUrl;
+    } catch (err: any) {
+      console.error("handleConnectGithub error:", err);
+      setError(err.message || "Failed to initiate GitHub connection.");
+      alert("GitHub Connect Error: " + (err.message || err));
+    }
+  };
+
+  const handleDisconnectGithub = async () => {
+    try {
+      console.log("handleDisconnectGithub called");
+      setError("");
+      setMessage("");
+      const resolvedUserId = userId || JSON.parse(localStorage.getItem("user") || "{}").id;
+      if (!resolvedUserId) {
+        throw new Error("User ID is not found. Please log in again.");
+      }
+      await profileService.disconnectGithub(resolvedUserId);
+      setGithubUsername("");
+      setGithubProfileUrl("");
+      setMessage("GitHub account disconnected successfully.");
+    } catch (err: any) {
+      console.error("handleDisconnectGithub error:", err);
+      setError(err.message || "Failed to disconnect GitHub.");
+      alert("GitHub Disconnect Error: " + (err.message || err));
+    }
+  };
+
+  const handleConnectLinkedin = async () => {
+    try {
+      console.log("handleConnectLinkedin called");
+      setError("");
+      setMessage("");
+      const resolvedUserId = userId || JSON.parse(localStorage.getItem("user") || "{}").id;
+      console.log("resolvedUserId:", resolvedUserId);
+      if (!resolvedUserId) {
+        throw new Error("User ID is not found. Please log in again.");
+      }
+      const redirectUrl = await profileService.getLinkedinConnectUrl(resolvedUserId);
+      console.log("redirectUrl received:", redirectUrl);
+      window.location.href = redirectUrl;
+    } catch (err: any) {
+      console.error("handleConnectLinkedin error:", err);
+      setError(err.message || "Failed to initiate LinkedIn connection.");
+      alert("LinkedIn Connect Error: " + (err.message || err));
+    }
+  };
+
+  const handleDisconnectLinkedin = async () => {
+    try {
+      console.log("handleDisconnectLinkedin called");
+      setError("");
+      setMessage("");
+      const resolvedUserId = userId || JSON.parse(localStorage.getItem("user") || "{}").id;
+      if (!resolvedUserId) {
+        throw new Error("User ID is not found. Please log in again.");
+      }
+      await profileService.disconnectLinkedin(resolvedUserId);
+      setLinkedinName("");
+      setLinkedinProfileUrl("");
+      setMessage("LinkedIn account disconnected successfully.");
+    } catch (err: any) {
+      console.error("handleDisconnectLinkedin error:", err);
+      setError(err.message || "Failed to disconnect LinkedIn.");
+      alert("LinkedIn Disconnect Error: " + (err.message || err));
+    }
+  };
+
   useEffect(() => {
     if (!skills || masterSkills.length === 0) {
       setSuggestions([]);
@@ -283,6 +398,10 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
         setEducation(data.education || []);
         setExperience(data.experience || []);
         setCertifications(data.certifications || []);
+        setGithubUsername(data.githubUsername || "");
+        setGithubProfileUrl(data.githubProfileUrl || "");
+        setLinkedinName(data.linkedinName || "");
+        setLinkedinProfileUrl(data.linkedinProfileUrl || "");
       })
       .catch(() => setError("Failed to load profile details."))
       .finally(() => setLoading(false));
@@ -310,6 +429,10 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
         education,
         experience,
         certifications,
+        githubUsername,
+        githubProfileUrl,
+        linkedinProfileUrl,
+        linkedinName,
       };
 
       const result = await profileService.updateCandidateProfile(userId, updatedProfile);
@@ -681,6 +804,108 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
               </Button>
             </div>
           )}
+        </div>
+
+        {/* Connected Accounts Section */}
+        <div className="w-full border-t border-slate-100 pt-5">
+          <h3 className="text-base font-semibold text-slate-800 mb-2">Connected Social Accounts</h3>
+          <p className="text-xs text-slate-500 mb-4">
+            Connect your GitHub and LinkedIn profiles to authenticate your professional identity and enrich outreach materials.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* GitHub Card */}
+            {githubUsername ? (
+              <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-card">
+                <div className="flex items-center gap-3">
+                  <GithubIcon />
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">GitHub Connected</p>
+                    <a
+                      href={githubProfileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-primary hover:underline font-medium"
+                    >
+                      @{githubUsername}
+                    </a>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDisconnectGithub}
+                  className="text-rose-600 border-rose-200 hover:bg-rose-50 hover:text-rose-700"
+                >
+                  Disconnect
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-card">
+                <div className="flex items-center gap-3">
+                  <GithubIcon />
+                  <div>
+                    <p className="text-sm font-semibold text-slate-700">GitHub</p>
+                    <p className="text-xs text-slate-400">Not connected</p>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={handleConnectGithub}
+                >
+                  Connect GitHub
+                </Button>
+              </div>
+            )}
+
+            {/* LinkedIn Card */}
+            {linkedinName ? (
+              <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-card">
+                <div className="flex items-center gap-3">
+                  <LinkedinIcon />
+                  <div>
+                    <p className="text-sm font-semibold text-[#0A66C2]">LinkedIn Connected</p>
+                    <a
+                      href={linkedinProfileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-[#0A66C2] hover:underline font-medium"
+                    >
+                      {linkedinName}
+                    </a>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDisconnectLinkedin}
+                  className="text-rose-600 border-rose-200 hover:bg-rose-50 hover:text-rose-700"
+                >
+                  Disconnect
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-card">
+                <div className="flex items-center gap-3">
+                  <LinkedinIcon />
+                  <div>
+                    <p className="text-sm font-semibold text-slate-700">LinkedIn</p>
+                    <p className="text-xs text-slate-400">Not connected</p>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={handleConnectLinkedin}
+                >
+                  Connect LinkedIn
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Outreach Scheduling & Anti-Spam Settings */}
