@@ -19,6 +19,14 @@ public class SkillMigrationRunner implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         try {
+            // Ensure any existing users without a status value are set to ACTIVE
+            try {
+                jdbcTemplate.execute("UPDATE users SET status = 'ACTIVE' WHERE status IS NULL");
+                log.info("Successfully checked and initialized user statuses to ACTIVE.");
+            } catch (Exception ex) {
+                log.warn("Could not check/update user statuses. The column might not exist yet.", ex);
+            }
+
             // Check if candidates table has skills column and does not have legacy_skills column
             Boolean hasSkillsColumn = jdbcTemplate.queryForObject(
                 "SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='candidates' AND column_name='skills')",

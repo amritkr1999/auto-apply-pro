@@ -104,6 +104,10 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
 
+        if (user.getStatus() == UserStatus.DELETED) {
+            throw new IllegalArgumentException("Invalid email or password");
+        }
+
         if (request.getPassword() == null || !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new IllegalArgumentException("Invalid email or password");
         }
@@ -143,6 +147,8 @@ public class UserServiceImpl implements UserService {
                 .officialEmail(user.getOfficialEmail())
                 .role(user.getRole().name())
                 .loginStreak(user.getLoginStreak())
+                .isPendingDeletion(user.getStatus() == UserStatus.PENDING_DELETION)
+                .deletionScheduledAt(user.getDeletionScheduledAt() != null ? user.getDeletionScheduledAt().toString() : null)
                 .build();
     }
 
@@ -497,5 +503,39 @@ public class UserServiceImpl implements UserService {
                 .activityType("PASSWORD_RESET")
                 .activityDate(java.time.LocalDate.now())
                 .build());
+    }
+
+    @Override
+    @Transactional
+    public void requestAccountDeletion(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        user.setStatus(UserStatus.PENDING_DELETION);
+        user.setDeletionScheduledAt(java.time.LocalDateTime.now().plusDays(14));
+        userRepository.save(user);
+
+        userActivityLogRepository.save(UserActivityLog.builder()
+                .user(user)
+                .activityType("DELETE_REQUEST")
+                .activityDate(java.time.LocalDate.now())
+                .build());
+    }
+
+    @Override
+    @Transactional
+    public void cancelAccountDeletion(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        if (user.getStatus() == UserStatus.PENDING_DELETION) {
+            user.setStatus(UserStatus.ACTIVE);
+            user.setDeletionScheduledAt(null);
+            userRepository.save(user);
+
+            userActivityLogRepository.save(UserActivityLog.builder()
+                    .user(user)
+                    .activityType("DELETE_CANCEL")
+                    .activityDate(java.time.LocalDate.now())
+                    .build());
+        }
     }
 }

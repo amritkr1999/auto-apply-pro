@@ -11,4 +11,5 @@ public interface UserActivityLogRepository extends JpaRepository<UserActivityLog
     List<UserActivityLog> findByUserIdAndActivityDateBetween(Long userId, LocalDate startDate, LocalDate endDate);
     List<UserActivityLog> findByUserIdAndActivityType(Long userId, String activityType);
     boolean existsByUserIdAndActivityTypeAndReferenceId(Long userId, String activityType, Long referenceId);
+    List<UserActivityLog> findByUserId(Long userId);
 }

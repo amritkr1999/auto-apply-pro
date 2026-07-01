@@ -123,6 +123,14 @@ public class User {
     @Column(name = "last_marketing_email_sent_at")
     private LocalDateTime lastMarketingEmailSentAt;
 
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, columnDefinition = "VARCHAR(25) DEFAULT 'ACTIVE'")
+    private UserStatus status = UserStatus.ACTIVE;
+
+    @Column(name = "deletion_scheduled_at")
+    private LocalDateTime deletionScheduledAt;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -183,6 +191,9 @@ public class User {
         }
         if (marketingCampaignStep == null) {
             marketingCampaignStep = 0;
+        }
+        if (status == null) {
+            status = UserStatus.ACTIVE;
         }
     }
 

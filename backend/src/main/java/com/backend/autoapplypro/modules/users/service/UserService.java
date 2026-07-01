@@ -21,4 +21,7 @@ public interface UserService {
     
     void initiatePasswordReset(ForgotPasswordRequest request);
     void resetPassword(ResetPasswordRequest request);
+    
+    void requestAccountDeletion(Long userId);
+    void cancelAccountDeletion(Long userId);
 }

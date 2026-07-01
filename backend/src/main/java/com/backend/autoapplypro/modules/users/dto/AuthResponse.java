@@ -18,4 +18,6 @@ public class AuthResponse {
     private String officialEmail;
     private String role;
     private Integer loginStreak;
+    private Boolean isPendingDeletion;
+    private String deletionScheduledAt;
 }

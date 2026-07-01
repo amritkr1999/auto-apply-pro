@@ -124,4 +124,32 @@ public class ProfileController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @PostMapping("/delete-request")
+    public ResponseEntity<?> deleteAccount(org.springframework.security.core.Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED).build();
+        }
+        Long userId = (Long) authentication.getCredentials();
+        try {
+            userService.requestAccountDeletion(userId);
+            return ResponseEntity.ok(java.util.Map.of("message", "Account deletion request submitted successfully."));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/cancel-delete")
+    public ResponseEntity<?> cancelDeleteAccount(org.springframework.security.core.Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED).build();
+        }
+        Long userId = (Long) authentication.getCredentials();
+        try {
+            userService.cancelAccountDeletion(userId);
+            return ResponseEntity.ok(java.util.Map.of("message", "Account deletion request cancelled."));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("message", e.getMessage()));
+        }
+    }
 }

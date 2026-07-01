@@ -9,4 +9,5 @@ import java.util.List;
 public interface ReferralOutreachRepository extends JpaRepository<ReferralOutreach, Long> {
     List<ReferralOutreach> findByReferralRequestId(Long referralRequestId);
     long countByReferralRequestId(Long referralRequestId);
+    List<ReferralOutreach> findByRecipientId(Long recipientId);
 }

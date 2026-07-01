@@ -41,7 +41,13 @@ export const LoginPage: React.FC = () => {
   const [rememberMe, setRememberMe] = useState<boolean>(false);
 
   // Error States
-  const [error, setError] = useState<string>("");
+  const [error, setError] = useState<string>(null);
+
+  // Account Recovery States
+  const [showRecoveryModal, setShowRecoveryModal] = useState<boolean>(false);
+  const [pendingUser, setPendingUser] = useState<any>(null);
+  const [isRestoring, setIsRestoring] = useState<boolean>(false);
+  const [restoreError, setRestoreError] = useState<string>("");
 
   const handleTabChange = (newTab: AuthTab) => {
     setTab(newTab);
@@ -76,6 +82,13 @@ export const LoginPage: React.FC = () => {
     try {
       setError("");
       const userData = await profileService.login({ email, password });
+      
+      if (userData.isPendingDeletion) {
+        setPendingUser(userData);
+        setShowRecoveryModal(true);
+        return;
+      }
+
       localStorage.setItem("user", JSON.stringify(userData));
       
       if (userData.role === "RECRUITER") {
@@ -87,6 +100,46 @@ export const LoginPage: React.FC = () => {
       }
     } catch (err: any) {
       setError(err.message || "Invalid credentials. Please try again.");
+    }
+  };
+
+  const handleRestoreAccount = async () => {
+    if (!pendingUser) return;
+    setIsRestoring(true);
+    setRestoreError("");
+    try {
+      const response = await fetch("http://localhost:8060/api/v1/profiles/cancel-delete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${pendingUser.token || ""}`
+        }
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.message || "Failed to restore account.");
+      }
+
+      // Success: Save user to localStorage and navigate to dashboard
+      const activeUser = { ...pendingUser, isPendingDeletion: false, deletionScheduledAt: null };
+      localStorage.setItem("user", JSON.stringify(activeUser));
+      setShowRecoveryModal(false);
+      setPendingUser(null);
+      
+      alert("Welcome back! Your account deletion has been cancelled successfully.");
+      
+      if (activeUser.role === "RECRUITER") {
+        navigate("/recruiter-dashboard");
+      } else if (activeUser.role === "COMPANY") {
+        navigate("/company-dashboard");
+      } else {
+        navigate("/candidate-dashboard");
+      }
+    } catch (err: any) {
+      setRestoreError(err.message || "Failed to restore account. Please try again.");
+    } finally {
+      setIsRestoring(false);
     }
   };
 
@@ -506,6 +559,73 @@ export const LoginPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Account Deletion Intercept Modal */}
+      {showRecoveryModal && pendingUser && (
+        <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm">
+          <div className="bg-white rounded-card shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200" style={{ color: "#334155" }}>
+            <div className="p-6">
+              <div className="flex items-center space-x-2 text-amber-600 mb-3">
+                <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <h3 className="text-xl font-bold text-slate-800">Account Scheduled for Deletion</h3>
+              </div>
+
+              <div className="text-sm text-slate-600 space-y-3">
+                <p>
+                  This account is currently deactivated and scheduled for permanent erasure on:
+                </p>
+                <p className="font-mono text-center font-bold bg-amber-50 text-amber-800 py-2 border border-amber-200 rounded-lg text-sm">
+                  {new Date(pendingUser.deletionScheduledAt).toLocaleString()}
+                </p>
+                <p>
+                  Logging in will automatically keep your account deactivated unless you restore it. 
+                  Would you like to cancel the deletion request and restore access to your profile?
+                </p>
+              </div>
+
+              {restoreError && (
+                <div className="mt-4 p-3 bg-rose-50 border border-rose-200 text-xs text-rose-600 rounded-lg">
+                  {restoreError}
+                </div>
+              )}
+
+              <div className="mt-6 flex flex-col space-y-2">
+                <button
+                  type="button"
+                  disabled={isRestoring}
+                  onClick={handleRestoreAccount}
+                  className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm rounded-btn transition-colors shadow-sm flex items-center justify-center disabled:opacity-50"
+                >
+                  {isRestoring ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      Restoring Account...
+                    </>
+                  ) : (
+                    "Yes, Restore My Account"
+                  )}
+                </button>
+                <button
+                  type="button"
+                  disabled={isRestoring}
+                  onClick={() => {
+                    setShowRecoveryModal(false);
+                    setPendingUser(null);
+                  }}
+                  className="w-full py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-medium text-sm rounded-btn transition-colors"
+                >
+                  Cancel & Keep Scheduled for Deletion
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
