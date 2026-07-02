@@ -123,7 +123,9 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isMobile = f
   };
 
   return (
-    <aside className={`${
+    <aside
+      data-tour="sidebar-nav"
+      className={`${
       isMobile 
         ? "w-full h-full" 
         : minimizedState ? "w-[72px]" : "w-[240px]"
@@ -220,7 +222,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isMobile = f
             </>
           )}
 
-          <NavLink to="/candidate/profile" className={linkStyle} title={minimizedState ? "Profile Settings" : undefined} onClick={handleLinkClick}>
+          <NavLink to="/candidate/profile" data-tour="sidebar-profile" className={linkStyle} title={minimizedState ? "Profile Settings" : undefined} onClick={handleLinkClick}>
             <ProfileIcon className={iconClass} />
             {!minimizedState && <span>Profile Settings</span>}
           </NavLink>

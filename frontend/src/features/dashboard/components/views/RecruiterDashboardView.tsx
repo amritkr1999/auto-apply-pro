@@ -12,7 +12,7 @@ export const RecruiterDashboardView: React.FC = () => {
   return (
     <>
       <div className="flex-grow min-w-0">
-        <div className="flex items-center justify-between mb-8">
+        <div data-tour="recruiter-header" className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-slate-800">Recruiter Dashboard</h1>
             <p className="text-sm text-slate-500 mt-1">Manage sourcing pipelines and candidate outreach campaigns</p>
@@ -20,7 +20,7 @@ export const RecruiterDashboardView: React.FC = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+        <div data-tour="recruiter-stats" className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
           <div className="bg-white rounded-card shadow-sm border border-slate-200 p-5">
             <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Sourced Candidates</h3>
             <p className="text-3xl font-bold text-slate-800 mt-2">48 candidates</p>
@@ -36,7 +36,7 @@ export const RecruiterDashboardView: React.FC = () => {
         </div>
 
         {/* Outreach Table */}
-        <section id="outreach">
+        <section id="outreach" data-tour="recruiter-campaigns">
           <h2 className="text-lg font-bold text-slate-800 mb-4">Recent Outreach Campaigns</h2>
           <Table>
             <TableHeader>

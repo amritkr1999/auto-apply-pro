@@ -1,0 +1,231 @@
+/* walkthrough.css */
+
+/* Fullscreen tour backdrop overlay */
+.tour-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  width: 100%;
+  height: 100%;
+}
+
+.tour-backdrop svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.tour-backdrop-overlay {
+  fill: rgba(15, 23, 42, 0.65);
+  pointer-events: auto;
+  transition: fill 0.3s ease-in-out;
+}
+
+/* Pulse animation on target spotlight */
+.tour-spotlight-rect {
+  transition: x 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              y 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Glassmorphic Tooltip Card */
+.tour-tooltip-card {
+  position: absolute;
+  z-index: 10000;
+  width: 320px;
+  max-width: calc(100vw - 32px);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px) saturate(120%);
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.05),
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(9, 132, 227, 0.1);
+  border-radius: 16px;
+  padding: 20px;
+  color: #1e293b;
+  pointer-events: auto;
+  
+  /* Initial animation */
+  animation: tourCardEnter 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Centered fallback for welcome/completion modals */
+.tour-tooltip-card.tour-modal-center {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 440px;
+  max-width: calc(100vw - 32px);
+  animation: tourModalEnter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(9, 132, 227, 0.15);
+}
+
+/* Glow highlight for target element */
+.tour-target-highlight {
+  position: absolute;
+  pointer-events: none;
+  z-index: 9998;
+  border: 2px solid #0984e3;
+  box-shadow: 0 0 0 4px rgba(9, 132, 227, 0.2), 0 0 20px rgba(9, 132, 227, 0.4);
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: tourPulse 2s infinite ease-in-out;
+}
+
+/* Animations */
+@keyframes tourCardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes tourModalEnter {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -40%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes tourPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 2px rgba(9, 132, 227, 0.2), 0 0 10px rgba(9, 132, 227, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(9, 132, 227, 0.4), 0 0 25px rgba(9, 132, 227, 0.6);
+  }
+}
+
+/* Card Header Gradient Badge styling */
+.tour-step-badge {
+  background: linear-gradient(135deg, rgba(9, 132, 227, 0.1) 0%, rgba(0, 184, 148, 0.1) 100%);
+  color: #0984e3;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  display: inline-block;
+}
+
+/* Card typography & spacing */
+.tour-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.3;
+}
+
+.tour-description {
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.5;
+}
+
+/* Dot Navigation indicators */
+.tour-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #cbd5e1;
+  transition: all 0.2s ease-in-out;
+}
+
+.tour-dot.active {
+  width: 16px;
+  border-radius: 3px;
+  background-color: #0984e3;
+}
+
+/* Tooltip Arrow */
+.tour-arrow {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  transform: rotate(45deg);
+  z-index: -1;
+}
+
+.tour-arrow-top {
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  border-top: none;
+  border-left: none;
+}
+
+.tour-arrow-bottom {
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  border-bottom: none;
+  border-right: none;
+}
+
+.tour-arrow-left {
+  right: -6px;
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+  border-bottom: none;
+  border-left: none;
+}
+
+.tour-arrow-right {
+  left: -6px;
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+  border-top: none;
+  border-right: none;
+}
+
+/* Responsive Overrides (for tablet/mobile viewport layout safety) */
+@media (max-width: 768px) {
+  .tour-tooltip-card:not(.tour-modal-center) {
+    position: fixed;
+    bottom: 20px;
+    left: 16px;
+    right: 16px;
+    width: auto;
+    max-width: none;
+    transform: none;
+    top: auto !important;
+    left: 16px !important;
+    right: 16px !important;
+    animation: tourCardEnterMobile 0.3s ease-out both;
+  }
+  
+  .tour-arrow {
+    display: none;
+  }
+}
+
+@keyframes tourCardEnterMobile {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

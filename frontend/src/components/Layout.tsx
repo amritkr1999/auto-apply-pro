@@ -3,6 +3,7 @@ import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
 import DashboardSidebar from "../features/dashboard/components/DashboardSidebar";
+import WalkthroughTour from "./WalkthroughTour";
 
 export const Layout: React.FC = () => {
   const navigate = useNavigate();
@@ -33,6 +34,7 @@ export const Layout: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen bg-bg-color text-base-text font-sans">
       <Header onMenuClick={() => setMobileMenuOpen(true)} />
+      {user && <WalkthroughTour />}
 
       {/* Mobile Drawer Overlay */}
       {mobileMenuOpen && user && (

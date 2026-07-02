@@ -242,14 +242,16 @@ export const CandidateDashboardView: React.FC = () => {
 
   return (
     <>
-      <div className="flex items-center justify-between mb-8">
+      <div data-tour="dashboard-header" className="flex items-center justify-between mb-8">
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-3xl font-bold text-slate-800">Candidate Dashboard</h1>
               {!loadingStatus && (
-                <Badge variant={gmailConnected ? "success" : "neutral"}>
-                  {gmailConnected ? "Gmail Connected" : "Gmail Disconnected"}
-                </Badge>
+                <div data-tour="gmail-status">
+                  <Badge variant={gmailConnected ? "success" : "neutral"}>
+                    {gmailConnected ? "Gmail Connected" : "Gmail Disconnected"}
+                  </Badge>
+                </div>
               )}
             </div>
             <p className="text-sm text-slate-500 mt-1">Track your job applications and email outreach status</p>
@@ -361,7 +363,7 @@ export const CandidateDashboardView: React.FC = () => {
         </div>
 
         {/* HR Cold Email Campaign Status Widget */}
-        <div className="mb-10 p-6 bg-white border border-slate-200 rounded-card shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 hover:shadow-md transition-shadow duration-200">
+        <div data-tour="campaign-widget" className="mb-10 p-6 bg-white border border-slate-200 rounded-card shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 hover:shadow-md transition-shadow duration-200">
           <div className="flex gap-4">
             <div className="w-12 h-12 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-2xl shrink-0">
               🚀
@@ -402,7 +404,7 @@ export const CandidateDashboardView: React.FC = () => {
 
         {/* Daily Learning Preview Widget */}
         {dailyContent && (
-          <div className="mb-10 grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-900 text-white rounded-card p-6 shadow-sm border border-slate-800 relative overflow-hidden">
+          <div data-tour="learning-preview" className="mb-10 grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-900 text-white rounded-card p-6 shadow-sm border border-slate-800 relative overflow-hidden">
             <div className="absolute top-0 right-0 p-4 opacity-5">
               <svg className="w-24 h-24" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />

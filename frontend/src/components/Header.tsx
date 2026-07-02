@@ -57,6 +57,18 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
         
         {user && (
           <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => {
+                localStorage.removeItem(`walkthrough_completed_${user.id}`);
+                window.dispatchEvent(new CustomEvent("start-walkthrough"));
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 hover:text-amber-800 border border-amber-200 rounded-full text-xs font-semibold shadow-sm transition-all focus:outline-none cursor-pointer"
+              title="Start Guided Tour"
+            >
+              <span>💡</span>
+              <span className="hidden sm:inline">Guided Tour</span>
+            </button>
             <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full uppercase tracking-wider">
               {user.role}
             </span>

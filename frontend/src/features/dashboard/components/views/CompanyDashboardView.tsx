@@ -12,7 +12,7 @@ export const CompanyDashboardView: React.FC = () => {
   return (
     <>
       <div className="flex-grow min-w-0">
-        <div className="flex items-center justify-between mb-8">
+        <div data-tour="company-header" className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-slate-800">Company Dashboard</h1>
             <p className="text-sm text-slate-500 mt-1">Manage active corporate job postings and internal recruiters</p>
@@ -20,7 +20,7 @@ export const CompanyDashboardView: React.FC = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+        <div data-tour="company-stats" className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
           <div className="bg-white rounded-card shadow-sm border border-slate-200 p-5">
             <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Active Jobs</h3>
             <p className="text-3xl font-bold text-slate-800 mt-2">15 listings</p>
@@ -36,7 +36,7 @@ export const CompanyDashboardView: React.FC = () => {
         </div>
 
         {/* Postings Table */}
-        <section id="jobs">
+        <section id="jobs" data-tour="company-postings">
           <h2 className="text-lg font-bold text-slate-800 mb-4">Active Postings</h2>
           <Table>
             <TableHeader>

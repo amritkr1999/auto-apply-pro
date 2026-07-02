@@ -73,6 +73,41 @@ export const CandidateProfile: React.FC = () => {
         {renderProfileView()}
       </div>
 
+      {/* Guided Tour Section */}
+      <div className="bg-amber-50/50 rounded-card shadow-sm border border-amber-200/60 p-8">
+        <div className="flex items-start space-x-3">
+          <div className="p-2 bg-amber-100/80 text-amber-700 rounded-lg">
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-slate-800">Guided App Tour</h2>
+            <p className="text-sm text-slate-600 mt-1">
+              Need a refresher on how the dashboard and automation features work? You can restart the onboarding tour anytime.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                localStorage.removeItem(`walkthrough_completed_${user.id}`);
+                const dashboardPath = user.role === "RECRUITER" 
+                  ? "/recruiter-dashboard" 
+                  : user.role === "COMPANY" 
+                    ? "/company-dashboard" 
+                    : "/candidate-dashboard";
+                navigate(dashboardPath);
+                setTimeout(() => {
+                  window.dispatchEvent(new CustomEvent("start-walkthrough"));
+                }, 100);
+              }}
+              className="mt-4 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium text-sm rounded-btn transition-colors shadow-sm cursor-pointer"
+            >
+              Start Guided Tour
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Danger Zone - GDPR/CCPA Compliant Deletion */}
       <div className="bg-rose-50 rounded-card shadow-sm border border-rose-200 p-8">
         <div className="flex items-start space-x-3">
