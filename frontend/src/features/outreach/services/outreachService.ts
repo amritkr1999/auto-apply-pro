@@ -1,4 +1,6 @@
-const API_BASE = "http://localhost:8060/api";
+import { API_BASE } from "../../../config/api";
+
+const API_BASE_V1 = `${API_BASE}/v1`;
 
 const getAuthHeaders = (): Record<string, string> => {
   const userStr = localStorage.getItem("user");
@@ -231,7 +233,7 @@ export const outreachService = {
 
   // Connect Gmail: returns the OAuth redirect URL
   async getConnectUrl(userId: number): Promise<string> {
-    const response = await fetch(`http://localhost:8060/api/v1/outreach/connect/google?userId=${userId}`, {
+    const response = await fetch(buildApiUrl(`/v1/outreach/connect/google?userId=${userId}`), {
       headers: getAuthHeaders(),
     });
     if (!response.ok) {
@@ -242,7 +244,7 @@ export const outreachService = {
 
   // Get Gmail Connection Status
   async getGmailStatus(userId: number): Promise<{ connected: boolean; connectedEmail: string | null }> {
-    const response = await fetch(`http://localhost:8060/api/v1/outreach/status?userId=${userId}`, {
+    const response = await fetch(buildApiUrl(`/v1/outreach/status?userId=${userId}`), {
       headers: getAuthHeaders(),
     });
     if (!response.ok) {
@@ -253,7 +255,7 @@ export const outreachService = {
 
   // Disconnect Gmail
   async disconnectGmail(userId: number): Promise<{ message: string }> {
-    const response = await fetch(`http://localhost:8060/api/v1/outreach/disconnect?userId=${userId}`, {
+    const response = await fetch(buildApiUrl(`/v1/outreach/disconnect?userId=${userId}`), {
       method: "POST",
       headers: getAuthHeaders(),
     });
@@ -319,7 +321,7 @@ export const outreachService = {
 
   // Quick toggle HR outreach campaign
   async toggleHrCampaign(userId: number, enable: boolean): Promise<{ enabled: boolean; message: string }> {
-    const response = await fetch(`${API_BASE}/v1/outreach/settings/campaign/toggle?userId=${userId}&enable=${enable}`, {
+    const response = await fetch(`${API_BASE_V1}/outreach/settings/campaign/toggle?userId=${userId}&enable=${enable}`, {
       method: "POST",
       headers: {
         ...getAuthHeaders(),

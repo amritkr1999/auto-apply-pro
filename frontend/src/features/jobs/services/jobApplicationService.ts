@@ -1,4 +1,6 @@
-const API_BASE = "http://localhost:8060/api/job-applications";
+import { buildApiUrl } from "../../../config/api";
+
+const API_BASE = buildApiUrl("/job-applications");
 
 const getAuthHeaders = (): Record<string, string> => {
   const userStr = localStorage.getItem("user");

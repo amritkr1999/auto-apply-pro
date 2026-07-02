@@ -1,4 +1,6 @@
-const API_BASE = "http://localhost:8060/api/v1";
+import { API_BASE } from "../../../config/api";
+
+const API_BASE_V1 = `${API_BASE}/v1`;
 
 const getAuthHeaders = (): Record<string, string> => {
   const userStr = localStorage.getItem("user");
@@ -25,6 +27,7 @@ export interface UserAuthData {
   mobile: string;
   officialEmail?: string;
   role: string;
+  isPendingDeletion: boolean;
 }
 
 export interface CandidateProfile {
@@ -72,7 +75,7 @@ export interface CompanyProfile {
 export const profileService = {
   // Authentication
   async register(requestData: any): Promise<UserAuthData> {
-    const response = await fetch(`${API_BASE}/auth/register`, {
+    const response = await fetch(`${API_BASE_V1}/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestData),
@@ -85,7 +88,7 @@ export const profileService = {
   },
 
   async login(requestData: any): Promise<UserAuthData> {
-    const response = await fetch(`${API_BASE}/auth/login`, {
+    const response = await fetch(`${API_BASE_V1}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestData),
@@ -98,7 +101,7 @@ export const profileService = {
   },
 
   async forgotPassword(email: string): Promise<any> {
-    const response = await fetch(`${API_BASE}/auth/forgot-password`, {
+    const response = await fetch(`${API_BASE_V1}/auth/forgot-password`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email }),
@@ -111,7 +114,7 @@ export const profileService = {
   },
 
   async resetPassword(requestData: any): Promise<any> {
-    const response = await fetch(`${API_BASE}/auth/reset-password`, {
+    const response = await fetch(`${API_BASE_V1}/auth/reset-password`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestData),
@@ -152,7 +155,7 @@ export const profileService = {
   async uploadCandidateResume(userId: number, file: File): Promise<{ message: string }> {
     const formData = new FormData();
     formData.append("file", file);
-    const response = await fetch(`${API_BASE}/profiles/candidate/${userId}/resume`, {
+    const response = await fetch(`${API_BASE_V1}/profiles/candidate/${userId}/resume`, {
       method: "POST",
       headers: getAuthHeaders(),
       body: formData,
@@ -164,7 +167,7 @@ export const profileService = {
   },
 
   async syncCandidateProfile(userId: number): Promise<{ message: string }> {
-    const response = await fetch(`${API_BASE}/profiles/candidate/${userId}/resume/sync`, {
+    const response = await fetch(`${API_BASE_V1}/profiles/candidate/${userId}/resume/sync`, {
       method: "POST",
       headers: getAuthHeaders(),
     });
@@ -226,7 +229,7 @@ export const profileService = {
   },
 
   async getSkills(): Promise<{ id: number; name: string }[]> {
-    const response = await fetch(`${API_BASE}/skills`, {
+    const response = await fetch(`${API_BASE_V1}/skills`, {
       headers: getAuthHeaders(),
     });
     if (!response.ok) {
@@ -236,7 +239,7 @@ export const profileService = {
   },
 
   async getGithubConnectUrl(userId: number): Promise<string> {
-    const response = await fetch(`${API_BASE}/auth/connect/github?userId=${userId}`);
+    const response = await fetch(`${API_BASE_V1}/auth/connect/github?userId=${userId}`);
     if (!response.ok) {
       throw new Error("Failed to get GitHub redirect URL");
     }
@@ -244,7 +247,7 @@ export const profileService = {
   },
 
   async disconnectGithub(userId: number): Promise<any> {
-    const response = await fetch(`${API_BASE}/auth/disconnect/github?userId=${userId}`, {
+    const response = await fetch(`${API_BASE_V1}/auth/disconnect/github?userId=${userId}`, {
       method: "POST",
       headers: getAuthHeaders(),
     });
@@ -255,7 +258,7 @@ export const profileService = {
   },
 
   async getLinkedinConnectUrl(userId: number): Promise<string> {
-    const response = await fetch(`${API_BASE}/auth/connect/linkedin?userId=${userId}`);
+    const response = await fetch(`${API_BASE_V1}/auth/connect/linkedin?userId=${userId}`);
     if (!response.ok) {
       throw new Error("Failed to get LinkedIn redirect URL");
     }
@@ -263,7 +266,7 @@ export const profileService = {
   },
 
   async disconnectLinkedin(userId: number): Promise<any> {
-    const response = await fetch(`${API_BASE}/auth/disconnect/linkedin?userId=${userId}`, {
+    const response = await fetch(`${API_BASE_V1}/auth/disconnect/linkedin?userId=${userId}`, {
       method: "POST",
       headers: getAuthHeaders(),
     });

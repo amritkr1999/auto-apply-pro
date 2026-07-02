@@ -41,7 +41,7 @@ export const LoginPage: React.FC = () => {
   const [rememberMe, setRememberMe] = useState<boolean>(false);
 
   // Error States
-  const [error, setError] = useState<string>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Account Recovery States
   const [showRecoveryModal, setShowRecoveryModal] = useState<boolean>(false);
@@ -108,7 +108,7 @@ export const LoginPage: React.FC = () => {
     setIsRestoring(true);
     setRestoreError("");
     try {
-      const response = await fetch("http://localhost:8060/api/v1/profiles/cancel-delete", {
+      const response = await fetch("/api/v1/profiles/cancel-delete", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

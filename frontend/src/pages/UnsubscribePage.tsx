@@ -15,7 +15,7 @@ export const UnsubscribePage: React.FC = () => {
     }
 
     // Call backend API to unsubscribe
-    fetch("http://localhost:8060/api/v1/marketing/unsubscribe", {
+    fetch("/api/v1/marketing/unsubscribe", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

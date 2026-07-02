@@ -37,7 +37,7 @@ export const CandidateProfile: React.FC = () => {
     setErrorMsg("");
 
     try {
-      const response = await fetch("http://localhost:8060/api/v1/profiles/delete-request", {
+      const response = await fetch("/api/v1/profiles/delete-request", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -1,4 +1,6 @@
-const API_BASE = "http://localhost:8060/api/v1";
+import { API_BASE } from "../../../config/api";
+
+const API_BASE_V1 = `${API_BASE}/v1`;
 
 const getAuthHeaders = (): Record<string, string> => {
   const userStr = localStorage.getItem("user");
@@ -67,7 +69,7 @@ export interface CheckoutConfig {
 // --- API Methods ---
 
 export const getPlans = async (): Promise<PlanDto[]> => {
-  const res = await fetch(`${API_BASE}/billing/plans`);
+  const res = await fetch(`${API_BASE_V1}/billing/plans`);
   if (!res.ok) {
     throw new Error("Failed to fetch plans");
   }
@@ -75,7 +77,7 @@ export const getPlans = async (): Promise<PlanDto[]> => {
 };
 
 export const createSubscription = async (razorpayPlanId: string): Promise<CheckoutConfig> => {
-  const res = await fetch(`${API_BASE}/billing/subscribe`, {
+  const res = await fetch(`${API_BASE_V1}/billing/subscribe`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -95,7 +97,7 @@ export const verifySubscription = async (data: {
   razorpay_subscription_id: string;
   razorpay_signature: string;
 }): Promise<{ message: string }> => {
-  const res = await fetch(`${API_BASE}/billing/verify`, {
+  const res = await fetch(`${API_BASE_V1}/billing/verify`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -111,7 +113,7 @@ export const verifySubscription = async (data: {
 };
 
 export const getActiveSubscription = async (): Promise<SubscriptionDto | null> => {
-  const res = await fetch(`${API_BASE}/billing/subscription`, {
+  const res = await fetch(`${API_BASE_V1}/billing/subscription`, {
     headers: { ...getAuthHeaders() },
   });
   if (!res.ok) {
@@ -129,7 +131,7 @@ export const getActiveSubscription = async (): Promise<SubscriptionDto | null> =
 };
 
 export const cancelSubscription = async (): Promise<SubscriptionDto> => {
-  const res = await fetch(`${API_BASE}/billing/cancel`, {
+  const res = await fetch(`${API_BASE_V1}/billing/cancel`, {
     method: "POST",
     headers: { ...getAuthHeaders() },
   });
@@ -141,7 +143,7 @@ export const cancelSubscription = async (): Promise<SubscriptionDto> => {
 };
 
 export const getTransactions = async (): Promise<PaymentTransactionDto[]> => {
-  const res = await fetch(`${API_BASE}/billing/transactions`, {
+  const res = await fetch(`${API_BASE_V1}/billing/transactions`, {
     headers: { ...getAuthHeaders() },
   });
   if (!res.ok) {

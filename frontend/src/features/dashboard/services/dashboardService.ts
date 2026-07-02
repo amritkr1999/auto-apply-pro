@@ -1,4 +1,6 @@
-const API_BASE = "http://localhost:8060/api/v1";
+import { API_BASE } from "../../../config/api";
+
+const API_BASE_V1 = `${API_BASE}/v1`;
 
 const getAuthHeaders = (): Record<string, string> => {
   const userStr = localStorage.getItem("user");
@@ -36,7 +38,7 @@ export interface DashboardMetrics {
 
 export const dashboardService = {
   async getDashboardMetrics(userId: number): Promise<DashboardMetrics> {
-    const response = await fetch(`${API_BASE}/dashboard/metrics/${userId}`, {
+    const response = await fetch(`${API_BASE_V1}/dashboard/metrics/${userId}`, {
       headers: getAuthHeaders(),
     });
     if (!response.ok) {

@@ -1179,7 +1179,7 @@ export const CandidateProfileView: React.FC<Props> = ({ userId }) => {
                 <span className="text-sm text-slate-600 font-medium">📄 {profile.resumeFilename}</span>
                 <div className="flex items-center gap-3">
                   <a
-                    href={`http://localhost:8060/api/v1/profiles/candidate/${userId}/resume`}
+                    href={`/api/v1/profiles/candidate/${userId}/resume`}
                     download
                     className="text-xs text-primary hover:underline font-semibold"
                   >

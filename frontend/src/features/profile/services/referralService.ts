@@ -1,4 +1,6 @@
-const API_BASE = "http://localhost:8060/api/v1";
+import { API_BASE } from "../../../config/api";
+
+const API_BASE_V1 = `${API_BASE}/v1`;
 
 const getAuthHeaders = (): Record<string, string> => {
   const userStr = localStorage.getItem("user");
@@ -35,7 +37,7 @@ export interface ReferralRequestDto {
 
 export const referralService = {
   async createReferralRequest(userId: number, companyName: string, jobId: string, jobLink: string): Promise<ReferralRequestDto> {
-    const response = await fetch(`${API_BASE}/referrals/request?userId=${userId}`, {
+    const response = await fetch(`${API_BASE_V1}/referrals/request?userId=${userId}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -50,7 +52,7 @@ export const referralService = {
   },
 
   async getReferralRequests(userId: number): Promise<ReferralRequestDto[]> {
-    const response = await fetch(`${API_BASE}/referrals/requests?userId=${userId}`, {
+    const response = await fetch(`${API_BASE_V1}/referrals/requests?userId=${userId}`, {
       headers: getAuthHeaders(),
     });
     if (!response.ok) {
@@ -60,7 +62,7 @@ export const referralService = {
   },
 
   async getReferralRequest(id: number): Promise<ReferralRequestDto> {
-    const response = await fetch(`${API_BASE}/referrals/requests/${id}`, {
+    const response = await fetch(`${API_BASE_V1}/referrals/requests/${id}`, {
       headers: getAuthHeaders(),
     });
     if (!response.ok) {

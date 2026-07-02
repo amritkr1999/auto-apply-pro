@@ -1,4 +1,6 @@
-const API_BASE = "http://localhost:8060/api/v1";
+import { API_BASE } from "../../../config/api";
+
+const API_BASE_V1 = `${API_BASE}/v1`;
 
 const getAuthHeaders = (): Record<string, string> => {
   const userStr = localStorage.getItem("user");
@@ -98,7 +100,7 @@ export interface Progress {
 
 export const learningService = {
   async getTopics(): Promise<Topic[]> {
-    const response = await fetch(`${API_BASE}/learning/topics`, {
+    const response = await fetch(`${API_BASE_V1}/learning/topics`, {
       headers: getAuthHeaders(),
     });
     if (!response.ok) {
@@ -108,7 +110,7 @@ export const learningService = {
   },
 
   async getResources(topicId: number): Promise<Resource[]> {
-    const response = await fetch(`${API_BASE}/learning/topics/${topicId}/resources`, {
+    const response = await fetch(`${API_BASE_V1}/learning/topics/${topicId}/resources`, {
       headers: getAuthHeaders(),
     });
     if (!response.ok) {
@@ -118,7 +120,7 @@ export const learningService = {
   },
 
   async getQuestions(topicId: number): Promise<PracticeQuestion[]> {
-    const response = await fetch(`${API_BASE}/learning/topics/${topicId}/questions`, {
+    const response = await fetch(`${API_BASE_V1}/learning/topics/${topicId}/questions`, {
       headers: getAuthHeaders(),
     });
     if (!response.ok) {
@@ -128,7 +130,7 @@ export const learningService = {
   },
 
   async submitAnswer(questionId: number, answer: string): Promise<SubmitResponse> {
-    const response = await fetch(`${API_BASE}/learning/questions/${questionId}/submit`, {
+    const response = await fetch(`${API_BASE_V1}/learning/questions/${questionId}/submit`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -143,7 +145,7 @@ export const learningService = {
   },
 
   async toggleResource(resourceId: number): Promise<{ completed: boolean }> {
-    const response = await fetch(`${API_BASE}/learning/resources/${resourceId}/complete`, {
+    const response = await fetch(`${API_BASE_V1}/learning/resources/${resourceId}/complete`, {
       method: "POST",
       headers: getAuthHeaders(),
     });
@@ -154,7 +156,7 @@ export const learningService = {
   },
 
   async getDailyContent(): Promise<DailyContent> {
-    const response = await fetch(`${API_BASE}/learning/daily`, {
+    const response = await fetch(`${API_BASE_V1}/learning/daily`, {
       headers: getAuthHeaders(),
     });
     if (!response.ok) {
@@ -164,7 +166,7 @@ export const learningService = {
   },
 
   async getProgress(): Promise<Progress> {
-    const response = await fetch(`${API_BASE}/learning/progress`, {
+    const response = await fetch(`${API_BASE_V1}/learning/progress`, {
       headers: getAuthHeaders(),
     });
     if (!response.ok) {
@@ -174,7 +176,7 @@ export const learningService = {
   },
 
   async getRoadmaps(): Promise<Roadmap[]> {
-    const response = await fetch(`${API_BASE}/learning/roadmaps`, {
+    const response = await fetch(`${API_BASE_V1}/learning/roadmaps`, {
       headers: getAuthHeaders(),
     });
     if (!response.ok) {
@@ -184,7 +186,7 @@ export const learningService = {
   },
 
   async getRoadmapDetails(id: number): Promise<Roadmap> {
-    const response = await fetch(`${API_BASE}/learning/roadmaps/${id}`, {
+    const response = await fetch(`${API_BASE_V1}/learning/roadmaps/${id}`, {
       headers: getAuthHeaders(),
     });
     if (!response.ok) {

@@ -8,6 +8,22 @@
 *.sln
 *.swp
 
+# Environment files / secrets
+.env
+.env.*
+!.env.example
+!.env.sample
+*.pem
+*.key
+*.p12
+*.jks
+*.sqlite
+*.db
+*.dump
+
+# Local Docker overrides
+docker-compose.override.yml
+
 # Python (Local pipeline)
 __pycache__/
 *.pyc
