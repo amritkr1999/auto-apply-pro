@@ -1,7 +1,15 @@
 package com.backend.autoapplypro.modules.users.controller;
 
 import com.backend.autoapplypro.modules.users.model.Candidate;
+import com.backend.autoapplypro.modules.users.model.User;
+import com.backend.autoapplypro.modules.users.model.UserRole;
 import com.backend.autoapplypro.modules.users.repository.CandidateRepository;
+import com.backend.autoapplypro.modules.users.repository.UserRepository;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
+import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +21,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.view.RedirectView;
 
 import org.springframework.transaction.annotation.Transactional;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,6 +34,9 @@ import java.util.Map;
 public class SocialOAuthController {
 
     private final CandidateRepository candidateRepository;
+    private final UserRepository userRepository;
+    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+    private final com.backend.autoapplypro.config.JwtUtil jwtUtil;
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Value("${github.client.id:dev-github-client-id}")
@@ -39,8 +51,55 @@ public class SocialOAuthController {
     @Value("${linkedin.client.secret:dev-linkedin-client-secret}")
     private String linkedinClientSecret;
 
+    @Value("${spring.security.oauth2.client.registration.google.client-id:dev-client-id}")
+    private String googleClientId;
+
+    @Value("${spring.security.oauth2.client.registration.google.client-secret:dev-client-secret}")
+    private String googleClientSecret;
+
     private static final String CALLBACK_URL_GITHUB = "http://localhost:8060/api/v1/auth/callback/github";
     private static final String CALLBACK_URL_LINKEDIN = "http://localhost:8060/api/v1/auth/callback/linkedin";
+
+    /**
+     * Google Login
+     */
+    @GetMapping("/login/google")
+    public ResponseEntity<String> loginGoogle() {
+        log.info("Generating Google OAuth login URL");
+        String callbackUrl = "http://localhost:8060/api/v1/outreach/oauth2/callback";
+        if (googleClientId.startsWith("dev-")) {
+            log.info("Using mock Google connection URL for development");
+            String mockUrl = callbackUrl + "?code=mock_google_code&state=login";
+            return ResponseEntity.ok(mockUrl);
+        }
+        String authUrl = new GoogleAuthorizationCodeRequestUrl(
+                "https://accounts.google.com/o/oauth2/v2/auth",
+                googleClientId,
+                callbackUrl,
+                Arrays.asList("email", "profile", "openid")
+        )
+        .setState("login")
+        .build();
+        return ResponseEntity.ok(authUrl);
+    }
+
+    /**
+     * GitHub Login
+     */
+    @GetMapping("/login/github")
+    public ResponseEntity<String> loginGithub() {
+        log.info("Generating GitHub OAuth login URL");
+        if (githubClientId.startsWith("dev-")) {
+            log.info("Using mock GitHub connection URL for development");
+            String mockUrl = CALLBACK_URL_GITHUB + "?code=mock_github_code&state=login";
+            return ResponseEntity.ok(mockUrl);
+        }
+        String authUrl = "https://github.com/login/oauth/authorize?client_id=" + githubClientId
+                + "&redirect_uri=" + CALLBACK_URL_GITHUB
+                + "&state=login"
+                + "&scope=user";
+        return ResponseEntity.ok(authUrl);
+    }
 
     /**
      * Connect GitHub
@@ -68,16 +127,24 @@ public class SocialOAuthController {
     public RedirectView githubCallback(
             @RequestParam("code") String code,
             @RequestParam("state") String state) {
-        Long userId = Long.parseLong(state);
-        log.info("Received GitHub callback for user: {}", userId);
+        boolean isLogin = false;
+        Long userId = null;
+        try {
+            userId = Long.parseLong(state);
+        } catch (NumberFormatException e) {
+            isLogin = true;
+        }
+        log.info("Received GitHub callback. state: {}, isLogin: {}", state, isLogin);
 
         try {
             String githubUsername;
             String githubProfileUrl;
+            String email = null;
 
             if ("mock_github_code".equals(code)) {
                 githubUsername = "mock-developer";
                 githubProfileUrl = "https://github.com/mock-developer";
+                email = "social.github@example.com";
             } else {
                 // Exchange code for token
                 HttpHeaders headers = new HttpHeaders();
@@ -119,24 +186,108 @@ public class SocialOAuthController {
                 }
                 githubUsername = (String) userBody.get("login");
                 githubProfileUrl = (String) userBody.get("html_url");
+                email = (String) userBody.get("email");
+
+                if (isLogin && (email == null || email.isEmpty())) {
+                    // Fetch emails from /user/emails
+                    try {
+                        HttpHeaders emailHeaders = new HttpHeaders();
+                        emailHeaders.set("Authorization", "Bearer " + accessToken);
+                        HttpEntity<String> emailEntity = new HttpEntity<>(emailHeaders);
+                        ResponseEntity<java.util.List> emailsResponse = restTemplate.exchange(
+                                "https://api.github.com/user/emails",
+                                HttpMethod.GET,
+                                emailEntity,
+                                java.util.List.class
+                        );
+                        java.util.List<Map<String, Object>> emailsList = emailsResponse.getBody();
+                        if (emailsList != null) {
+                            for (Map<String, Object> emailObj : emailsList) {
+                                Boolean primary = (Boolean) emailObj.get("primary");
+                                Boolean verified = (Boolean) emailObj.get("verified");
+                                if (Boolean.TRUE.equals(primary) && Boolean.TRUE.equals(verified)) {
+                                    email = (String) emailObj.get("email");
+                                    break;
+                                }
+                            }
+                        }
+                    } catch (Exception ex) {
+                        log.error("Failed to fetch email list from GitHub", ex);
+                    }
+                }
             }
 
-            // Save to database
-            Candidate candidate = candidateRepository.findByUserId(userId)
-                    .orElseThrow(() -> new IllegalArgumentException("Candidate profile not found"));
-            candidate.setGithubUsername(githubUsername);
-            candidate.setGithubProfileUrl(githubProfileUrl);
-            candidateRepository.save(candidate);
+            if (isLogin) {
+                if (email == null || email.isEmpty()) {
+                    email = (githubUsername != null ? githubUsername : "github-user") + "@github.com";
+                }
+                User user = userRepository.findByEmail(email).orElse(null);
+                if (user == null) {
+                    String randomPassword = java.util.UUID.randomUUID().toString();
+                    user = User.builder()
+                            .email(email)
+                            .passwordHash(passwordEncoder.encode(randomPassword))
+                            .role(UserRole.CANDIDATE)
+                            .name(githubUsername != null ? githubUsername : "GitHub User")
+                            .mobile("1234567890")
+                            .loginStreak(1)
+                            .lastLoginDate(java.time.LocalDate.now())
+                            .build();
+                    user = userRepository.save(user);
 
-            return new RedirectView("http://localhost:5173/candidate/profile?status=success&provider=github");
+                    Candidate candidate = Candidate.builder()
+                            .user(user)
+                            .githubUsername(githubUsername)
+                            .githubProfileUrl(githubProfileUrl)
+                            .skills(new java.util.HashSet<>())
+                            .jobPreferences(new java.util.HashMap<>())
+                            .build();
+                    candidateRepository.save(candidate);
+                } else {
+                    if (user.getRole() == UserRole.CANDIDATE) {
+                        Candidate candidate = candidateRepository.findByUserId(user.getId()).orElse(null);
+                        if (candidate != null) {
+                            if (candidate.getGithubUsername() == null) {
+                                candidate.setGithubUsername(githubUsername);
+                                candidate.setGithubProfileUrl(githubProfileUrl);
+                                candidateRepository.save(candidate);
+                            }
+                        }
+                    }
+                }
+
+                String jwtToken = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getRole().name());
+                String targetUrl = String.format("http://localhost:5173/login?token=%s&id=%d&email=%s&name=%s&role=%s&loginStreak=%d&mobile=%s",
+                        jwtToken,
+                        user.getId(),
+                        java.net.URLEncoder.encode(user.getEmail(), "UTF-8"),
+                        java.net.URLEncoder.encode(user.getName(), "UTF-8"),
+                        user.getRole().name(),
+                        user.getLoginStreak(),
+                        user.getMobile() != null ? java.net.URLEncoder.encode(user.getMobile(), "UTF-8") : ""
+                );
+                return new RedirectView(targetUrl);
+            } else {
+                Candidate candidate = candidateRepository.findByUserId(userId)
+                        .orElseThrow(() -> new IllegalArgumentException("Candidate profile not found"));
+                candidate.setGithubUsername(githubUsername);
+                candidate.setGithubProfileUrl(githubProfileUrl);
+                candidateRepository.save(candidate);
+
+                return new RedirectView("http://localhost:5173/candidate/profile?status=success&provider=github");
+            }
 
         } catch (Exception e) {
-            log.error("GitHub OAuth Error for user {}", userId, e);
+            log.error("GitHub OAuth Error for state {}", state, e);
             String errMsg = e.getMessage() != null ? e.getMessage() : "Unknown Error";
             try {
                 errMsg = java.net.URLEncoder.encode(errMsg, "UTF-8");
             } catch (Exception ex) {}
-            return new RedirectView("http://localhost:5173/candidate/profile?status=error&provider=github&errorMsg=" + errMsg);
+            if (isLogin) {
+                return new RedirectView("http://localhost:5173/login?status=error&errorMsg=" + errMsg);
+            } else {
+                return new RedirectView("http://localhost:5173/candidate/profile?status=error&provider=github&errorMsg=" + errMsg);
+            }
         }
     }
 

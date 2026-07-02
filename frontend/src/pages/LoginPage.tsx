@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import "./login.css";
 import { profileService } from "../features/profile/services/profileService";
+import { API_BASE } from "../config/api";
 
 type AuthTab = "login" | "register";
 type UserRole = "candidate" | "recruiter" | "company";
@@ -19,11 +20,48 @@ export const LoginPage: React.FC = () => {
 
   React.useEffect(() => {
     const params = new URLSearchParams(location.search);
+    const token = params.get("token");
+    if (token) {
+      const id = params.get("id");
+      const email = params.get("email");
+      const name = params.get("name");
+      const role = params.get("role");
+      const loginStreak = params.get("loginStreak");
+      const mobile = params.get("mobile");
+      
+      const userData = {
+        token,
+        id: Number(id),
+        email: email ? decodeURIComponent(email) : "",
+        name: name ? decodeURIComponent(name) : "",
+        role: role || "CANDIDATE",
+        loginStreak: loginStreak && loginStreak !== "null" ? Number(loginStreak) : 1,
+        mobile: mobile ? decodeURIComponent(mobile) : "",
+        isPendingDeletion: false
+      };
+      
+      localStorage.setItem("user", JSON.stringify(userData));
+      
+      if (userData.role === "RECRUITER") {
+        navigate("/recruiter-dashboard");
+      } else if (userData.role === "COMPANY") {
+        navigate("/company-dashboard");
+      } else {
+        navigate("/candidate-dashboard");
+      }
+      return;
+    }
+
+    const errorMsg = params.get("errorMsg");
+    if (errorMsg) {
+      setError(decodeURIComponent(errorMsg));
+    }
+
     const tabParam = params.get("tab");
     if (tabParam === "register" || tabParam === "login") {
       setTab(tabParam);
     }
-  }, [location.search]);
+  }, [location.search, navigate]);
 
   // Registration step state: 1 (role selection) or 2 (details form)
   const [regStep, setRegStep] = useState<number>(1);
@@ -179,19 +217,47 @@ export const LoginPage: React.FC = () => {
 
   const handleSocialAuth = async (provider: string) => {
     console.log(`Authenticating with ${provider}...`);
-    try {
-      setError("");
-      const userData = await profileService.register({
-        name: `Social ${provider} User`,
-        email: `social.${provider.toLowerCase()}@example.com`,
-        mobile: "1234567890",
-        password: "social-password-123",
-        role: "CANDIDATE",
-      });
-      localStorage.setItem("user", JSON.stringify(userData));
-      navigate("/candidate-dashboard");
-    } catch (err: any) {
-      setError(err.message || "Social login failed.");
+    const providerLower = provider.toLowerCase();
+    if (providerLower === "google" || providerLower === "github") {
+      try {
+        setError("");
+        const API_BASE_V1 = `${API_BASE}/v1`;
+        const response = await fetch(`${API_BASE_V1}/auth/login/${providerLower}`);
+        if (!response.ok) {
+          throw new Error(`Failed to get ${provider} login URL`);
+        }
+        const redirectUrl = await response.text();
+        console.log(`Redirecting to ${provider} OAuth URL:`, redirectUrl);
+        window.location.href = redirectUrl;
+      } catch (err: any) {
+        setError(err.message || `Failed to initiate ${provider} login.`);
+      }
+    } else {
+      const email = `social.${providerLower}@example.com`;
+      const password = "social-password-123";
+      try {
+        setError("");
+        let userData;
+        try {
+          userData = await profileService.register({
+            name: `Social ${provider} User`,
+            email,
+            mobile: "1234567890",
+            password,
+            role: "CANDIDATE",
+          });
+        } catch (err: any) {
+          if (err.message && err.message.includes("already in use")) {
+            userData = await profileService.login({ email, password });
+          } else {
+            throw err;
+          }
+        }
+        localStorage.setItem("user", JSON.stringify(userData));
+        navigate("/candidate-dashboard");
+      } catch (err: any) {
+        setError(err.message || "Social login failed.");
+      }
     }
   };
 

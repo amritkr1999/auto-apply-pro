@@ -3,7 +3,10 @@ package com.backend.autoapplypro.modules.outreach.controller;
 import com.backend.autoapplypro.modules.outreach.model.GmailCredential;
 import com.backend.autoapplypro.modules.outreach.repository.GmailCredentialRepository;
 import com.backend.autoapplypro.modules.users.model.User;
+import com.backend.autoapplypro.modules.users.model.UserRole;
+import com.backend.autoapplypro.modules.users.model.Candidate;
 import com.backend.autoapplypro.modules.users.repository.UserRepository;
+import com.backend.autoapplypro.modules.users.repository.CandidateRepository;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
@@ -16,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
@@ -28,6 +32,9 @@ public class OutreachOAuthController {
 
     private final GmailCredentialRepository credentialRepository;
     private final UserRepository userRepository;
+    private final CandidateRepository candidateRepository;
+    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+    private final com.backend.autoapplypro.config.JwtUtil jwtUtil;
 
     @Value("${spring.security.oauth2.client.registration.google.client-id:dev-client-id}")
     private String clientId;
@@ -69,57 +76,127 @@ public class OutreachOAuthController {
      * decrypts/extracts the user's email, and saves the credentials encrypted in database.
      */
     @GetMapping("/oauth2/callback")
+    @Transactional
     public RedirectView oauthCallback(
             @RequestParam("code") String code,
             @RequestParam("state") String state) {
-        
-        Long userId = Long.parseLong(state);
-        log.info("Received OAuth callback for user ID: {}", userId);
+        boolean isLogin = false;
+        Long userId = null;
+        try {
+            userId = Long.parseLong(state);
+        } catch (NumberFormatException e) {
+            isLogin = true;
+        }
+        log.info("Received OAuth callback. state: {}, isLogin: {}", state, isLogin);
 
         try {
             // Exchange code for tokens
-            GoogleTokenResponse tokenResponse = new GoogleAuthorizationCodeTokenRequest(
-                    new NetHttpTransport(),
-                    GsonFactory.getDefaultInstance(),
-                    "https://oauth2.googleapis.com/token",
-                    clientId,
-                    clientSecret,
-                    code,
-                    CALLBACK_URL
-            ).execute();
-
-            String accessToken = tokenResponse.getAccessToken();
-            String refreshToken = tokenResponse.getRefreshToken();
-            Long expiresIn = tokenResponse.getExpiresInSeconds();
-            LocalDateTime expiryTime = LocalDateTime.now().plusSeconds(expiresIn != null ? expiresIn : 3600);
-
-            // Parse ID token to extract email
-            String email = tokenResponse.parseIdToken().getPayload().getEmail();
-            log.info("Token exchange successful. Connected email: {}", email);
-
-            User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-            // Check if credential already exists or create new
-            GmailCredential credential = credentialRepository.findByUserId(userId)
-                    .orElse(GmailCredential.builder().user(user).build());
-
-            credential.setAccessToken(accessToken);
-            if (refreshToken != null) {
-                credential.setRefreshToken(refreshToken);
+            GoogleTokenResponse tokenResponse;
+            if ("mock_google_code".equals(code)) {
+                tokenResponse = null;
+            } else {
+                tokenResponse = new GoogleAuthorizationCodeTokenRequest(
+                        new NetHttpTransport(),
+                        GsonFactory.getDefaultInstance(),
+                        "https://oauth2.googleapis.com/token",
+                        clientId,
+                        clientSecret,
+                        code,
+                        CALLBACK_URL
+                ).execute();
             }
-            credential.setTokenExpiry(expiryTime);
-            credential.setConnectedEmail(email);
 
-            credentialRepository.save(credential);
-            log.info("OAuth credentials securely saved for user ID: {}", userId);
+            String email;
+            String name;
 
-            // Redirect back to frontend profile page
-            return new RedirectView("http://localhost:5173/candidate/profile?status=success");
+            if (tokenResponse == null) {
+                email = "social.google@example.com";
+                name = "Social Google User";
+            } else {
+                email = tokenResponse.parseIdToken().getPayload().getEmail();
+                name = (String) tokenResponse.parseIdToken().getPayload().get("name");
+                if (name == null) {
+                    name = "Google User";
+                }
+            }
+
+            if (isLogin) {
+                // Find or register user
+                User user = userRepository.findByEmail(email).orElse(null);
+                if (user == null) {
+                    String randomPassword = java.util.UUID.randomUUID().toString();
+                    user = User.builder()
+                            .email(email)
+                            .passwordHash(passwordEncoder.encode(randomPassword))
+                            .role(UserRole.CANDIDATE)
+                            .name(name)
+                            .mobile("1234567890")
+                            .loginStreak(1)
+                            .lastLoginDate(java.time.LocalDate.now())
+                            .build();
+                    user = userRepository.save(user);
+
+                    Candidate candidate = Candidate.builder()
+                            .user(user)
+                            .skills(new java.util.HashSet<>())
+                            .jobPreferences(new java.util.HashMap<>())
+                            .build();
+                    candidateRepository.save(candidate);
+                }
+
+                String jwtToken = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getRole().name());
+                String targetUrl = String.format("http://localhost:5173/login?token=%s&id=%d&email=%s&name=%s&role=%s&loginStreak=%d&mobile=%s",
+                        jwtToken,
+                        user.getId(),
+                        java.net.URLEncoder.encode(user.getEmail(), "UTF-8"),
+                        java.net.URLEncoder.encode(user.getName(), "UTF-8"),
+                        user.getRole().name(),
+                        user.getLoginStreak(),
+                        user.getMobile() != null ? java.net.URLEncoder.encode(user.getMobile(), "UTF-8") : ""
+                );
+                return new RedirectView(targetUrl);
+
+            } else {
+                // Original outreach connect flow
+                String accessToken = tokenResponse.getAccessToken();
+                String refreshToken = tokenResponse.getRefreshToken();
+                Long expiresIn = tokenResponse.getExpiresInSeconds();
+                LocalDateTime expiryTime = LocalDateTime.now().plusSeconds(expiresIn != null ? expiresIn : 3600);
+
+                log.info("Token exchange successful. Connected email: {}", email);
+
+                User user = userRepository.findById(userId)
+                        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+                // Check if credential already exists or create new
+                GmailCredential credential = credentialRepository.findByUserId(userId)
+                        .orElse(GmailCredential.builder().user(user).build());
+
+                credential.setAccessToken(accessToken);
+                if (refreshToken != null) {
+                    credential.setRefreshToken(refreshToken);
+                }
+                credential.setTokenExpiry(expiryTime);
+                credential.setConnectedEmail(email);
+
+                credentialRepository.save(credential);
+                log.info("OAuth credentials securely saved for user ID: {}", userId);
+
+                // Redirect back to frontend profile page
+                return new RedirectView("http://localhost:5173/candidate/profile?status=success");
+            }
 
         } catch (Exception e) {
-            log.error("Error exchanging OAuth code for user ID: {}", userId, e);
-            return new RedirectView("http://localhost:5173/candidate/profile?status=error");
+            log.error("Google OAuth Callback Error for state: {}", state, e);
+            String errMsg = e.getMessage() != null ? e.getMessage() : "Unknown Error";
+            try {
+                errMsg = java.net.URLEncoder.encode(errMsg, "UTF-8");
+            } catch (Exception ex) {}
+            if (isLogin) {
+                return new RedirectView("http://localhost:5173/login?status=error&errorMsg=" + errMsg);
+            } else {
+                return new RedirectView("http://localhost:5173/candidate/profile?status=error&errorMsg=" + errMsg);
+            }
         }
     }
 

@@ -128,7 +128,7 @@ export const profileService = {
 
   // Profiles
   async getCandidateProfile(userId: number): Promise<CandidateProfile> {
-    const response = await fetch(`${API_BASE}/profiles/candidate/${userId}`, {
+    const response = await fetch(`${API_BASE_V1}/profiles/candidate/${userId}`, {
       headers: getAuthHeaders(),
     });
     if (!response.ok) {
@@ -138,7 +138,7 @@ export const profileService = {
   },
 
   async updateCandidateProfile(userId: number, profile: CandidateProfile): Promise<CandidateProfile> {
-    const response = await fetch(`${API_BASE}/profiles/candidate/${userId}`, {
+    const response = await fetch(`${API_BASE_V1}/profiles/candidate/${userId}`, {
       method: "PUT",
       headers: { 
         "Content-Type": "application/json",
@@ -179,7 +179,7 @@ export const profileService = {
   },
 
   async getRecruiterProfile(userId: number): Promise<RecruiterProfile> {
-    const response = await fetch(`${API_BASE}/profiles/recruiter/${userId}`, {
+    const response = await fetch(`${API_BASE_V1}/profiles/recruiter/${userId}`, {
       headers: getAuthHeaders(),
     });
     if (!response.ok) {
@@ -189,7 +189,7 @@ export const profileService = {
   },
 
   async updateRecruiterProfile(userId: number, profile: RecruiterProfile): Promise<RecruiterProfile> {
-    const response = await fetch(`${API_BASE}/profiles/recruiter/${userId}`, {
+    const response = await fetch(`${API_BASE_V1}/profiles/recruiter/${userId}`, {
       method: "PUT",
       headers: { 
         "Content-Type": "application/json",
@@ -204,7 +204,7 @@ export const profileService = {
   },
 
   async getCompanyProfile(userId: number): Promise<CompanyProfile> {
-    const response = await fetch(`${API_BASE}/profiles/company/${userId}`, {
+    const response = await fetch(`${API_BASE_V1}/profiles/company/${userId}`, {
       headers: getAuthHeaders(),
     });
     if (!response.ok) {
@@ -214,7 +214,7 @@ export const profileService = {
   },
 
   async updateCompanyProfile(userId: number, profile: CompanyProfile): Promise<CompanyProfile> {
-    const response = await fetch(`${API_BASE}/profiles/company/${userId}`, {
+    const response = await fetch(`${API_BASE_V1}/profiles/company/${userId}`, {
       method: "PUT",
       headers: { 
         "Content-Type": "application/json",
