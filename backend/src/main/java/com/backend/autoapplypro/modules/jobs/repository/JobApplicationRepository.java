@@ -9,4 +9,5 @@ import java.util.List;
 public interface JobApplicationRepository extends JpaRepository<JobApplication, Long> {
     List<JobApplication> findByUserIdOrderByCreatedAtDesc(Long userId);
     List<JobApplication> findByUserId(Long userId);
+    long countByUserId(Long userId);
 }

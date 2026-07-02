@@ -21,6 +21,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> {}) // Enable standard CORS support
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/feedback").permitAll()
                 .requestMatchers(
                     "/api/v1/auth/**",
                     "/api/v1/marketing/**",

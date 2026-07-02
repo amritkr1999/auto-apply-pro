@@ -1,17 +1,48 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
 import DashboardSidebar from "../features/dashboard/components/DashboardSidebar";
 import WalkthroughTour from "./WalkthroughTour";
+import FeedbackModal from "../features/profile/components/FeedbackModal";
+import { feedbackService } from "../features/profile/services/feedbackService";
 
 export const Layout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
   const userStr = localStorage.getItem("user");
   const user = userStr ? JSON.parse(userStr) : null;
+
+  useEffect(() => {
+    if (!user) return;
+
+    // Check if feedback is snoozed
+    const snoozedUntil = localStorage.getItem("feedback_snoozed_until");
+    if (snoozedUntil && Date.now() < parseInt(snoozedUntil, 10)) {
+      return;
+    }
+
+    const checkFeedbackStatus = async () => {
+      try {
+        const status = await feedbackService.getFeedbackStatus();
+        if (status.showPopup) {
+          setShowFeedbackModal(true);
+        }
+      } catch (err) {
+        console.error("Failed to check feedback status", err);
+      }
+    };
+
+    // Delay check for better UX after layout settles
+    const timer = setTimeout(() => {
+      checkFeedbackStatus();
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }, [userStr]);
 
   // Hide the back button on primary dashboards to avoid redundant navigation
   const isDashboard = ["/candidate-dashboard", "/recruiter-dashboard", "/company-dashboard"].includes(location.pathname);
@@ -35,6 +66,9 @@ export const Layout: React.FC = () => {
     <div className="flex flex-col min-h-screen bg-bg-color text-base-text font-sans">
       <Header onMenuClick={() => setMobileMenuOpen(true)} />
       {user && <WalkthroughTour />}
+      {showFeedbackModal && (
+        <FeedbackModal onClose={() => setShowFeedbackModal(false)} />
+      )}
 
       {/* Mobile Drawer Overlay */}
       {mobileMenuOpen && user && (

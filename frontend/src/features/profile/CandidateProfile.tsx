@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import CandidateProfileView from "./components/CandidateProfileView";
 import RecruiterProfileView from "./components/RecruiterProfileView";
 import CompanyProfileView from "./components/CompanyProfileView";
+import { feedbackService } from "./services/feedbackService";
 
 export const CandidateProfile: React.FC = () => {
   const navigate = useNavigate();
@@ -14,6 +15,41 @@ export const CandidateProfile: React.FC = () => {
   const [confirmEmail, setConfirmEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+
+  const [feedbackRating, setFeedbackRating] = useState<number>(0);
+  const [feedbackHoverRating, setFeedbackHoverRating] = useState<number>(0);
+  const [feedbackComment, setFeedbackComment] = useState<string>("");
+  const [feedbackSubmitting, setFeedbackSubmitting] = useState<boolean>(false);
+  const [feedbackSuccess, setFeedbackSuccess] = useState<boolean>(false);
+  const [feedbackError, setFeedbackError] = useState<string>("");
+
+  const handleFeedbackSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (feedbackRating === 0) {
+      setFeedbackError("Please select a rating of at least 1 star.");
+      return;
+    }
+    if (!feedbackComment.trim()) {
+      setFeedbackError("Please write a short comment about your experience.");
+      return;
+    }
+
+    setFeedbackSubmitting(true);
+    setFeedbackError("");
+    setFeedbackSuccess(false);
+
+    try {
+      await feedbackService.submitFeedback(feedbackRating, feedbackComment);
+      setFeedbackSuccess(true);
+      setFeedbackComment("");
+      setFeedbackRating(0);
+      localStorage.removeItem("feedback_snoozed_until");
+    } catch (err: any) {
+      setFeedbackError(err.message || "Failed to submit feedback. Please try again.");
+    } finally {
+      setFeedbackSubmitting(false);
+    }
+  };
 
   const renderProfileView = () => {
     switch (user.role) {
@@ -104,6 +140,103 @@ export const CandidateProfile: React.FC = () => {
             >
               Start Guided Tour
             </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Share Your Feedback Section */}
+      <div className="bg-white rounded-card shadow-sm border border-slate-200 p-8">
+        <div className="flex items-start space-x-3">
+          <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.907c.961 0 1.36 1.24.588 1.81l-3.97 2.883a1 1 0 00-.364 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.971-2.883a1 1 0 00-1.175 0l-3.97 2.883c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.364-1.118L2.98 10.3c-.77-.57-.372-1.81.587-1.81h4.907a1 1 0 00.95-.69l1.519-4.674z" />
+            </svg>
+          </div>
+          <div className="flex-1">
+            <h2 className="text-xl font-bold text-slate-800">Share Your Feedback</h2>
+            <p className="text-sm text-slate-600 mt-1">
+              Your feedback helps us improve Auto Apply Pro. Share your rating and review with us.
+            </p>
+
+            <form onSubmit={handleFeedbackSubmit} className="mt-6 space-y-4">
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
+                  Select Rating
+                </label>
+                <div className="flex items-center gap-1.5">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setFeedbackRating(star)}
+                      onMouseEnter={() => setFeedbackHoverRating(star)}
+                      onMouseLeave={() => setFeedbackHoverRating(0)}
+                      className="text-2xl focus:outline-none transition-transform hover:scale-110 cursor-pointer"
+                    >
+                      <span
+                        className={
+                          star <= (feedbackHoverRating || feedbackRating)
+                            ? "text-amber-400"
+                            : "text-slate-200"
+                        }
+                      >
+                        ★
+                      </span>
+                    </button>
+                  ))}
+                  {feedbackRating > 0 && (
+                    <span className="text-xs font-semibold text-slate-500 ml-2">
+                      {feedbackRating === 5 ? "Excellent!" : feedbackRating === 4 ? "Very Good!" : feedbackRating === 3 ? "Good" : feedbackRating === 2 ? "Fair" : "Poor"}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="feedback-comment" className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
+                  Review Comment
+                </label>
+                <textarea
+                  id="feedback-comment"
+                  value={feedbackComment}
+                  onChange={(e) => setFeedbackComment(e.target.value)}
+                  placeholder="What has been your experience using the platform? Any suggestions for improvement?"
+                  rows={4}
+                  maxLength={1000}
+                  className="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all bg-slate-50/50 hover:bg-slate-50 resize-none"
+                />
+              </div>
+
+              {feedbackSuccess && (
+                <div className="p-3 bg-emerald-50 border border-emerald-200 text-xs text-emerald-600 rounded-lg">
+                  Thank you! Your feedback has been submitted successfully.
+                </div>
+              )}
+
+              {feedbackError && (
+                <div className="p-3 bg-rose-50 border border-rose-200 text-xs text-rose-600 rounded-lg">
+                  {feedbackError}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={feedbackSubmitting}
+                className="px-4 py-2 bg-primary hover:bg-primary-hover text-white font-medium text-sm rounded-btn transition-colors shadow-sm cursor-pointer disabled:opacity-50 flex items-center"
+              >
+                {feedbackSubmitting ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Submitting...
+                  </>
+                ) : (
+                  "Submit Review"
+                )}
+              </button>
+            </form>
           </div>
         </div>
       </div>

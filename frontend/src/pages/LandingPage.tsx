@@ -1,10 +1,35 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./landing.css";
+import { feedbackService } from "../features/profile/services/feedbackService";
+import type { FeedbackResponse } from "../features/profile/services/feedbackService";
 
 export const LandingPage: React.FC = () => {
   const userStr = localStorage.getItem("user");
   const user = userStr ? JSON.parse(userStr) : null;
+
+  const [feedbacks, setFeedbacks] = useState<FeedbackResponse[]>([]);
+
+  useEffect(() => {
+    const fetchFeedbacks = async () => {
+      try {
+        const data = await feedbackService.getFeedbacks();
+        setFeedbacks(data.slice(0, 6));
+      } catch (err) {
+        console.error("Failed to fetch testimonials", err);
+      }
+    };
+    fetchFeedbacks();
+  }, []);
+
+  const getInitials = (name: string) => {
+    if (!name) return "U";
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.slice(0, 2).toUpperCase();
+  };
 
   const getDashboardPath = () => {
     if (!user) return "/login";
@@ -373,6 +398,26 @@ export const LandingPage: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {feedbacks.map((fb) => (
+            <div key={fb.id} className="testimonial-card animate-in fade-in duration-300">
+              <div className="testimonial-stars">
+                {"★".repeat(fb.rating)}{"☆".repeat(5 - fb.rating)}
+              </div>
+              <p className="testimonial-quote">
+                {fb.comment}
+              </p>
+              <div className="testimonial-user">
+                <div className="testimonial-avatar bg-primary/10 text-primary font-bold">
+                  {getInitials(fb.userName)}
+                </div>
+                <div className="testimonial-meta">
+                  <h4>{fb.userName}</h4>
+                  <p>{fb.userRole}</p>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
