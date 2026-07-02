@@ -13,6 +13,8 @@ import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import { useAuth } from '../../context/AuthContext';
 import { api, API_BASE_URL } from '../../services/api';
+import * as SecureStore from 'expo-secure-store';
+import { feedbackService } from '../../services/feedbackService';
 
 interface ProfileData {
   name: string;
@@ -29,6 +31,53 @@ export default function ProfileScreen() {
   const [loading, setLoading] = useState(false);
   const [uploadingResume, setUploadingResume] = useState(false);
   const [syncingProfile, setSyncingProfile] = useState(false);
+
+  // Feedback States
+  const [feedbackRating, setFeedbackRating] = useState<number>(0);
+  const [feedbackComment, setFeedbackComment] = useState<string>('');
+  const [feedbackSubmitting, setFeedbackSubmitting] = useState<boolean>(false);
+  const [feedbackSuccess, setFeedbackSuccess] = useState<boolean>(false);
+  const [feedbackError, setFeedbackError] = useState<string>('');
+
+  const handleFeedbackSubmit = async () => {
+    if (feedbackRating === 0) {
+      setFeedbackError('Please select a rating of at least 1 star.');
+      return;
+    }
+    if (!feedbackComment.trim()) {
+      setFeedbackError('Please write a short comment about your experience.');
+      return;
+    }
+
+    setFeedbackSubmitting(true);
+    setFeedbackError('');
+    setFeedbackSuccess(false);
+
+    try {
+      await feedbackService.submitFeedback(feedbackRating, feedbackComment);
+      setFeedbackSuccess(true);
+      setFeedbackRating(0);
+      setFeedbackComment('');
+    } catch (err: any) {
+      const errMsg = err.response?.data?.message || err.message || 'Failed to submit feedback. Please try again.';
+      setFeedbackError(errMsg);
+    } finally {
+      setFeedbackSubmitting(false);
+    }
+  };
+
+  const handleReplayTour = async () => {
+    try {
+      await SecureStore.setItemAsync(`walkthrough_completed_${user?.id}`, 'false');
+      Alert.alert(
+        'Walkthrough Reset',
+        'The guided tour has been reset! Switch to the Dashboard tab to view it again.',
+        [{ text: 'OK' }]
+      );
+    } catch (e) {
+      console.log('Error resetting walkthrough:', e);
+    }
+  };
 
   // Form states
   const [profile, setProfile] = useState<ProfileData>({
@@ -349,6 +398,94 @@ export default function ProfileScreen() {
               <Text className="text-slate-500 text-sm italic py-2 ml-1">No skills added yet.</Text>
             )}
           </View>
+        </View>
+
+        {/* Help & Guided Tour Section */}
+        <Text className="text-white text-lg font-bold mb-4 mt-6">Help & Onboarding</Text>
+        <View className="bg-slate-900 border border-slate-800 rounded-3xl p-5 mb-6 flex-row justify-between items-center">
+          <View className="flex-1 pr-4">
+            <Text className="text-white font-bold text-sm">Need a refresher?</Text>
+            <Text className="text-slate-400 text-xs mt-1 leading-relaxed">
+              Replay the 1-minute guided tour to learn how to manage and optimize your job applications.
+            </Text>
+          </View>
+          <TouchableOpacity
+            onPress={handleReplayTour}
+            className="bg-slate-950 border border-slate-805 rounded-xl px-4 py-2.5 active:bg-slate-850"
+          >
+            <Text className="text-emerald-400 text-xs font-bold uppercase">Replay Tour</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Share Your Feedback Section */}
+        <Text className="text-white text-lg font-bold mb-4">Share Your Feedback</Text>
+        <View className="bg-slate-900 border border-slate-800 rounded-3xl p-5 mb-6">
+          <Text className="text-slate-400 text-xs mt-0.5 leading-relaxed mb-4">
+            Your feedback helps us improve Auto Apply Pro. Share your rating and review with us.
+          </Text>
+
+          <View className="mb-4">
+            <Text className="text-slate-400 text-xs font-semibold mb-2 ml-1">SELECT RATING</Text>
+            <View className="flex-row items-center gap-2">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <TouchableOpacity
+                  key={star}
+                  onPress={() => setFeedbackRating(star)}
+                  className="p-1"
+                >
+                  <Ionicons
+                    name={star <= feedbackRating ? 'star' : 'star-outline'}
+                    size={28}
+                    color={star <= feedbackRating ? '#fbbf24' : '#475569'}
+                  />
+                </TouchableOpacity>
+              ))}
+              {feedbackRating > 0 && (
+                <Text className="text-slate-400 text-xs font-semibold ml-2">
+                  {feedbackRating === 5 ? 'Excellent!' : feedbackRating === 4 ? 'Very Good!' : feedbackRating === 3 ? 'Good' : feedbackRating === 2 ? 'Fair' : 'Poor'}
+                </Text>
+              )}
+            </View>
+          </View>
+
+          <View className="mb-4">
+            <Text className="text-slate-400 text-xs font-semibold mb-2 ml-1">REVIEW COMMENT</Text>
+            <TextInput
+              value={feedbackComment}
+              onChangeText={setFeedbackComment}
+              placeholder="What has been your experience using the platform? Any suggestions for improvement?"
+              placeholderTextColor="#475569"
+              multiline
+              numberOfLines={4}
+              style={{ textAlignVertical: 'top', height: 80 }}
+              className="bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-3 text-white text-sm"
+              maxLength={500}
+            />
+          </View>
+
+          {feedbackSuccess && (
+            <View className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 mb-4">
+              <Text className="text-emerald-400 text-xs text-center font-medium">Thank you! Your feedback has been submitted successfully.</Text>
+            </View>
+          )}
+
+          {feedbackError ? (
+            <View className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-3 mb-4">
+              <Text className="text-rose-400 text-xs text-center font-medium">{feedbackError}</Text>
+            </View>
+          ) : null}
+
+          <TouchableOpacity
+            onPress={handleFeedbackSubmit}
+            disabled={feedbackSubmitting}
+            className="bg-emerald-500/15 border border-emerald-500/30 rounded-2xl py-3.5 items-center active:opacity-90 disabled:opacity-50"
+          >
+            {feedbackSubmitting ? (
+              <ActivityIndicator color="#10b981" />
+            ) : (
+              <Text className="text-emerald-400 font-bold text-base">Submit Review</Text>
+            )}
+          </TouchableOpacity>
         </View>
 
         {/* Save Profile Button */}

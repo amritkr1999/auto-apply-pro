@@ -17,9 +17,14 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
 import { biometricService } from '../../services/biometricService';
+import * as WebBrowser from 'expo-web-browser';
+import axios from 'axios';
+import { api, API_BASE_URL } from '../../services/api';
+
+WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen() {
-  const { signIn, signUp, checkBiometrics } = useAuth();
+  const { signIn, signUp, checkBiometrics, loginWithSession } = useAuth();
 
   // Mode toggles
   const [isRegistering, setIsRegistering] = useState(false);
@@ -89,12 +94,87 @@ export default function LoginScreen() {
     }
   };
 
-  const handleGoogleSignIn = () => {
-    Alert.alert('Google Sign-In', 'Google Authentication will be configured in the next phase.');
-  };
+  const handleSocialLogin = async (provider: 'google' | 'github') => {
+    setLoading(true);
+    try {
+      const response = await api.get(`/auth/login/${provider}`);
+      const authUrl = response.data;
+      
+      console.log(`[OAuth] Received auth URL for ${provider}:`, authUrl);
 
-  const handleAppleSignIn = () => {
-    Alert.alert('Apple Sign-In', 'Apple Authentication will be configured in the next phase.');
+      const parseParams = (urlStr: string) => {
+        const queryString = urlStr.split('?')[1];
+        if (!queryString) return null;
+        
+        const params: Record<string, string> = {};
+        queryString.split('&').forEach(param => {
+          const [key, val] = param.split('=');
+          if (key && val) {
+            params[key] = decodeURIComponent(val);
+          }
+        });
+        return params;
+      };
+
+      const completeSession = async (redirectUrl: string) => {
+        const params = parseParams(redirectUrl);
+        if (params && params.token) {
+          const userInfo = {
+            id: Number(params.id),
+            email: params.email,
+            name: params.name,
+            role: params.role || 'CANDIDATE',
+            loginStreak: params.loginStreak ? Number(params.loginStreak) : 1,
+            mobile: params.mobile || '',
+            isPendingDeletion: false
+          };
+          
+          await loginWithSession(params.token, userInfo);
+          Alert.alert('Success', `Logged in via ${provider === 'google' ? 'Google' : 'GitHub'} successfully.`);
+        } else {
+          throw new Error('Authentication failed - no token returned.');
+        }
+      };
+
+      if (authUrl.includes('mock_') || authUrl.includes('localhost:8060')) {
+        const baseIp = API_BASE_URL.replace('http://', '').replace('https://', '');
+        const devUrl = authUrl.replace('localhost:8060', baseIp);
+        
+        console.log('[OAuth Dev] Making direct mock callback request to:', devUrl);
+        
+        const res = await axios.get(devUrl, {
+          maxRedirects: 0,
+          validateStatus: (status) => status >= 200 && status < 400,
+        });
+
+        let targetRedirect = res.headers.location;
+        if (!targetRedirect && res.status === 200 && res.request?.responseURL) {
+          targetRedirect = res.request.responseURL;
+        }
+
+        if (targetRedirect) {
+          console.log('[OAuth Dev] Captured redirect path:', targetRedirect);
+          await completeSession(targetRedirect);
+          return;
+        }
+      }
+
+      console.log('[OAuth Web] Opening auth session for:', authUrl);
+      const result = await WebBrowser.openAuthSessionAsync(authUrl);
+      
+      if (result.type === 'success' && result.url) {
+        console.log('[OAuth Web] Auth session success redirect:', result.url);
+        await completeSession(result.url);
+      } else if (result.type === 'cancel') {
+        console.log('[OAuth Web] Auth session cancelled by user');
+      }
+    } catch (error: any) {
+      console.error(`[OAuth Error] ${provider}:`, error);
+      const errMsg = error.response?.data?.message || error.message || 'OAuth authentication failed.';
+      Alert.alert('OAuth Error', errMsg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -279,22 +359,20 @@ export default function LoginScreen() {
 
                   <View className="flex-row space-x-3 gap-3">
                     <TouchableOpacity
-                      onPress={handleGoogleSignIn}
+                      onPress={() => handleSocialLogin('google')}
                       className="flex-1 flex-row items-center justify-center bg-slate-950 border border-slate-800 rounded-2xl py-3 active:opacity-80"
                     >
                       <FontAwesome name="google" size={18} color="#fff" />
                       <Text className="text-white font-semibold text-sm ml-2">Google</Text>
                     </TouchableOpacity>
 
-                    {Platform.OS === 'ios' && (
-                      <TouchableOpacity
-                        onPress={handleAppleSignIn}
-                        className="flex-1 flex-row items-center justify-center bg-slate-950 border border-slate-800 rounded-2xl py-3 active:opacity-80"
-                      >
-                        <FontAwesome name="apple" size={18} color="#fff" />
-                        <Text className="text-white font-semibold text-sm ml-2">Apple</Text>
-                      </TouchableOpacity>
-                    )}
+                    <TouchableOpacity
+                      onPress={() => handleSocialLogin('github')}
+                      className="flex-1 flex-row items-center justify-center bg-slate-950 border border-slate-800 rounded-2xl py-3 active:opacity-80"
+                    >
+                      <FontAwesome name="github" size={18} color="#fff" />
+                      <Text className="text-white font-semibold text-sm ml-2">GitHub</Text>
+                    </TouchableOpacity>
                   </View>
                 </View>
 

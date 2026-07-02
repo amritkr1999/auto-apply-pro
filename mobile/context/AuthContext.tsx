@@ -12,6 +12,7 @@ interface AuthContextType {
   signUp: (name: string, email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   checkBiometrics: () => Promise<boolean>;
+  loginWithSession: (token: string, user: Omit<LoginResponse, 'token'>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -102,6 +103,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const loginWithSession = async (sessionToken: string, userInfo: Omit<LoginResponse, 'token'>) => {
+    try {
+      await secureStore.saveToken(sessionToken);
+      await secureStore.saveUser(userInfo);
+      setToken(sessionToken);
+      setUser(userInfo);
+    } catch (e) {
+      console.error('Failed to log in with OAuth session:', e);
+      throw e;
+    }
+  };
+
   const checkBiometrics = async (): Promise<boolean> => {
     try {
       const success = await biometricService.authenticate('Unlock Auto Apply Pro');
@@ -122,7 +135,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ token, user, isLoading, signIn, signUp, signOut, checkBiometrics }}>
+    <AuthContext.Provider value={{ token, user, isLoading, signIn, signUp, signOut, checkBiometrics, loginWithSession }}>
       {children}
     </AuthContext.Provider>
   );

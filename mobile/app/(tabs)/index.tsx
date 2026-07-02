@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,10 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
+import * as SecureStore from 'expo-secure-store';
+import { feedbackService } from '../../services/feedbackService';
+import FeedbackModal from '../../components/FeedbackModal';
+import WalkthroughTour from '../../components/WalkthroughTour';
 
 interface MetricCardProps {
   title: string;
@@ -37,6 +41,46 @@ function MetricCard({ title, value, change, iconName, colorClass, iconColor }: M
 export default function DashboardScreen() {
   const { user, signOut } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [showTour, setShowTour] = useState(false);
+
+  // Check tour & feedback popup on mount
+  useEffect(() => {
+    if (!user?.id) return;
+
+    // Check tour eligibility
+    const checkTour = async () => {
+      try {
+        const completed = await SecureStore.getItemAsync(`walkthrough_completed_${user.id}`);
+        if (completed !== 'true') {
+          setShowTour(true);
+        }
+      } catch (e) {
+        console.log('Error checking tour status:', e);
+      }
+    };
+    checkTour();
+
+    // Check feedback eligibility after a short delay
+    const timer = setTimeout(async () => {
+      try {
+        // Check local snooze
+        const snoozedUntil = await SecureStore.getItemAsync('feedback_snoozed_until');
+        if (snoozedUntil && Date.now() < parseInt(snoozedUntil, 10)) {
+          return;
+        }
+
+        const status = await feedbackService.getFeedbackStatus();
+        if (status.showPopup) {
+          setShowFeedback(true);
+        }
+      } catch (err) {
+        console.log('Failed to check feedback eligibility:', err);
+      }
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }, [user?.id]);
 
   // Mock statistics & history (can be wired to backend REST API in Phase 3/4)
   const [stats] = useState({
@@ -75,12 +119,21 @@ export default function DashboardScreen() {
             <Text className="text-slate-400 text-sm font-medium">Welcome back,</Text>
             <Text className="text-2xl font-bold text-white mt-0.5">{user?.name || 'Candidate'}</Text>
           </View>
-          <TouchableOpacity
-            onPress={signOut}
-            className="w-10 h-10 bg-slate-900 border border-slate-800 rounded-full items-center justify-center"
-          >
-            <Ionicons name="log-out-outline" size={20} color="#f43f5e" />
-          </TouchableOpacity>
+          <View className="flex-row gap-3">
+            <TouchableOpacity
+              onPress={() => setShowTour(true)}
+              className="w-10 h-10 bg-slate-900 border border-slate-800 rounded-full items-center justify-center"
+              accessibilityLabel="Guided Tour"
+            >
+              <Ionicons name="help-circle-outline" size={20} color="#10b981" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={signOut}
+              className="w-10 h-10 bg-slate-900 border border-slate-800 rounded-full items-center justify-center"
+            >
+              <Ionicons name="log-out-outline" size={20} color="#f43f5e" />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Dashboard Banner */}
@@ -168,6 +221,21 @@ export default function DashboardScreen() {
         </View>
 
       </ScrollView>
+
+      {/* Popups & Modals */}
+      {user?.id && (
+        <>
+          <FeedbackModal
+            visible={showFeedback}
+            onClose={() => setShowFeedback(false)}
+          />
+          <WalkthroughTour
+            userId={String(user.id)}
+            visible={showTour}
+            onClose={() => setShowTour(false)}
+          />
+        </>
+      )}
     </SafeAreaView>
   );
 }
