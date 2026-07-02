@@ -9,7 +9,7 @@ on:
 jobs:
   deploy:
     name: Deploy to Production Server
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: SSH and Deploy
         uses: appleboy/ssh-action@v1.2.1
