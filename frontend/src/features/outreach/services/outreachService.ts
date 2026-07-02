@@ -390,3 +390,8 @@ export const outreachService = {
     return response.json();
   }
 };
+function buildApiUrl(path: string): RequestInfo | URL {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return `${API_BASE}${normalizedPath}`;
+}
+
