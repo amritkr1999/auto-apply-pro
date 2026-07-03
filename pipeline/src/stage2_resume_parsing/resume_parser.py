@@ -1,3 +1,5 @@
+from pydantic import BaseModel
+from typing import Optional, List
 import json
 import logging
 from datetime import datetime
@@ -7,13 +9,46 @@ from src.stage2_resume_parsing.schemas import Candidate
 
 logger = logging.getLogger(__name__)
 
+class ResumeExperienceSchema(BaseModel):
+    title: str
+    company: str
+    duration: Optional[str] = None
+    description: Optional[str] = None
+
+class ResumeEducationSchema(BaseModel):
+    degree: str
+    institution: str
+    graduation_year: Optional[int] = None
+    field_of_study: Optional[str] = None
+
+class ResumeSchema(BaseModel):
+    name: str
+    email: str
+    phone: Optional[str] = None
+    location: Optional[str] = None
+    skills: List[str]
+    experience: List[ResumeExperienceSchema] = []
+    education: List[ResumeEducationSchema] = []
+    certifications: List[str] = []
+    summary: Optional[str] = None
+
+def clean_json_text(text: str) -> str:
+    text = text.strip()
+    if text.startswith("```json"):
+        text = text[7:]
+    elif text.startswith("```"):
+        text = text[3:]
+    if text.endswith("```"):
+        text = text[:-3]
+    return text.strip()
+
 class ResumeParser:
     def __init__(self, config: Settings, session: aiohttp.ClientSession):
         self.config = config
         self.session = session
 
     async def parse(self, resume_text: str, source_filename: str) -> Candidate:
-        """Uses Ollama model to extract structured candidate details from resume text."""
+        """Uses Ollama model or Google Gemini API to extract structured candidate details from resume text."""
         system_prompt = """
         Extract the following candidate details from the resume text into a JSON object matching this schema:
         {
@@ -61,21 +96,69 @@ class ResumeParser:
             }
         }
 
-        logger.info(f"Sending resume text to LLM model {self.config.ollama_llm_model} for parsing")
+        if self.config.use_local_model:
+            logger.info(f"Sending resume text to LLM model {self.config.ollama_llm_model} for parsing (Local Model)")
+            try:
+                from src.llm_client import call_llm
+                response_text = await call_llm(
+                    config=self.config,
+                    session=self.session,
+                    model=self.config.ollama_llm_model,
+                    purpose="resume_parsing",
+                    prompt=user_prompt,
+                    system_prompt=system_prompt,
+                    json_format=True,
+                    temperature=self.config.ollama_temperature
+                )
+                cleaned_text = clean_json_text(response_text)
+                parsed_json = json.loads(cleaned_text)
+            except json.JSONDecodeError as jde:
+                logger.error(f"Failed to decode JSON response from Ollama: {jde}. Raw text: {response_text}")
+                raise RuntimeError(f"Ollama returned invalid JSON: {jde}")
+            except Exception as e:
+                logger.error(f"Error calling Ollama instruction API for resume parsing: {e}")
+                raise RuntimeError(f"Ollama resume parsing call failed: {e}")
+        else:
+            logger.info("Routing resume parsing request to Google Gemini API")
+            try:
+                import os
+                import google.generativeai as genai
+                
+                api_key = os.environ.get("GEMINI_API_KEY") or self.config.gemini_api_key
+                if not api_key:
+                    raise RuntimeError("GEMINI_API_KEY environment variable is not set")
+                genai.configure(api_key=api_key)
+                
+                model_name = self.config.ollama_llm_model
+                if "gemini-1.5-flash" in model_name.lower():
+                    model_name = "gemini-3.5-flash"
+                elif "gemini-1.5-pro" in model_name.lower():
+                    model_name = "gemini-2.5-pro"
+                elif "gemini" not in model_name.lower():
+                    model_name = "gemini-3.5-flash"
+                
+                model = genai.GenerativeModel(
+                    model_name=model_name,
+                    system_instruction=system_prompt,
+                    generation_config={
+                        "response_mime_type": "application/json",
+                        "response_schema": ResumeSchema,
+                        "temperature": self.config.ollama_temperature
+                    }
+                )
+                
+                response = await model.generate_content_async(user_prompt)
+                response_text = response.text.strip()
+                cleaned_text = clean_json_text(response_text)
+                parsed_json = json.loads(cleaned_text)
+            except json.JSONDecodeError as jde:
+                logger.error(f"Failed to decode JSON response from Gemini: {jde}. Raw text: {response_text}")
+                raise RuntimeError(f"Gemini returned invalid JSON: {jde}")
+            except Exception as e:
+                logger.error(f"Error calling Google Gemini API for resume parsing: {e}")
+                raise RuntimeError(f"Gemini resume parsing call failed: {e}")
+
         try:
-            from src.llm_client import call_llm
-            response_text = await call_llm(
-                config=self.config,
-                session=self.session,
-                model=self.config.ollama_llm_model,
-                purpose="resume_parsing",
-                prompt=user_prompt,
-                system_prompt=system_prompt,
-                json_format=True,
-                temperature=self.config.ollama_temperature
-            )
-            parsed_json = json.loads(response_text)
-            
             # Populate metadata fields required by the Candidate model
             parsed_json["raw_text"] = resume_text
             parsed_json["source_filename"] = source_filename
@@ -96,9 +179,6 @@ class ResumeParser:
                 parsed_json["certifications"] = []
 
             return Candidate(**parsed_json)
-        except json.JSONDecodeError as jde:
-            logger.error(f"Failed to decode JSON response from Ollama: {jde}. Raw text: {response_text}")
-            raise RuntimeError(f"Ollama returned invalid JSON: {jde}")
         except Exception as e:
-            logger.error(f"Error calling Ollama instruction API for resume parsing: {e}")
-            raise RuntimeError(f"Ollama resume parsing call failed: {e}")
+            logger.error(f"Error building Candidate model from parsed json: {e}")
+            raise RuntimeError(f"Candidate model instantiation failed: {e}")

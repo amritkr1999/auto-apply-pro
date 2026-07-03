@@ -1,3 +1,5 @@
+from pydantic import BaseModel
+from typing import Optional, List
 import json
 import logging
 from datetime import datetime
@@ -9,6 +11,20 @@ from src.stage3_email_gen.schemas import Email
 from src.stage3_email_gen.prompt_builder import PromptBuilder
 
 logger = logging.getLogger(__name__)
+
+class EmailResponseSchema(BaseModel):
+    subject: str
+    body: str
+
+def clean_json_text(text: str) -> str:
+    text = text.strip()
+    if text.startswith("```json"):
+        text = text[7:]
+    elif text.startswith("```"):
+        text = text[3:]
+    if text.endswith("```"):
+        text = text[:-3]
+    return text.strip()
 
 class EmailGenerator:
     def __init__(self, config: Settings, session: aiohttp.ClientSession):
@@ -75,7 +91,8 @@ class EmailGenerator:
                     json_format=True,
                     temperature=self.config.ollama_temperature
                 )
-                parsed_json = json.loads(response_text)
+                cleaned_text = clean_json_text(response_text)
+                parsed_json = json.loads(cleaned_text)
             except json.JSONDecodeError as jde:
                 logger.error(f"Failed to decode JSON email response from Ollama: {jde}. Raw text: {response_text}")
                 raise RuntimeError(f"Ollama returned invalid JSON for email: {jde}")
@@ -106,13 +123,15 @@ class EmailGenerator:
                     system_instruction=system_prompt,
                     generation_config={
                         "response_mime_type": "application/json",
+                        "response_schema": EmailResponseSchema,
                         "temperature": self.config.ollama_temperature
                     }
                 )
                 
                 response = await model.generate_content_async(user_prompt)
                 response_text = response.text.strip()
-                parsed_json = json.loads(response_text)
+                cleaned_text = clean_json_text(response_text)
+                parsed_json = json.loads(cleaned_text)
             except json.JSONDecodeError as jde:
                 logger.error(f"Failed to decode JSON response from Gemini: {jde}. Raw text: {response_text}")
                 raise RuntimeError(f"Gemini returned invalid JSON for email: {jde}")

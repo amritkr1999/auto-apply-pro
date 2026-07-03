@@ -1,3 +1,5 @@
+from pydantic import BaseModel
+from typing import Optional, List
 import json
 import logging
 from datetime import datetime
@@ -6,6 +8,32 @@ from src.config import Settings
 from src.stage1_jd_extraction.schemas import JobDescription
 
 logger = logging.getLogger(__name__)
+
+class SalarySchema(BaseModel):
+    min: Optional[int] = None
+    max: Optional[int] = None
+    currency: Optional[str] = "USD"
+
+class JobDescriptionSchema(BaseModel):
+    job_title: str
+    company: str
+    skills: List[str]
+    salary: Optional[SalarySchema] = None
+    recruiter_emails: List[str] = []
+    experience_required: Optional[str] = None
+    location: Optional[str] = None
+    job_type: Optional[str] = None
+    description: Optional[str] = None
+
+def clean_json_text(text: str) -> str:
+    text = text.strip()
+    if text.startswith("```json"):
+        text = text[7:]
+    elif text.startswith("```"):
+        text = text[3:]
+    if text.endswith("```"):
+        text = text[:-3]
+    return text.strip()
 
 class JDParser:
     def __init__(self, config: Settings, session: aiohttp.ClientSession):
@@ -90,7 +118,8 @@ class JDParser:
                     json_format=True,
                     temperature=self.config.ollama_temperature
                 )
-                parsed_json = json.loads(response_text)
+                cleaned_text = clean_json_text(response_text)
+                parsed_json = json.loads(cleaned_text)
             except json.JSONDecodeError as jde:
                 logger.error(f"Failed to decode JSON response from Ollama: {jde}. Raw text: {response_text}")
                 raise RuntimeError(f"Ollama returned invalid JSON: {jde}")
@@ -121,13 +150,15 @@ class JDParser:
                     system_instruction=system_prompt,
                     generation_config={
                         "response_mime_type": "application/json",
+                        "response_schema": JobDescriptionSchema,
                         "temperature": self.config.ollama_temperature
                     }
                 )
                 
                 response = await model.generate_content_async(user_prompt)
                 response_text = response.text.strip()
-                parsed_json = json.loads(response_text)
+                cleaned_text = clean_json_text(response_text)
+                parsed_json = json.loads(cleaned_text)
             except json.JSONDecodeError as jde:
                 logger.error(f"Failed to decode JSON response from Gemini: {jde}. Raw text: {response_text}")
                 raise RuntimeError(f"Gemini returned invalid JSON: {jde}")
