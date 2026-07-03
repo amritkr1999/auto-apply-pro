@@ -37,10 +37,10 @@ public class BillingService {
     private final PaymentTransactionRepository paymentTransactionRepository;
     private final UserRepository userRepository;
 
-    @Value("${razorpay.key.id}")
+    @Value("${razorpay.key.id:rzp_test_placeholder}")
     private String razorpayKeyId;
 
-    @Value("${razorpay.key.secret}")
+    @Value("${razorpay.key.secret:test_secret_placeholder}")
     private String razorpayKeySecret;
 
     @PostConstruct

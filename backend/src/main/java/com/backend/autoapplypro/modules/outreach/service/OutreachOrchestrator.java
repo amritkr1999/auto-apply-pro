@@ -49,7 +49,7 @@ public class OutreachOrchestrator {
     public void processOutreachQueue() {
         log.info("Starting scheduled outreach queue processing run.");
         
-        List<EmailQueue> pendingEmails = queueRepository.findDueEmails(OutreachStatus.PENDING, LocalDateTime.now());
+        List<EmailQueue> pendingEmails = queueRepository.findDueEmailsForUpdate(OutreachStatus.PENDING, LocalDateTime.now());
         if (pendingEmails.isEmpty()) {
             log.info("No due pending outreach emails found in the queue.");
             return;

@@ -18,6 +18,43 @@ from src.stage3_email_gen.email_generator import EmailGenerator
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("pipeline_server")
 
+# Security Logging setup
+import socket
+import ipaddress
+from urllib.parse import urlparse
+
+security_logger = logging.getLogger("security_logger")
+security_logger.setLevel(logging.WARNING)
+os.makedirs("./logs", exist_ok=True)
+sec_handler = logging.FileHandler("./logs/security.log")
+sec_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+security_logger.addHandler(sec_handler)
+
+def is_safe_url(url: str) -> bool:
+    try:
+        parsed = urlparse(url)
+        if parsed.scheme not in ("http", "https"):
+            return False
+        
+        hostname = parsed.hostname
+        if not hostname:
+            return False
+        
+        # Resolve hostname to IP addresses
+        ips = socket.getaddrinfo(hostname, None)
+        for ip_info in ips:
+            ip = ipaddress.ip_address(ip_info[4][0])
+            # Check for loopback, private, link-local, multicast or reserved addresses
+            if (ip.is_private or 
+                ip.is_loopback or 
+                ip.is_link_local or 
+                ip.is_multicast or 
+                ip.is_reserved):
+                return False
+        return True
+    except Exception:
+        return False
+
 app = FastAPI(title="Auto Apply Pro AI Pipeline Service")
 
 # Enable CORS for convenience
@@ -206,6 +243,10 @@ class JobParseRequest(BaseModel):
 @app.post("/parse-job-url")
 async def parse_job_url(req: JobParseRequest):
     logger.info(f"Received request to parse job URL: {req.url}")
+    if not is_safe_url(req.url):
+        error_msg = f"Blocked SSRF attempt: Unsafe or internal URL request to '{req.url}'"
+        security_logger.warning(error_msg)
+        raise HTTPException(status_code=400, detail="Invalid or unsafe destination URL.")
     try:
         # Fetch the URL content
         async with session.get(req.url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}) as resp:
