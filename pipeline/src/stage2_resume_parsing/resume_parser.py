@@ -75,27 +75,27 @@ class ResumeParser:
                 temperature=self.config.ollama_temperature
             )
             parsed_json = json.loads(response_text)
-                
-                # Populate metadata fields required by the Candidate model
-                parsed_json["raw_text"] = resume_text
-                parsed_json["source_filename"] = source_filename
-                parsed_json["parsed_at"] = datetime.utcnow().isoformat()
-                
-                # Enforce fallback defaults if required Pydantic fields are missing/null
-                if not parsed_json.get("name"):
-                    parsed_json["name"] = "Unknown Candidate"
-                if not parsed_json.get("email"):
-                    parsed_json["email"] = "unknown@example.com"
-                if not isinstance(parsed_json.get("skills"), list):
-                    parsed_json["skills"] = []
-                if not isinstance(parsed_json.get("experience"), list):
-                    parsed_json["experience"] = []
-                if not isinstance(parsed_json.get("education"), list):
-                    parsed_json["education"] = []
-                if not isinstance(parsed_json.get("certifications"), list):
-                    parsed_json["certifications"] = []
+            
+            # Populate metadata fields required by the Candidate model
+            parsed_json["raw_text"] = resume_text
+            parsed_json["source_filename"] = source_filename
+            parsed_json["parsed_at"] = datetime.utcnow().isoformat()
+            
+            # Enforce fallback defaults if required Pydantic fields are missing/null
+            if not parsed_json.get("name"):
+                parsed_json["name"] = "Unknown Candidate"
+            if not parsed_json.get("email"):
+                parsed_json["email"] = "unknown@example.com"
+            if not isinstance(parsed_json.get("skills"), list):
+                parsed_json["skills"] = []
+            if not isinstance(parsed_json.get("experience"), list):
+                parsed_json["experience"] = []
+            if not isinstance(parsed_json.get("education"), list):
+                parsed_json["education"] = []
+            if not isinstance(parsed_json.get("certifications"), list):
+                parsed_json["certifications"] = []
 
-                return Candidate(**parsed_json)
+            return Candidate(**parsed_json)
         except json.JSONDecodeError as jde:
             logger.error(f"Failed to decode JSON response from Ollama: {jde}. Raw text: {response_text}")
             raise RuntimeError(f"Ollama returned invalid JSON: {jde}")

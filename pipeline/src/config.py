@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     
     # Gemini
     gemini_api_key: str = ""
+    use_local_model: bool = False
     
     # Pipeline
     pipeline_batch_size: int = 5
