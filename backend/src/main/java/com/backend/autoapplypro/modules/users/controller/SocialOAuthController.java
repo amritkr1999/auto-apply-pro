@@ -30,7 +30,6 @@ import java.util.Map;
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class SocialOAuthController {
 
     private final CandidateRepository candidateRepository;

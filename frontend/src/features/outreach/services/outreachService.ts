@@ -1,4 +1,4 @@
-import { API_BASE } from "../../../config/api";
+import { API_BASE, buildApiUrl } from "../../../config/api";
 
 const API_BASE_V1 = `${API_BASE}/v1`;
 
@@ -390,8 +390,4 @@ export const outreachService = {
     return response.json();
   }
 };
-function buildApiUrl(path: string): RequestInfo | URL {
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  return `${API_BASE}${normalizedPath}`;
-}
 

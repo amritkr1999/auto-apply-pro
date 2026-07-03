@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/drafts")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class OutreachDraftController {
 
     private final EmailQueueRepository emailQueueRepository;

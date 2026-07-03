@@ -14,34 +14,36 @@ class JDParser:
 
     async def parse(self, ocr_text: str, source_filename: str) -> JobDescription:
         """Uses Ollama instruction model to extract structured data from raw OCR text and validates using Pydantic."""
-        prompt = f"""
+        system_prompt = """
         Extract the following job description details from the OCR text into a JSON object matching this schema:
-        {{
+        {
             "job_title": "string (Required)",
             "company": "string (Required)",
             "skills": ["string"] (Required, list of skills),
-            "salary": {{
+            "salary": {
                 "min": int or null,
                 "max": int or null,
                 "currency": "string"
-            }} or null,
-            "recruiter_emails": ["string"] (Search for all email patterns matching [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{{2,}}),
+            } or null,
+            "recruiter_emails": ["string"] (Search for all email patterns matching [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}),
             "experience_required": "string" or null,
             "location": "string" or null,
             "job_type": "string" or null (e.g. Full-time, Contract, Part-time, Internship),
             "description": "string (Required, a clean, readable, professional summary of the job description. Do not include coordinates, HTML tags, or email/contact instructions)"
-        }}
+        }
 
         Ensure all keys are present. If a field is missing, assign it null.
         Only output the raw JSON object. Do not wrap it in markdown or formatting blocks.
-
-        OCR text:
-        {ocr_text}
         """
+
+        user_prompt = f"OCR text:\n{ocr_text}"
 
         payload = {
             "model": self.config.ollama_llm_model,
-            "prompt": prompt,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
             "format": "json",
             "stream": False,
             "options": {
@@ -52,13 +54,13 @@ class JDParser:
         logger.info(f"Sending OCR text to Ollama LLM model {self.config.ollama_llm_model} for parsing")
         try:
             async with self.session.post(
-                f"{self.config.ollama_base_url}/api/generate",
+                f"{self.config.ollama_base_url}/api/chat",
                 json=payload,
                 timeout=self.config.ollama_timeout_seconds
             ) as resp:
                 resp.raise_for_status()
                 data = await resp.json()
-                response_text = data.get("response", "{}").strip()
+                response_text = data.get("message", {}).get("content", "{}").strip()
                 
                 parsed_json = json.loads(response_text)
                 

@@ -42,7 +42,52 @@ class PromptBuilder:
         Format:
         {
             "subject": "Tailored Email Subject Line",
-            "body": "Tailored Email Body Text (using line breaks like \\n where appropriate)"
+            "body": "Tailored Email Body Text (using line breaks like \n where appropriate)"
         }
         """
         return prompt
+
+    def build_messages(self, jd: JobDescription, candidate: Candidate) -> list:
+        """Constructs system and user messages to leverage prompt caching in Ollama."""
+        system_content = """
+        You are a highly skilled professional outreach assistant. Your task is to write a highly tailored, compelling job application outreach email from the candidate to the hiring manager or recruiter.
+        
+        Instructions:
+        1. Analyze the job requirements (JD) and align the candidate's skills and experiences to match.
+        2. Highlight how the candidate can solve problems for the company.
+        3. Make the email concise, professional, and clear. Avoid generic boilerplate templates.
+        4. Include a call-to-action requesting a chat or brief call.
+        
+        The output MUST be a JSON object with exactly two fields: "subject" and "body".
+        Do not include any extra text, comments, or explanations outside the JSON object.
+
+        Format:
+        {
+            "subject": "Tailored Email Subject Line",
+            "body": "Tailored Email Body Text (using line breaks like \\n where appropriate)"
+        }
+        """
+
+        user_content = f"""
+        Job Details:
+        - Job Title: {jd.job_title}
+        - Company: {jd.company}
+        - Required Skills: {', '.join(jd.skills)}
+        - Location: {jd.location or 'Not specified'}
+        - Job Type: {jd.job_type or 'Not specified'}
+        
+        Candidate Profile:
+        - Name: {candidate.name}
+        - Contact Email: {candidate.email}
+        - Contact Phone: {candidate.phone or 'Not specified'}
+        - Skills: {', '.join(candidate.skills)}
+        - Professional Summary: {candidate.summary or 'Not specified'}
+        - Experience Entries:
+        """
+        for exp in candidate.experience:
+            user_content += f"  * {exp.title} at {exp.company} ({exp.duration or 'N/A'}): {exp.description or 'No details'}\n"
+
+        return [
+            {"role": "system", "content": system_content.strip()},
+            {"role": "user", "content": user_content.strip()}
+        ]

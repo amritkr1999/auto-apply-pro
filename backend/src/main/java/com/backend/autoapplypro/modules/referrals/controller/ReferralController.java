@@ -11,7 +11,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/referrals")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class ReferralController {
 
     private final ReferralService referralService;

@@ -20,7 +20,6 @@ import java.util.*;
 @RequestMapping("/api/screenshots")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class ScreenshotUploadController {
 
     private final ScreenshotUploadRepository screenshotRepository;

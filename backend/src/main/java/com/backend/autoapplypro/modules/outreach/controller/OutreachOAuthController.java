@@ -27,7 +27,6 @@ import java.util.Arrays;
 @RequestMapping("/api/v1/outreach")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class OutreachOAuthController {
 
     private final GmailCredentialRepository credentialRepository;

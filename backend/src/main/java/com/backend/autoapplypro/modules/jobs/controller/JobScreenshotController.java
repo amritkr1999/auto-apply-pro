@@ -20,7 +20,6 @@ import java.io.IOException;
 @RequestMapping("/api/jobs")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class JobScreenshotController {
 
     private final SkillRepository skillRepository;

@@ -18,11 +18,11 @@ class EmailGenerator:
 
     async def generate(self, jd: JobDescription, candidate: Candidate) -> Email:
         """Sends the constructed prompt to Ollama LLM to generate the outreach email."""
-        prompt = self.prompt_builder.build(jd, candidate)
+        messages = self.prompt_builder.build_messages(jd, candidate)
         
         payload = {
             "model": self.config.ollama_llm_model,
-            "prompt": prompt,
+            "messages": messages,
             "format": "json",
             "stream": False,
             "options": {
@@ -30,16 +30,16 @@ class EmailGenerator:
             }
         }
         
-        logger.info(f"Sending prompt to Ollama LLM model {self.config.ollama_llm_model} for email generation")
+        logger.info(f"Sending messages to Ollama LLM model {self.config.ollama_llm_model} for email generation")
         try:
             async with self.session.post(
-                f"{self.config.ollama_base_url}/api/generate",
+                f"{self.config.ollama_base_url}/api/chat",
                 json=payload,
                 timeout=self.config.ollama_timeout_seconds
             ) as resp:
                 resp.raise_for_status()
                 data = await resp.json()
-                response_text = data.get("response", "{}").strip()
+                response_text = data.get("message", {}).get("content", "{}").strip()
                 
                 parsed_json = json.loads(response_text)
                 

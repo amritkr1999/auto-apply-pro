@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/profiles")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class ProfileController {
 
     private final UserService userService;

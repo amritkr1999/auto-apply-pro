@@ -14,44 +14,46 @@ class ResumeParser:
 
     async def parse(self, resume_text: str, source_filename: str) -> Candidate:
         """Uses Ollama model to extract structured candidate details from resume text."""
-        prompt = f"""
+        system_prompt = """
         Extract the following candidate details from the resume text into a JSON object matching this schema:
-        {{
+        {
             "name": "string (Required)",
             "email": "string (Required)",
             "phone": "string" or null,
             "location": "string" or null,
             "skills": ["string"] (Required, list of skills),
             "experience": [
-                {{
+                {
                     "title": "string (Required)",
                     "company": "string (Required)",
                     "duration": "string" or null,
                     "description": "string" or null
-                }}
+                }
             ],
             "education": [
-                {{
+                {
                     "degree": "string (Required)",
                     "institution": "string (Required)",
                     "graduation_year": int or null,
                     "field_of_study": "string" or null
-                }}
+                }
             ],
             "certifications": ["string"],
             "summary": "string" or null
-        }}
+        }
 
         Ensure all keys are present. If a field is missing, assign it null.
         Only output the raw JSON object. Do not wrap it in markdown or formatting blocks.
-
-        Resume text:
-        {resume_text}
         """
+
+        user_prompt = f"Resume text:\n{resume_text}"
 
         payload = {
             "model": self.config.ollama_llm_model,
-            "prompt": prompt,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
             "format": "json",
             "stream": False,
             "options": {
@@ -62,13 +64,13 @@ class ResumeParser:
         logger.info(f"Sending resume text to Ollama LLM model {self.config.ollama_llm_model} for parsing")
         try:
             async with self.session.post(
-                f"{self.config.ollama_base_url}/api/generate",
+                f"{self.config.ollama_base_url}/api/chat",
                 json=payload,
                 timeout=self.config.ollama_timeout_seconds
             ) as resp:
                 resp.raise_for_status()
                 data = await resp.json()
-                response_text = data.get("response", "{}").strip()
+                response_text = data.get("message", {}).get("content", "{}").strip()
                 
                 parsed_json = json.loads(response_text)
                 

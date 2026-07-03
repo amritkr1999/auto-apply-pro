@@ -14,7 +14,6 @@ import java.util.List;
 @RequestMapping("/api/templates")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class EmailTemplateController {
 
     private final EmailTemplateRepository templateRepository;

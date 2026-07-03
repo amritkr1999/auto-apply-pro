@@ -6,12 +6,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @RequiredArgsConstructor
 public class EmailTemplateEngine {
 
     private final Mustache.Compiler mustacheCompiler;
+    private final Map<String, Template> templateCache = new ConcurrentHashMap<>();
 
     // Hardcoded 'Professional Boilerplate' structure with placeholders
     private static final String DEFAULT_BASE_TEMPLATE =
@@ -26,7 +28,7 @@ public class EmailTemplateEngine {
      */
     public String render(String templateText, Map<String, Object> context) {
         String templateToUse = (templateText == null || templateText.trim().isEmpty()) ? DEFAULT_BASE_TEMPLATE : templateText;
-        Template compiled = mustacheCompiler.compile(templateToUse);
+        Template compiled = templateCache.computeIfAbsent(templateToUse, mustacheCompiler::compile);
         return compiled.execute(context);
     }
 }

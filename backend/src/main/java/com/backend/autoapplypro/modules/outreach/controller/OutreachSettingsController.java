@@ -17,7 +17,6 @@ import java.util.Map;
 @RequestMapping("/api/v1/outreach/settings")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class OutreachSettingsController {
 
     private final UserRepository userRepository;

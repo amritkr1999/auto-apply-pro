@@ -14,7 +14,6 @@ import java.util.List;
 @RequestMapping("/api/job-applications")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class JobApplicationController {
 
     private final JobApplicationService service;
