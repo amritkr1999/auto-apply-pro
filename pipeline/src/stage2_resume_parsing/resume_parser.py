@@ -61,18 +61,20 @@ class ResumeParser:
             }
         }
 
-        logger.info(f"Sending resume text to Ollama LLM model {self.config.ollama_llm_model} for parsing")
+        logger.info(f"Sending resume text to LLM model {self.config.ollama_llm_model} for parsing")
         try:
-            async with self.session.post(
-                f"{self.config.ollama_base_url}/api/chat",
-                json=payload,
-                timeout=self.config.ollama_timeout_seconds
-            ) as resp:
-                resp.raise_for_status()
-                data = await resp.json()
-                response_text = data.get("message", {}).get("content", "{}").strip()
-                
-                parsed_json = json.loads(response_text)
+            from src.llm_client import call_llm
+            response_text = await call_llm(
+                config=self.config,
+                session=self.session,
+                model=self.config.ollama_llm_model,
+                purpose="resume_parsing",
+                prompt=user_prompt,
+                system_prompt=system_prompt,
+                json_format=True,
+                temperature=self.config.ollama_temperature
+            )
+            parsed_json = json.loads(response_text)
                 
                 # Populate metadata fields required by the Candidate model
                 parsed_json["raw_text"] = resume_text

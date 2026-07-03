@@ -41,19 +41,21 @@ class OCRHandler:
             }
         }
 
-        logger.info(f"Sending JD image {image_path.name} to Ollama Vision model: {self.config.ollama_deepseek_model}")
+        logger.info(f"Sending JD image {image_path.name} to vision model: {self.config.ollama_deepseek_model}")
         try:
-            async with self.session.post(
-                f"{self.config.ollama_base_url}/api/generate",
-                json=payload,
-                timeout=self.config.ollama_timeout_seconds
-            ) as resp:
-                resp.raise_for_status()
-                data = await resp.json()
-                ocr_text = data.get("response", "").strip()
-                if not ocr_text:
-                    logger.warning(f"Ollama returned empty OCR text for {image_path.name}")
-                return ocr_text
+            from src.llm_client import call_llm
+            ocr_text = await call_llm(
+                config=self.config,
+                session=self.session,
+                model=self.config.ollama_deepseek_model,
+                purpose="ocr_extraction",
+                prompt=prompt,
+                images=[encoded_string],
+                temperature=0.0
+            )
+            if not ocr_text:
+                logger.warning(f"Vision model returned empty OCR text for {image_path.name}")
+            return ocr_text
         except Exception as e:
-            logger.error(f"Error calling Ollama vision API: {e}")
-            raise RuntimeError(f"Ollama vision OCR call failed: {e}")
+            logger.error(f"Error calling vision OCR API: {e}")
+            raise RuntimeError(f"Vision OCR call failed: {e}")

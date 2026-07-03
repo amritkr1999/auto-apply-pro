@@ -237,6 +237,18 @@ async def generate_hook(req: HookGenerationRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.get("/llm-stats")
+async def get_llm_stats():
+    logger.info("Received request to fetch LLM stats")
+    try:
+        from src.telemetry import get_aggregated_stats
+        stats = get_aggregated_stats()
+        return stats
+    except Exception as e:
+        logger.error(f"Error retrieving LLM stats: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 class JobParseRequest(BaseModel):
     url: str
 

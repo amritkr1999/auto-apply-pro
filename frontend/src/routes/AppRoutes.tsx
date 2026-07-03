@@ -21,6 +21,7 @@ import TopicDetailsView from "../features/learning/components/TopicDetailsView";
 import RoadmapDetailsView from "../features/learning/components/RoadmapDetailsView";
 import PricingPage from "../features/billing/components/PricingPage";
 import BillingPortal from "../features/billing/components/BillingPortal";
+import { TelemetryDashboard } from "../features/dashboard/components/views/TelemetryDashboard";
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -55,6 +56,7 @@ export const AppRoutes: React.FC = () => {
         <Route path="/learning/roadmap/:roadmapId" element={<RoadmapDetailsView />} />
         <Route path="/billing/pricing" element={<PricingPage />} />
         <Route path="/billing/portal" element={<BillingPortal />} />
+        <Route path="/admin/telemetry" element={<TelemetryDashboard />} />
       </Route>
     </Routes>
   );

@@ -203,4 +203,21 @@ public class EmailServiceImpl implements EmailService {
                 profile.getEmail(), 
                 profile.getMobile() != null ? profile.getMobile() : "");
     }
+
+    @Override
+    public java.util.Map<String, Object> getLlmStats() {
+        log.info("Requesting LLM telemetry statistics from AI pipeline service");
+        try {
+            String pythonStatsUrl = llmServiceUrl.replace("/generate-hook", "/llm-stats");
+            ResponseEntity<java.util.Map> response = restTemplate.getForEntity(pythonStatsUrl, java.util.Map.class);
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                return response.getBody();
+            } else {
+                throw new RuntimeException("AI pipeline telemetry endpoint returned status: " + response.getStatusCode());
+            }
+        } catch (Exception e) {
+            log.error("Failed to fetch statistics from AI pipeline", e);
+            throw new RuntimeException("Failed to fetch LLM statistics: " + e.getMessage(), e);
+        }
+    }
 }

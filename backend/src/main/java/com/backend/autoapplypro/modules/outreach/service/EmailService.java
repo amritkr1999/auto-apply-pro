@@ -15,4 +15,9 @@ public interface EmailService {
      * Generates only the opening hook using the AI model (cached).
      */
     String generateHook(Long userId, String companyId, String roleId, String jobDescription, String resumeSnippet, String model);
+
+    /**
+     * Retrieves LLM usage token and cost telemetry from the AI pipeline service.
+     */
+    java.util.Map<String, Object> getLlmStats();
 }

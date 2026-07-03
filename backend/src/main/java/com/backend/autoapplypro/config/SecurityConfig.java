@@ -36,6 +36,7 @@ public class SecurityConfig {
                     "/swagger-ui.html",
                     "/error"
                 ).permitAll()
+                .requestMatchers("/api/drafts/llm-stats").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

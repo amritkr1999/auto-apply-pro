@@ -201,4 +201,17 @@ public class OutreachDraftController {
                     .body("Failed to fetch queue items: " + e.getMessage());
         }
     }
+
+    @GetMapping("/llm-stats")
+    public ResponseEntity<?> getLlmStats() {
+        log.info("Secure endpoint: admin requested LLM token and cost telemetry statistics");
+        try {
+            java.util.Map<String, Object> stats = emailService.getLlmStats();
+            return ResponseEntity.ok(stats);
+        } catch (Exception e) {
+            log.error("Failed to fetch LLM stats", e);
+            return ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to retrieve LLM stats: " + e.getMessage());
+        }
+    }
 }

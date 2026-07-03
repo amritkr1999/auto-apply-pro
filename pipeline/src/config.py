@@ -9,6 +9,9 @@ class Settings(BaseSettings):
     ollama_timeout_seconds: int = 120
     ollama_temperature: float = 0.7
     
+    # Gemini
+    gemini_api_key: str = ""
+    
     # Pipeline
     pipeline_batch_size: int = 5
     pipeline_memory_threshold_gb: int = 14

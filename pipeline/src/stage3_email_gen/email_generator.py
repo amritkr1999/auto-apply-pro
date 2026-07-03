@@ -20,28 +20,23 @@ class EmailGenerator:
         """Sends the constructed prompt to Ollama LLM to generate the outreach email."""
         messages = self.prompt_builder.build_messages(jd, candidate)
         
-        payload = {
-            "model": self.config.ollama_llm_model,
-            "messages": messages,
-            "format": "json",
-            "stream": False,
-            "options": {
-                "temperature": self.config.ollama_temperature
-            }
-        }
+        system_prompt = messages[0]["content"]
+        user_prompt = messages[1]["content"]
         
-        logger.info(f"Sending messages to Ollama LLM model {self.config.ollama_llm_model} for email generation")
+        logger.info(f"Sending messages to LLM model {self.config.ollama_llm_model} for email generation")
         try:
-            async with self.session.post(
-                f"{self.config.ollama_base_url}/api/chat",
-                json=payload,
-                timeout=self.config.ollama_timeout_seconds
-            ) as resp:
-                resp.raise_for_status()
-                data = await resp.json()
-                response_text = data.get("message", {}).get("content", "{}").strip()
-                
-                parsed_json = json.loads(response_text)
+            from src.llm_client import call_llm
+            response_text = await call_llm(
+                config=self.config,
+                session=self.session,
+                model=self.config.ollama_llm_model,
+                purpose="email_generation",
+                prompt=user_prompt,
+                system_prompt=system_prompt,
+                json_format=True,
+                temperature=self.config.ollama_temperature
+            )
+            parsed_json = json.loads(response_text)
                 
                 email = Email(
                     recipient_email=jd.recruiter_emails[0] if (getattr(jd, "recruiter_emails", None) and len(jd.recruiter_emails) > 0) else "recruiter@example.com",
@@ -90,18 +85,19 @@ Instructions:
         
         logger.info(f"Sending prompt to LLM model {model_name} for hook generation")
         try:
-            async with self.session.post(
-                f"{self.config.ollama_base_url}/api/generate",
-                json=payload,
-                timeout=self.config.ollama_timeout_seconds
-            ) as resp:
-                resp.raise_for_status()
-                data = await resp.json()
-                response_text = data.get("response", "").strip()
-                # Clean any markdown code fences if LLM accidentally outputs them
-                if response_text.startswith("```"):
-                    response_text = response_text.replace("```", "").strip()
-                return response_text
+            from src.llm_client import call_llm
+            response_text = await call_llm(
+                config=self.config,
+                session=self.session,
+                model=model_name,
+                purpose="hook_generation",
+                prompt=prompt,
+                temperature=self.config.ollama_temperature
+            )
+            # Clean any markdown code fences if LLM accidentally outputs them
+            if response_text.startswith("```"):
+                response_text = response_text.replace("```", "").strip()
+            return response_text
         except Exception as e:
             logger.error(f"Error calling LLM for hook generation: {e}")
             raise RuntimeError(f"LLM hook generation call failed: {e}")
