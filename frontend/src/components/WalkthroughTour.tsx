@@ -211,6 +211,19 @@ export const WalkthroughTour: React.FC = () => {
       clearInterval(timer);
     };
   }, [active, activeStep]);
+  
+  // Scroll target element into view when active step changes
+  useEffect(() => {
+    if (active && activeStep && activeStep.targetSelector) {
+      const timer = setTimeout(() => {
+        const el = document.querySelector(activeStep.targetSelector!);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [active, currentStep, activeStep]);
 
   // Keyboard navigation
   useEffect(() => {
