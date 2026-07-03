@@ -45,9 +45,24 @@ services:
       RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET}
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
+      PIPELINE_SERVICE_URL: http://pipeline:8000
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  pipeline:
+    build:
+      context: ./pipeline
+      dockerfile: Dockerfile
+    container_name: auto-apply-pipeline
+    ports:
+      - "8000:8000"
+    environment:
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      USE_LOCAL_MODEL: ${USE_LOCAL_MODEL:-false}
     networks:
       - app-network
     restart: unless-stopped

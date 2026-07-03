@@ -25,6 +25,9 @@ public class UserServiceImpl implements UserService {
     private final UserActivityLogRepository userActivityLogRepository;
     private final SystemEmailService systemEmailService;
 
+    @org.springframework.beans.factory.annotation.Value("${pipeline.service.url:http://localhost:8000}")
+    private String pythonServiceUrl;
+
     @Override
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -379,7 +382,7 @@ public class UserServiceImpl implements UserService {
 
         try {
             org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
-            String pythonServiceUrl = "http://localhost:8000/parse-resume";
+            String requestUrl = pythonServiceUrl + "/parse-resume";
 
             org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
             headers.setContentType(org.springframework.http.MediaType.MULTIPART_FORM_DATA);
@@ -399,7 +402,7 @@ public class UserServiceImpl implements UserService {
                 new org.springframework.http.HttpEntity<>(body, headers);
 
             org.springframework.http.ResponseEntity<ParsedResumeDto> response = restTemplate.postForEntity(
-                pythonServiceUrl,
+                requestUrl,
                 requestEntity,
                 ParsedResumeDto.class
             );

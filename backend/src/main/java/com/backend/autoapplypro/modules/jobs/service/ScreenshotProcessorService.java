@@ -45,8 +45,8 @@ public class ScreenshotProcessorService {
     private final UserService userService;
     private final RestTemplate restTemplate = new RestTemplate();
 
-    private static final String PYTHON_EXTRACT_URL = "http://localhost:8000/extract-job-details";
-    private static final String PYTHON_GENERATE_URL = "http://localhost:8000/generate-email";
+    @org.springframework.beans.factory.annotation.Value("${pipeline.service.url:http://localhost:8000}")
+    private String pythonServiceUrl;
 
     @Async
     @Transactional
@@ -80,7 +80,7 @@ public class ScreenshotProcessorService {
 
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
             ResponseEntity<JobDetailsDto> parseResponse = restTemplate.postForEntity(
-                    PYTHON_EXTRACT_URL,
+                    pythonServiceUrl + "/extract-job-details",
                     requestEntity,
                     JobDetailsDto.class
             );
@@ -275,7 +275,7 @@ public class ScreenshotProcessorService {
 
             HttpEntity<Map<String, Object>> jsonRequest = new HttpEntity<>(pythonPayload, jsonHeaders);
             ResponseEntity<EmailGenerationResponseDto> genResponse = restTemplate.postForEntity(
-                    PYTHON_GENERATE_URL,
+                    pythonServiceUrl + "/generate-email",
                     jsonRequest,
                     EmailGenerationResponseDto.class
             );
