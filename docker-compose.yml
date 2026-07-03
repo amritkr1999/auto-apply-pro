@@ -64,6 +64,13 @@ services:
     environment:
       GEMINI_API_KEY: ${GEMINI_API_KEY}
       USE_LOCAL_MODEL: ${USE_LOCAL_MODEL:-false}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      OLLAMA_DEEPSEEK_MODEL: ${OLLAMA_DEEPSEEK_MODEL:-deepseek-vision:7b}
+      OLLAMA_LLM_MODEL: ${OLLAMA_LLM_MODEL:-ollama3.1:8b}
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://${DB_USER:-amrit}:${DB_PASSWORD:-amrit123}@db:5432/${DB_NAME:-autoapplypro}}
+      BACKEND_API_URL: ${BACKEND_API_URL:-http://backend:8060}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - app-network
     restart: unless-stopped
