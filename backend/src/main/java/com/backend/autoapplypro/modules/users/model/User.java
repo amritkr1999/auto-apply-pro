@@ -125,7 +125,7 @@ public class User {
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, columnDefinition = "VARCHAR(25) DEFAULT 'ACTIVE'")
+    @Column(name = "status", nullable = false, length = 25)
     private UserStatus status = UserStatus.ACTIVE;
 
     @Column(name = "deletion_scheduled_at")

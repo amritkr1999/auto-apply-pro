@@ -82,7 +82,7 @@ interface DashboardSidebarProps {
 
 export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isMobile = false, onClose }) => {
   const navigate = useNavigate();
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(true);
   const userStr = localStorage.getItem("user");
   const user = userStr ? JSON.parse(userStr) : null;
   const role = user?.role || "CANDIDATE";
@@ -130,7 +130,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isMobile = f
         ? "w-full h-full" 
         : minimizedState ? "w-[72px]" : "w-[240px]"
     } shrink-0 p-4 ${
-      isMobile ? "" : "border-r border-slate-200 min-h-[calc(100vh-64px)]"
+      isMobile ? "" : "border-r border-slate-200 h-full overflow-y-auto"
     } bg-white flex flex-col justify-between transition-all duration-300`}>
       <div className="flex-1">
         {/* Sidebar Toggle & Header */}
@@ -236,7 +236,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isMobile = f
           className={`flex items-center justify-center ${minimizedState ? "w-10 h-10 p-0" : "w-full py-2.5 px-4"} rounded-btn border border-rose-200 bg-rose-50 text-rose-600 font-medium hover:bg-rose-100 transition-colors text-sm mx-auto`}
           title={minimizedState ? "Logout" : undefined}
         >
-          <LogoutIcon />
+          <LogoutIcon className="w-5 h-5 shrink-0" />
           {!minimizedState && <span className="ml-2">Logout</span>}
         </button>
       </div>

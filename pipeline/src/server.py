@@ -184,6 +184,22 @@ async def generate_email(req: EmailGenerationRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+class HookGenerationRequest(BaseModel):
+    job_description: str
+    resume_snippet: str
+    model: str
+
+@app.post("/generate-hook")
+async def generate_hook(req: HookGenerationRequest):
+    logger.info(f"Received request to generate hook using model: {req.model}")
+    try:
+        hook = await email_generator.generate_hook(req.job_description, req.resume_snippet, req.model)
+        return {"hook": hook}
+    except Exception as e:
+        logger.error(f"Error generating hook: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 class JobParseRequest(BaseModel):
     url: str
 

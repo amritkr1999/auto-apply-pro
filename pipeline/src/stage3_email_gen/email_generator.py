@@ -61,3 +61,47 @@ class EmailGenerator:
         except Exception as e:
             logger.error(f"Error calling Ollama instruction API for email generation: {e}")
             raise RuntimeError(f"Ollama email generation call failed: {e}")
+
+    async def generate_hook(self, job_description: str, resume_snippet: str, model_name: str) -> str:
+        """Sends a hook generation prompt to the LLM (Ollama or other configured provider) with the specific model."""
+        prompt = f"""
+You are a highly skilled professional outreach assistant. Your task is to write a highly tailored, compelling 1-2 sentence opening hook for a job application email.
+
+Job Description:
+{job_description}
+
+Candidate Resume Snippet:
+{resume_snippet}
+
+Instructions:
+1. Write ONLY the opening hook (1-2 sentences). Do NOT include any greetings (e.g., "Hi Hiring Manager"), subject lines, closings, or signatures.
+2. The hook must immediately connect a strong skill or experience from the candidate's resume snippet directly to a key requirement/challenge in the job description to grab attention.
+3. Be professional, direct, and customized. Avoid generic templates or buzzwords.
+4. Output ONLY the hook text itself. Do not wrap in JSON, markdown code fences, or add explanatory text.
+"""
+        payload = {
+            "model": model_name,
+            "prompt": prompt,
+            "stream": False,
+            "options": {
+                "temperature": self.config.ollama_temperature
+            }
+        }
+        
+        logger.info(f"Sending prompt to LLM model {model_name} for hook generation")
+        try:
+            async with self.session.post(
+                f"{self.config.ollama_base_url}/api/generate",
+                json=payload,
+                timeout=self.config.ollama_timeout_seconds
+            ) as resp:
+                resp.raise_for_status()
+                data = await resp.json()
+                response_text = data.get("response", "").strip()
+                # Clean any markdown code fences if LLM accidentally outputs them
+                if response_text.startswith("```"):
+                    response_text = response_text.replace("```", "").strip()
+                return response_text
+        except Exception as e:
+            logger.error(f"Error calling LLM for hook generation: {e}")
+            raise RuntimeError(f"LLM hook generation call failed: {e}")

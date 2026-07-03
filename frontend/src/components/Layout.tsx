@@ -100,16 +100,16 @@ export const Layout: React.FC = () => {
       )}
 
       {/* Main Responsive Grid Layout */}
-      <div className="flex-grow flex max-w-[1200px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 gap-8">
+      <div className="flex-grow flex w-full mx-auto">
         {/* Desktop Persistent Sidebar (hidden on mobile) */}
         {user && (
-          <div className="hidden lg:block">
+          <div className="hidden lg:block sticky top-16 h-[calc(100vh-64px)] shrink-0">
             <DashboardSidebar />
           </div>
         )}
 
         {/* Content Wrapper */}
-        <main className="flex-1 min-w-0 flex flex-col">
+        <main className="flex-1 min-w-0 flex flex-col py-8 px-4 sm:px-6 lg:px-8 xl:px-12">
           {!isDashboard && (
             <div className="mb-6">
               <button
