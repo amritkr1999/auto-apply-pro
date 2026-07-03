@@ -1,5 +1,3 @@
-from pydantic import BaseModel
-from typing import Optional, List
 import json
 import logging
 from datetime import datetime
@@ -12,9 +10,14 @@ from src.stage3_email_gen.prompt_builder import PromptBuilder
 
 logger = logging.getLogger(__name__)
 
-class EmailResponseSchema(BaseModel):
-    subject: str
-    body: str
+email_response_schema = {
+    "type": "OBJECT",
+    "properties": {
+        "subject": {"type": "STRING"},
+        "body": {"type": "STRING"}
+    },
+    "required": ["subject", "body"]
+}
 
 def clean_json_text(text: str) -> str:
     text = text.strip()
@@ -123,7 +126,7 @@ class EmailGenerator:
                     system_instruction=system_prompt,
                     generation_config={
                         "response_mime_type": "application/json",
-                        "response_schema": EmailResponseSchema,
+                        "response_schema": email_response_schema,
                         "temperature": self.config.ollama_temperature
                     }
                 )

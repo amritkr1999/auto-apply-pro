@@ -1,5 +1,3 @@
-from pydantic import BaseModel
-from typing import Optional, List
 import json
 import logging
 from datetime import datetime
@@ -9,21 +7,34 @@ from src.stage1_jd_extraction.schemas import JobDescription
 
 logger = logging.getLogger(__name__)
 
-class SalarySchema(BaseModel):
-    min: Optional[int] = None
-    max: Optional[int] = None
-    currency: Optional[str] = "USD"
-
-class JobDescriptionSchema(BaseModel):
-    job_title: str
-    company: str
-    skills: List[str]
-    salary: Optional[SalarySchema] = None
-    recruiter_emails: List[str] = []
-    experience_required: Optional[str] = None
-    location: Optional[str] = None
-    job_type: Optional[str] = None
-    description: Optional[str] = None
+job_description_schema = {
+    "type": "OBJECT",
+    "properties": {
+        "job_title": {"type": "STRING"},
+        "company": {"type": "STRING"},
+        "skills": {
+            "type": "ARRAY",
+            "items": {"type": "STRING"}
+        },
+        "salary": {
+            "type": "OBJECT",
+            "properties": {
+                "min": {"type": "INTEGER"},
+                "max": {"type": "INTEGER"},
+                "currency": {"type": "STRING"}
+            }
+        },
+        "recruiter_emails": {
+            "type": "ARRAY",
+            "items": {"type": "STRING"}
+        },
+        "experience_required": {"type": "STRING"},
+        "location": {"type": "STRING"},
+        "job_type": {"type": "STRING"},
+        "description": {"type": "STRING"}
+    },
+    "required": ["job_title", "company", "skills"]
+}
 
 def clean_json_text(text: str) -> str:
     text = text.strip()
@@ -150,7 +161,7 @@ class JDParser:
                     system_instruction=system_prompt,
                     generation_config={
                         "response_mime_type": "application/json",
-                        "response_schema": JobDescriptionSchema,
+                        "response_schema": job_description_schema,
                         "temperature": self.config.ollama_temperature
                     }
                 )

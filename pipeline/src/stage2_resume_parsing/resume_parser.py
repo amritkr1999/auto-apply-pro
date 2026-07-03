@@ -1,5 +1,3 @@
-from pydantic import BaseModel
-from typing import Optional, List
 import json
 import logging
 from datetime import datetime
@@ -9,28 +7,51 @@ from src.stage2_resume_parsing.schemas import Candidate
 
 logger = logging.getLogger(__name__)
 
-class ResumeExperienceSchema(BaseModel):
-    title: str
-    company: str
-    duration: Optional[str] = None
-    description: Optional[str] = None
-
-class ResumeEducationSchema(BaseModel):
-    degree: str
-    institution: str
-    graduation_year: Optional[int] = None
-    field_of_study: Optional[str] = None
-
-class ResumeSchema(BaseModel):
-    name: str
-    email: str
-    phone: Optional[str] = None
-    location: Optional[str] = None
-    skills: List[str]
-    experience: List[ResumeExperienceSchema] = []
-    education: List[ResumeEducationSchema] = []
-    certifications: List[str] = []
-    summary: Optional[str] = None
+resume_schema = {
+    "type": "OBJECT",
+    "properties": {
+        "name": {"type": "STRING"},
+        "email": {"type": "STRING"},
+        "phone": {"type": "STRING"},
+        "location": {"type": "STRING"},
+        "skills": {
+            "type": "ARRAY",
+            "items": {"type": "STRING"}
+        },
+        "experience": {
+            "type": "ARRAY",
+            "items": {
+                "type": "OBJECT",
+                "properties": {
+                    "title": {"type": "STRING"},
+                    "company": {"type": "STRING"},
+                    "duration": {"type": "STRING"},
+                    "description": {"type": "STRING"}
+                },
+                "required": ["title", "company"]
+            }
+        },
+        "education": {
+            "type": "ARRAY",
+            "items": {
+                "type": "OBJECT",
+                "properties": {
+                    "degree": {"type": "STRING"},
+                    "institution": {"type": "STRING"},
+                    "graduation_year": {"type": "INTEGER"},
+                    "field_of_study": {"type": "STRING"}
+                },
+                "required": ["degree", "institution"]
+            }
+        },
+        "certifications": {
+            "type": "ARRAY",
+            "items": {"type": "STRING"}
+        },
+        "summary": {"type": "STRING"}
+    },
+    "required": ["name", "email", "skills"]
+}
 
 def clean_json_text(text: str) -> str:
     text = text.strip()
@@ -142,7 +163,7 @@ class ResumeParser:
                     system_instruction=system_prompt,
                     generation_config={
                         "response_mime_type": "application/json",
-                        "response_schema": ResumeSchema,
+                        "response_schema": resume_schema,
                         "temperature": self.config.ollama_temperature
                     }
                 )
