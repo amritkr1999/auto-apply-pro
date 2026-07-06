@@ -30,4 +30,10 @@ public class CandidateProfileDto {
     private String linkedinProfileUrl;
     private String linkedinName;
     private String avatar;
+    private Boolean isProfilePublic;
+    private String username;
+    private Map<String, Object> githubStats;
+    private Map<String, Object> leetcodeStats;
+    private String leetcodeUsername;
+    private Boolean isVerified;
 }

@@ -26,13 +26,13 @@ public class ProfileController {
     }
 
     @PutMapping("/candidate/{userId}")
-    public ResponseEntity<CandidateProfileDto> updateCandidateProfile(
+    public ResponseEntity<?> updateCandidateProfile(
             @PathVariable Long userId,
             @RequestBody CandidateProfileDto dto) {
         try {
             return ResponseEntity.ok(userService.updateCandidateProfile(userId, dto));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(java.util.Map.of("message", e.getMessage()));
         }
     }
 

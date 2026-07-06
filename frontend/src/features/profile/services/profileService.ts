@@ -50,6 +50,28 @@ export interface CandidateProfile {
   linkedinProfileUrl?: string;
   linkedinName?: string;
   avatar?: string;
+  isProfilePublic?: boolean;
+  username?: string;
+  githubStats?: Record<string, any>;
+  leetcodeStats?: Record<string, any>;
+  leetcodeUsername?: string;
+  isVerified?: boolean;
+}
+
+export interface PublicProfile {
+  username: string;
+  name: string;
+  summary?: string;
+  avatar?: string;
+  githubUsername?: string;
+  githubProfileUrl?: string;
+  linkedinProfileUrl?: string;
+  linkedinName?: string;
+  githubStats?: Record<string, any>;
+  leetcodeStats?: Record<string, any>;
+  leetcodeUsername?: string;
+  isVerified: boolean;
+  skills: string[];
 }
 
 export interface RecruiterProfile {
@@ -278,5 +300,30 @@ export const profileService = {
       throw new Error("Failed to disconnect LinkedIn");
     }
     return response.json();
+  },
+
+  async getPublicProfile(username: string): Promise<PublicProfile> {
+    const response = await fetch(`${API_BASE_V1}/public/profile/${username}`);
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMsg = "Profile not found or private";
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMsg = errorJson.message || errorMsg;
+      } catch (e) {}
+      throw new Error(errorMsg);
+    }
+    return response.json();
+  },
+
+  async checkUsernameAvailability(username: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${API_BASE_V1}/public/profile/check-username?username=${username}`);
+      if (!response.ok) return false;
+      const data = await response.json();
+      return !!data.available;
+    } catch {
+      return false;
+    }
   },
 };

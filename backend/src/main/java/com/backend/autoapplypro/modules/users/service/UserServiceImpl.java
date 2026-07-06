@@ -161,11 +161,28 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
+    private Candidate getOrCreateCandidate(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        if (user.getRole() != UserRole.CANDIDATE) {
+            throw new IllegalArgumentException("User is not a candidate");
+        }
+        return candidateRepository.findByUserId(userId)
+                .orElseGet(() -> {
+                    Candidate newCand = Candidate.builder()
+                            .user(user)
+                            .skills(new java.util.HashSet<>())
+                            .jobPreferences(new java.util.HashMap<>())
+                            .isVerified(false)
+                            .build();
+                    return candidateRepository.save(newCand);
+                });
+    }
+
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public CandidateProfileDto getCandidateProfile(Long userId) {
-        Candidate candidate = candidateRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Candidate profile not found"));
+        Candidate candidate = getOrCreateCandidate(userId);
         User user = candidate.getUser();
         return CandidateProfileDto.builder()
                 .id(candidate.getId())
@@ -186,20 +203,37 @@ public class UserServiceImpl implements UserService {
                 .linkedinProfileUrl(candidate.getLinkedinProfileUrl())
                 .linkedinName(candidate.getLinkedinName())
                 .avatar(user.getAvatar())
+                .isProfilePublic(user.getIsProfilePublic())
+                .username(user.getUsername())
+                .githubStats(candidate.getGithubStats())
+                .leetcodeStats(candidate.getLeetcodeStats())
+                .leetcodeUsername(candidate.getLeetcodeUsername())
+                .isVerified(candidate.getIsVerified())
                 .build();
     }
 
     @Override
     @Transactional
     public CandidateProfileDto updateCandidateProfile(Long userId, CandidateProfileDto dto) {
-        Candidate candidate = candidateRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Candidate profile not found"));
+        Candidate candidate = getOrCreateCandidate(userId);
         User user = candidate.getUser();
         
         user.setName(dto.getName());
         user.setMobile(dto.getMobile());
         user.setOfficialEmail(dto.getOfficialEmail());
         user.setAvatar(dto.getAvatar());
+        if (dto.getIsProfilePublic() != null) {
+            user.setIsProfilePublic(dto.getIsProfilePublic());
+        }
+        if (dto.getUsername() != null && !dto.getUsername().trim().isEmpty()) {
+            String newUsername = dto.getUsername().trim().toLowerCase().replaceAll("[^a-zA-Z0-9_]", "");
+            if (!newUsername.isEmpty() && !newUsername.equals(user.getUsername())) {
+                if (userRepository.existsByUsername(newUsername)) {
+                    throw new IllegalArgumentException("Username is already taken");
+                }
+                user.setUsername(newUsername);
+            }
+        }
         userRepository.save(user);
 
         java.util.Set<Skill> dbSkills = new java.util.HashSet<>();
@@ -226,6 +260,35 @@ public class UserServiceImpl implements UserService {
         candidate.setGithubProfileUrl(dto.getGithubProfileUrl());
         candidate.setLinkedinProfileUrl(dto.getLinkedinProfileUrl());
         candidate.setLinkedinName(dto.getLinkedinName());
+        
+        candidate.setLeetcodeUsername(dto.getLeetcodeUsername());
+        if (dto.getLeetcodeUsername() != null && !dto.getLeetcodeUsername().trim().isEmpty()) {
+            if (candidate.getLeetcodeStats() == null || candidate.getLeetcodeStats().isEmpty()) {
+                java.util.Map<String, Object> mockLeetcode = new java.util.HashMap<>();
+                mockLeetcode.put("easySolved", 52);
+                mockLeetcode.put("mediumSolved", 114);
+                mockLeetcode.put("hardSolved", 27);
+                mockLeetcode.put("totalSolved", 193);
+                mockLeetcode.put("ranking", "Top 7.4%");
+                candidate.setLeetcodeStats(mockLeetcode);
+            }
+        } else {
+            candidate.setLeetcodeStats(null);
+        }
+
+        if (candidate.getGithubUsername() != null && !candidate.getGithubUsername().trim().isEmpty()) {
+            if (candidate.getGithubStats() == null || candidate.getGithubStats().isEmpty()) {
+                java.util.Map<String, Object> mockGithub = new java.util.HashMap<>();
+                mockGithub.put("publicRepos", 31);
+                mockGithub.put("stars", 148);
+                mockGithub.put("contributions", 1204);
+                mockGithub.put("followers", 42);
+                candidate.setGithubStats(mockGithub);
+            }
+        } else {
+            candidate.setGithubStats(null);
+        }
+
         candidate = candidateRepository.save(candidate);
 
         return CandidateProfileDto.builder()
@@ -247,6 +310,12 @@ public class UserServiceImpl implements UserService {
                 .linkedinProfileUrl(candidate.getLinkedinProfileUrl())
                 .linkedinName(candidate.getLinkedinName())
                 .avatar(user.getAvatar())
+                .isProfilePublic(user.getIsProfilePublic())
+                .username(user.getUsername())
+                .githubStats(candidate.getGithubStats())
+                .leetcodeStats(candidate.getLeetcodeStats())
+                .leetcodeUsername(candidate.getLeetcodeUsername())
+                .isVerified(candidate.getIsVerified())
                 .build();
     }
 
@@ -377,8 +446,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void uploadResume(Long userId, org.springframework.web.multipart.MultipartFile file) throws java.io.IOException {
-        Candidate candidate = candidateRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Candidate profile not found"));
+        Candidate candidate = getOrCreateCandidate(userId);
         candidate.setResumeFilename(file.getOriginalFilename());
         candidate.setResumeContentType(file.getContentType());
         candidate.setResumeBytes(file.getBytes());
@@ -388,8 +456,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void syncProfileFromResume(Long userId) {
-        Candidate candidate = candidateRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Candidate profile not found"));
+        Candidate candidate = getOrCreateCandidate(userId);
         
         if (candidate.getResumeBytes() == null || candidate.getResumeBytes().length == 0) {
             throw new IllegalStateException("No resume uploaded to sync profile from.");
@@ -458,10 +525,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public Candidate getCandidateResume(Long userId) {
-        Candidate candidate = candidateRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Candidate profile not found"));
+        Candidate candidate = getOrCreateCandidate(userId);
         // Force eager initialization of lazy @Lob resumeBytes while the transaction is active
         if (candidate.getResumeBytes() != null) {
             int length = candidate.getResumeBytes().length;

@@ -27,6 +27,7 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/feedback").permitAll()
                 .requestMatchers(
                     "/api/v1/auth/**",
+                    "/api/v1/public/**",
                     "/api/v1/marketing/**",
                     "/api/v1/outreach/oauth2/callback",
                     "/api/v1/billing/plans",

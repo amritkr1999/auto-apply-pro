@@ -40,6 +40,12 @@ export const CandidateProfileView: React.FC<Props> = ({ userId, activeTab, onPro
   const [githubProfileUrl, setGithubProfileUrl] = useState("");
   const [linkedinName, setLinkedinName] = useState("");
   const [linkedinProfileUrl, setLinkedinProfileUrl] = useState("");
+  const [isProfilePublic, setIsProfilePublic] = useState(false);
+  const [username, setUsername] = useState("");
+  const [leetcodeUsername, setLeetcodeUsername] = useState("");
+  const [isVerified, setIsVerified] = useState(false);
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+  const [checkingUsername, setCheckingUsername] = useState(false);
   
   const [masterSkills, setMasterSkills] = useState<{ id: number; name: string }[]>([]);
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -393,6 +399,10 @@ export const CandidateProfileView: React.FC<Props> = ({ userId, activeTab, onPro
         setGithubProfileUrl(data.githubProfileUrl || "");
         setLinkedinName(data.linkedinName || "");
         setLinkedinProfileUrl(data.linkedinProfileUrl || "");
+        setIsProfilePublic(data.isProfilePublic || false);
+        setUsername(data.username || "");
+        setLeetcodeUsername(data.leetcodeUsername || "");
+        setIsVerified(data.isVerified || false);
 
         onProfileUpdate(data.name, data.avatar || "");
       })
@@ -400,9 +410,33 @@ export const CandidateProfileView: React.FC<Props> = ({ userId, activeTab, onPro
       .finally(() => setLoading(false));
   }, [userId]);
 
+  useEffect(() => {
+    if (!username || username === profile?.username) {
+      setUsernameAvailable(null);
+      return;
+    }
+
+    setCheckingUsername(true);
+    const delayDebounceFn = setTimeout(() => {
+      profileService.checkUsernameAvailability(username)
+        .then((available) => {
+          setUsernameAvailable(available);
+        })
+        .catch(() => setUsernameAvailable(false))
+        .finally(() => setCheckingUsername(false));
+    }, 400);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [username, profile?.username]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!profile) return;
+
+    if (isProfilePublic && usernameAvailable === false) {
+      setError("Cannot save profile: Username is already taken.");
+      return;
+    }
 
     try {
       setMessage("");
@@ -426,10 +460,17 @@ export const CandidateProfileView: React.FC<Props> = ({ userId, activeTab, onPro
         githubProfileUrl,
         linkedinProfileUrl,
         linkedinName,
+        isProfilePublic,
+        username,
+        leetcodeUsername,
       };
 
       const result = await profileService.updateCandidateProfile(userId, updatedProfile);
       setProfile(result);
+      setIsProfilePublic(result.isProfilePublic || false);
+      setUsername(result.username || "");
+      setLeetcodeUsername(result.leetcodeUsername || "");
+      setIsVerified(result.isVerified || false);
       
       // Update local storage user details
       const userStr = localStorage.getItem("user");
@@ -443,8 +484,8 @@ export const CandidateProfileView: React.FC<Props> = ({ userId, activeTab, onPro
 
       onProfileUpdate(name, result.avatar || "");
       setMessage("Profile details saved successfully!");
-    } catch {
-      setError("Failed to update profile.");
+    } catch (err: any) {
+      setError(err.message || "Failed to update profile.");
     }
   };
 
@@ -756,6 +797,107 @@ export const CandidateProfileView: React.FC<Props> = ({ userId, activeTab, onPro
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Public Profile Settings */}
+          <div className="w-full border-t border-slate-100 pt-6 animate-in fade-in duration-200">
+            <h3 className="text-base font-bold text-slate-800 mb-2">Public Profile Settings</h3>
+            <p className="text-xs text-slate-500 mb-4">
+              Control your public profile visibility. When enabled, recruiters and peers can view your non-sensitive professional bio, skills, GitHub stats, and LeetCode stats.
+            </p>
+
+            <div className="bg-slate-50/60 border border-slate-200 rounded-2xl p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <label htmlFor="is-profile-public-checkbox" className="text-sm font-bold text-slate-700">Make Profile Public</label>
+                  <p className="text-xs text-slate-400">Allow anyone with the link to view your public profile page.</p>
+                </div>
+                <input
+                  id="is-profile-public-checkbox"
+                  type="checkbox"
+                  checked={isProfilePublic}
+                  onChange={(e) => setIsProfilePublic(e.target.checked)}
+                  className="w-4 h-4 text-primary border-slate-350 rounded focus:ring-primary cursor-pointer"
+                />
+              </div>
+
+              {isProfilePublic && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-slate-100 animate-in fade-in duration-250">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label htmlFor="public-username-input" className="block text-xs font-bold uppercase tracking-wider text-slate-500">
+                        Profile Username / Handle
+                      </label>
+                      {isVerified && (
+                        <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-250 px-2 py-0.5 rounded-full">
+                          Verified ✔
+                        </span>
+                      )}
+                    </div>
+                    <input
+                      id="public-username-input"
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value.toLowerCase().replaceAll(/[^a-z0-9_]/g, ""))}
+                      placeholder="e.g. developer_handle"
+                      required={isProfilePublic}
+                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                    />
+                    {username && username !== profile?.username && (
+                      <div className="mt-1.5 text-xs">
+                        {checkingUsername ? (
+                          <span className="text-slate-400 font-medium animate-pulse">Checking availability...</span>
+                        ) : usernameAvailable ? (
+                          <span className="text-emerald-600 font-semibold">✓ Username is available</span>
+                        ) : (
+                          <span className="text-rose-500 font-semibold">✗ Username is already taken</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <label htmlFor="leetcode-username-input" className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+                      LeetCode Username
+                    </label>
+                    <input
+                      id="leetcode-username-input"
+                      type="text"
+                      value={leetcodeUsername}
+                      onChange={(e) => setLeetcodeUsername(e.target.value)}
+                      placeholder="e.g. leetcode_user"
+                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {isProfilePublic && username && (
+                <div className="mt-4 p-4 bg-white border border-slate-200/80 rounded-xl flex items-center justify-between gap-3 flex-wrap">
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Shareable Public Link</p>
+                    <a
+                      href={`${window.location.origin}/profile/${username}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-primary hover:underline font-bold block truncate mt-0.5"
+                    >
+                      {`${window.location.origin}/profile/${username}`}
+                    </a>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(`${window.location.origin}/profile/${username}`);
+                      alert("Link copied to clipboard!");
+                    }}
+                    className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition-colors cursor-pointer"
+                  >
+                    Copy Link
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="flex justify-end pt-4 border-t border-slate-100">

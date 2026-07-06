@@ -23,6 +23,8 @@ import PricingPage from "../features/billing/components/PricingPage";
 import BillingPortal from "../features/billing/components/BillingPortal";
 import { TelemetryDashboard } from "../features/dashboard/components/views/TelemetryDashboard";
 
+import PublicProfilePage from "../pages/PublicProfilePage";
+
 export const AppRoutes: React.FC = () => {
   return (
     <Routes>
@@ -31,6 +33,7 @@ export const AppRoutes: React.FC = () => {
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/unsubscribe" element={<UnsubscribePage />} />
+      <Route path="/profile/:username" element={<PublicProfilePage />} />
       <Route element={<Layout />}>
         <Route
           path="/candidate-dashboard"

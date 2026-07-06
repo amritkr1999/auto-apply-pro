@@ -33,6 +33,13 @@ public class User {
     @Column(nullable = false)
     private String mobile;
 
+    @Column(name = "username", unique = true)
+    private String username;
+
+    @Builder.Default
+    @Column(name = "is_profile_public")
+    private Boolean isProfilePublic = false;
+
     @Column(name = "official_email")
     private String officialEmail;
 
@@ -198,6 +205,13 @@ public class User {
         }
         if (status == null) {
             status = UserStatus.ACTIVE;
+        }
+        if (username == null && email != null) {
+            String base = email.split("@")[0].replaceAll("[^a-zA-Z0-9_]", "");
+            username = base + "_" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        }
+        if (isProfilePublic == null) {
+            isProfilePublic = false;
         }
     }
 

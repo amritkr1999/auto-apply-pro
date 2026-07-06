@@ -240,6 +240,7 @@ public class SocialOAuthController {
                             .user(user)
                             .githubUsername(githubUsername)
                             .githubProfileUrl(githubProfileUrl)
+                            .isVerified(true)
                             .skills(new java.util.HashSet<>())
                             .jobPreferences(new java.util.HashMap<>())
                             .build();
@@ -251,6 +252,7 @@ public class SocialOAuthController {
                             if (candidate.getGithubUsername() == null) {
                                 candidate.setGithubUsername(githubUsername);
                                 candidate.setGithubProfileUrl(githubProfileUrl);
+                                candidate.setIsVerified(true);
                                 candidateRepository.save(candidate);
                             }
                         }
@@ -273,6 +275,7 @@ public class SocialOAuthController {
                         .orElseThrow(() -> new IllegalArgumentException("Candidate profile not found"));
                 candidate.setGithubUsername(githubUsername);
                 candidate.setGithubProfileUrl(githubProfileUrl);
+                candidate.setIsVerified(true);
                 candidateRepository.save(candidate);
 
                 return new RedirectView("http://localhost:5173/candidate/profile?status=success&provider=github");
@@ -408,6 +411,7 @@ public class SocialOAuthController {
                 .orElseThrow(() -> new IllegalArgumentException("Candidate profile not found"));
         candidate.setGithubUsername(null);
         candidate.setGithubProfileUrl(null);
+        candidate.setIsVerified(false);
         candidateRepository.save(candidate);
         return ResponseEntity.ok(Map.of("message", "GitHub disconnected successfully"));
     }

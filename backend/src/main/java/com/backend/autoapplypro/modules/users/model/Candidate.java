@@ -76,4 +76,19 @@ public class Candidate {
 
     @Column(name = "linkedin_name")
     private String linkedinName;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "github_stats", columnDefinition = "jsonb")
+    private Map<String, Object> githubStats;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "leetcode_stats", columnDefinition = "jsonb")
+    private Map<String, Object> leetcodeStats;
+
+    @Column(name = "leetcode_username")
+    private String leetcodeUsername;
+
+    @Builder.Default
+    @Column(name = "is_verified")
+    private Boolean isVerified = false;
 }
