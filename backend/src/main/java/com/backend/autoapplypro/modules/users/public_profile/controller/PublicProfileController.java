@@ -2,6 +2,10 @@ package com.backend.autoapplypro.modules.users.public_profile.controller;
 
 import com.backend.autoapplypro.modules.users.public_profile.dto.PublicProfileDTO;
 import com.backend.autoapplypro.modules.users.public_profile.dto.PublicProfileProjection;
+import com.backend.autoapplypro.modules.users.public_profile.dto.AchievementCard;
+import com.backend.autoapplypro.modules.users.public_profile.evidence.EvidenceEngine;
+import com.backend.autoapplypro.modules.users.public_profile.evidence.EvidenceProvider;
+import com.backend.autoapplypro.modules.users.model.User;
 import com.backend.autoapplypro.modules.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +24,7 @@ import java.util.Map;
 public class PublicProfileController {
 
     private final UserRepository userRepository;
+    private final EvidenceEngine evidenceEngine;
 
     @GetMapping("/{username}")
     public ResponseEntity<PublicProfileDTO> getPublicProfile(@PathVariable String username) {
@@ -36,28 +41,41 @@ public class PublicProfileController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Profile not found or private");
         }
         
-        // 2. Fetch the projection (ensures database query explicitly excludes sensitive fields)
-        PublicProfileProjection projection = userRepository.findPublicProfileByUsername(cleanUsername)
+        // 2. Fetch the user to determine their vertical
+        User user = userRepository.findByUsername(cleanUsername)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found or private"));
                 
         // 3. Fetch skills separately
         List<String> skills = userRepository.findSkillsByUsername(cleanUsername);
         
-        // 4. Map to DTO
+        // 4. Resolve the polymorphic strategy provider for their vertical
+        EvidenceProvider provider = evidenceEngine.getProvider(user.getProfessionalVertical());
+        Map<String, Object> evidenceMetrics = provider.getEvidenceMetrics(user);
+        List<AchievementCard> highlights = new java.util.ArrayList<>(provider.getHighlights(user));
+        if (user.getCandidate() != null && user.getCandidate().getAchievements() != null) {
+            for (com.backend.autoapplypro.modules.users.model.Achievement ach : user.getCandidate().getAchievements()) {
+                highlights.add(AchievementCard.builder()
+                        .title(ach.getTitle())
+                        .description(ach.getDescription())
+                        .category(ach.getCategory())
+                        .badgeUrl(ach.getBadgeUrl())
+                        .trustScore(ach.getTrustScore())
+                        .isVerified(ach.getTrustScore() != null && ach.getTrustScore() > 70)
+                        .build());
+            }
+        }
+        
+        // 5. Map to DTO
         PublicProfileDTO dto = PublicProfileDTO.builder()
-                .username(projection.getUsername())
-                .name(projection.getName())
-                .summary(projection.getSummary())
-                .avatar(projection.getAvatar())
-                .githubUsername(projection.getGithubUsername())
-                .githubProfileUrl(projection.getGithubProfileUrl())
-                .linkedinProfileUrl(projection.getLinkedinProfileUrl())
-                .linkedinName(projection.getLinkedinName())
-                .githubStats(projection.getGithubStats())
-                .leetcodeStats(projection.getLeetcodeStats())
-                .leetcodeUsername(projection.getLeetcodeUsername())
-                .isVerified(projection.getIsVerified() != null ? projection.getIsVerified() : false)
+                .username(user.getUsername())
+                .name(user.getName())
+                .summary(user.getCandidate() != null ? user.getCandidate().getSummary() : null)
+                .avatar(user.getAvatar())
+                .isVerified(user.getCandidate() != null && Boolean.TRUE.equals(user.getCandidate().getIsVerified()))
                 .skills(skills)
+                .professionalVertical(user.getProfessionalVertical() != null ? user.getProfessionalVertical().name() : "DEVELOPER")
+                .evidenceMetrics(evidenceMetrics)
+                .highlights(highlights)
                 .build();
                 
         return ResponseEntity.ok(dto);

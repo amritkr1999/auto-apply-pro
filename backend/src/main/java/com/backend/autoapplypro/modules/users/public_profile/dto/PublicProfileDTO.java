@@ -16,13 +16,9 @@ public class PublicProfileDTO {
     private String name;
     private String summary;
     private String avatar;
-    private String githubUsername;
-    private String githubProfileUrl;
-    private String linkedinProfileUrl;
-    private String linkedinName;
-    private Map<String, Object> githubStats;
-    private Map<String, Object> leetcodeStats;
-    private String leetcodeUsername;
     private Boolean isVerified;
     private List<String> skills;
+    private String professionalVertical; // e.g. "DEVELOPER", "KNOWLEDGE_WORKER", "DOCUMENT_VERIFICATION"
+    private Map<String, Object> evidenceMetrics;
+    private List<AchievementCard> highlights;
 }

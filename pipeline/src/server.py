@@ -225,12 +225,13 @@ class HookGenerationRequest(BaseModel):
     job_description: str
     resume_snippet: str
     model: str
+    persona: Optional[str] = None
 
 @app.post("/generate-hook")
 async def generate_hook(req: HookGenerationRequest):
-    logger.info(f"Received request to generate hook using model: {req.model}")
+    logger.info(f"Received request to generate hook using model: {req.model} and persona: {req.persona}")
     try:
-        hook = await email_generator.generate_hook(req.job_description, req.resume_snippet, req.model)
+        hook = await email_generator.generate_hook(req.job_description, req.resume_snippet, req.model, req.persona)
         return {"hook": hook}
     except Exception as e:
         logger.error(f"Error generating hook: {e}", exc_info=True)

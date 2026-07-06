@@ -46,6 +46,7 @@ export const CandidateProfileView: React.FC<Props> = ({ userId, activeTab, onPro
   const [isVerified, setIsVerified] = useState(false);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
   const [checkingUsername, setCheckingUsername] = useState(false);
+  const [professionalVertical, setProfessionalVertical] = useState("DEVELOPER");
   
   const [masterSkills, setMasterSkills] = useState<{ id: number; name: string }[]>([]);
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -403,6 +404,7 @@ export const CandidateProfileView: React.FC<Props> = ({ userId, activeTab, onPro
         setUsername(data.username || "");
         setLeetcodeUsername(data.leetcodeUsername || "");
         setIsVerified(data.isVerified || false);
+        setProfessionalVertical(data.professionalVertical || "DEVELOPER");
 
         onProfileUpdate(data.name, data.avatar || "");
       })
@@ -463,6 +465,7 @@ export const CandidateProfileView: React.FC<Props> = ({ userId, activeTab, onPro
         isProfilePublic,
         username,
         leetcodeUsername,
+        professionalVertical,
       };
 
       const result = await profileService.updateCandidateProfile(userId, updatedProfile);
@@ -471,6 +474,7 @@ export const CandidateProfileView: React.FC<Props> = ({ userId, activeTab, onPro
       setUsername(result.username || "");
       setLeetcodeUsername(result.leetcodeUsername || "");
       setIsVerified(result.isVerified || false);
+      setProfessionalVertical(result.professionalVertical || "DEVELOPER");
       
       // Update local storage user details
       const userStr = localStorage.getItem("user");
@@ -822,10 +826,27 @@ export const CandidateProfileView: React.FC<Props> = ({ userId, activeTab, onPro
               </div>
 
               {isProfilePublic && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-slate-100 animate-in fade-in duration-250">
+                <div className="pt-3 border-t border-slate-100 space-y-4">
                   <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <label htmlFor="public-username-input" className="block text-xs font-bold uppercase tracking-wider text-slate-500">
+                    <label htmlFor="vertical-select" className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+                      Professional Vertical
+                    </label>
+                    <select
+                      id="vertical-select"
+                      value={professionalVertical}
+                      onChange={(e) => setProfessionalVertical(e.target.value)}
+                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                    >
+                      <option value="DEVELOPER">Developer / Software Engineer</option>
+                      <option value="KNOWLEDGE_WORKER">Knowledge Worker (Manager, Consultant, Accountant)</option>
+                      <option value="DOCUMENT_VERIFICATION">Document Verification (Lawyer, Doctor)</option>
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-slate-200/50 animate-in fade-in duration-250">
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <label htmlFor="public-username-input" className="block text-xs font-bold uppercase tracking-wider text-slate-500">
                         Profile Username / Handle
                       </label>
                       {isVerified && (
@@ -870,7 +891,8 @@ export const CandidateProfileView: React.FC<Props> = ({ userId, activeTab, onPro
                     />
                   </div>
                 </div>
-              )}
+              </div>
+            )}
 
               {isProfilePublic && username && (
                 <div className="mt-4 p-4 bg-white border border-slate-200/80 rounded-xl flex items-center justify-between gap-3 flex-wrap">

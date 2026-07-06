@@ -200,10 +200,22 @@ public class EmailServiceImpl implements EmailService {
                 model, userId, companyId, roleId);
         
         try {
+            // Resolve professional vertical for persona routing
+            String persona = "DEVELOPER";
+            try {
+                CandidateProfileDto candidateProfile = userService.getCandidateProfile(userId);
+                if (candidateProfile.getProfessionalVertical() != null) {
+                    persona = candidateProfile.getProfessionalVertical();
+                }
+            } catch (Exception ex) {
+                log.warn("Failed to retrieve candidate vertical for User ID: {}, falling back to DEVELOPER. Error: {}", userId, ex.getMessage());
+            }
+
             Map<String, Object> payload = new HashMap<>();
             payload.put("job_description", jobDescription);
             payload.put("resume_snippet", resumeSnippet);
             payload.put("model", model);
+            payload.put("persona", persona);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);

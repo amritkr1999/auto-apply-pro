@@ -27,6 +27,11 @@ public class User {
     @Column(nullable = false)
     private UserRole role;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "professional_vertical")
+    @Builder.Default
+    private ProfessionalVertical professionalVertical = ProfessionalVertical.DEVELOPER;
+
     @Column(nullable = false)
     private String name;
 

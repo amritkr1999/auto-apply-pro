@@ -1,6 +1,7 @@
 import json
 import logging
 from datetime import datetime
+from typing import Optional
 import aiohttp
 from src.config import Settings
 from src.stage1_jd_extraction.schemas import JobDescription
@@ -159,10 +160,22 @@ class EmailGenerator:
             logger.error(f"Error building Email model from parsed json: {e}")
             raise RuntimeError(f"Email model instantiation failed: {e}")
 
-    async def generate_hook(self, job_description: str, resume_snippet: str, model_name: str) -> str:
+    async def generate_hook(self, job_description: str, resume_snippet: str, model_name: str, persona: Optional[str] = None) -> str:
         """Sends a hook generation prompt to the LLM (Ollama or other configured provider) with the specific model."""
+        persona_instruction = ""
+        if persona:
+            p_lower = persona.lower()
+            if "lawyer" in p_lower or "legal" in p_lower or "document_verification" in p_lower:
+                persona_instruction = "Tone/Persona: Prioritize regulatory precision, formal tone, compliance/analytical accuracy, and standard legal communication terminology. Avoid informal or overly enthusiastic phrasing."
+            elif "manager" in p_lower or "leader" in p_lower or "consultant" in p_lower or "knowledge_worker" in p_lower:
+                persona_instruction = "Tone/Persona: Focus heavily on leadership metrics, key performance indicators (KPIs), team orchestration, business outcomes, and strategic growth impact."
+            elif "developer" in p_lower or "engineer" in p_lower or "programmer" in p_lower:
+                persona_instruction = "Tone/Persona: Focus on software architectures, technical stacks, coding practices, and engineering problem-solving."
+
         prompt = f"""
 You are a highly skilled professional outreach assistant. Your task is to write a highly tailored, compelling 1-2 sentence opening hook for a job application email.
+
+{persona_instruction}
 
 Job Description:
 {job_description}

@@ -36,4 +36,6 @@ public class CandidateProfileDto {
     private Map<String, Object> leetcodeStats;
     private String leetcodeUsername;
     private Boolean isVerified;
+    private String professionalVertical;
+    private List<AchievementDto> achievements;
 }

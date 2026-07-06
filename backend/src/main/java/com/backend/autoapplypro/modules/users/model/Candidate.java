@@ -91,4 +91,12 @@ public class Candidate {
     @Builder.Default
     @Column(name = "is_verified")
     private Boolean isVerified = false;
+
+    @OneToMany(mappedBy = "candidate", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<Achievement> achievements = new java.util.ArrayList<>();
+
+    @Column(name = "is_reference_check_confirmed")
+    @Builder.Default
+    private Boolean isReferenceCheckConfirmed = false;
 }

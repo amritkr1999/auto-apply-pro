@@ -209,6 +209,19 @@ public class UserServiceImpl implements UserService {
                 .leetcodeStats(candidate.getLeetcodeStats())
                 .leetcodeUsername(candidate.getLeetcodeUsername())
                 .isVerified(candidate.getIsVerified())
+                .professionalVertical(user.getProfessionalVertical() != null ? user.getProfessionalVertical().name() : "DEVELOPER")
+                .achievements(candidate.getAchievements() != null ? candidate.getAchievements().stream()
+                        .map(ach -> AchievementDto.builder()
+                                .id(ach.getId())
+                                .title(ach.getTitle())
+                                .description(ach.getDescription())
+                                .category(ach.getCategory())
+                                .badgeUrl(ach.getBadgeUrl())
+                                .verificationStatus(ach.getVerificationStatus() != null ? ach.getVerificationStatus().name() : "NONE")
+                                .trustScore(ach.getTrustScore())
+                                .isVerified(ach.getIsVerified())
+                                .build())
+                        .collect(java.util.stream.Collectors.toList()) : new java.util.ArrayList<>())
                 .build();
     }
 
@@ -224,6 +237,13 @@ public class UserServiceImpl implements UserService {
         user.setAvatar(dto.getAvatar());
         if (dto.getIsProfilePublic() != null) {
             user.setIsProfilePublic(dto.getIsProfilePublic());
+        }
+        if (dto.getProfessionalVertical() != null) {
+            try {
+                user.setProfessionalVertical(com.backend.autoapplypro.modules.users.model.ProfessionalVertical.valueOf(dto.getProfessionalVertical().toUpperCase()));
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Invalid professional vertical: " + dto.getProfessionalVertical());
+            }
         }
         if (dto.getUsername() != null && !dto.getUsername().trim().isEmpty()) {
             String newUsername = dto.getUsername().trim().toLowerCase().replaceAll("[^a-zA-Z0-9_]", "");
@@ -289,6 +309,66 @@ public class UserServiceImpl implements UserService {
             candidate.setGithubStats(null);
         }
 
+        // Trigger / hook: if user manually edits a previously 'VERIFIED' achievement, reset status and score
+        if (dto.getAchievements() != null) {
+            java.util.List<Achievement> currentAchievements = candidate.getAchievements();
+            if (currentAchievements == null) {
+                currentAchievements = new java.util.ArrayList<>();
+                candidate.setAchievements(currentAchievements);
+            }
+
+            java.util.Map<Long, Achievement> currentMap = new java.util.HashMap<>();
+            for (Achievement ach : currentAchievements) {
+                if (ach.getId() != null) {
+                    currentMap.put(ach.getId(), ach);
+                }
+            }
+
+            java.util.List<Achievement> updatedAchievements = new java.util.ArrayList<>();
+            for (AchievementDto achDto : dto.getAchievements()) {
+                if (achDto.getId() != null && currentMap.containsKey(achDto.getId())) {
+                    Achievement existing = currentMap.get(achDto.getId());
+
+                    // Check for changes in title, description, category, or badgeUrl
+                    boolean changed = !java.util.Objects.equals(existing.getTitle(), achDto.getTitle())
+                            || !java.util.Objects.equals(existing.getDescription(), achDto.getDescription())
+                            || !java.util.Objects.equals(existing.getCategory(), achDto.getCategory())
+                            || !java.util.Objects.equals(existing.getBadgeUrl(), achDto.getBadgeUrl());
+
+                    if (changed) {
+                        if (existing.getVerificationStatus() == com.backend.autoapplypro.modules.users.public_profile.evidence.VerificationStatus.VERIFIED) {
+                            existing.setVerificationStatus(com.backend.autoapplypro.modules.users.public_profile.evidence.VerificationStatus.NONE);
+                            existing.setTrustScore(10); // baseline
+                            existing.setIsVerified(false);
+                        }
+                    }
+
+                    existing.setTitle(achDto.getTitle());
+                    existing.setDescription(achDto.getDescription());
+                    existing.setCategory(achDto.getCategory());
+                    existing.setBadgeUrl(achDto.getBadgeUrl());
+
+                    updatedAchievements.add(existing);
+                } else {
+                    // New Achievement
+                    Achievement newAch = Achievement.builder()
+                            .candidate(candidate)
+                            .title(achDto.getTitle())
+                            .description(achDto.getDescription())
+                            .category(achDto.getCategory())
+                            .badgeUrl(achDto.getBadgeUrl())
+                            .verificationStatus(com.backend.autoapplypro.modules.users.public_profile.evidence.VerificationStatus.NONE)
+                            .trustScore(10)
+                            .isVerified(false)
+                            .build();
+                    updatedAchievements.add(newAch);
+                }
+            }
+
+            currentAchievements.clear();
+            currentAchievements.addAll(updatedAchievements);
+        }
+
         candidate = candidateRepository.save(candidate);
 
         return CandidateProfileDto.builder()
@@ -316,6 +396,19 @@ public class UserServiceImpl implements UserService {
                 .leetcodeStats(candidate.getLeetcodeStats())
                 .leetcodeUsername(candidate.getLeetcodeUsername())
                 .isVerified(candidate.getIsVerified())
+                .professionalVertical(user.getProfessionalVertical() != null ? user.getProfessionalVertical().name() : "DEVELOPER")
+                .achievements(candidate.getAchievements() != null ? candidate.getAchievements().stream()
+                        .map(ach -> AchievementDto.builder()
+                                .id(ach.getId())
+                                .title(ach.getTitle())
+                                .description(ach.getDescription())
+                                .category(ach.getCategory())
+                                .badgeUrl(ach.getBadgeUrl())
+                                .verificationStatus(ach.getVerificationStatus() != null ? ach.getVerificationStatus().name() : "NONE")
+                                .trustScore(ach.getTrustScore())
+                                .isVerified(ach.getIsVerified())
+                                .build())
+                        .collect(java.util.stream.Collectors.toList()) : new java.util.ArrayList<>())
                 .build();
     }
 

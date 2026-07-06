@@ -56,6 +56,18 @@ export interface CandidateProfile {
   leetcodeStats?: Record<string, any>;
   leetcodeUsername?: string;
   isVerified?: boolean;
+  professionalVertical?: string;
+  achievements?: AchievementCard[];
+}
+
+export interface AchievementCard {
+  id?: number;
+  title: string;
+  description: string;
+  category: string;
+  badgeUrl?: string;
+  trustScore?: number;
+  isVerified?: boolean;
 }
 
 export interface PublicProfile {
@@ -63,6 +75,12 @@ export interface PublicProfile {
   name: string;
   summary?: string;
   avatar?: string;
+  isVerified: boolean;
+  skills: string[];
+  professionalVertical: string;
+  evidenceMetrics?: Record<string, any>;
+  highlights?: AchievementCard[];
+  // Legacy compatibility fields
   githubUsername?: string;
   githubProfileUrl?: string;
   linkedinProfileUrl?: string;
@@ -70,8 +88,6 @@ export interface PublicProfile {
   githubStats?: Record<string, any>;
   leetcodeStats?: Record<string, any>;
   leetcodeUsername?: string;
-  isVerified: boolean;
-  skills: string[];
 }
 
 export interface RecruiterProfile {
