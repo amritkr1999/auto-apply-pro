@@ -34,6 +34,7 @@ public class OutreachOAuthController {
     private final CandidateRepository candidateRepository;
     private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
     private final com.backend.autoapplypro.config.JwtUtil jwtUtil;
+    private final com.backend.autoapplypro.modules.users.service.MarketingEmailCampaignService marketingCampaignService;
 
     @Value("${spring.security.oauth2.client.registration.google.client-id:dev-client-id}")
     private String clientId;
@@ -134,6 +135,7 @@ public class OutreachOAuthController {
                             .lastLoginDate(java.time.LocalDate.now())
                             .build();
                     user = userRepository.save(user);
+                    marketingCampaignService.sendWelcomeEmail(user);
 
                     Candidate candidate = Candidate.builder()
                             .user(user)

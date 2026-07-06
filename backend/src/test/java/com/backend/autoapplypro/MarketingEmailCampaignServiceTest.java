@@ -55,4 +55,20 @@ class MarketingEmailCampaignServiceTest {
         assertThrows(IllegalArgumentException.class, () -> campaignService.unsubscribeUser(token));
         verify(userRepository, never()).save(any());
     }
+
+    @Test
+    void testSendWelcomeEmail() {
+        User user = new User();
+        user.setEmail("welcome@example.com");
+        user.setName("John Doe");
+        user.setMarketingEmailsEnabled(true);
+        user.setMarketingCampaignStep(0);
+        user.setUnsubscribeToken("unsubscribe-token");
+
+        campaignService.sendWelcomeEmail(user);
+
+        assertEquals(1, user.getMarketingCampaignStep());
+        assertNotNull(user.getLastMarketingEmailSentAt());
+        verify(userRepository, times(1)).save(user);
+    }
 }

@@ -24,6 +24,7 @@ public class UserServiceImpl implements UserService {
     private final JwtUtil jwtUtil;
     private final UserActivityLogRepository userActivityLogRepository;
     private final SystemEmailService systemEmailService;
+    private final MarketingEmailCampaignService marketingCampaignService;
 
     @org.springframework.beans.factory.annotation.Value("${pipeline.service.url:http://localhost:8000}")
     private String pythonServiceUrl;
@@ -56,6 +57,9 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         user = userRepository.save(user);
+
+        // Send welcome email immediately
+        marketingCampaignService.sendWelcomeEmail(user);
 
         // Log LOGIN activity
         userActivityLogRepository.save(UserActivityLog.builder()

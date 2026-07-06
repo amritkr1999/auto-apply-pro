@@ -36,6 +36,7 @@ public class SocialOAuthController {
     private final UserRepository userRepository;
     private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
     private final com.backend.autoapplypro.config.JwtUtil jwtUtil;
+    private final com.backend.autoapplypro.modules.users.service.MarketingEmailCampaignService marketingCampaignService;
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Value("${github.client.id:dev-github-client-id}")
@@ -233,6 +234,7 @@ public class SocialOAuthController {
                             .lastLoginDate(java.time.LocalDate.now())
                             .build();
                     user = userRepository.save(user);
+                    marketingCampaignService.sendWelcomeEmail(user);
 
                     Candidate candidate = Candidate.builder()
                             .user(user)

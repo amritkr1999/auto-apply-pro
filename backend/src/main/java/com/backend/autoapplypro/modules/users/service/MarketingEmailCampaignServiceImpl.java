@@ -92,6 +92,27 @@ public class MarketingEmailCampaignServiceImpl implements MarketingEmailCampaign
 
     @Override
     @Transactional
+    public void sendWelcomeEmail(User user) {
+        if (Boolean.TRUE.equals(user.getMarketingEmailsEnabled())) {
+            try {
+                String subject = "Welcome to Auto Apply Pro - Let's get you hired!";
+                String htmlContent = getWelcomeEmailTemplate(user);
+                sendHtmlEmail(user.getEmail(), subject, htmlContent);
+                user.setMarketingCampaignStep(1);
+                user.setLastMarketingEmailSentAt(LocalDateTime.now());
+                userRepository.save(user);
+                log.info("Successfully sent immediate welcome email to: {}", user.getEmail());
+            } catch (Exception e) {
+                log.error("Failed to send immediate welcome email to user: {}", user.getEmail(), e);
+            }
+        } else {
+            log.info("Skipping welcome email for user: {} - marketing emails are disabled.", user.getEmail());
+        }
+    }
+
+
+    @Override
+    @Transactional
     public void sendDailyLimitExceededEmail(Long userId) {
         userRepository.findById(userId).ifPresent(user -> {
             if (Boolean.TRUE.equals(user.getMarketingEmailsEnabled())) {
@@ -161,17 +182,32 @@ public class MarketingEmailCampaignServiceImpl implements MarketingEmailCampaign
     }
 
     private String getWelcomeEmailTemplate(User user) {
-        String body = "<p>Hi " + user.getName() + ",</p>\n" +
-                "<p>Welcome to Auto Apply Pro! We are excited to help you automate your job search and skip the application fatigue.</p>\n" +
-                "<p>To get started, follow these simple steps:</p>\n" +
-                "<ul>\n" +
-                "  <li>Upload your resume in PDF format</li>\n" +
-                "  <li>Set your target role and preferences</li>\n" +
-                "  <li>Review matching positions dynamically in your dashboard</li>\n" +
+        String body = "<p style=\"font-size: 18px; font-weight: 500; color: #4f46e5; margin-bottom: 24px;\">Hello " + user.getName() + ", welcome onboard, let's get you hired!</p>\n" +
+                "<p>Welcome to Auto Apply Pro! We are thrilled to help you automate your job search and eliminate application fatigue. Here is what we bring to your career journey:</p>\n" +
+                "\n" +
+                "<h3 style=\"color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin-top: 24px;\">Services We Provide</h3>\n" +
+                "<ul style=\"padding-left: 20px; line-height: 1.8;\">\n" +
+                "  <li><strong>AI-Driven Application Outreach</strong>: Custom local AI models scan job descriptions, extract recruiter contact details, and draft highly personalized cold emails automatically.</li>\n" +
+                "  <li><strong>Smart Resume & Profile Parsing</strong>: Extract and align key skills from your PDF resume with matching roles.</li>\n" +
+                "  <li><strong>Automated Outreach Scheduling</strong>: Intelligent queuing that spaces out applications to stay within recruiter safe-limits and respect weekend/active hour constraints.</li>\n" +
+                "  <li><strong>Application CRM Tracker</strong>: Track applications, outbound outreach emails, and recruiter replies dynamically from your central dashboard.</li>\n" +
                 "</ul>\n" +
-                "<p>Your dream job is waiting. Let's start applying today!</p>\n" +
-                "<div class=\"button-container\">\n" +
-                "  <a href=\"" + frontendUrl + "/login\" class=\"button\">Complete Your Profile</a>\n" +
+                "\n" +
+                "<h3 style=\"color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin-top: 24px;\">Our Subscription Plans</h3>\n" +
+                "<ul style=\"padding-left: 20px; line-height: 1.8;\">\n" +
+                "  <li><strong>Free Tier</strong>: 50 AI outreach drafts and sends per day, basic tracking dashboard, standard interval queuing.</li>\n" +
+                "  <li><strong>Premium Tier</strong>: Unlimited daily outreach drafts, priority DeepSeek-OCR processing, multiple job search profiles/portfolios, and automated response alerts.</li>\n" +
+                "</ul>\n" +
+                "\n" +
+                "<h3 style=\"color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin-top: 24px;\">Our Achievements</h3>\n" +
+                "<ul style=\"padding-left: 20px; line-height: 1.8;\">\n" +
+                "  <li><strong>10 Million+</strong> automated applications and outreaches successfully delivered.</li>\n" +
+                "  <li><strong>15+ Hours Saved Weekly</strong> on average per active job seeker.</li>\n" +
+                "  <li><strong>40% Increase</strong> in recruiter positive response rates compared to standard board applying.</li>\n" +
+                "</ul>\n" +
+                "\n" +
+                "<div class=\"button-container\" style=\"margin-top: 32px;\">\n" +
+                "  <a href=\"" + frontendUrl + "/login\" class=\"button\">Complete Your Profile & Start Applying</a>\n" +
                 "</div>";
         return getHtmlLayout("Welcome to Auto Apply Pro", body, getUnsubscribeUrl(user));
     }
