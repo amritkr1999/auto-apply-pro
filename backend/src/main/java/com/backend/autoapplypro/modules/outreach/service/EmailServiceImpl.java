@@ -9,6 +9,8 @@ import com.backend.autoapplypro.modules.users.dto.CandidateProfileDto;
 import com.backend.autoapplypro.modules.users.model.Company;
 import com.backend.autoapplypro.modules.users.repository.CompanyRepository;
 import com.backend.autoapplypro.modules.users.service.UserService;
+import com.backend.autoapplypro.modules.outreach.model.EmailTemplate;
+import com.backend.autoapplypro.modules.outreach.repository.EmailTemplateRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +26,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -37,6 +41,7 @@ public class EmailServiceImpl implements EmailService {
     private final UserService userService;
     private final EmailTemplateEngine templateEngine;
     private final CacheManager cacheManager;
+    private final EmailTemplateRepository templateRepository;
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Autowired
@@ -58,7 +63,8 @@ public class EmailServiceImpl implements EmailService {
         String companyName = dto.getJobDetails().getCompany();
         String jobTitle = dto.getJobDetails().getTitle();
 
-        log.info("Orchestrating email generation for User ID: {}, Company: {}, Role: {}", userId, companyName, jobTitle);
+        log.info("Orchestrating email generation for User ID: {}, Company: {}, Role: {}, regenerate: {}", 
+                userId, companyName, jobTitle, regenerate);
 
         // 1. Resolve Company ID (create if missing)
         Company company = companyRepository.findByName(companyName)
@@ -83,49 +89,108 @@ public class EmailServiceImpl implements EmailService {
                 });
         String roleId = String.valueOf(job.getId());
 
-        // 3. Clear cache if 'Regenerate' is clicked to force fresh generation
-        if (regenerate) {
-            String cacheKey = "email_hook:" + userId + ":" + companyId + ":" + roleId;
-            Cache cache = cacheManager.getCache("email_hooks");
-            if (cache != null) {
-                cache.evict(cacheKey);
-                log.info("Evicted key '{}' from cache due to regeneration request.", cacheKey);
-            }
-        }
+        // 3. Determine if AI should be used
+        boolean callAi = regenerate || (dto.getUseAi() != null && dto.getUseAi());
 
         // 4. Fetch candidate details & construct minimized profile snippet (Data Minimization)
         CandidateProfileDto profile = userService.getCandidateProfile(userId);
-        String resumeSnippet = constructResumeSnippet(profile);
-        String jobDescription = dto.getJobDetails().getDescription();
-
-        // 5. Select LLM Model based on routing rules
-        String model = regenerate ? lowCostModel : highIntelModel;
-
-        // 6. Generate hook (utilizing cached self call to activate Spring cache proxy)
-        String hook = self.generateHook(userId, companyId, roleId, jobDescription, resumeSnippet, model);
-
-        // 7. Populate base boilerplate template variables
-        Map<String, Object> templateContext = new HashMap<>();
-        templateContext.put("recruiterName", "Hiring Team");
-        templateContext.put("HOOK", hook);
-        templateContext.put("EXPERIENCE_HIGHLIGHT", constructExperienceHighlight(profile));
-        templateContext.put("CLOSING", constructClosing(profile));
-
-        // 8. Render using the template engine
-        String emailBody = templateEngine.render(null, templateContext);
-
-        String subject = String.format("Application for %s at %s", jobTitle, companyName);
         
+        String hook;
+        if (callAi) {
+            // Clear cache if 'Regenerate' is clicked to force fresh generation
+            if (regenerate) {
+                String cacheKey = "email_hook:" + userId + ":" + companyId + ":" + roleId;
+                Cache cache = cacheManager.getCache("email_hooks");
+                if (cache != null) {
+                    cache.evict(cacheKey);
+                    log.info("Evicted key '{}' from cache due to regeneration request.", cacheKey);
+                }
+            }
+            String resumeSnippet = constructResumeSnippet(profile);
+            String jobDescription = dto.getJobDetails().getDescription();
+            // Select LLM Model based on routing rules
+            String model = regenerate ? lowCostModel : highIntelModel;
+            // Generate hook (utilizing cached self call to activate Spring cache proxy)
+            hook = self.generateHook(userId, companyId, roleId, jobDescription, resumeSnippet, model);
+        } else {
+            log.info("Generating deterministic hook locally (No AI)");
+            hook = generateDeterministicHook(profile, dto);
+        }
+
+        // 5. Retrieve Template if specified
+        EmailTemplate emailTemplate = null;
+        if (dto.getTemplateId() != null) {
+            emailTemplate = templateRepository.findById(dto.getTemplateId()).orElse(null);
+            if (emailTemplate != null) {
+                log.info("Using email template from database: {}", emailTemplate.getName());
+            } else {
+                log.warn("Requested template ID '{}' not found. Falling back to default layout.", dto.getTemplateId());
+            }
+        }
+
         String recipientEmail = "recruiter@example.com";
         if (dto.getJobDetails().getHrEmails() != null && !dto.getJobDetails().getHrEmails().isEmpty()) {
             recipientEmail = dto.getJobDetails().getHrEmails().get(0);
         }
 
+        // 6. Populate context variables
+        Map<String, Object> templateContext = new HashMap<>();
+        templateContext.put("recruiterName", "Hiring Team");
+        templateContext.put("hrName", "Hiring Team");
+        templateContext.put("HOOK", hook);
+        templateContext.put("EXPERIENCE_HIGHLIGHT", constructExperienceHighlight(profile));
+        templateContext.put("CLOSING", constructClosing(profile));
+        templateContext.put("jobRole", jobTitle);
+        templateContext.put("jobTitle", jobTitle);
+        templateContext.put("companyName", companyName);
+        templateContext.put("company", companyName);
+        templateContext.put("candidateName", profile.getName());
+
+        // 7. Render subject and body
+        String renderedSubject;
+        String renderedBody;
+
+        if (emailTemplate != null) {
+            renderedSubject = templateEngine.render(emailTemplate.getSubject(), templateContext);
+            renderedBody = templateEngine.render(emailTemplate.getBody(), templateContext);
+        } else {
+            renderedSubject = String.format("Application for %s at %s", jobTitle, companyName);
+            renderedBody = templateEngine.render(null, templateContext);
+        }
+
         return EmailGenerationResponseDto.builder()
-                .subject(subject)
-                .body(emailBody)
+                .subject(renderedSubject)
+                .body(renderedBody)
                 .recipientEmail(recipientEmail)
                 .build();
+    }
+
+    private String generateDeterministicHook(CandidateProfileDto profile, EmailGenerationRequestDto dto) {
+        String jobTitle = dto.getJobDetails().getTitle();
+        String companyName = dto.getJobDetails().getCompany();
+        List<String> candidateSkills = profile.getSkills();
+        List<String> jobSkills = dto.getJobDetails().getSkills();
+
+        List<String> matchingSkills = new ArrayList<>();
+        if (candidateSkills != null && jobSkills != null) {
+            for (String cSkill : candidateSkills) {
+                for (String jSkill : jobSkills) {
+                    if (cSkill.trim().equalsIgnoreCase(jSkill.trim())) {
+                        matchingSkills.add(cSkill.trim());
+                    }
+                }
+            }
+        }
+
+        if (!matchingSkills.isEmpty()) {
+            int limit = Math.min(3, matchingSkills.size());
+            List<String> displaySkills = matchingSkills.subList(0, limit);
+            return String.format("As a developer with hands-on experience in %s, I am writing to express my strong interest in the %s position at %s.",
+                    String.join(", ", displaySkills), jobTitle, companyName);
+        } else {
+            return String.format("I am writing to express my interest in the %s position at %s, as my background and passion for building high-quality software align with your team's goals.",
+                    jobTitle, companyName);
+        }
     }
 
     @Override

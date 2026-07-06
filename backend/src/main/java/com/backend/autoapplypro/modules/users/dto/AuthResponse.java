@@ -20,4 +20,5 @@ public class AuthResponse {
     private Integer loginStreak;
     private Boolean isPendingDeletion;
     private String deletionScheduledAt;
+    private String avatar;
 }

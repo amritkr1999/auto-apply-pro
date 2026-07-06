@@ -18,4 +18,5 @@ public class CompanyProfileDto {
     private String industry;
     private String website;
     private String description;
+    private String avatar;
 }

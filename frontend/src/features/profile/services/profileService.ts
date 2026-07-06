@@ -28,6 +28,7 @@ export interface UserAuthData {
   officialEmail?: string;
   role: string;
   isPendingDeletion: boolean;
+  avatar?: string;
 }
 
 export interface CandidateProfile {
@@ -48,6 +49,7 @@ export interface CandidateProfile {
   githubProfileUrl?: string;
   linkedinProfileUrl?: string;
   linkedinName?: string;
+  avatar?: string;
 }
 
 export interface RecruiterProfile {
@@ -59,6 +61,7 @@ export interface RecruiterProfile {
   officialEmail?: string;
   companyId?: number | null;
   companyName?: string | null;
+  avatar?: string;
 }
 
 export interface CompanyProfile {
@@ -70,6 +73,7 @@ export interface CompanyProfile {
   industry: string;
   website: string;
   description: string;
+  avatar?: string;
 }
 
 export const profileService = {

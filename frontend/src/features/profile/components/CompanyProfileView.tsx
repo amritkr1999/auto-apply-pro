@@ -6,9 +6,10 @@ import Button from "../../../components/ui/Button";
 
 interface Props {
   userId: number;
+  onProfileUpdate: (name: string, avatar: string) => void;
 }
 
-export const CompanyProfileView: React.FC<Props> = ({ userId }) => {
+export const CompanyProfileView: React.FC<Props> = ({ userId, onProfileUpdate }) => {
   const [profile, setProfile] = useState<CompanyProfile | null>(null);
   const [name, setName] = useState("");
   const [industry, setIndustry] = useState("");
@@ -30,6 +31,7 @@ export const CompanyProfileView: React.FC<Props> = ({ userId }) => {
         setWebsite(data.website || "");
         setOfficialEmail(data.officialEmail || "");
         setDescription(data.description || "");
+        onProfileUpdate(data.name || "", data.avatar || "");
       })
       .catch(() => setError("Failed to load profile details."))
       .finally(() => setLoading(false));
@@ -55,7 +57,7 @@ export const CompanyProfileView: React.FC<Props> = ({ userId }) => {
       const result = await profileService.updateCompanyProfile(userId, updatedProfile);
       setProfile(result);
       
-      // Update local storage user name
+      // Update local storage user details
       const userStr = localStorage.getItem("user");
       if (userStr) {
         const u = JSON.parse(userStr);
@@ -64,62 +66,72 @@ export const CompanyProfileView: React.FC<Props> = ({ userId }) => {
         localStorage.setItem("user", JSON.stringify(u));
       }
 
+      onProfileUpdate(name, result.avatar || "");
       setMessage("Profile updated successfully!");
     } catch {
       setError("Failed to update profile.");
     }
   };
 
-  if (loading) return <div className="text-slate-500">Loading profile details...</div>;
+  if (loading) return <div className="text-slate-500 py-6 text-center font-medium animate-pulse">Loading profile details...</div>;
 
   return (
     <div className="w-full">
       <div className="mb-6">
-        <h2 className="text-xl font-bold text-slate-800">Company Profile Settings</h2>
+        <h2 className="text-xl font-bold text-slate-800">Company Details</h2>
+        <p className="text-sm text-slate-500 mt-1">Manage public profile info, website, industry, and description.</p>
       </div>
 
       {message && (
-        <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-card mb-6 text-sm">
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-2xl mb-6 text-sm font-medium animate-in fade-in duration-200">
           {message}
         </div>
       )}
       {error && (
-        <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-card mb-6 text-sm">
+        <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-2xl mb-6 text-sm font-medium animate-in fade-in duration-200">
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-        <Input
-          label="Company Name"
-          type="text"
-          value={name}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
-          required
-        />
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6 animate-in fade-in duration-200">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <Input
+            label="Company Name"
+            type="text"
+            value={name}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
+            required
+            className="rounded-xl border-slate-200 focus:ring-primary focus:border-transparent px-4 py-2.5"
+          />
 
-        <Input
-          label="Primary Contact Email (Read-only)"
-          type="email"
-          value={profile?.email || ""}
-          disabled
-        />
+          <Input
+            label="Official Email Address"
+            type="email"
+            value={officialEmail}
+            placeholder="yourname@company.com"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setOfficialEmail(e.target.value)}
+            className="rounded-xl border-slate-200 focus:ring-primary focus:border-transparent px-4 py-2.5"
+          />
+        </div>
 
-        <Input
-          label="Official Email Address"
-          type="email"
-          value={officialEmail}
-          placeholder="yourname@company.com"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setOfficialEmail(e.target.value)}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <Input
+            label="Primary Contact Email (Read-only)"
+            type="email"
+            value={profile?.email || ""}
+            disabled
+            className="rounded-xl border-slate-100 bg-slate-50 text-slate-400 font-medium px-4 py-2.5"
+          />
 
-        <Input
-          label="Industry"
-          type="text"
-          value={industry}
-          placeholder="e.g. Software, Finance, Healthcare..."
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setIndustry(e.target.value)}
-        />
+          <Input
+            label="Industry"
+            type="text"
+            value={industry}
+            placeholder="e.g. Software, Finance, Healthcare..."
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setIndustry(e.target.value)}
+            className="rounded-xl border-slate-200 focus:ring-primary focus:border-transparent px-4 py-2.5"
+          />
+        </div>
 
         <Input
           label="Website URL"
@@ -127,10 +139,11 @@ export const CompanyProfileView: React.FC<Props> = ({ userId }) => {
           value={website}
           placeholder="https://acme.com"
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setWebsite(e.target.value)}
+          className="rounded-xl border-slate-200 focus:ring-primary focus:border-transparent px-4 py-2.5"
         />
 
         <div className="w-full">
-          <label className="block text-sm font-medium text-slate-600 mb-1">
+          <label className="block text-sm font-semibold text-slate-600 mb-1.5">
             Company Description
           </label>
           <textarea
@@ -138,13 +151,13 @@ export const CompanyProfileView: React.FC<Props> = ({ userId }) => {
             placeholder="Describe your company culture, mission, and size..."
             onChange={(e) => setDescription(e.target.value)}
             rows={4}
-            className="w-full px-3 py-2 border border-[#b2bec3] rounded-input text-sm text-base-text bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+            className="w-full px-4 py-3 border border-slate-200 rounded-2xl text-sm text-base-text bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
           />
         </div>
 
-        <div className="flex justify-end pt-4">
-          <Button type="submit">
-            Save Profile
+        <div className="flex justify-end pt-4 border-t border-slate-100">
+          <Button type="submit" size="md">
+            Save Company Details
           </Button>
         </div>
       </form>
