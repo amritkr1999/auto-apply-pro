@@ -36,6 +36,10 @@ public class User {
     @Column(name = "official_email")
     private String officialEmail;
 
+    @Lob
+    @Column(name = "avatar", columnDefinition = "TEXT")
+    private String avatar;
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Candidate candidate;
 

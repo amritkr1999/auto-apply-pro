@@ -102,6 +102,7 @@ public class UserServiceImpl implements UserService {
                 .officialEmail(user.getOfficialEmail())
                 .role(user.getRole().name())
                 .loginStreak(user.getLoginStreak())
+                .avatar(user.getAvatar())
                 .build();
     }
 
@@ -156,6 +157,7 @@ public class UserServiceImpl implements UserService {
                 .loginStreak(user.getLoginStreak())
                 .isPendingDeletion(user.getStatus() == UserStatus.PENDING_DELETION)
                 .deletionScheduledAt(user.getDeletionScheduledAt() != null ? user.getDeletionScheduledAt().toString() : null)
+                .avatar(user.getAvatar())
                 .build();
     }
 
@@ -183,6 +185,7 @@ public class UserServiceImpl implements UserService {
                 .githubProfileUrl(candidate.getGithubProfileUrl())
                 .linkedinProfileUrl(candidate.getLinkedinProfileUrl())
                 .linkedinName(candidate.getLinkedinName())
+                .avatar(user.getAvatar())
                 .build();
     }
 
@@ -196,6 +199,7 @@ public class UserServiceImpl implements UserService {
         user.setName(dto.getName());
         user.setMobile(dto.getMobile());
         user.setOfficialEmail(dto.getOfficialEmail());
+        user.setAvatar(dto.getAvatar());
         userRepository.save(user);
 
         java.util.Set<Skill> dbSkills = new java.util.HashSet<>();
@@ -242,6 +246,7 @@ public class UserServiceImpl implements UserService {
                 .githubProfileUrl(candidate.getGithubProfileUrl())
                 .linkedinProfileUrl(candidate.getLinkedinProfileUrl())
                 .linkedinName(candidate.getLinkedinName())
+                .avatar(user.getAvatar())
                 .build();
     }
 
@@ -264,6 +269,7 @@ public class UserServiceImpl implements UserService {
                 .officialEmail(user.getOfficialEmail())
                 .companyId(companyId)
                 .companyName(companyName)
+                .avatar(user.getAvatar())
                 .build();
     }
 
@@ -277,6 +283,7 @@ public class UserServiceImpl implements UserService {
         user.setName(dto.getName());
         user.setMobile(dto.getMobile());
         user.setOfficialEmail(dto.getOfficialEmail());
+        user.setAvatar(dto.getAvatar());
         userRepository.save(user);
 
         recruiter.setName(dto.getName());
@@ -310,6 +317,7 @@ public class UserServiceImpl implements UserService {
                 .officialEmail(user.getOfficialEmail())
                 .companyId(companyId)
                 .companyName(companyName)
+                .avatar(user.getAvatar())
                 .build();
     }
 
@@ -329,6 +337,7 @@ public class UserServiceImpl implements UserService {
                 .industry(company.getIndustry())
                 .website(company.getWebsite())
                 .description(company.getDescription())
+                .avatar(user.getAvatar())
                 .build();
     }
 
@@ -342,6 +351,7 @@ public class UserServiceImpl implements UserService {
         User user = company.getUser();
         user.setName(dto.getName()); // Owner's name or company name update
         user.setOfficialEmail(dto.getOfficialEmail());
+        user.setAvatar(dto.getAvatar());
         userRepository.save(user);
 
         company.setName(dto.getName());
@@ -360,6 +370,7 @@ public class UserServiceImpl implements UserService {
                 .industry(company.getIndustry())
                 .website(company.getWebsite())
                 .description(company.getDescription())
+                .avatar(user.getAvatar())
                 .build();
     }
 

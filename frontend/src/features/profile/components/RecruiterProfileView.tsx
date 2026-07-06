@@ -6,9 +6,10 @@ import Button from "../../../components/ui/Button";
 
 interface Props {
   userId: number;
+  onProfileUpdate: (name: string, avatar: string) => void;
 }
 
-export const RecruiterProfileView: React.FC<Props> = ({ userId }) => {
+export const RecruiterProfileView: React.FC<Props> = ({ userId, onProfileUpdate }) => {
   const [profile, setProfile] = useState<RecruiterProfile | null>(null);
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
@@ -28,6 +29,7 @@ export const RecruiterProfileView: React.FC<Props> = ({ userId }) => {
         setMobile(data.mobile || "");
         setOfficialEmail(data.officialEmail || "");
         setCompanyName(data.companyName || "");
+        onProfileUpdate(data.name || "", data.avatar || "");
       })
       .catch(() => setError("Failed to load profile details."))
       .finally(() => setLoading(false));
@@ -52,7 +54,7 @@ export const RecruiterProfileView: React.FC<Props> = ({ userId }) => {
       const result = await profileService.updateRecruiterProfile(userId, updatedProfile);
       setProfile(result);
       
-      // Update local storage user name
+      // Update local storage user details
       const userStr = localStorage.getItem("user");
       if (userStr) {
         const u = JSON.parse(userStr);
@@ -62,62 +64,72 @@ export const RecruiterProfileView: React.FC<Props> = ({ userId }) => {
         localStorage.setItem("user", JSON.stringify(u));
       }
 
+      onProfileUpdate(name, result.avatar || "");
       setMessage("Profile updated successfully!");
     } catch {
       setError("Failed to update profile.");
     }
   };
 
-  if (loading) return <div className="text-slate-500">Loading profile details...</div>;
+  if (loading) return <div className="text-slate-500 py-6 text-center font-medium animate-pulse">Loading profile details...</div>;
 
   return (
     <div className="w-full">
       <div className="mb-6">
-        <h2 className="text-xl font-bold text-slate-800">Recruiter Profile Settings</h2>
+        <h2 className="text-xl font-bold text-slate-800">Recruiter Details</h2>
+        <p className="text-sm text-slate-500 mt-1">Manage your affiliated company details and personal identifiers.</p>
       </div>
 
       {message && (
-        <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-card mb-6 text-sm">
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-2xl mb-6 text-sm font-medium animate-in fade-in duration-200">
           {message}
         </div>
       )}
       {error && (
-        <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-card mb-6 text-sm">
+        <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-2xl mb-6 text-sm font-medium animate-in fade-in duration-200">
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-        <Input
-          label="Full Name"
-          type="text"
-          value={name}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
-          required
-        />
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6 animate-in fade-in duration-200">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <Input
+            label="Full Name"
+            type="text"
+            value={name}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
+            required
+            className="rounded-xl border-slate-200 focus:ring-primary focus:border-transparent px-4 py-2.5"
+          />
 
-        <Input
-          label="Email Address (Read-only)"
-          type="email"
-          value={profile?.email || ""}
-          disabled
-        />
+          <Input
+            label="Mobile Number"
+            type="text"
+            value={mobile}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMobile(e.target.value)}
+            required
+            className="rounded-xl border-slate-200 focus:ring-primary focus:border-transparent px-4 py-2.5"
+          />
+        </div>
 
-        <Input
-          label="Official Email Address"
-          type="email"
-          value={officialEmail}
-          placeholder="yourname@company.com"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setOfficialEmail(e.target.value)}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <Input
+            label="Account Email Address (Read-only)"
+            type="email"
+            value={profile?.email || ""}
+            disabled
+            className="rounded-xl border-slate-100 bg-slate-50 text-slate-400 font-medium px-4 py-2.5"
+          />
 
-        <Input
-          label="Mobile Number"
-          type="text"
-          value={mobile}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMobile(e.target.value)}
-          required
-        />
+          <Input
+            label="Official Email Address"
+            type="email"
+            value={officialEmail}
+            placeholder="yourname@company.com"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setOfficialEmail(e.target.value)}
+            className="rounded-xl border-slate-200 focus:ring-primary focus:border-transparent px-4 py-2.5"
+          />
+        </div>
 
         <Input
           label="Affiliated Company Name"
@@ -125,11 +137,12 @@ export const RecruiterProfileView: React.FC<Props> = ({ userId }) => {
           value={companyName}
           placeholder="e.g. Acme Corp"
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCompanyName(e.target.value)}
+          className="rounded-xl border-slate-200 focus:ring-primary focus:border-transparent px-4 py-2.5"
         />
 
-        <div className="flex justify-end pt-4">
-          <Button type="submit">
-            Save Profile
+        <div className="flex justify-end pt-4 border-t border-slate-100">
+          <Button type="submit" size="md">
+            Save Recruiter Details
           </Button>
         </div>
       </form>

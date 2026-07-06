@@ -29,4 +29,5 @@ public class CandidateProfileDto {
     private String githubProfileUrl;
     private String linkedinProfileUrl;
     private String linkedinName;
+    private String avatar;
 }
