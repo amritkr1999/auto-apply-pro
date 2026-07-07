@@ -120,6 +120,28 @@ The backend is built with Spring Boot and Maven.
 4. You can access the OpenAPI Swagger documentation at:
    [http://localhost:8060/swagger-ui.html](http://localhost:8060/swagger-ui.html)
 
+#### Running with Environment-Specific Profiles
+
+You can start the backend with environment-specific profiles to dynamically manage the Google OAuth2 `redirect_uri` and server ports:
+
+* **Default Profile** (Runs on port `8060`, Google OAuth redirect URI targets `http://localhost:8060`):
+  ```bash
+  ./mvnw spring-boot:run
+  ```
+* **Local Development Profile (`dev-local`)** (Runs on port `8080`, Google OAuth redirect URI targets `http://localhost:8080`):
+  ```bash
+  ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev-local
+  ```
+  > [!IMPORTANT]
+  > When starting the backend with the `dev-local` profile on port `8080`, make sure to start the Vite frontend with the proxy target set to port `8080` as well:
+  > ```bash
+  > VITE_API_PROXY_TARGET=http://localhost:8080 npm run dev
+  > ```
+* **Ngrok Tunnel Profile (`dev-ngrok`)** (Runs on port `8060`, Google OAuth redirect URI targets `https://deskbound-many-zeppelin.ngrok-free.dev`):
+  ```bash
+  ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev-ngrok
+  ```
+
 ---
 
 ### 3. Frontend Setup & Run

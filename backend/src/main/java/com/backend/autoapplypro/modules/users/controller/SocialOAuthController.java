@@ -57,8 +57,17 @@ public class SocialOAuthController {
     @Value("${spring.security.oauth2.client.registration.google.client-secret:dev-client-secret}")
     private String googleClientSecret;
 
-    private static final String CALLBACK_URL_GITHUB = "http://localhost:8060/api/v1/auth/callback/github";
-    private static final String CALLBACK_URL_LINKEDIN = "http://localhost:8060/api/v1/auth/callback/linkedin";
+    @Value("${google.oauth2.redirect-uri:http://localhost:8060/api/v1/outreach/oauth2/callback}")
+    private String googleRedirectUri;
+
+    @Value("${github.oauth2.redirect-uri:http://localhost:8060/api/v1/auth/callback/github}")
+    private String githubRedirectUri;
+
+    @Value("${linkedin.oauth2.redirect-uri:http://localhost:8060/api/v1/auth/callback/linkedin}")
+    private String linkedinRedirectUri;
+
+    @Value("${app.frontend.url:http://localhost:5173}")
+    private String frontendUrl;
 
     /**
      * Google Login
@@ -66,16 +75,15 @@ public class SocialOAuthController {
     @GetMapping("/login/google")
     public ResponseEntity<String> loginGoogle() {
         log.info("Generating Google OAuth login URL");
-        String callbackUrl = "http://localhost:8060/api/v1/outreach/oauth2/callback";
         if (googleClientId.startsWith("dev-")) {
             log.info("Using mock Google connection URL for development");
-            String mockUrl = callbackUrl + "?code=mock_google_code&state=login";
+            String mockUrl = googleRedirectUri + "?code=mock_google_code&state=login";
             return ResponseEntity.ok(mockUrl);
         }
         String authUrl = new GoogleAuthorizationCodeRequestUrl(
                 "https://accounts.google.com/o/oauth2/v2/auth",
                 googleClientId,
-                callbackUrl,
+                googleRedirectUri,
                 Arrays.asList("email", "profile", "openid")
         )
         .setState("login")
@@ -91,11 +99,11 @@ public class SocialOAuthController {
         log.info("Generating GitHub OAuth login URL");
         if (githubClientId.startsWith("dev-")) {
             log.info("Using mock GitHub connection URL for development");
-            String mockUrl = CALLBACK_URL_GITHUB + "?code=mock_github_code&state=login";
+            String mockUrl = githubRedirectUri + "?code=mock_github_code&state=login";
             return ResponseEntity.ok(mockUrl);
         }
         String authUrl = "https://github.com/login/oauth/authorize?client_id=" + githubClientId
-                + "&redirect_uri=" + CALLBACK_URL_GITHUB
+                + "&redirect_uri=" + githubRedirectUri
                 + "&state=login"
                 + "&scope=user";
         return ResponseEntity.ok(authUrl);
@@ -109,11 +117,11 @@ public class SocialOAuthController {
         log.info("Connecting GitHub for user: {}", userId);
         if (githubClientId.startsWith("dev-")) {
             log.info("Using mock GitHub connection URL for development");
-            String mockUrl = CALLBACK_URL_GITHUB + "?code=mock_github_code&state=" + userId;
+            String mockUrl = githubRedirectUri + "?code=mock_github_code&state=" + userId;
             return ResponseEntity.ok(mockUrl);
         }
         String authUrl = "https://github.com/login/oauth/authorize?client_id=" + githubClientId
-                + "&redirect_uri=" + CALLBACK_URL_GITHUB
+                + "&redirect_uri=" + githubRedirectUri
                 + "&state=" + userId
                 + "&scope=user";
         return ResponseEntity.ok(authUrl);
@@ -153,7 +161,7 @@ public class SocialOAuthController {
                 request.put("client_id", githubClientId);
                 request.put("client_secret", githubClientSecret);
                 request.put("code", code);
-                request.put("redirect_uri", CALLBACK_URL_GITHUB);
+                request.put("redirect_uri", githubRedirectUri);
 
                 HttpEntity<Map<String, String>> entity = new HttpEntity<>(request, headers);
                 ResponseEntity<Map> response = restTemplate.postForEntity(
@@ -260,7 +268,8 @@ public class SocialOAuthController {
                 }
 
                 String jwtToken = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getRole().name());
-                String targetUrl = String.format("http://localhost:5173/login?token=%s&id=%d&email=%s&name=%s&role=%s&loginStreak=%d&mobile=%s",
+                String targetUrl = String.format("%s/login?token=%s&id=%d&email=%s&name=%s&role=%s&loginStreak=%d&mobile=%s",
+                        frontendUrl,
                         jwtToken,
                         user.getId(),
                         java.net.URLEncoder.encode(user.getEmail(), "UTF-8"),
@@ -278,7 +287,7 @@ public class SocialOAuthController {
                 candidate.setIsVerified(true);
                 candidateRepository.save(candidate);
 
-                return new RedirectView("http://localhost:5173/candidate/profile?status=success&provider=github");
+                return new RedirectView(frontendUrl + "/candidate/profile?status=success&provider=github");
             }
 
         } catch (Exception e) {
@@ -288,9 +297,9 @@ public class SocialOAuthController {
                 errMsg = java.net.URLEncoder.encode(errMsg, "UTF-8");
             } catch (Exception ex) {}
             if (isLogin) {
-                return new RedirectView("http://localhost:5173/login?status=error&errorMsg=" + errMsg);
+                return new RedirectView(frontendUrl + "/login?status=error&errorMsg=" + errMsg);
             } else {
-                return new RedirectView("http://localhost:5173/candidate/profile?status=error&provider=github&errorMsg=" + errMsg);
+                return new RedirectView(frontendUrl + "/candidate/profile?status=error&provider=github&errorMsg=" + errMsg);
             }
         }
     }
@@ -303,12 +312,12 @@ public class SocialOAuthController {
         log.info("Connecting LinkedIn for user: {}", userId);
         if (linkedinClientId.startsWith("dev-")) {
             log.info("Using mock LinkedIn connection URL for development");
-            String mockUrl = CALLBACK_URL_LINKEDIN + "?code=mock_linkedin_code&state=" + userId;
+            String mockUrl = linkedinRedirectUri + "?code=mock_linkedin_code&state=" + userId;
             return ResponseEntity.ok(mockUrl);
         }
         String authUrl = "https://www.linkedin.com/oauth/v2/authorization?response_type=code"
                 + "&client_id=" + linkedinClientId
-                + "&redirect_uri=" + CALLBACK_URL_LINKEDIN
+                + "&redirect_uri=" + linkedinRedirectUri
                 + "&state=" + userId
                 + "&scope=openid%20profile%20email";
         return ResponseEntity.ok(authUrl);
@@ -340,7 +349,7 @@ public class SocialOAuthController {
                 MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
                 map.add("grant_type", "authorization_code");
                 map.add("code", code);
-                map.add("redirect_uri", CALLBACK_URL_LINKEDIN);
+                map.add("redirect_uri", linkedinRedirectUri);
                 map.add("client_id", linkedinClientId);
                 map.add("client_secret", linkedinClientSecret);
 
@@ -388,7 +397,7 @@ public class SocialOAuthController {
             candidate.setLinkedinProfileUrl(linkedinProfileUrl);
             candidateRepository.save(candidate);
 
-            return new RedirectView("http://localhost:5173/candidate/profile?status=success&provider=linkedin");
+            return new RedirectView(frontendUrl + "/candidate/profile?status=success&provider=linkedin");
 
         } catch (Exception e) {
             log.error("LinkedIn OAuth Error for user {}", userId, e);
@@ -396,7 +405,7 @@ public class SocialOAuthController {
             try {
                 errMsg = java.net.URLEncoder.encode(errMsg, "UTF-8");
             } catch (Exception ex) {}
-            return new RedirectView("http://localhost:5173/candidate/profile?status=error&provider=linkedin&errorMsg=" + errMsg);
+            return new RedirectView(frontendUrl + "/candidate/profile?status=error&provider=linkedin&errorMsg=" + errMsg);
         }
     }
 

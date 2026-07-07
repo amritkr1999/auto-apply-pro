@@ -42,7 +42,12 @@ public class OutreachOAuthController {
     @Value("${spring.security.oauth2.client.registration.google.client-secret:dev-client-secret}")
     private String clientSecret;
 
-    private static final String CALLBACK_URL = "http://localhost:8060/api/v1/outreach/oauth2/callback";
+    @Value("${google.oauth2.redirect-uri:http://localhost:8060/api/v1/outreach/oauth2/callback}")
+    private String callbackUrl;
+
+    @Value("${app.frontend.url:http://localhost:5173}")
+    private String frontendUrl;
+
     private static final String GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
 
     /**
@@ -59,7 +64,7 @@ public class OutreachOAuthController {
         String authUrl = new GoogleAuthorizationCodeRequestUrl(
                 GOOGLE_AUTH_URL,
                 clientId,
-                CALLBACK_URL,
+                callbackUrl,
                 Arrays.asList("https://www.googleapis.com/auth/gmail.send", "email", "openid")
         )
         .setAccessType("offline")
@@ -102,7 +107,7 @@ public class OutreachOAuthController {
                         clientId,
                         clientSecret,
                         code,
-                        CALLBACK_URL
+                        callbackUrl
                 ).execute();
             }
 
@@ -146,7 +151,8 @@ public class OutreachOAuthController {
                 }
 
                 String jwtToken = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getRole().name());
-                String targetUrl = String.format("http://localhost:5173/login?token=%s&id=%d&email=%s&name=%s&role=%s&loginStreak=%d&mobile=%s",
+                String targetUrl = String.format("%s/login?token=%s&id=%d&email=%s&name=%s&role=%s&loginStreak=%d&mobile=%s",
+                        frontendUrl,
                         jwtToken,
                         user.getId(),
                         java.net.URLEncoder.encode(user.getEmail(), "UTF-8"),
@@ -184,7 +190,7 @@ public class OutreachOAuthController {
                 log.info("OAuth credentials securely saved for user ID: {}", userId);
 
                 // Redirect back to frontend profile page
-                return new RedirectView("http://localhost:5173/candidate/profile?status=success");
+                return new RedirectView(frontendUrl + "/candidate/profile?status=success");
             }
 
         } catch (Exception e) {
@@ -194,9 +200,9 @@ public class OutreachOAuthController {
                 errMsg = java.net.URLEncoder.encode(errMsg, "UTF-8");
             } catch (Exception ex) {}
             if (isLogin) {
-                return new RedirectView("http://localhost:5173/login?status=error&errorMsg=" + errMsg);
+                return new RedirectView(frontendUrl + "/login?status=error&errorMsg=" + errMsg);
             } else {
-                return new RedirectView("http://localhost:5173/candidate/profile?status=error&errorMsg=" + errMsg);
+                return new RedirectView(frontendUrl + "/candidate/profile?status=error&errorMsg=" + errMsg);
             }
         }
     }
