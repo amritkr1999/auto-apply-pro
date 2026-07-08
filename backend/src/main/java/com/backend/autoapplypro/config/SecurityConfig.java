@@ -38,6 +38,7 @@ public class SecurityConfig {
                     "/error"
                 ).permitAll()
                 .requestMatchers("/api/drafts/llm-stats").hasRole("ADMIN")
+                .requestMatchers("/api/v1/learning/submissions/pending", "/api/v1/learning/submissions/*/review").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

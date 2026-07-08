@@ -11,6 +11,7 @@ export const TopicDetailsView: React.FC = () => {
   const [selectedSubtopic, setSelectedSubtopic] = useState<Topic | null>(null);
   const [resources, setResources] = useState<Resource[]>([]);
   const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
+  const [ratingsState, setRatingsState] = useState<Record<number, { rating: number; comment: string; submitted: boolean; loading: boolean }>>({});
   
   // Interactive State
   const [activeTab, setActiveTab] = useState<"questions" | "documentation" | "videos">("questions");
@@ -353,6 +354,11 @@ export const TopicDetailsView: React.FC = () => {
                             </div>
 
                             <div className="flex items-center gap-2 flex-shrink-0">
+                              {q.totalRatings && q.totalRatings > 0 ? (
+                                <span className="text-[10px] text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 flex items-center gap-0.5 font-bold">
+                                  ⭐ {q.averageRating?.toFixed(1)} ({q.totalRatings})
+                                </span>
+                              ) : null}
                               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                                 q.difficulty === "EASY" ? "bg-green-50 text-green-700" :
                                 q.difficulty === "MEDIUM" ? "bg-amber-50 text-amber-700" :
@@ -447,6 +453,82 @@ export const TopicDetailsView: React.FC = () => {
                                     )}
                                   </div>
                                   <p className="leading-relaxed"><strong className="text-slate-800">Explanation:</strong> {solveResult.explanation}</p>
+                                </div>
+                              )}
+
+                              {isSolved && (
+                                <div className="mt-4 p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                                  <span className="block text-xs font-bold text-slate-700">Rate this question</span>
+                                  {ratingsState[q.id]?.submitted ? (
+                                    <p className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
+                                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                      </svg>
+                                      Thank you for rating!
+                                    </p>
+                                  ) : (
+                                    <div className="space-y-2">
+                                      <div className="flex items-center gap-1.5">
+                                        {[1, 2, 3, 4, 5].map((star) => {
+                                          const currentRating = ratingsState[q.id]?.rating || 0;
+                                          return (
+                                            <button
+                                              key={star}
+                                              type="button"
+                                              onClick={() => setRatingsState(prev => ({
+                                                ...prev,
+                                                [q.id]: { ...(prev[q.id] || { comment: "", submitted: false, loading: false }), rating: star }
+                                              }))}
+                                              className="text-lg text-amber-400 hover:scale-115 transition-transform"
+                                            >
+                                              {star <= currentRating ? "★" : "☆"}
+                                            </button>
+                                          );
+                                        })}
+                                      </div>
+                                      <div className="flex gap-2">
+                                        <input
+                                          type="text"
+                                          placeholder="Optional comment..."
+                                          value={ratingsState[q.id]?.comment || ""}
+                                          onChange={(e) => setRatingsState(prev => ({
+                                            ...prev,
+                                            [q.id]: { ...(prev[q.id] || { rating: 0, submitted: false, loading: false }), comment: e.target.value }
+                                          }))}
+                                          className="flex-1 px-2.5 py-1 border border-slate-300 rounded text-xs bg-white focus:outline-none focus:border-primary font-medium text-slate-800"
+                                        />
+                                        <button
+                                          type="button"
+                                          disabled={!ratingsState[q.id]?.rating || ratingsState[q.id]?.loading}
+                                          onClick={async () => {
+                                            const rState = ratingsState[q.id];
+                                            if (!rState || !rState.rating) return;
+                                            try {
+                                              setRatingsState(prev => ({ ...prev, [q.id]: { ...prev[q.id], loading: true } }));
+                                              await learningService.rateQuestion(q.id, { rating: rState.rating, comment: rState.comment });
+                                              setRatingsState(prev => ({ ...prev, [q.id]: { ...prev[q.id], submitted: true, loading: false } }));
+                                              
+                                              // Silent update of average rating in local state
+                                              setQuestions(prev => prev.map(item => {
+                                                if (item.id === q.id) {
+                                                  const newCount = (item.totalRatings || 0) + 1;
+                                                  const newAvg = (((item.averageRating || 0) * (item.totalRatings || 0)) + rState.rating) / newCount;
+                                                  return { ...item, averageRating: newAvg, totalRatings: newCount };
+                                                }
+                                                return item;
+                                              }));
+                                            } catch (err) {
+                                              console.error(err);
+                                              setRatingsState(prev => ({ ...prev, [q.id]: { ...prev[q.id], loading: false } }));
+                                            }
+                                          }}
+                                          className="px-3 py-1 bg-slate-900 text-white text-[10px] font-bold rounded hover:bg-slate-800 disabled:opacity-50 transition-colors"
+                                        >
+                                          {ratingsState[q.id]?.loading ? "Submitting..." : "Submit"}
+                                        </button>
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                               )}
                             </div>
