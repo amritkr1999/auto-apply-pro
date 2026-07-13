@@ -24,6 +24,12 @@ export interface EmailTemplate {
   name: string;
   subject: string;
   body: string;
+  isSystemTemplate?: boolean;
+  isPublic?: boolean;
+  creatorId?: number;
+  averageRating?: number;
+  isFavorited?: boolean;
+  userRating?: number;
 }
 
 export interface OutreachDraft {
@@ -70,18 +76,25 @@ const saveLocalTemplates = (templates: EmailTemplate[]) => {
 
 export const outreachService = {
   // Get all email templates
-  async getTemplates(): Promise<EmailTemplate[]> {
+  async getTemplates(sortBy?: string): Promise<EmailTemplate[]> {
     try {
-      const response = await fetch(`${API_BASE}/templates`, {
+      const url = sortBy ? `${API_BASE}/templates?sortBy=${sortBy}` : `${API_BASE}/templates`;
+      const response = await fetch(url, {
         headers: getAuthHeaders(),
       });
       if (response.ok) {
         return response.json();
       }
-    } catch {
-      console.warn("Backend /api/templates unavailable. Falling back to local storage.");
+    } catch (e) {
+      console.warn("Backend /api/templates unavailable. Falling back to local storage.", e);
     }
-    return getLocalTemplates();
+    const tpls = getLocalTemplates();
+    const favorites = JSON.parse(localStorage.getItem("email_template_favorites") || "[]");
+    return tpls.map(t => ({
+      ...t,
+      isFavorited: favorites.includes(t.id),
+      averageRating: t.averageRating || 0.0
+    }));
   },
 
   // Save/Create a new template
@@ -104,9 +117,15 @@ export const outreachService = {
       });
       if (response.ok) {
         return response.json();
+      } else {
+        const errMsg = await response.text();
+        throw new Error(errMsg || "Failed to save template.");
       }
-    } catch {
-      console.warn("Backend save template failed. Saving to local storage fallback.");
+    } catch (e: any) {
+      if (e.message && e.message !== "Failed to fetch" && !e.message.includes("network")) {
+        throw e;
+      }
+      console.warn("Backend save template failed. Saving to local storage fallback.", e);
     }
 
     const current = getLocalTemplates();
@@ -138,6 +157,61 @@ export const outreachService = {
     const filtered = current.filter(t => t.id !== id);
     saveLocalTemplates(filtered);
     return true;
+  },
+
+  // Toggle template favorite bookmark status
+  async toggleFavorite(id: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${API_BASE}/templates/${id}/favorite`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+      });
+      if (response.ok) {
+        return response.json();
+      }
+    } catch (e) {
+      console.warn("Backend toggle favorite failed.", e);
+    }
+    const favorites = JSON.parse(localStorage.getItem("email_template_favorites") || "[]");
+    const index = favorites.indexOf(id);
+    if (index > -1) {
+      favorites.splice(index, 1);
+      localStorage.setItem("email_template_favorites", JSON.stringify(favorites));
+      return false;
+    } else {
+      favorites.push(id);
+      localStorage.setItem("email_template_favorites", JSON.stringify(favorites));
+      return true;
+    }
+  },
+
+  // Rate a template
+  async rateTemplate(id: string, rating: number, comment?: string): Promise<any> {
+    try {
+      const response = await fetch(`${API_BASE}/templates/${id}/rate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders(),
+        },
+        body: JSON.stringify({ rating, comment }),
+      });
+      if (response.ok) {
+        return response.json();
+      } else {
+        const errMsg = await response.text();
+        throw new Error(errMsg || "Failed to submit rating.");
+      }
+    } catch (e: any) {
+      if (e.message && e.message !== "Failed to fetch" && !e.message.includes("network")) {
+        throw e;
+      }
+      console.warn("Backend rate template failed. Simulating locally.", e);
+    }
+    const ratings = JSON.parse(localStorage.getItem("email_template_ratings") || "{}");
+    ratings[id] = rating;
+    localStorage.setItem("email_template_ratings", JSON.stringify(ratings));
+    return { templateId: id, rating };
   },
 
   // Save an outreach draft to the sending queue
