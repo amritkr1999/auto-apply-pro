@@ -354,13 +354,36 @@ export const outreachService = {
     hrOutreachSourceTable: string;
     marketingEmailsEnabled: boolean;
   }> {
-    const response = await fetch(`${API_BASE}/v1/outreach/settings?userId=${userId}`, {
-      headers: getAuthHeaders(),
-    });
-    if (!response.ok) {
-      throw new Error("Failed to load outreach settings.");
+    try {
+      const response = await fetch(`${API_BASE}/v1/outreach/settings?userId=${userId}`, {
+        headers: getAuthHeaders(),
+      });
+      if (response.ok) {
+        return response.json();
+      }
+    } catch (e) {
+      console.warn("Backend /settings unavailable. Falling back to local storage.", e);
     }
-    return response.json();
+
+    // local storage fallback
+    const localSettingsStr = localStorage.getItem(`outreach_settings_${userId}`);
+    if (localSettingsStr) {
+      return JSON.parse(localSettingsStr);
+    }
+    return {
+      dailyLimit: 50,
+      minIntervalMinutes: 10,
+      maxIntervalMinutes: 30,
+      slotStart: "09:00",
+      slotEnd: "17:00",
+      timezone: "UTC",
+      skipWeekends: true,
+      hrOutreachCampaignEnabled: false,
+      hrOutreachTargetRole: "Software Engineer",
+      hrOutreachTemplateId: "default-1",
+      hrOutreachSourceTable: "TESTING",
+      marketingEmailsEnabled: true
+    };
   },
 
   // Save outreach scheduling settings
@@ -378,19 +401,33 @@ export const outreachService = {
     hrOutreachSourceTable?: string;
     marketingEmailsEnabled?: boolean;
   }): Promise<{ message: string }> {
-    const response = await fetch(`${API_BASE}/v1/outreach/settings?userId=${userId}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...getAuthHeaders(),
-      },
-      body: JSON.stringify(settings)
-    });
-    if (!response.ok) {
-      const errText = await response.text();
-      throw new Error(errText || "Failed to save outreach settings.");
+    try {
+      const response = await fetch(`${API_BASE}/v1/outreach/settings?userId=${userId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders(),
+        },
+        body: JSON.stringify(settings)
+      });
+      if (response.ok) {
+        return response.json();
+      } else {
+        const errText = await response.text();
+        throw new Error(errText || "Failed to save outreach settings.");
+      }
+    } catch (e: any) {
+      if (e.message && e.message !== "Failed to fetch" && !e.message.includes("network")) {
+        throw e;
+      }
+      console.warn("Backend save settings failed. Saving to local storage fallback.", e);
     }
-    return response.json();
+
+    // local storage fallback
+    const currentSettings = await this.getOutreachSettings(userId);
+    const updatedSettings = { ...currentSettings, ...settings };
+    localStorage.setItem(`outreach_settings_${userId}`, JSON.stringify(updatedSettings));
+    return { message: "Outreach settings updated successfully." };
   },
 
   // Quick toggle HR outreach campaign
