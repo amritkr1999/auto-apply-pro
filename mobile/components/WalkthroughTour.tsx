@@ -96,19 +96,19 @@ export default function WalkthroughTour({ userId, visible, onClose }: Walkthroug
       animationType="fade"
       onRequestClose={onClose}
     >
-      <View className="flex-1 justify-center items-center bg-slate-950/85 px-6">
-        <View className="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl relative overflow-hidden">
+      <View className="flex-1 justify-center items-center bg-black/75 px-6">
+        <View className="w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl relative overflow-hidden">
           {/* Decorative glowing background bubbles */}
           <View className="absolute -top-12 -left-12 w-28 h-28 bg-emerald-500/10 rounded-full blur-xl pointer-events-none" />
           <View className="absolute -bottom-12 -right-12 w-28 h-28 bg-indigo-500/10 rounded-full blur-xl pointer-events-none" />
 
           {/* Progress bar */}
-          <View className="flex-row h-1 bg-slate-800 rounded-full mb-6 overflow-hidden">
+          <View className="flex-row h-1 bg-slate-200 dark:bg-slate-800 rounded-full mb-6 overflow-hidden">
             {steps.map((_, idx) => (
               <View
                 key={idx}
                 className={`flex-1 h-full ${
-                  idx <= currentStep ? 'bg-emerald-500' : 'bg-slate-850'
+                  idx <= currentStep ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-800'
                 }`}
                 style={{ marginRight: idx < steps.length - 1 ? 2 : 0 }}
               />
@@ -123,28 +123,28 @@ export default function WalkthroughTour({ userId, visible, onClose }: Walkthroug
             >
               <Ionicons name={activeStep.icon} size={28} color={activeStep.iconColor} />
             </View>
-            <Text className="text-white text-lg font-bold text-center px-1">
+            <Text className="text-slate-900 dark:text-white text-lg font-bold text-center px-1">
               {activeStep.title}
             </Text>
-            <Text className="text-slate-400 text-sm text-center mt-3 px-2 leading-relaxed h-20">
+            <Text className="text-slate-650 dark:text-slate-400 text-sm text-center mt-3 px-2 leading-relaxed h-20">
               {activeStep.description}
             </Text>
           </View>
 
           {/* Controls Footer */}
-          <View className="flex-row justify-between items-center mt-4 pt-4 border-t border-slate-800/60">
+          <View className="flex-row justify-between items-center mt-4 pt-4 border-t border-slate-200 dark:border-slate-800/60">
             <TouchableOpacity
               onPress={handleFinish}
               className="active:opacity-80 py-1"
             >
-              <Text className="text-slate-500 font-semibold text-xs uppercase tracking-wider">Skip Tour</Text>
+              <Text className="text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase tracking-wider">Skip Tour</Text>
             </TouchableOpacity>
 
             <View className="flex-row items-center gap-3">
               {currentStep > 0 && (
                 <TouchableOpacity
                   onPress={handleBack}
-                  className="bg-slate-950 border border-slate-800 w-10 h-10 rounded-xl items-center justify-center active:bg-slate-850"
+                  className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 w-10 h-10 rounded-xl items-center justify-center active:bg-slate-100 dark:active:bg-slate-850"
                 >
                   <Ionicons name="arrow-back" size={16} color="#94a3b8" />
                 </TouchableOpacity>

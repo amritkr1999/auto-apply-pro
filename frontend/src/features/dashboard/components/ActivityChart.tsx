@@ -18,16 +18,16 @@ export const ActivityChart: React.FC<ActivityChartProps> = ({ data, loading }) =
 
   if (loading) {
     return (
-      <div className="bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-2xl p-6 shadow-sm h-[380px] flex flex-col justify-center items-center">
+      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 shadow-sm h-[380px] flex flex-col justify-center items-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-        <p className="text-xs text-slate-400 mt-2 font-medium">Loading activity analytics...</p>
+        <p className="text-xs text-slate-400 dark:text-slate-500 mt-2 font-medium">Loading activity analytics...</p>
       </div>
     );
   }
 
   if (!data || data.length === 0) {
     return (
-      <div className="bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-2xl p-6 shadow-sm h-[380px] flex flex-col justify-center items-center text-slate-400 italic">
+      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 shadow-sm h-[380px] flex flex-col justify-center items-center text-slate-400 dark:text-slate-500 italic">
         No activity logs found for the last 7 days.
       </div>
     );
@@ -60,17 +60,17 @@ export const ActivityChart: React.FC<ActivityChartProps> = ({ data, loading }) =
   const barSpacing = 3;
 
   return (
-    <div className="bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-2xl p-6 shadow-sm relative overflow-visible hover:shadow-md transition-shadow duration-300">
+    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 shadow-sm relative overflow-visible hover:shadow-md transition-shadow duration-300">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
+          <h3 className="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
             <span>📊</span> Activity Analytics
           </h3>
-          <p className="text-xs text-slate-400 mt-0.5">Your daily performance over the past 7 days</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Your daily performance over the past 7 days</p>
         </div>
 
         {/* Legend */}
-        <div className="flex items-center gap-4 text-xs font-semibold text-slate-500">
+        <div className="flex items-center gap-4 text-xs font-semibold text-slate-500 dark:text-slate-400">
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded bg-gradient-to-r from-indigo-500 to-violet-600 block shadow-sm shadow-indigo-200"></span>
             <span>Emails Sent</span>
@@ -126,7 +126,7 @@ export const ActivityChart: React.FC<ActivityChartProps> = ({ data, loading }) =
                   x={padding.left - 10}
                   y={yPos + 4}
                   textAnchor="end"
-                  className="text-[10px] font-bold fill-slate-400"
+                  className="text-[10px] font-bold fill-slate-400 dark:fill-slate-500"
                 >
                   {Math.round(yVal)}
                 </text>
@@ -173,7 +173,7 @@ export const ActivityChart: React.FC<ActivityChartProps> = ({ data, loading }) =
                   x={padding.left + dIdx * groupWidth + groupWidth / 2}
                   y={svgHeight - 15}
                   textAnchor="middle"
-                  className="text-xs font-bold fill-slate-500"
+                  className="text-xs font-bold fill-slate-500 dark:fill-slate-400"
                 >
                   {day.date}
                 </text>

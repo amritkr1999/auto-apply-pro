@@ -3,11 +3,13 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import "./login.css";
 import { profileService } from "../features/profile/services/profileService";
 import { API_BASE } from "../config/api";
+import { useTheme } from "../context/ThemeContext";
 
 type AuthTab = "login" | "register";
 type UserRole = "candidate" | "recruiter" | "company";
 
 export const LoginPage: React.FC = () => {
+  const { toggleTheme, resolvedTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -98,6 +100,7 @@ export const LoginPage: React.FC = () => {
 
   const handleRoleSelect = (role: UserRole) => {
     setSelectedRole(role);
+    setRegStep(2);
     setError("");
   };
 
@@ -263,6 +266,37 @@ export const LoginPage: React.FC = () => {
 
   return (
     <div className="auth-page-root">
+      <div style={{ position: "absolute", top: "1.5rem", right: "1.5rem", zIndex: 50 }}>
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className="auth-theme-toggle"
+          style={{
+            background: "var(--bg-card)",
+            border: "1px solid var(--border-color)",
+            cursor: "pointer",
+            padding: "10px",
+            borderRadius: "50%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
+            transition: "all 0.2s"
+          }}
+          title={`Switch to ${resolvedTheme === "dark" ? "light" : "dark"} mode`}
+        >
+          {resolvedTheme === "dark" ? (
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} style={{ width: "20px", height: "20px", color: "#fbbf24" }}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
+            </svg>
+          ) : (
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} style={{ width: "20px", height: "20px", color: "#4f46e5" }}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+          )}
+        </button>
+      </div>
+
       {/* Background Orbs */}
       <div className="auth-bg-glow">
         <div className="glow-orb-1"></div>

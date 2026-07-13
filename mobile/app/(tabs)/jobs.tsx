@@ -147,7 +147,7 @@ export default function JobsScreen() {
 
   if (loading) {
     return (
-      <View className="flex-1 bg-slate-950 items-center justify-center">
+      <View className="flex-1 bg-slate-50 dark:bg-slate-950 items-center justify-center">
         <ActivityIndicator size="large" color="#10b981" />
       </View>
     );
@@ -157,15 +157,15 @@ export default function JobsScreen() {
   const hasQueueFinished = !activeJob || currentIndex >= jobs.length;
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-950">
+    <SafeAreaView className="flex-1 bg-slate-50 dark:bg-slate-950">
       
       {hasQueueFinished ? (
         <View className="flex-1 items-center justify-center px-6">
-          <View className="w-20 h-20 bg-slate-900 border border-slate-800 rounded-full items-center justify-center mb-6">
+          <View className="w-20 h-20 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full items-center justify-center mb-6 shadow-sm">
             <Ionicons name="checkmark-done-circle" size={42} color="#10b981" />
           </View>
-          <Text className="text-white text-2xl font-bold text-center">Queue Empty!</Text>
-          <Text className="text-slate-400 text-sm text-center mt-2 max-w-xs">
+          <Text className="text-slate-900 dark:text-white text-2xl font-bold text-center">Queue Empty!</Text>
+          <Text className="text-slate-500 dark:text-slate-400 text-sm text-center mt-2 max-w-xs leading-relaxed">
             You've reviewed all drafted outreach emails. Check back later or import more jobs from the web dashboard.
           </Text>
           <TouchableOpacity
@@ -182,48 +182,48 @@ export default function JobsScreen() {
           <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
             
             {/* Job Metadata Card */}
-            <View className="bg-slate-900 border border-slate-800 rounded-3xl p-5 mb-5 shadow-lg">
+            <View className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 mb-5 shadow-sm dark:shadow-lg">
               <View className="flex-row justify-between items-start mb-2">
-                <Text className="text-emerald-400 text-xs font-bold uppercase tracking-wider">
+                <Text className="text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">
                   Opportunity {currentIndex + 1} of {jobs.length}
                 </Text>
                 <View className="flex-row items-center">
                   <Ionicons name="pin-outline" size={14} color="#94a3b8" />
-                  <Text className="text-slate-400 text-xs ml-1 font-medium">{activeJob.location}</Text>
+                  <Text className="text-slate-500 dark:text-slate-400 text-xs ml-1 font-medium">{activeJob.location}</Text>
                 </View>
               </View>
-              <Text className="text-white text-xl font-bold mb-1 leading-tight">{activeJob.title}</Text>
-              <Text className="text-slate-300 text-sm font-semibold mb-3">{activeJob.company}</Text>
-              <View className="h-[1px] bg-slate-800 mb-3" />
-              <Text className="text-slate-400 text-xs font-semibold mb-1.5 uppercase tracking-wider">Description</Text>
-              <Text className="text-slate-300 text-sm leading-relaxed" numberOfLines={4}>
+              <Text className="text-slate-900 dark:text-white text-xl font-bold mb-1 leading-tight">{activeJob.title}</Text>
+              <Text className="text-slate-650 dark:text-slate-300 text-sm font-semibold mb-3">{activeJob.company}</Text>
+              <View className="h-[1px] bg-slate-200 dark:bg-slate-800 mb-3" />
+              <Text className="text-slate-500 dark:text-slate-400 text-xs font-semibold mb-1.5 uppercase tracking-wider">Description</Text>
+              <Text className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed" numberOfLines={4}>
                 {activeJob.description}
               </Text>
             </View>
 
             {/* Email Outreach Draft Card */}
-            <View className="bg-slate-900 border border-slate-800 rounded-3xl p-5 mb-6">
+            <View className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 mb-6 shadow-sm dark:shadow-lg">
               <View className="flex-row justify-between items-center mb-3">
                 <View className="flex-row items-center">
                   <Ionicons name="sparkles" size={16} color="#10b981" />
-                  <Text className="text-emerald-400 text-sm font-bold ml-1.5">AI Tailored Email</Text>
+                  <Text className="text-emerald-600 dark:text-emerald-400 text-sm font-bold ml-1.5">AI Tailored Email</Text>
                 </View>
                 <TouchableOpacity
                   onPress={openEditModal}
-                  className="flex-row items-center bg-slate-950 border border-slate-800 px-3 py-1 rounded-xl"
+                  className="flex-row items-center bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-3 py-1 rounded-xl"
                 >
                   <Ionicons name="create-outline" size={14} color="#10b981" />
-                  <Text className="text-white text-xs font-bold ml-1">Edit</Text>
+                  <Text className="text-slate-800 dark:text-white text-xs font-bold ml-1">Edit</Text>
                 </TouchableOpacity>
               </View>
 
-              <View className="bg-slate-950 border border-slate-800/80 rounded-2xl p-4">
-                <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Subject</Text>
-                <Text className="text-white font-bold text-sm mb-3" numberOfLines={1}>
+              <View className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4">
+                <Text className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Subject</Text>
+                <Text className="text-slate-900 dark:text-white font-bold text-sm mb-3" numberOfLines={1}>
                   {activeJob.draftSubject}
                 </Text>
-                <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Body</Text>
-                <Text className="text-slate-300 text-sm leading-relaxed" numberOfLines={12}>
+                <Text className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Body</Text>
+                <Text className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed" numberOfLines={12}>
                   {activeJob.draftBody}
                 </Text>
               </View>
@@ -232,13 +232,13 @@ export default function JobsScreen() {
           </ScrollView>
 
           {/* Bottom Action Controls */}
-          <View className="flex-row justify-between py-2 border-t border-slate-850 gap-4">
+          <View className="flex-row justify-between py-2 border-t border-slate-200 dark:border-slate-800 gap-4">
             
             {/* Skip Button */}
             <TouchableOpacity
               onPress={() => handleAction('REJECTED')}
               disabled={actioning}
-              className="flex-1 flex-row items-center justify-center bg-slate-900 border border-slate-800 rounded-2xl py-4 active:bg-slate-800"
+              className="flex-1 flex-row items-center justify-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl py-4 active:bg-slate-100 dark:active:bg-slate-800"
             >
               <Ionicons name="close-circle-outline" size={20} color="#f43f5e" />
               <Text className="text-rose-500 font-bold ml-2">Skip & Reject</Text>
@@ -273,10 +273,10 @@ export default function JobsScreen() {
         onRequestClose={() => setEditModalVisible(false)}
       >
         <View className="flex-1 justify-end bg-black/60">
-          <View className="bg-slate-900 rounded-t-3xl border-t border-slate-800 p-6 h-[80%]">
+          <View className="bg-white dark:bg-slate-900 rounded-t-3xl border-t border-slate-200 dark:border-slate-800 p-6 h-[80%]">
             
             <View className="flex-row justify-between items-center mb-6">
-              <Text className="text-white text-xl font-bold">Customize Outreach Draft</Text>
+              <Text className="text-slate-900 dark:text-white text-xl font-bold">Customize Outreach Draft</Text>
               <TouchableOpacity onPress={() => setEditModalVisible(false)}>
                 <Ionicons name="close-circle" size={26} color="#64748b" />
               </TouchableOpacity>
@@ -284,18 +284,18 @@ export default function JobsScreen() {
 
             <ScrollView className="flex-1 mb-6 space-y-4">
               <View>
-                <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Subject Header</Text>
+                <Text className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Subject Header</Text>
                 <TextInput
                   value={editedSubject}
                   onChangeText={setEditedSubject}
                   placeholder="Subject Line"
                   placeholderTextColor="#475569"
-                  className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white font-semibold text-base"
+                  className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-white font-semibold text-base"
                 />
               </View>
 
               <View className="mt-4">
-                <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Email Body Text</Text>
+                <Text className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Email Body Text</Text>
                 <TextInput
                   value={editedBody}
                   onChangeText={setEditedBody}
@@ -304,7 +304,7 @@ export default function JobsScreen() {
                   multiline
                   numberOfLines={15}
                   style={{ textAlignVertical: 'top', height: 260 }}
-                  className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-4 text-white text-base leading-relaxed"
+                  className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-4 text-slate-900 dark:text-white text-base leading-relaxed"
                 />
               </View>
             </ScrollView>

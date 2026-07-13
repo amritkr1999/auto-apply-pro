@@ -63,7 +63,7 @@ export const Layout: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-bg-color text-base-text font-sans">
+    <div className="flex flex-col min-h-screen bg-bg-color dark:bg-slate-950 text-base-text dark:text-slate-100 font-sans transition-colors">
       <Header onMenuClick={() => setMobileMenuOpen(true)} />
       {user && <WalkthroughTour />}
       {showFeedbackModal && (
@@ -79,12 +79,12 @@ export const Layout: React.FC = () => {
             onClick={() => setMobileMenuOpen(false)}
           />
           {/* Drawer content */}
-          <div className="relative flex w-full max-w-xs flex-1 flex-col bg-white pt-5 pb-4 animate-in slide-in-from-left duration-300">
+          <div className="relative flex w-full max-w-xs flex-1 flex-col bg-white dark:bg-slate-900 pt-5 pb-4 animate-in slide-in-from-left duration-300 border-r border-slate-200 dark:border-slate-800">
             <div className="absolute top-4 right-4">
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(false)}
-                className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors focus:outline-none"
+                className="p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors focus:outline-none"
                 aria-label="Close menu"
               >
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -115,7 +115,7 @@ export const Layout: React.FC = () => {
               <button
                 type="button"
                 onClick={handleBack}
-                className="inline-flex items-center text-sm font-semibold text-slate-500 hover:text-primary transition-colors gap-1.5 focus:outline-none"
+                className="inline-flex items-center text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors gap-1.5 focus:outline-none"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

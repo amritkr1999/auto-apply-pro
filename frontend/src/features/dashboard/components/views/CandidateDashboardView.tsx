@@ -340,13 +340,13 @@ export const CandidateDashboardView: React.FC = () => {
 
         {/* Timeframe selector header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-          <h2 className="text-lg font-bold text-slate-800">Overview Metrics</h2>
+          <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Overview Metrics</h2>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Timeframe:</span>
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Timeframe:</span>
             <select
               value={timeframe}
               onChange={(e) => setTimeframe(e.target.value as any)}
-              className="px-3 py-1.5 border border-slate-200 bg-white rounded-card text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+              className="px-3 py-1.5 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-card text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
             >
               <option value="all">All Time</option>
               <option value="24h">Last 24 Hours</option>
@@ -358,21 +358,21 @@ export const CandidateDashboardView: React.FC = () => {
 
         {/* Overview Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          <div className="bg-white rounded-card shadow-sm border border-slate-200 p-5">
-            <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Total Applications</h3>
-            <p className="text-3xl font-bold text-slate-800 mt-2">{totalApplications} submitted</p>
+          <div className="bg-white dark:bg-slate-900 rounded-card shadow-sm border border-slate-200 dark:border-slate-800 p-5">
+            <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Applications</h3>
+            <p className="text-3xl font-bold text-slate-800 dark:text-white mt-2">{totalApplications} submitted</p>
           </div>
-          <div className="bg-white rounded-card shadow-sm border border-slate-200 p-5">
-            <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Pending Approval</h3>
-            <p className="text-3xl font-bold text-slate-800 mt-2">{pendingApprovalCount} drafts</p>
+          <div className="bg-white dark:bg-slate-900 rounded-card shadow-sm border border-slate-200 dark:border-slate-800 p-5">
+            <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Pending Approval</h3>
+            <p className="text-3xl font-bold text-slate-800 dark:text-white mt-2">{pendingApprovalCount} drafts</p>
           </div>
-          <div className="bg-white rounded-card shadow-sm border border-slate-200 p-5">
-            <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Match Suggestions</h3>
-            <p className="text-3xl font-bold text-slate-800 mt-2">{suggestionCount} suggestions</p>
+          <div className="bg-white dark:bg-slate-900 rounded-card shadow-sm border border-slate-200 dark:border-slate-800 p-5">
+            <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Match Suggestions</h3>
+            <p className="text-3xl font-bold text-slate-800 dark:text-white mt-2">{suggestionCount} suggestions</p>
           </div>
-          <div className="bg-white rounded-card shadow-sm border border-slate-200 p-5">
-            <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Sent Emails</h3>
-            <p className="text-3xl font-bold text-slate-800 mt-2">{sentCount} sent</p>
+          <div className="bg-white dark:bg-slate-900 rounded-card shadow-sm border border-slate-200 dark:border-slate-800 p-5">
+            <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Sent Emails</h3>
+            <p className="text-3xl font-bold text-slate-800 dark:text-white mt-2">{sentCount} sent</p>
           </div>
         </div>
 
@@ -382,19 +382,19 @@ export const CandidateDashboardView: React.FC = () => {
         </div>
 
         {/* HR Cold Email Campaign Status Widget */}
-        <div data-tour="campaign-widget" className="mb-10 p-6 bg-white border border-slate-200 rounded-card shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 hover:shadow-md transition-shadow duration-200">
+        <div data-tour="campaign-widget" className="mb-10 p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-card shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 hover:shadow-md transition-shadow duration-200">
           <div className="flex gap-4">
-            <div className="w-12 h-12 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-2xl shrink-0">
+            <div className="w-12 h-12 rounded-full bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/60 flex items-center justify-center text-2xl shrink-0">
               🚀
             </div>
             <div>
               <div className="flex items-center gap-3">
-                <h4 className="text-base font-bold text-slate-800">Automated HR Cold Email Campaign</h4>
+                <h4 className="text-base font-bold text-slate-800 dark:text-white">Automated HR Cold Email Campaign</h4>
                 <Badge variant={hrOutreachCampaignEnabled ? "success" : "neutral"}>
                   {hrOutreachCampaignEnabled ? "Active" : "Inactive"}
                 </Badge>
               </div>
-              <p className="text-xs text-slate-500 mt-1 max-w-xl">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xl">
                 Automatically draft and dispatch cold outreach emails to HR contacts in random order. Respects daily quotas, intervals, and active slot windows.
               </p>
             </div>
@@ -402,7 +402,7 @@ export const CandidateDashboardView: React.FC = () => {
           <div className="flex items-center gap-3 self-end md:self-center shrink-0">
             <button
               onClick={() => navigate("/candidate/profile")}
-              className="px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-800 transition-colors border border-slate-200 rounded-card hover:bg-slate-50"
+              className="px-3.5 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-350 hover:text-slate-800 dark:hover:text-slate-100 transition-colors border border-slate-200 dark:border-slate-800 rounded-card hover:bg-slate-50 dark:hover:bg-slate-800"
             >
               Configure Settings
             </button>

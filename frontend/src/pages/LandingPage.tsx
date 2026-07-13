@@ -3,8 +3,10 @@ import { Link } from "react-router-dom";
 import "./landing.css";
 import { feedbackService } from "../features/profile/services/feedbackService";
 import type { FeedbackResponse } from "../features/profile/services/feedbackService";
+import { useTheme } from "../context/ThemeContext";
 
 export const LandingPage: React.FC = () => {
+  const { toggleTheme, resolvedTheme } = useTheme();
   const userStr = localStorage.getItem("user");
   const user = userStr ? JSON.parse(userStr) : null;
 
@@ -58,7 +60,35 @@ export const LandingPage: React.FC = () => {
             <li className="nav-link-item"><a href="#testimonials">Testimonials</a></li>
             <li className="nav-link-item"><a href="#faqs">FAQs</a></li>
           </ul>
-          <div className="nav-ctas">
+          <div className="nav-ctas" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="theme-toggle-btn"
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: "8px",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "var(--text-secondary)",
+                transition: "opacity 0.2s"
+              }}
+              title={`Switch to ${resolvedTheme === "dark" ? "light" : "dark"} mode`}
+            >
+              {resolvedTheme === "dark" ? (
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} style={{ width: "20px", height: "20px", color: "#fbbf24" }}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
+                </svg>
+              ) : (
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} style={{ width: "20px", height: "20px", color: "#4f46e5" }}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              )}
+            </button>
             {user ? (
               <Link to={getDashboardPath()} className="landing-btn btn-primary">
                 Go to Dashboard

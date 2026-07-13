@@ -12,4 +12,63 @@ html, body, #root {
   font-family: 'Inter', sans-serif;
   background: #f1f2f6;
   color: #2d3436;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+html.dark, html.dark body, html.dark #root {
+  background: #0f172a;
+  color: #f8fafc;
+}
+
+/* login.css theme overrides */
+.dark {
+  --bg-primary: #0f172a;
+  --bg-card: #1e293b;
+  --border-color: #334155;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  
+  --candidate-bg: rgba(0, 184, 148, 0.15);
+  --recruiter-bg: rgba(139, 92, 246, 0.15);
+  --company-bg: rgba(9, 132, 227, 0.15);
+}
+
+/* landing.css theme overrides */
+.dark .landing-root {
+  --bg-color: #0b0f19;
+  --bg-radial: radial-gradient(circle at 50% -20%, #1e1b4b 0%, #0f172a 70%);
+  --card-bg: rgba(30, 41, 59, 0.7);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --accent-cyan: #38bdf8;
+  --accent-purple: #a78bfa;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-dark: #f8fafc;
+}
+
+.dark .landing-nav {
+  background: rgba(15, 23, 42, 0.75);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.dark .feature-card,
+.dark .benefit-card,
+.dark .pricing-card,
+.dark .testimonial-card,
+.dark .faq-item {
+  background: rgba(30, 41, 59, 0.5) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark .pricing-card.popular {
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
+}
+
+.dark .faq-answer {
+  color: var(--text-secondary);
+}
+
+.dark .footer-section {
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
 }
