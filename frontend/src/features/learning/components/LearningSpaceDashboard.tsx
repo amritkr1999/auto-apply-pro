@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { learningService } from "../services/learningService";
 import type { Topic, DailyContent, Progress, Roadmap } from "../services/learningService";
 
 export const LearningSpaceDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const userStr = localStorage.getItem("user");
+  const user = userStr ? JSON.parse(userStr) : null;
   const [topics, setTopics] = useState<Topic[]>([]);
   const [roadmaps, setRoadmaps] = useState<Roadmap[]>([]);
   const [activeView, setActiveView] = useState<"topics" | "roadmaps">("topics");
@@ -208,6 +210,28 @@ export const LearningSpaceDashboard: React.FC = () => {
             <p className="text-slate-300 max-w-xl text-sm sm:text-base">
               Expand your tech stack, practice interview questions, and study official documentations to boost your candidacy.
             </p>
+            <div className="flex flex-wrap items-center gap-3 pt-2">
+              <Link
+                to="/learning/submit"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 border border-white/15 text-white rounded-lg text-xs font-bold transition-all"
+              >
+                ✍️ Contribute a Question
+              </Link>
+              <Link
+                to="/learning/submissions"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 border border-white/15 text-white rounded-lg text-xs font-bold transition-all"
+              >
+                📋 My Submissions
+              </Link>
+              {user && user.role === "ADMIN" && (
+                <Link
+                  to="/learning/moderation"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/45 text-indigo-200 rounded-lg text-xs font-bold transition-all"
+                >
+                  🛡️ Moderation Portal
+                </Link>
+              )}
+            </div>
           </div>
 
           <div className="bg-white/10 backdrop-blur-md rounded-xl p-5 border border-white/10 flex items-center gap-5 min-w-[280px]">

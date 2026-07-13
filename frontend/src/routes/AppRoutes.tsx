@@ -19,11 +19,15 @@ import JobTrackerPage from "../pages/JobTrackerPage";
 import LearningSpaceDashboard from "../features/learning/components/LearningSpaceDashboard";
 import TopicDetailsView from "../features/learning/components/TopicDetailsView";
 import RoadmapDetailsView from "../features/learning/components/RoadmapDetailsView";
+import { SubmitQuestionForm } from "../features/learning/components/SubmitQuestionForm";
+import { UserSubmissionsList } from "../features/learning/components/UserSubmissionsList";
+import { AdminModerationList } from "../features/learning/components/AdminModerationList";
 import PricingPage from "../features/billing/components/PricingPage";
 import BillingPortal from "../features/billing/components/BillingPortal";
 import { TelemetryDashboard } from "../features/dashboard/components/views/TelemetryDashboard";
 
 import PublicProfilePage from "../pages/PublicProfilePage";
+import PublicPlaqueCardPage from "../pages/PublicPlaqueCardPage";
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -34,6 +38,7 @@ export const AppRoutes: React.FC = () => {
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/unsubscribe" element={<UnsubscribePage />} />
       <Route path="/profile/:username" element={<PublicProfilePage />} />
+      <Route path="/card/:username" element={<PublicPlaqueCardPage />} />
       <Route element={<Layout />}>
         <Route
           path="/candidate-dashboard"
@@ -55,6 +60,9 @@ export const AppRoutes: React.FC = () => {
         <Route path="/outreach/drafts/review" element={<DraftsReviewPage />} />
         <Route path="/outreach/queue" element={<QueueDetailsPage />} />
         <Route path="/learning" element={<LearningSpaceDashboard />} />
+        <Route path="/learning/submit" element={<SubmitQuestionForm />} />
+        <Route path="/learning/submissions" element={<UserSubmissionsList />} />
+        <Route path="/learning/moderation" element={<AdminModerationList />} />
         <Route path="/learning/topic/:topicId" element={<TopicDetailsView />} />
         <Route path="/learning/roadmap/:roadmapId" element={<RoadmapDetailsView />} />
         <Route path="/billing/pricing" element={<PricingPage />} />

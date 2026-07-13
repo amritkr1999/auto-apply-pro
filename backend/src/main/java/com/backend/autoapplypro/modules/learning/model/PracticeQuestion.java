@@ -48,4 +48,13 @@ public class PracticeQuestion {
 
     @Column(columnDefinition = "TEXT")
     private String explanation;
+
+    @Column(name = "average_rating")
+    @Builder.Default
+    private Double averageRating = 0.0;
+
+    @Column(name = "total_ratings")
+    @Builder.Default
+    private Integer totalRatings = 0;
 }
+

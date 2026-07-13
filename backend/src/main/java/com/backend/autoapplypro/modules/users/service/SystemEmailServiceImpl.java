@@ -47,4 +47,42 @@ public class SystemEmailServiceImpl implements SystemEmailService {
             }
         }
     }
+
+    @Override
+    public void sendPlaqueCardContactEmail(String recipientEmail, String candidateName, String senderName, String senderEmail, String senderCompany, String message) {
+        String subject = "New Recruiter Inquiry from your Auto Apply Pro Plaque Card!";
+        String body = "Hello " + candidateName + ",\n\n"
+                + "A visitor left you a message on your Virtual Visiting Card (Plaque Card):\n\n"
+                + "--------------------------------------------------\n"
+                + "Sender: " + senderName + "\n"
+                + "Email: " + senderEmail + "\n"
+                + "Company: " + (senderCompany != null && !senderCompany.trim().isEmpty() ? senderCompany : "N/A") + "\n\n"
+                + "Message:\n" + message + "\n"
+                + "--------------------------------------------------\n\n"
+                + "You can reply directly to this email to get in touch with them.\n\n"
+                + "Best regards,\n"
+                + "The Auto Apply Pro Team";
+
+        log.info("\n==================================================\n"
+                + "[SYSTEM EMAIL OUTBOX - PLAQUE CARD CONTACT]\n"
+                + "To: {}\n"
+                + "Subject: {}\n"
+                + "Body:\n{}\n"
+                + "==================================================",
+                recipientEmail, subject, body);
+
+        if (mailSender != null) {
+            try {
+                SimpleMailMessage mailMessage = new SimpleMailMessage();
+                mailMessage.setTo(recipientEmail);
+                mailMessage.setReplyTo(senderEmail);
+                mailMessage.setSubject(subject);
+                mailMessage.setText(body);
+                mailSender.send(mailMessage);
+                log.info("Successfully sent plaque card contact email to: {}", recipientEmail);
+            } catch (Exception e) {
+                log.error("Failed to send real email via SMTP, fell back to console logging: {}", e.getMessage());
+            }
+        }
+    }
 }
