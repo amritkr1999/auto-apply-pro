@@ -38,4 +38,5 @@ public class CandidateProfileDto {
     private Boolean isVerified;
     private String professionalVertical;
     private List<AchievementDto> achievements;
+    private List<String> excludedCompanies;
 }

@@ -99,4 +99,9 @@ public class Candidate {
     @Column(name = "is_reference_check_confirmed")
     @Builder.Default
     private Boolean isReferenceCheckConfirmed = false;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "excluded_companies", columnDefinition = "jsonb")
+    @Builder.Default
+    private List<String> excludedCompanies = new java.util.ArrayList<>();
 }

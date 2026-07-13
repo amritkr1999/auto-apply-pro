@@ -36,6 +36,8 @@ export const CandidateProfileView: React.FC<Props> = ({ userId, activeTab, onPro
   const [experience, setExperience] = useState<any[]>([]);
   const [certifications, setCertifications] = useState<string[]>([]);
   const [newCert, setNewCert] = useState("");
+  const [excludedCompanies, setExcludedCompanies] = useState<string[]>([]);
+  const [newExcludedCompany, setNewExcludedCompany] = useState("");
   const [githubUsername, setGithubUsername] = useState("");
   const [githubProfileUrl, setGithubProfileUrl] = useState("");
   const [linkedinName, setLinkedinName] = useState("");
@@ -121,6 +123,7 @@ export const CandidateProfileView: React.FC<Props> = ({ userId, activeTab, onPro
       setEducation(data.education || []);
       setExperience(data.experience || []);
       setCertifications(data.certifications || []);
+      setExcludedCompanies(data.excludedCompanies || []);
       setGithubUsername(data.githubUsername || "");
       setGithubProfileUrl(data.githubProfileUrl || "");
       setLinkedinName(data.linkedinName || "");
@@ -396,6 +399,7 @@ export const CandidateProfileView: React.FC<Props> = ({ userId, activeTab, onPro
         setEducation(data.education || []);
         setExperience(data.experience || []);
         setCertifications(data.certifications || []);
+        setExcludedCompanies(data.excludedCompanies || []);
         setGithubUsername(data.githubUsername || "");
         setGithubProfileUrl(data.githubProfileUrl || "");
         setLinkedinName(data.linkedinName || "");
@@ -458,6 +462,7 @@ export const CandidateProfileView: React.FC<Props> = ({ userId, activeTab, onPro
         education,
         experience,
         certifications,
+        excludedCompanies,
         githubUsername,
         githubProfileUrl,
         linkedinProfileUrl,
@@ -475,6 +480,7 @@ export const CandidateProfileView: React.FC<Props> = ({ userId, activeTab, onPro
       setLeetcodeUsername(result.leetcodeUsername || "");
       setIsVerified(result.isVerified || false);
       setProfessionalVertical(result.professionalVertical || "DEVELOPER");
+      setExcludedCompanies(result.excludedCompanies || []);
       
       // Update local storage user details
       const userStr = localStorage.getItem("user");
@@ -530,6 +536,20 @@ export const CandidateProfileView: React.FC<Props> = ({ userId, activeTab, onPro
 
   const handleRemoveCert = (index: number) => {
     setCertifications(certifications.filter((_, i) => i !== index));
+  };
+
+  const handleAddExcludedCompany = () => {
+    if (newExcludedCompany.trim()) {
+      const trimmed = newExcludedCompany.trim();
+      if (!excludedCompanies.some((c) => c.toLowerCase() === trimmed.toLowerCase())) {
+        setExcludedCompanies([...excludedCompanies, trimmed]);
+      }
+      setNewExcludedCompany("");
+    }
+  };
+
+  const handleRemoveExcludedCompany = (index: number) => {
+    setExcludedCompanies(excludedCompanies.filter((_, i) => i !== index));
   };
 
   if (loading) return <div className="text-slate-500 py-6 text-center font-medium animate-pulse">Loading profile details...</div>;
@@ -955,6 +975,64 @@ export const CandidateProfileView: React.FC<Props> = ({ userId, activeTab, onPro
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setExpectedSalary(e.target.value)}
               className="rounded-xl border-slate-200 focus:ring-primary focus:border-transparent px-4 py-2.5"
             />
+          </div>
+
+          {/* Excluded Companies Section */}
+          <div className="w-full border-t border-slate-100 pt-6">
+            <h3 className="text-base font-bold text-slate-800 mb-1">Excluded Companies</h3>
+            <p className="text-xs text-slate-500 mb-4">
+              Add companies that you want to exclude from email outreach and job applications. (e.g. current or previous employers).
+            </p>
+
+            <div className="space-y-4">
+              <div className="flex gap-3 max-w-md">
+                <input
+                  type="text"
+                  placeholder="e.g. Google, Microsoft, Meta"
+                  value={newExcludedCompany}
+                  onChange={(e) => setNewExcludedCompany(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleAddExcludedCompany();
+                    }
+                  }}
+                  className="flex-1 min-h-[44px] px-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all bg-slate-50/50 hover:bg-slate-50"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddExcludedCompany}
+                  className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold rounded-xl transition-all shadow-xs cursor-pointer active:scale-95 flex items-center justify-center min-h-[44px]"
+                >
+                  Exclude
+                </button>
+              </div>
+
+              <div className="flex flex-wrap gap-2 pt-1">
+                {excludedCompanies.length > 0 ? (
+                  excludedCompanies.map((company, index) => (
+                    <div
+                      key={`${company}-${index}`}
+                      className="group flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200/60 rounded-full text-xs font-semibold tracking-wide transition-all shadow-xs"
+                    >
+                      <span>{company}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveExcludedCompany(index)}
+                        className="text-rose-400 hover:text-rose-700 focus:outline-none cursor-pointer transition-colors p-0.5 rounded-full hover:bg-rose-200/60"
+                        aria-label={`Remove exclusion for ${company}`}
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <span className="text-xs text-slate-400 italic">No companies excluded yet.</span>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Resume Upload section */}

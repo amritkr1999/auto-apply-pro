@@ -58,6 +58,7 @@ export interface CandidateProfile {
   isVerified?: boolean;
   professionalVertical?: string;
   achievements?: AchievementCard[];
+  excludedCompanies?: string[];
 }
 
 export interface AchievementCard {

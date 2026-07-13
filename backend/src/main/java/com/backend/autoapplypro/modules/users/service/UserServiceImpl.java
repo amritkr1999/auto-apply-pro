@@ -222,6 +222,7 @@ public class UserServiceImpl implements UserService {
                                 .isVerified(ach.getIsVerified())
                                 .build())
                         .collect(java.util.stream.Collectors.toList()) : new java.util.ArrayList<>())
+                .excludedCompanies(candidate.getExcludedCompanies() != null ? candidate.getExcludedCompanies() : new java.util.ArrayList<>())
                 .build();
     }
 
@@ -276,6 +277,7 @@ public class UserServiceImpl implements UserService {
         candidate.setEducation(dto.getEducation());
         candidate.setExperience(dto.getExperience());
         candidate.setCertifications(dto.getCertifications());
+        candidate.setExcludedCompanies(dto.getExcludedCompanies() != null ? dto.getExcludedCompanies() : new java.util.ArrayList<>());
         candidate.setGithubUsername(dto.getGithubUsername());
         candidate.setGithubProfileUrl(dto.getGithubProfileUrl());
         candidate.setLinkedinProfileUrl(dto.getLinkedinProfileUrl());
@@ -409,6 +411,7 @@ public class UserServiceImpl implements UserService {
                                 .isVerified(ach.getIsVerified())
                                 .build())
                         .collect(java.util.stream.Collectors.toList()) : new java.util.ArrayList<>())
+                .excludedCompanies(candidate.getExcludedCompanies() != null ? candidate.getExcludedCompanies() : new java.util.ArrayList<>())
                 .build();
     }
 

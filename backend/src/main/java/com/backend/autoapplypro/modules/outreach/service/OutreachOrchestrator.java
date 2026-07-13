@@ -6,6 +6,8 @@ import com.backend.autoapplypro.modules.outreach.model.OutreachStatus;
 import com.backend.autoapplypro.modules.outreach.repository.EmailQueueRepository;
 import com.backend.autoapplypro.modules.users.model.User;
 import com.backend.autoapplypro.modules.users.model.UserActivityLog;
+import com.backend.autoapplypro.modules.users.model.Candidate;
+import com.backend.autoapplypro.modules.users.repository.CandidateRepository;
 import com.backend.autoapplypro.modules.users.repository.UserRepository;
 import com.backend.autoapplypro.modules.users.repository.UserActivityLogRepository;
 import com.backend.autoapplypro.modules.jobs.service.JobApplicationService;
@@ -32,6 +34,7 @@ public class OutreachOrchestrator {
     private final HrOutreachCampaignService campaignService;
     private final UserActivityLogRepository userActivityLogRepository;
     private final JobApplicationService jobApplicationService;
+    private final CandidateRepository candidateRepository;
     private final com.backend.autoapplypro.modules.users.service.MarketingEmailCampaignService marketingCampaignService;
 
     /**
@@ -127,6 +130,36 @@ public class OutreachOrchestrator {
             if (hasSentRecently) {
                 log.info("Safety guardrail active: Skipping email queue ID: {} for user ID: {} because another email was sent within the last {} minutes.", 
                         item.getId(), user.getId(), minInterval);
+                continue;
+            }
+
+            // Excluded Companies Check
+            boolean isExcludedCompany = false;
+            java.util.Optional<Candidate> candidateOpt = candidateRepository.findByUserId(user.getId());
+            if (candidateOpt.isPresent()) {
+                List<String> excluded = candidateOpt.get().getExcludedCompanies();
+                if (excluded != null && !excluded.isEmpty()) {
+                    String recipient = item.getRecipientEmail().toLowerCase().trim();
+                    for (String company : excluded) {
+                        String cleanCompany = company.trim().toLowerCase();
+                        if (cleanCompany.isEmpty()) continue;
+                        
+                        if (recipient.contains("@")) {
+                            String domain = recipient.substring(recipient.indexOf("@") + 1);
+                            if (domain.startsWith(cleanCompany + ".") || domain.contains("." + cleanCompany + ".")) {
+                                isExcludedCompany = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (isExcludedCompany) {
+                log.warn("EXCLUDED COMPANY SHIELD: Recipient {} belongs to excluded company. Blacklisting queue item.", item.getRecipientEmail());
+                item.setStatus(OutreachStatus.BLACKLISTED);
+                item.setErrorMessage("Company matches the candidate's excluded company list.");
+                queueRepository.save(item);
                 continue;
             }
 

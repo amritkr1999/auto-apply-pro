@@ -95,6 +95,16 @@ public class EmailServiceImpl implements EmailService {
         // 4. Fetch candidate details & construct minimized profile snippet (Data Minimization)
         CandidateProfileDto profile = userService.getCandidateProfile(userId);
         
+        // Check if company is excluded
+        if (profile.getExcludedCompanies() != null && !profile.getExcludedCompanies().isEmpty()) {
+            boolean isExcluded = profile.getExcludedCompanies().stream()
+                    .anyMatch(c -> c.trim().equalsIgnoreCase(companyName.trim()));
+            if (isExcluded) {
+                log.warn("Blocking email generation: Company '{}' is in the candidate's exclusion list.", companyName);
+                throw new IllegalArgumentException("This company has been excluded in your profile settings.");
+            }
+        }
+        
         String hook;
         if (callAi) {
             // Clear cache if 'Regenerate' is clicked to force fresh generation
