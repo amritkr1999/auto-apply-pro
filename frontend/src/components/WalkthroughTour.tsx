@@ -272,6 +272,7 @@ export const WalkthroughTour: React.FC = () => {
     console.log("Walkthrough: Tour completed / saved.");
     setActive(false);
     localStorage.setItem(`walkthrough_completed_${userId}`, "true");
+    window.dispatchEvent(new CustomEvent("walkthrough-finished"));
   };
 
   if (!active || !activeStep) return null;

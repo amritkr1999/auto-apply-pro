@@ -224,18 +224,37 @@ export const CandidateDashboardView: React.FC = () => {
   };
 
   useEffect(() => {
-    if (dailyContent?.tip) {
-      const todayStr = new Date().toDateString();
-      const lastDismissed = localStorage.getItem("last_tip_dismissed_date");
+    if (!dailyContent?.tip) return;
+
+    const todayStr = new Date().toDateString();
+
+    const tryShowTip = () => {
+      const lastDismissed = localStorage.getItem(`last_tip_dismissed_date_${userId}`);
       if (lastDismissed !== todayStr) {
         setShowTipModal(true);
       }
+    };
+
+    // Check if walkthrough tour is completed
+    const walkthroughCompleted = localStorage.getItem(`walkthrough_completed_${userId}`) === "true";
+
+    if (walkthroughCompleted) {
+      tryShowTip();
     }
-  }, [dailyContent]);
+
+    // Always listen for walkthrough completion (in case it was active or restarted manually)
+    const handleTourFinished = () => {
+      tryShowTip();
+    };
+    window.addEventListener("walkthrough-finished", handleTourFinished);
+    return () => {
+      window.removeEventListener("walkthrough-finished", handleTourFinished);
+    };
+  }, [dailyContent, userId]);
 
   const handleCloseTipModal = () => {
     const todayStr = new Date().toDateString();
-    localStorage.setItem("last_tip_dismissed_date", todayStr);
+    localStorage.setItem(`last_tip_dismissed_date_${userId}`, todayStr);
     setShowTipModal(false);
   };
 
