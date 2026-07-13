@@ -5,7 +5,6 @@ import RecruiterProfileView from "./components/RecruiterProfileView";
 import CompanyProfileView from "./components/CompanyProfileView";
 import { feedbackService } from "./services/feedbackService";
 import { profileService } from "./services/profileService";
-import PlaqueCardEditor from "./components/PlaqueCardEditor";
 
 export const CandidateProfile: React.FC = () => {
   const navigate = useNavigate();
@@ -29,18 +28,6 @@ export const CandidateProfile: React.FC = () => {
   const [feedbackSubmitting, setFeedbackSubmitting] = useState<boolean>(false);
   const [feedbackSuccess, setFeedbackSuccess] = useState<boolean>(false);
   const [feedbackError, setFeedbackError] = useState<string>("");
-
-  const [candidateProfile, setCandidateProfile] = useState<any>(null);
-  const [reloadTrigger, setReloadTrigger] = useState(0);
-
-  useEffect(() => {
-    if (user.role === "CANDIDATE") {
-      profileService.getCandidateProfile(user.id)
-        .then((data) => setCandidateProfile(data))
-        .catch((err) => console.error("Error loading candidate profile for header links", err));
-    }
-  }, [user.id, user.role, reloadTrigger]);
-
 
   useEffect(() => {
     // If the role has changed or details update in localStorage, sync them
@@ -66,7 +53,6 @@ export const CandidateProfile: React.FC = () => {
       u.avatar = avatar;
       localStorage.setItem("user", JSON.stringify(u));
     }
-    setReloadTrigger(prev => prev + 1);
   };
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -225,6 +211,7 @@ export const CandidateProfile: React.FC = () => {
                   type="button"
                   onClick={() => {
                     localStorage.removeItem(`walkthrough_completed_${user.id}`);
+                    localStorage.removeItem(`last_tip_dismissed_date_${user.id}`);
                     const dashboardPath = user.role === "RECRUITER" 
                       ? "/recruiter-dashboard" 
                       : user.role === "COMPANY" 
@@ -363,9 +350,6 @@ export const CandidateProfile: React.FC = () => {
         </div>
       );
     }
-    if (activeTab === "plaque-card") {
-      return <PlaqueCardEditor userId={user.id} />;
-    }
 
     return renderProfileView();
   };
@@ -395,94 +379,6 @@ export const CandidateProfile: React.FC = () => {
           </div>
         )}
       </div>
-
-      {/* Share Links Panel */}
-      {user.role === "CANDIDATE" && candidateProfile && (
-        <div className="bg-indigo-50/40 border border-indigo-100/70 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 animate-in fade-in duration-200">
-          <div className="space-y-1 text-left">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-lg">📢</span>
-              <h4 className="text-sm font-black text-slate-800">Your Shareable Profiles</h4>
-              {candidateProfile.isProfilePublic ? (
-                <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  Public & Active
-                </span>
-              ) : (
-                <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                  Private Profile
-                </span>
-              )}
-            </div>
-            <p className="text-xs text-slate-500 font-medium">
-              {candidateProfile.isProfilePublic 
-                ? "Copy and share your public profile passport or digital visiting card with recruiters."
-                : "Your profile is private. Enable 'Public Profile' under Professional Details to share links."}
-            </p>
-          </div>
-
-          {candidateProfile.isProfilePublic && candidateProfile.username && (
-            <div className="flex flex-col sm:flex-row flex-wrap gap-3 shrink-0 w-full md:w-auto">
-              {/* Profile Link */}
-              <div className="flex items-center bg-white border border-slate-200 rounded-xl p-1 shadow-xs hover:border-slate-300 transition-colors w-full sm:w-auto justify-between">
-                <span className="text-[11px] font-bold text-slate-600 px-2 truncate max-w-[140px] sm:max-w-[200px] select-all">
-                  {`/profile/${candidateProfile.username}`}
-                </span>
-                <div className="flex gap-0.5 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      navigator.clipboard.writeText(`${window.location.origin}/profile/${candidateProfile.username}`);
-                      alert("Public Profile link copied to clipboard!");
-                    }}
-                    className="px-2.5 py-1.5 text-[11px] font-bold text-primary hover:bg-slate-50 rounded-lg cursor-pointer transition-colors active:scale-95"
-                    title="Copy Profile Link"
-                  >
-                    Copy
-                  </button>
-                  <a
-                    href={`/profile/${candidateProfile.username}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="px-2.5 py-1.5 text-[11px] font-bold text-slate-600 hover:bg-slate-50 rounded-lg cursor-pointer transition-colors text-center"
-                    title="Open Profile Link"
-                  >
-                    View ↗
-                  </a>
-                </div>
-              </div>
-
-              {/* Card Link */}
-              <div className="flex items-center bg-white border border-slate-200 rounded-xl p-1 shadow-xs hover:border-slate-300 transition-colors w-full sm:w-auto justify-between">
-                <span className="text-[11px] font-bold text-slate-600 px-2 truncate max-w-[140px] sm:max-w-[200px] select-all">
-                  {`/card/${candidateProfile.username}`}
-                </span>
-                <div className="flex gap-0.5 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      navigator.clipboard.writeText(`${window.location.origin}/card/${candidateProfile.username}`);
-                      alert("Virtual Visiting Card link copied to clipboard!");
-                    }}
-                    className="px-2.5 py-1.5 text-[11px] font-bold text-primary hover:bg-slate-50 rounded-lg cursor-pointer transition-colors active:scale-95"
-                    title="Copy Card Link"
-                  >
-                    Copy
-                  </button>
-                  <a
-                    href={`/card/${candidateProfile.username}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="px-2.5 py-1.5 text-[11px] font-bold text-slate-600 hover:bg-slate-50 rounded-lg cursor-pointer transition-colors text-center"
-                    title="Open Card Link"
-                  >
-                    View ↗
-                  </a>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Column: Profile Card and Sidebar Navigation */}
@@ -571,18 +467,6 @@ export const CandidateProfile: React.FC = () => {
                 >
                   <span className="mr-3 text-lg">⚙️</span>
                   Outreach & Scheduling
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("plaque-card")}
-                  className={`w-full flex items-center px-4 py-3 text-sm font-semibold rounded-xl transition-all cursor-pointer ${
-                    activeTab === "plaque-card"
-                      ? "bg-primary/5 text-primary border-l-4 border-primary pl-3 border-r-0"
-                      : "text-slate-600 hover:bg-slate-50 hover:text-primary"
-                  }`}
-                >
-                  <span className="mr-3 text-lg">🎴</span>
-                  Virtual Visiting Card
                 </button>
               </>
             ) : (

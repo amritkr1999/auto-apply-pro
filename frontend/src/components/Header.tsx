@@ -61,6 +61,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
               type="button"
               onClick={() => {
                 localStorage.removeItem(`walkthrough_completed_${user.id}`);
+                localStorage.removeItem(`last_tip_dismissed_date_${user.id}`);
                 window.dispatchEvent(new CustomEvent("start-walkthrough"));
               }}
               className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 hover:text-amber-800 border border-amber-200 rounded-full text-xs font-semibold shadow-sm transition-all focus:outline-none cursor-pointer"
