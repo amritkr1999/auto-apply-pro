@@ -2,6 +2,7 @@ package com.backend.autoapplypro.modules.users.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 import java.time.LocalDateTime;
 
 @Entity
@@ -29,6 +30,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "professional_vertical")
+    @ColumnDefault("'DEVELOPER'")
     @Builder.Default
     private ProfessionalVertical professionalVertical = ProfessionalVertical.DEVELOPER;
 
