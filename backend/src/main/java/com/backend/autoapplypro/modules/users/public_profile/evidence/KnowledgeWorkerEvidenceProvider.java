@@ -1,7 +1,7 @@
 package com.backend.autoapplypro.modules.users.public_profile.evidence;
 
 import com.backend.autoapplypro.modules.users.model.User;
-import com.backend.autoapplypro.modules.users.model.Candidate;
+import com.backend.autoapplypro.modules.users.model.ProfessionalProfile;
 import com.backend.autoapplypro.modules.users.model.ProfessionalVertical;
 import com.backend.autoapplypro.modules.users.public_profile.dto.AchievementCard;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ public class KnowledgeWorkerEvidenceProvider implements EvidenceProvider {
     public Map<String, Object> getEvidenceMetrics(User user) {
         log.info("Compiling knowledge worker evidence metrics for User ID: {}", user.getId());
         Map<String, Object> metrics = new HashMap<>();
-        Candidate candidate = user.getCandidate();
+        ProfessionalProfile candidate = user.getProfessionalProfile();
         if (candidate != null) {
             if (candidate.getLinkedinName() != null) {
                 metrics.put("linkedin", Map.of(
@@ -50,7 +50,7 @@ public class KnowledgeWorkerEvidenceProvider implements EvidenceProvider {
     @Override
     public List<AchievementCard> getHighlights(User user) {
         List<AchievementCard> cards = new ArrayList<>();
-        Candidate candidate = user.getCandidate();
+        ProfessionalProfile candidate = user.getProfessionalProfile();
         if (candidate != null) {
             int trustScore = calculateTrustScore(user);
             boolean isVerified = trustScore > 70;
@@ -104,7 +104,7 @@ public class KnowledgeWorkerEvidenceProvider implements EvidenceProvider {
 
     @Override
     public int calculateTrustScore(User user) {
-        Candidate candidate = user.getCandidate();
+        ProfessionalProfile candidate = user.getProfessionalProfile();
         if (candidate == null) {
             return 10;
         }

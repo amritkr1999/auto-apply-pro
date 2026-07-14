@@ -1,9 +1,9 @@
 package com.backend.autoapplypro.modules.users.controller;
 
-import com.backend.autoapplypro.modules.users.model.Candidate;
+import com.backend.autoapplypro.modules.users.model.ProfessionalProfile;
 import com.backend.autoapplypro.modules.users.model.User;
 import com.backend.autoapplypro.modules.users.model.UserRole;
-import com.backend.autoapplypro.modules.users.repository.CandidateRepository;
+import com.backend.autoapplypro.modules.users.repository.ProfessionalProfileRepository;
 import com.backend.autoapplypro.modules.users.repository.UserRepository;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
@@ -32,7 +32,7 @@ import java.util.Map;
 @Slf4j
 public class SocialOAuthController {
 
-    private final CandidateRepository candidateRepository;
+    private final ProfessionalProfileRepository professionalProfileRepository;
     private final UserRepository userRepository;
     private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
     private final com.backend.autoapplypro.config.JwtUtil jwtUtil;
@@ -244,7 +244,7 @@ public class SocialOAuthController {
                     user = userRepository.save(user);
                     marketingCampaignService.sendWelcomeEmail(user);
 
-                    Candidate candidate = Candidate.builder()
+                    ProfessionalProfile candidate = ProfessionalProfile.builder()
                             .user(user)
                             .githubUsername(githubUsername)
                             .githubProfileUrl(githubProfileUrl)
@@ -252,16 +252,16 @@ public class SocialOAuthController {
                             .skills(new java.util.HashSet<>())
                             .jobPreferences(new java.util.HashMap<>())
                             .build();
-                    candidateRepository.save(candidate);
+                    professionalProfileRepository.save(candidate);
                 } else {
                     if (user.getRole() == UserRole.CANDIDATE) {
-                        Candidate candidate = candidateRepository.findByUserId(user.getId()).orElse(null);
+                        ProfessionalProfile candidate = professionalProfileRepository.findByUserId(user.getId()).orElse(null);
                         if (candidate != null) {
                             if (candidate.getGithubUsername() == null) {
                                 candidate.setGithubUsername(githubUsername);
                                 candidate.setGithubProfileUrl(githubProfileUrl);
                                 candidate.setIsVerified(true);
-                                candidateRepository.save(candidate);
+                                professionalProfileRepository.save(candidate);
                             }
                         }
                     }
@@ -280,14 +280,14 @@ public class SocialOAuthController {
                 );
                 return new RedirectView(targetUrl);
             } else {
-                Candidate candidate = candidateRepository.findByUserId(userId)
-                        .orElseThrow(() -> new IllegalArgumentException("Candidate profile not found"));
+                ProfessionalProfile candidate = professionalProfileRepository.findByUserId(userId)
+                        .orElseThrow(() -> new IllegalArgumentException("Professional profile not found"));
                 candidate.setGithubUsername(githubUsername);
                 candidate.setGithubProfileUrl(githubProfileUrl);
                 candidate.setIsVerified(true);
-                candidateRepository.save(candidate);
+                professionalProfileRepository.save(candidate);
 
-                return new RedirectView(frontendUrl + "/candidate/profile?status=success&provider=github");
+                return new RedirectView(frontendUrl + "/profile/settings?status=success&provider=github");
             }
 
         } catch (Exception e) {
@@ -391,13 +391,13 @@ public class SocialOAuthController {
             }
 
             // Save to database
-            Candidate candidate = candidateRepository.findByUserId(userId)
-                    .orElseThrow(() -> new IllegalArgumentException("Candidate profile not found"));
+            ProfessionalProfile candidate = professionalProfileRepository.findByUserId(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("Professional profile not found"));
             candidate.setLinkedinName(linkedinName);
             candidate.setLinkedinProfileUrl(linkedinProfileUrl);
-            candidateRepository.save(candidate);
+            professionalProfileRepository.save(candidate);
 
-            return new RedirectView(frontendUrl + "/candidate/profile?status=success&provider=linkedin");
+            return new RedirectView(frontendUrl + "/profile/settings?status=success&provider=linkedin");
 
         } catch (Exception e) {
             log.error("LinkedIn OAuth Error for user {}", userId, e);
@@ -405,7 +405,7 @@ public class SocialOAuthController {
             try {
                 errMsg = java.net.URLEncoder.encode(errMsg, "UTF-8");
             } catch (Exception ex) {}
-            return new RedirectView(frontendUrl + "/candidate/profile?status=error&provider=linkedin&errorMsg=" + errMsg);
+            return new RedirectView(frontendUrl + "/profile/settings?status=error&provider=linkedin&errorMsg=" + errMsg);
         }
     }
 
@@ -416,12 +416,12 @@ public class SocialOAuthController {
     @Transactional
     public ResponseEntity<?> disconnectGithub(@RequestParam("userId") Long userId) {
         log.info("Disconnecting GitHub for user: {}", userId);
-        Candidate candidate = candidateRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Candidate profile not found"));
+        ProfessionalProfile candidate = professionalProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Professional profile not found"));
         candidate.setGithubUsername(null);
         candidate.setGithubProfileUrl(null);
         candidate.setIsVerified(false);
-        candidateRepository.save(candidate);
+        professionalProfileRepository.save(candidate);
         return ResponseEntity.ok(Map.of("message", "GitHub disconnected successfully"));
     }
 
@@ -432,11 +432,11 @@ public class SocialOAuthController {
     @Transactional
     public ResponseEntity<?> disconnectLinkedin(@RequestParam("userId") Long userId) {
         log.info("Disconnecting LinkedIn for user: {}", userId);
-        Candidate candidate = candidateRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Candidate profile not found"));
+        ProfessionalProfile candidate = professionalProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Professional profile not found"));
         candidate.setLinkedinName(null);
         candidate.setLinkedinProfileUrl(null);
-        candidateRepository.save(candidate);
+        professionalProfileRepository.save(candidate);
         return ResponseEntity.ok(Map.of("message", "LinkedIn disconnected successfully"));
     }
 }

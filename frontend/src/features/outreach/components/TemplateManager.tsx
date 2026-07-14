@@ -445,7 +445,7 @@ export const TemplateManager: React.FC = () => {
             </p>
           </div>
           <Link
-            to="/billing/portal"
+            to="/billing/pricing"
             className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-btn text-xs font-semibold shadow-sm transition-all text-center shrink-0"
           >
             Upgrade to Premium

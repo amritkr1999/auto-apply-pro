@@ -1,10 +1,10 @@
 package com.backend.autoapplypro;
 
 import com.backend.autoapplypro.modules.users.dto.PlaqueCardDto;
-import com.backend.autoapplypro.modules.users.model.Candidate;
+import com.backend.autoapplypro.modules.users.model.ProfessionalProfile;
 import com.backend.autoapplypro.modules.users.model.User;
 import com.backend.autoapplypro.modules.users.model.UserRole;
-import com.backend.autoapplypro.modules.users.repository.CandidateRepository;
+import com.backend.autoapplypro.modules.users.repository.ProfessionalProfileRepository;
 import com.backend.autoapplypro.modules.users.repository.UserRepository;
 import com.backend.autoapplypro.modules.users.service.PlaqueCardService;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,7 @@ class PlaqueCardServiceTest {
     private UserRepository userRepository;
 
     @Autowired
-    private CandidateRepository candidateRepository;
+    private ProfessionalProfileRepository professionalProfileRepository;
 
     @Test
     void testGetDefaultPlaqueCardAndModify() {
@@ -44,12 +44,12 @@ class PlaqueCardServiceTest {
                 .build();
         user = userRepository.save(user);
 
-        Candidate candidate = Candidate.builder()
+        ProfessionalProfile candidate = ProfessionalProfile.builder()
                 .user(user)
                 .summary("Highly motivated tester of plaque cards.")
                 .build();
-        candidate = candidateRepository.save(candidate);
-        user.setCandidate(candidate);
+        candidate = professionalProfileRepository.save(candidate);
+        user.setProfessionalProfile(candidate);
 
         // 2. Fetch Plaque Card (should generate defaults)
         PlaqueCardDto cardDto = plaqueCardService.getPlaqueCardByUserId(user.getId());

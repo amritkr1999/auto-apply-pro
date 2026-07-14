@@ -758,7 +758,7 @@ export const ScreenshotUploader: React.FC = () => {
             </button>
             <button
               type="button"
-              onClick={() => navigate("/candidate/profile")}
+              onClick={() => navigate("/profile/settings")}
               className="px-4 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-650 rounded-lg text-xs transition-all"
             >
               Go to Profile

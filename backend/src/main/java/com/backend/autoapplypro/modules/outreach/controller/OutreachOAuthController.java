@@ -4,9 +4,9 @@ import com.backend.autoapplypro.modules.outreach.model.GmailCredential;
 import com.backend.autoapplypro.modules.outreach.repository.GmailCredentialRepository;
 import com.backend.autoapplypro.modules.users.model.User;
 import com.backend.autoapplypro.modules.users.model.UserRole;
-import com.backend.autoapplypro.modules.users.model.Candidate;
+import com.backend.autoapplypro.modules.users.model.ProfessionalProfile;
 import com.backend.autoapplypro.modules.users.repository.UserRepository;
-import com.backend.autoapplypro.modules.users.repository.CandidateRepository;
+import com.backend.autoapplypro.modules.users.repository.ProfessionalProfileRepository;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
@@ -31,7 +31,7 @@ public class OutreachOAuthController {
 
     private final GmailCredentialRepository credentialRepository;
     private final UserRepository userRepository;
-    private final CandidateRepository candidateRepository;
+    private final ProfessionalProfileRepository professionalProfileRepository;
     private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
     private final com.backend.autoapplypro.config.JwtUtil jwtUtil;
     private final com.backend.autoapplypro.modules.users.service.MarketingEmailCampaignService marketingCampaignService;
@@ -142,12 +142,12 @@ public class OutreachOAuthController {
                     user = userRepository.save(user);
                     marketingCampaignService.sendWelcomeEmail(user);
 
-                    Candidate candidate = Candidate.builder()
+                    ProfessionalProfile candidate = ProfessionalProfile.builder()
                             .user(user)
                             .skills(new java.util.HashSet<>())
                             .jobPreferences(new java.util.HashMap<>())
                             .build();
-                    candidateRepository.save(candidate);
+                    professionalProfileRepository.save(candidate);
                 }
 
                 String jwtToken = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getRole().name());

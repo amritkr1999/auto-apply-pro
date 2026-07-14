@@ -2,10 +2,10 @@ package com.backend.autoapplypro.modules.users.service;
 
 import com.backend.autoapplypro.modules.users.dto.PlaqueCardContactRequest;
 import com.backend.autoapplypro.modules.users.dto.PlaqueCardDto;
-import com.backend.autoapplypro.modules.users.model.Candidate;
+import com.backend.autoapplypro.modules.users.model.ProfessionalProfile;
 import com.backend.autoapplypro.modules.users.model.PlaqueCard;
 import com.backend.autoapplypro.modules.users.model.User;
-import com.backend.autoapplypro.modules.users.repository.CandidateRepository;
+import com.backend.autoapplypro.modules.users.repository.ProfessionalProfileRepository;
 import com.backend.autoapplypro.modules.users.repository.PlaqueCardRepository;
 import com.backend.autoapplypro.modules.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,19 +21,19 @@ import java.util.*;
 public class PlaqueCardServiceImpl implements PlaqueCardService {
 
     private final PlaqueCardRepository plaqueCardRepository;
-    private final CandidateRepository candidateRepository;
+    private final ProfessionalProfileRepository professionalProfileRepository;
     private final UserRepository userRepository;
     private final SystemEmailService systemEmailService;
 
     @Override
     @Transactional
     public PlaqueCardDto getPlaqueCardByUserId(Long userId) {
-        Candidate candidate = candidateRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Candidate not found for user ID: " + userId));
+        ProfessionalProfile candidate = professionalProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Professional profile not found for user ID: " + userId));
 
-        PlaqueCard plaqueCard = plaqueCardRepository.findByCandidateId(candidate.getId())
+        PlaqueCard plaqueCard = plaqueCardRepository.findByProfessionalProfileId(candidate.getId())
                 .orElseGet(() -> {
-                    log.info("No plaque card found for candidate {}. Generating default template.", candidate.getId());
+                    log.info("No plaque card found for professional profile {}. Generating default template.", candidate.getId());
                     PlaqueCard defaultCard = createDefaultCard(candidate);
                     return plaqueCardRepository.save(defaultCard);
                 });
@@ -44,10 +44,10 @@ public class PlaqueCardServiceImpl implements PlaqueCardService {
     @Override
     @Transactional
     public PlaqueCardDto updatePlaqueCard(Long userId, PlaqueCardDto dto) {
-        Candidate candidate = candidateRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Candidate not found for user ID: " + userId));
+        ProfessionalProfile candidate = professionalProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Professional profile not found for user ID: " + userId));
 
-        PlaqueCard plaqueCard = plaqueCardRepository.findByCandidateId(candidate.getId())
+        PlaqueCard plaqueCard = plaqueCardRepository.findByProfessionalProfileId(candidate.getId())
                 .orElseGet(() -> createDefaultCard(candidate));
 
         plaqueCard.setThemeConfig(dto.getThemeConfig());
@@ -71,12 +71,12 @@ public class PlaqueCardServiceImpl implements PlaqueCardService {
             throw new IllegalStateException("Profile is set to private.");
         }
 
-        Candidate candidate = user.getCandidate();
+        ProfessionalProfile candidate = user.getProfessionalProfile();
         if (candidate == null) {
             throw new IllegalArgumentException("Plaque card only available for candidates.");
         }
 
-        PlaqueCard plaqueCard = plaqueCardRepository.findByCandidateId(candidate.getId())
+        PlaqueCard plaqueCard = plaqueCardRepository.findByProfessionalProfileId(candidate.getId())
                 .orElseGet(() -> {
                     log.info("No plaque card found for public candidate {}. Generating temporary default template.", candidate.getId());
                     return createDefaultCard(candidate);
@@ -132,12 +132,12 @@ public class PlaqueCardServiceImpl implements PlaqueCardService {
         User user = userRepository.findByUsername(cleanUsername)
                 .orElseThrow(() -> new NoSuchElementException("Profile not found."));
 
-        if (user.getCandidate() == null) {
+        if (user.getProfessionalProfile() == null) {
             throw new IllegalArgumentException("User is not a candidate.");
         }
 
-        PlaqueCard plaqueCard = plaqueCardRepository.findByCandidateId(user.getCandidate().getId())
-                .orElseGet(() -> createDefaultCard(user.getCandidate()));
+        PlaqueCard plaqueCard = plaqueCardRepository.findByProfessionalProfileId(user.getProfessionalProfile().getId())
+                .orElseGet(() -> createDefaultCard(user.getProfessionalProfile()));
 
         // Double check if contact form is disabled
         Map<String, Object> settings = plaqueCard.getSettings();
@@ -164,7 +164,7 @@ public class PlaqueCardServiceImpl implements PlaqueCardService {
                 .build();
     }
 
-    private PlaqueCard createDefaultCard(Candidate candidate) {
+    private PlaqueCard createDefaultCard(ProfessionalProfile candidate) {
         Map<String, Object> settings = new HashMap<>();
         settings.put("displayName", candidate.getUser().getName());
         settings.put("customHeadline", candidate.getUser().getProfessionalVertical() != null ? 
@@ -186,7 +186,7 @@ public class PlaqueCardServiceImpl implements PlaqueCardService {
         settings.put("showContactForm", true);
 
         return PlaqueCard.builder()
-                .candidate(candidate)
+                .professionalProfile(candidate)
                 .themeConfig(new HashMap<>())
                 .settings(settings)
                 .elements(new ArrayList<>())

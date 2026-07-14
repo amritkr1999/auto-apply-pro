@@ -23,7 +23,7 @@ interface Props {
   onProfileUpdate: (name: string, avatar: string) => void;
 }
 
-export const CandidateProfileView: React.FC<Props> = ({ userId, activeTab, onProfileUpdate }) => {
+export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, onProfileUpdate }) => {
   const [profile, setProfile] = useState<CandidateProfile | null>(null);
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
@@ -857,62 +857,64 @@ export const CandidateProfileView: React.FC<Props> = ({ userId, activeTab, onPro
                       onChange={(e) => setProfessionalVertical(e.target.value)}
                       className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary transition-all"
                     >
-                      <option value="DEVELOPER">Developer / Software Engineer</option>
-                      <option value="KNOWLEDGE_WORKER">Knowledge Worker (Manager, Consultant, Accountant)</option>
-                      <option value="DOCUMENT_VERIFICATION">Document Verification (Lawyer, Doctor)</option>
+                      <option value="DEVELOPER">Technology & Software Engineering</option>
+                      <option value="KNOWLEDGE_WORKER">Business Operations, Management & Finance</option>
+                      <option value="DOCUMENT_VERIFICATION">Legal, Regulatory & Medical Services</option>
                     </select>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-slate-200/50 animate-in fade-in duration-250">
+                  <div className={`grid grid-cols-1 ${professionalVertical === "DEVELOPER" ? "md:grid-cols-2" : "md:grid-cols-1"} gap-4 pt-3 border-t border-slate-200/50 animate-in fade-in duration-250`}>
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <label htmlFor="public-username-input" className="block text-xs font-bold uppercase tracking-wider text-slate-500">
-                        Profile Username / Handle
-                      </label>
-                      {isVerified && (
-                        <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-250 px-2 py-0.5 rounded-full">
-                          Verified ✔
-                        </span>
+                          Profile Username / Handle
+                        </label>
+                        {isVerified && (
+                          <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-250 px-2 py-0.5 rounded-full">
+                            Verified ✔
+                          </span>
+                        )}
+                      </div>
+                      <input
+                        id="public-username-input"
+                        type="text"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value.toLowerCase().replaceAll(/[^a-z0-9_]/g, ""))}
+                        placeholder="e.g. professional_handle"
+                        required={isProfilePublic}
+                        className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                      />
+                      {username && username !== profile?.username && (
+                        <div className="mt-1.5 text-xs">
+                          {checkingUsername ? (
+                            <span className="text-slate-400 font-medium animate-pulse">Checking availability...</span>
+                          ) : usernameAvailable ? (
+                            <span className="text-emerald-600 font-semibold">✓ Username is available</span>
+                          ) : (
+                            <span className="text-rose-500 font-semibold">✗ Username is already taken</span>
+                          )}
+                        </div>
                       )}
                     </div>
-                    <input
-                      id="public-username-input"
-                      type="text"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value.toLowerCase().replaceAll(/[^a-z0-9_]/g, ""))}
-                      placeholder="e.g. developer_handle"
-                      required={isProfilePublic}
-                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary transition-all"
-                    />
-                    {username && username !== profile?.username && (
-                      <div className="mt-1.5 text-xs">
-                        {checkingUsername ? (
-                          <span className="text-slate-400 font-medium animate-pulse">Checking availability...</span>
-                        ) : usernameAvailable ? (
-                          <span className="text-emerald-600 font-semibold">✓ Username is available</span>
-                        ) : (
-                          <span className="text-rose-500 font-semibold">✗ Username is already taken</span>
-                        )}
+
+                    {professionalVertical === "DEVELOPER" && (
+                      <div>
+                        <label htmlFor="leetcode-username-input" className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+                          LeetCode Username
+                        </label>
+                        <input
+                          id="leetcode-username-input"
+                          type="text"
+                          value={leetcodeUsername}
+                          onChange={(e) => setLeetcodeUsername(e.target.value)}
+                          placeholder="e.g. leetcode_user"
+                          className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                        />
                       </div>
                     )}
                   </div>
-
-                  <div>
-                    <label htmlFor="leetcode-username-input" className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-                      LeetCode Username
-                    </label>
-                    <input
-                      id="leetcode-username-input"
-                      type="text"
-                      value={leetcodeUsername}
-                      onChange={(e) => setLeetcodeUsername(e.target.value)}
-                      placeholder="e.g. leetcode_user"
-                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary transition-all"
-                    />
-                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
               {isProfilePublic && username && (
                 <div className="mt-4 p-4 bg-white border border-slate-200/80 rounded-xl flex items-center justify-between gap-3 flex-wrap">
@@ -1158,63 +1160,65 @@ export const CandidateProfileView: React.FC<Props> = ({ userId, activeTab, onPro
             )}
           </div>
 
-          {/* Connected Social Accounts */}
+          {/* Connected Professional Accounts */}
           <div className="w-full border-t border-slate-100 pt-6">
-            <h3 className="text-base font-bold text-slate-800 mb-2">Connected Social Accounts</h3>
-            <p className="text-xs text-slate-500 mb-4">
-              Connect your GitHub and LinkedIn profiles to authenticate your professional identity and enrich outreach materials.
+            <h3 className="text-base font-bold text-slate-800 mb-2">Connected Professional Accounts</h3>
+            <p className="text-xs text-slate-550 dark:text-slate-400 mb-4">
+              Connect your verified accounts to authenticate your professional identity and enrich outreach materials.
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className={`grid grid-cols-1 ${professionalVertical === "DEVELOPER" ? "md:grid-cols-2" : "md:grid-cols-1"} gap-4`}>
               {/* GitHub Card */}
-              {githubUsername ? (
-                <div className="flex items-center justify-between p-4 bg-slate-50/50 border border-slate-200 rounded-2xl transition-all hover:bg-slate-50">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-white p-2 rounded-xl border border-slate-150 shadow-xs">
-                      <GithubIcon />
+              {professionalVertical === "DEVELOPER" && (
+                githubUsername ? (
+                  <div className="flex items-center justify-between p-4 bg-slate-50/50 border border-slate-200 rounded-2xl transition-all hover:bg-slate-50">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-white p-2 rounded-xl border border-slate-150 shadow-xs">
+                        <GithubIcon />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-slate-800">GitHub Connected</p>
+                        <a
+                          href={githubProfileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-primary hover:underline font-semibold block truncate"
+                        >
+                          @{githubUsername}
+                        </a>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold text-slate-800">GitHub Connected</p>
-                      <a
-                        href={githubProfileUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-primary hover:underline font-semibold block truncate"
-                      >
-                        @{githubUsername}
-                      </a>
-                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleDisconnectGithub}
+                      className="text-rose-600 border-rose-200 hover:bg-rose-55 font-bold rounded-xl"
+                    >
+                      Disconnect
+                    </Button>
                   </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleDisconnectGithub}
-                    className="text-rose-600 border-rose-200 hover:bg-rose-50 font-bold rounded-xl"
-                  >
-                    Disconnect
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex items-center justify-between p-4 bg-slate-50/50 border border-slate-200 rounded-2xl">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-white p-2 rounded-xl border border-slate-150 shadow-xs text-slate-400">
-                      <GithubIcon />
+                ) : (
+                  <div className="flex items-center justify-between p-4 bg-slate-50/50 border border-slate-200 rounded-2xl">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-white p-2 rounded-xl border border-slate-150 shadow-xs text-slate-400">
+                        <GithubIcon />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-slate-700">GitHub</p>
+                        <p className="text-xs text-slate-400">Not connected</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-xs font-bold text-slate-700">GitHub</p>
-                      <p className="text-xs text-slate-400">Not connected</p>
-                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={handleConnectGithub}
+                      className="rounded-xl"
+                    >
+                      Connect
+                    </Button>
                   </div>
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={handleConnectGithub}
-                    className="rounded-xl"
-                  >
-                    Connect
-                  </Button>
-                </div>
+                )
               )}
 
               {/* LinkedIn Card */}
@@ -1520,4 +1524,4 @@ export const CandidateProfileView: React.FC<Props> = ({ userId, activeTab, onPro
   );
 };
 
-export default CandidateProfileView;
+export default ProfessionalProfileView;

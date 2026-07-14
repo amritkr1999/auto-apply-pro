@@ -45,7 +45,7 @@ export const Layout: React.FC = () => {
   }, [userStr]);
 
   // Hide the back button on primary dashboards to avoid redundant navigation
-  const isDashboard = ["/candidate-dashboard", "/recruiter-dashboard", "/company-dashboard"].includes(location.pathname);
+  const isDashboard = ["/dashboard", "/recruiter-dashboard", "/company-dashboard"].includes(location.pathname);
 
   const handleBack = () => {
     if (window.history.length > 2) {
@@ -57,7 +57,7 @@ export const Layout: React.FC = () => {
       } else if (user?.role === "COMPANY") {
         navigate("/company-dashboard");
       } else {
-        navigate("/candidate-dashboard");
+        navigate("/dashboard");
       }
     }
   };

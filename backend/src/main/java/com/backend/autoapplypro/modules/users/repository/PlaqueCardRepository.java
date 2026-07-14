@@ -7,7 +7,7 @@ import java.util.Optional;
 
 @Repository
 public interface PlaqueCardRepository extends JpaRepository<PlaqueCard, Long> {
-    Optional<PlaqueCard> findByCandidateId(Long candidateId);
-    Optional<PlaqueCard> findByCandidateUserId(Long userId);
-    Optional<PlaqueCard> findByCandidateUserUsernameIgnoreCase(String username);
+    Optional<PlaqueCard> findByProfessionalProfileId(Long professionalProfileId);
+    Optional<PlaqueCard> findByProfessionalProfileUserId(Long userId);
+    Optional<PlaqueCard> findByProfessionalProfileUserUsernameIgnoreCase(String username);
 }

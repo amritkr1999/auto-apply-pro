@@ -106,7 +106,7 @@ public class ProfileController {
     @GetMapping("/candidate/{userId}/resume")
     public ResponseEntity<org.springframework.core.io.ByteArrayResource> getResume(@PathVariable Long userId) {
         try {
-            com.backend.autoapplypro.modules.users.model.Candidate candidate = userService.getCandidateResume(userId);
+            com.backend.autoapplypro.modules.users.model.ProfessionalProfile candidate = userService.getCandidateResume(userId);
             if (candidate.getResumeBytes() == null) {
                 return ResponseEntity.notFound().build();
             }

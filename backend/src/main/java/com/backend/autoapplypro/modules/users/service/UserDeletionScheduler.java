@@ -29,7 +29,7 @@ import java.util.UUID;
 public class UserDeletionScheduler {
 
     private final UserRepository userRepository;
-    private final CandidateRepository candidateRepository;
+    private final ProfessionalProfileRepository professionalProfileRepository;
     private final RecruiterRepository recruiterRepository;
     private final CompanyRepository companyRepository;
     private final GmailCredentialRepository gmailCredentialRepository;
@@ -134,11 +134,11 @@ public class UserDeletionScheduler {
             log.info("Deleted {} user activity logs", activityLogs.size());
         }
 
-        // 9. Delete Candidate profile
-        if (user.getCandidate() != null) {
-            candidateRepository.delete(user.getCandidate());
-            user.setCandidate(null);
-            log.info("Deleted candidate profile and resume");
+        // 9. Delete Professional Profile
+        if (user.getProfessionalProfile() != null) {
+            professionalProfileRepository.delete(user.getProfessionalProfile());
+            user.setProfessionalProfile(null);
+            log.info("Deleted professional profile and resume");
         }
 
         // 10. Delete Recruiter profile

@@ -52,8 +52,8 @@ public class PublicProfileController {
         EvidenceProvider provider = evidenceEngine.getProvider(user.getProfessionalVertical());
         Map<String, Object> evidenceMetrics = provider.getEvidenceMetrics(user);
         List<AchievementCard> highlights = new java.util.ArrayList<>(provider.getHighlights(user));
-        if (user.getCandidate() != null && user.getCandidate().getAchievements() != null) {
-            for (com.backend.autoapplypro.modules.users.model.Achievement ach : user.getCandidate().getAchievements()) {
+        if (user.getProfessionalProfile() != null && user.getProfessionalProfile().getAchievements() != null) {
+            for (com.backend.autoapplypro.modules.users.model.Achievement ach : user.getProfessionalProfile().getAchievements()) {
                 highlights.add(AchievementCard.builder()
                         .title(ach.getTitle())
                         .description(ach.getDescription())
@@ -69,9 +69,9 @@ public class PublicProfileController {
         PublicProfileDTO dto = PublicProfileDTO.builder()
                 .username(user.getUsername())
                 .name(user.getName())
-                .summary(user.getCandidate() != null ? user.getCandidate().getSummary() : null)
+                .summary(user.getProfessionalProfile() != null ? user.getProfessionalProfile().getSummary() : null)
                 .avatar(user.getAvatar())
-                .isVerified(user.getCandidate() != null && Boolean.TRUE.equals(user.getCandidate().getIsVerified()))
+                .isVerified(user.getProfessionalProfile() != null && Boolean.TRUE.equals(user.getProfessionalProfile().getIsVerified()))
                 .skills(skills)
                 .professionalVertical(user.getProfessionalVertical() != null ? user.getProfessionalVertical().name() : "DEVELOPER")
                 .evidenceMetrics(evidenceMetrics)

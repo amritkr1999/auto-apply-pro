@@ -8,9 +8,9 @@ import com.backend.autoapplypro.modules.jobs.dto.JobDetailsDto;
 import com.backend.autoapplypro.modules.outreach.model.EmailQueue;
 import com.backend.autoapplypro.modules.outreach.model.OutreachStatus;
 import com.backend.autoapplypro.modules.outreach.repository.EmailQueueRepository;
-import com.backend.autoapplypro.modules.users.model.Candidate;
+import com.backend.autoapplypro.modules.users.model.ProfessionalProfile;
 import com.backend.autoapplypro.modules.users.model.Skill;
-import com.backend.autoapplypro.modules.users.repository.CandidateRepository;
+import com.backend.autoapplypro.modules.users.repository.ProfessionalProfileRepository;
 import com.backend.autoapplypro.modules.users.repository.SkillRepository;
 import com.backend.autoapplypro.modules.users.repository.UserRepository;
 import com.backend.autoapplypro.modules.users.dto.CandidateProfileDto;
@@ -42,7 +42,7 @@ public class ScreenshotProcessorService {
     private final ScreenshotUploadRepository screenshotRepository;
     private final JobPostingRepository jobPostingRepository;
     private final EmailQueueRepository emailQueueRepository;
-    private final CandidateRepository candidateRepository;
+    private final ProfessionalProfileRepository professionalProfileRepository;
     private final SkillRepository skillRepository;
     private final UserService userService;
     private final EmailService emailService;
@@ -179,10 +179,10 @@ public class ScreenshotProcessorService {
             }
 
             // 4. Match Other Candidates in the system by skillset
-            List<Candidate> allCandidates = candidateRepository.findAll();
+            List<ProfessionalProfile> allCandidates = professionalProfileRepository.findAll();
             log.info("Checking skill matching for {} system candidates...", allCandidates.size());
             
-            for (Candidate candidate : allCandidates) {
+            for (ProfessionalProfile candidate : allCandidates) {
                 // Skip the uploader
                 if (candidate.getUser().getId().equals(upload.getUser().getId())) {
                     continue;

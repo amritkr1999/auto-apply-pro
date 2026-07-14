@@ -16,7 +16,7 @@ import java.util.HashMap;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final CandidateRepository candidateRepository;
+    private final ProfessionalProfileRepository professionalProfileRepository;
     private final RecruiterRepository recruiterRepository;
     private final CompanyRepository companyRepository;
     private final PasswordEncoder passwordEncoder;
@@ -70,12 +70,12 @@ public class UserServiceImpl implements UserService {
 
         // Create associated profile based on role
         if (role == UserRole.CANDIDATE) {
-            Candidate candidate = Candidate.builder()
+            ProfessionalProfile candidate = ProfessionalProfile.builder()
                     .user(user)
                     .skills(new java.util.HashSet<>())
                     .jobPreferences(new java.util.HashMap<>())
                     .build();
-            candidateRepository.save(candidate);
+            professionalProfileRepository.save(candidate);
         } else if (role == UserRole.RECRUITER) {
             Recruiter recruiter = Recruiter.builder()
                     .user(user)
@@ -161,28 +161,28 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
-    private Candidate getOrCreateCandidate(Long userId) {
+    private ProfessionalProfile getOrCreateCandidate(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
         if (user.getRole() != UserRole.CANDIDATE) {
             throw new IllegalArgumentException("User is not a candidate");
         }
-        return candidateRepository.findByUserId(userId)
+        return professionalProfileRepository.findByUserId(userId)
                 .orElseGet(() -> {
-                    Candidate newCand = Candidate.builder()
+                    ProfessionalProfile newCand = ProfessionalProfile.builder()
                             .user(user)
                             .skills(new java.util.HashSet<>())
                             .jobPreferences(new java.util.HashMap<>())
                             .isVerified(false)
                             .build();
-                    return candidateRepository.save(newCand);
+                    return professionalProfileRepository.save(newCand);
                 });
     }
 
     @Override
     @Transactional
     public CandidateProfileDto getCandidateProfile(Long userId) {
-        Candidate candidate = getOrCreateCandidate(userId);
+        ProfessionalProfile candidate = getOrCreateCandidate(userId);
         User user = candidate.getUser();
         return CandidateProfileDto.builder()
                 .id(candidate.getId())
@@ -229,7 +229,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public CandidateProfileDto updateCandidateProfile(Long userId, CandidateProfileDto dto) {
-        Candidate candidate = getOrCreateCandidate(userId);
+        ProfessionalProfile candidate = getOrCreateCandidate(userId);
         User user = candidate.getUser();
         
         user.setName(dto.getName());
@@ -335,7 +335,7 @@ public class UserServiceImpl implements UserService {
                 } else {
                     // New Achievement
                     Achievement newAch = Achievement.builder()
-                            .candidate(candidate)
+                            .professionalProfile(candidate)
                             .title(achDto.getTitle())
                             .description(achDto.getDescription())
                             .category(achDto.getCategory())
@@ -352,7 +352,7 @@ public class UserServiceImpl implements UserService {
             currentAchievements.addAll(updatedAchievements);
         }
 
-        candidate = candidateRepository.save(candidate);
+        candidate = professionalProfileRepository.save(candidate);
 
         return CandidateProfileDto.builder()
                 .id(candidate.getId())
@@ -523,17 +523,17 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void uploadResume(Long userId, org.springframework.web.multipart.MultipartFile file) throws java.io.IOException {
-        Candidate candidate = getOrCreateCandidate(userId);
+        ProfessionalProfile candidate = getOrCreateCandidate(userId);
         candidate.setResumeFilename(file.getOriginalFilename());
         candidate.setResumeContentType(file.getContentType());
         candidate.setResumeBytes(file.getBytes());
-        candidateRepository.save(candidate);
+        professionalProfileRepository.save(candidate);
     }
 
     @Override
     @Transactional
     public void syncProfileFromResume(Long userId) {
-        Candidate candidate = getOrCreateCandidate(userId);
+        ProfessionalProfile candidate = getOrCreateCandidate(userId);
         
         if (candidate.getResumeBytes() == null || candidate.getResumeBytes().length == 0) {
             throw new IllegalStateException("No resume uploaded to sync profile from.");
@@ -592,7 +592,7 @@ public class UserServiceImpl implements UserService {
                     }
                     candidate.setSkills(dbSkills);
                 }
-                candidateRepository.save(candidate);
+                professionalProfileRepository.save(candidate);
             } else {
                 throw new RuntimeException("Python AI parsing service returned an error status.");
             }
@@ -603,8 +603,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public Candidate getCandidateResume(Long userId) {
-        Candidate candidate = getOrCreateCandidate(userId);
+    public ProfessionalProfile getCandidateResume(Long userId) {
+        ProfessionalProfile candidate = getOrCreateCandidate(userId);
         // Force eager initialization of lazy @Lob resumeBytes while the transaction is active
         if (candidate.getResumeBytes() != null) {
             int length = candidate.getResumeBytes().length;

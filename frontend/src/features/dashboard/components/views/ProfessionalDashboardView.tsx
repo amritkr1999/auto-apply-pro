@@ -14,7 +14,7 @@ import { dashboardService } from "../../services/dashboardService";
 import { StatsGrid } from "./StatsGrid";
 import { ReviewDrawer } from "./ReviewDrawer";
 
-export const CandidateDashboardView: React.FC = () => {
+export const ProfessionalDashboardView: React.FC = () => {
   const navigate = useNavigate();
 
   const userStr = localStorage.getItem("user");
@@ -43,6 +43,9 @@ export const CandidateDashboardView: React.FC = () => {
 
   // Timeframe state
   const [timeframe, setTimeframe] = useState<"all" | "24h" | "7d" | "30d">("all");
+
+  // Streak Widget visibility
+  const [showStreak, setShowStreak] = useState(() => localStorage.getItem("show_streak_widget") !== "false");
 
   // Metrics State
   const [metrics, setMetrics] = useState<any>(null);
@@ -342,11 +345,39 @@ export const CandidateDashboardView: React.FC = () => {
 
       {activeTab === "overview" && (
         <div className="space-y-6">
-          <StreakWidget
-            loginStreak={metrics?.loginStreak || 0}
-            dailyActivity={metrics?.dailyActivity || []}
-            loading={metricsLoading}
-          />
+          {showStreak ? (
+            <div className="relative group">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowStreak(false);
+                  localStorage.setItem("show_streak_widget", "false");
+                }}
+                className="absolute top-3 right-3 z-10 text-[9px] bg-slate-800/80 hover:bg-slate-700 text-slate-300 font-bold px-2 py-1 rounded border border-slate-700 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
+                title="Hide Daily Streak Widget"
+              >
+                Hide Checklist
+              </button>
+              <StreakWidget
+                loginStreak={metrics?.loginStreak || 0}
+                dailyActivity={metrics?.dailyActivity || []}
+                loading={metricsLoading}
+              />
+            </div>
+          ) : (
+            <div className="flex justify-end pr-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowStreak(true);
+                  localStorage.setItem("show_streak_widget", "true");
+                }}
+                className="text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 font-bold flex items-center gap-1 transition-colors"
+              >
+                <span>🔥</span> Show Daily Streak & Checklist
+              </button>
+            </div>
+          )}
 
           {!hasResume && (
             <div className="p-5 bg-gradient-to-r from-rose-50 to-orange-50 dark:from-rose-950/20 dark:to-orange-950/20 border border-rose-100 dark:border-rose-900/40 rounded-card shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-300">
@@ -361,7 +392,7 @@ export const CandidateDashboardView: React.FC = () => {
               </div>
               <Button
                 size="sm"
-                onClick={() => navigate("/candidate/profile")}
+                onClick={() => navigate("/profile/settings")}
                 className="bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold px-4 py-1.5 shadow-sm shrink-0"
               >
                 Go to Profile to Upload
@@ -450,7 +481,7 @@ export const CandidateDashboardView: React.FC = () => {
             </div>
             <div className="flex items-center gap-3 self-end md:self-center shrink-0">
               <button
-                onClick={() => navigate("/candidate/profile")}
+                onClick={() => navigate("/profile/settings")}
                 className="px-3.5 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-350 hover:text-slate-800 dark:hover:text-slate-100 transition-colors border border-slate-200 dark:border-slate-800 rounded-card hover:bg-slate-50 dark:hover:bg-slate-800"
               >
                 Configure Settings
@@ -475,6 +506,47 @@ export const CandidateDashboardView: React.FC = () => {
       {activeTab === "outreach" && (
         <div className="space-y-8 animate-in fade-in duration-200">
           
+          {suggestions.length === 0 && drafts.length === 0 && (
+            <div className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 border border-slate-200 dark:border-slate-800 rounded-card p-8 text-center shadow-sm max-w-2xl mx-auto my-6">
+              <div className="w-16 h-16 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                ✉️
+              </div>
+              <h3 className="text-lg font-bold text-slate-800 dark:text-white">Start Sourcing Opportunities</h3>
+              <p className="text-slate-500 dark:text-slate-400 text-sm mt-2 max-w-md mx-auto leading-relaxed">
+                Welcome to your Outreach Workspace! Once you add professional opportunities or upload details, tailored email templates and matching suggestions will populate here.
+              </p>
+              
+              <div className="flex flex-wrap items-center justify-center gap-3 mt-6">
+                {!hasResume && (
+                  <Button
+                    size="sm"
+                    onClick={() => navigate("/profile/settings")}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 shadow-sm"
+                  >
+                    Upload Resume
+                  </Button>
+                )}
+                {!gmailConnected && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleConnectGmail}
+                    className="text-xs font-semibold px-4 py-2"
+                  >
+                    Connect Email
+                  </Button>
+                )}
+                <Button
+                  size="sm"
+                  onClick={() => navigate("/opportunities/import")}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 shadow-sm"
+                >
+                  Import Opportunity
+                </Button>
+              </div>
+            </div>
+          )}
+
           {/* Job Match Suggestions (Job Matches) */}
           {suggestions.length > 0 && (
             <section id="suggestions-review">
@@ -516,7 +588,7 @@ export const CandidateDashboardView: React.FC = () => {
                         variant="outline" 
                         size="sm" 
                         onClick={() => handleDiscardSuggestion(suggestion.id)}
-                        className="text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-205 px-3 py-1.5"
+                        className="text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200 px-3 py-1.5"
                       >
                         Discard
                       </Button>
@@ -576,7 +648,7 @@ export const CandidateDashboardView: React.FC = () => {
                         variant="outline" 
                         size="sm" 
                         onClick={() => handleDiscardDraft(draft.id)}
-                        className="text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-205 px-3 py-1.5"
+                        className="text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200 px-3 py-1.5"
                       >
                         Discard
                       </Button>
@@ -812,4 +884,4 @@ export const CandidateDashboardView: React.FC = () => {
   );
 };
 
-export default CandidateDashboardView;
+export default ProfessionalDashboardView;

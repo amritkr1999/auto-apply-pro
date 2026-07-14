@@ -3,11 +3,11 @@ package com.backend.autoapplypro;
 import com.backend.autoapplypro.modules.users.dto.AchievementDto;
 import com.backend.autoapplypro.modules.users.dto.CandidateProfileDto;
 import com.backend.autoapplypro.modules.users.model.Achievement;
-import com.backend.autoapplypro.modules.users.model.Candidate;
+import com.backend.autoapplypro.modules.users.model.ProfessionalProfile;
 import com.backend.autoapplypro.modules.users.model.User;
 import com.backend.autoapplypro.modules.users.public_profile.evidence.EvidenceVerifier;
 import com.backend.autoapplypro.modules.users.public_profile.evidence.VerificationStatus;
-import com.backend.autoapplypro.modules.users.repository.CandidateRepository;
+import com.backend.autoapplypro.modules.users.repository.ProfessionalProfileRepository;
 import com.backend.autoapplypro.modules.users.repository.UserRepository;
 import com.backend.autoapplypro.modules.users.service.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +31,7 @@ class EvidenceVerifierTest {
     private final EvidenceVerifier evidenceVerifier = new EvidenceVerifier();
 
     @Mock
-    private CandidateRepository candidateRepository;
+    private ProfessionalProfileRepository professionalProfileRepository;
 
     @Mock
     private UserRepository userRepository;
@@ -98,9 +98,10 @@ class EvidenceVerifierTest {
         user.setName("John Doe");
         user.setRole(com.backend.autoapplypro.modules.users.model.UserRole.CANDIDATE);
 
-        Candidate candidate = new Candidate();
+        ProfessionalProfile candidate = new ProfessionalProfile();
         candidate.setId(1L);
         candidate.setUser(user);
+        user.setProfessionalProfile(candidate);
 
         Achievement verifiedAch = Achievement.builder()
                 .id(100L)
@@ -111,7 +112,7 @@ class EvidenceVerifierTest {
                 .verificationStatus(VerificationStatus.VERIFIED)
                 .trustScore(90)
                 .isVerified(true)
-                .candidate(candidate)
+                .professionalProfile(candidate)
                 .build();
 
         List<Achievement> existingAchievements = new ArrayList<>();
@@ -119,8 +120,8 @@ class EvidenceVerifierTest {
         candidate.setAchievements(existingAchievements);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(candidateRepository.findByUserId(1L)).thenReturn(Optional.of(candidate));
-        when(candidateRepository.save(any(Candidate.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(professionalProfileRepository.findByUserId(1L)).thenReturn(Optional.of(candidate));
+        when(professionalProfileRepository.save(any(ProfessionalProfile.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Create update payload where title is modified
         CandidateProfileDto updateDto = new CandidateProfileDto();

@@ -100,7 +100,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isMobile = f
       case "COMPANY":
         return "/company-dashboard";
       default:
-        return "/candidate-dashboard";
+        return "/dashboard";
     }
   };
 
@@ -169,17 +169,17 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isMobile = f
 
           {role === "CANDIDATE" && (
             <>
-              <NavLink to="/jobs/applications" className={linkStyle} title={minimizedState ? "Applications" : undefined} onClick={handleLinkClick}>
+              <NavLink to="/opportunities/tracker" className={linkStyle} title={minimizedState ? "Opportunity Tracker" : undefined} onClick={handleLinkClick}>
                 <ApplicationsIcon className={iconClass} />
-                {!minimizedState && <span>Applications</span>}
+                {!minimizedState && <span>Opportunity Tracker</span>}
               </NavLink>
               <a href="#saved" className={anchorStyle} title={minimizedState ? "Saved Jobs" : undefined} onClick={handleLinkClick}>
                 <SavedJobsIcon className={iconClass} />
                 {!minimizedState && <span>Saved Jobs</span>}
               </a>
-              <NavLink to="/jobs/parse" className={linkStyle} title={minimizedState ? "Parse Screenshot" : undefined} onClick={handleLinkClick}>
+              <NavLink to="/opportunities/import" className={linkStyle} title={minimizedState ? "Import Opportunity" : undefined} onClick={handleLinkClick}>
                 <ParseIcon className={iconClass} />
-                {!minimizedState && <span>Parse Screenshot</span>}
+                {!minimizedState && <span>Import Opportunity</span>}
               </NavLink>
               <NavLink to="/outreach/templates" className={linkStyle} title={minimizedState ? "Email Templates" : undefined} onClick={handleLinkClick}>
                 <TemplatesIcon className={iconClass} />
@@ -233,7 +233,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isMobile = f
             </>
           )}
 
-          <NavLink to="/candidate/profile" data-tour="sidebar-profile" className={linkStyle} title={minimizedState ? "Profile Settings" : undefined} onClick={handleLinkClick}>
+          <NavLink to="/profile/settings" data-tour="sidebar-profile" className={linkStyle} title={minimizedState ? "Profile Settings" : undefined} onClick={handleLinkClick}>
             <ProfileIcon className={iconClass} />
             {!minimizedState && <span>Profile Settings</span>}
           </NavLink>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { jobApplicationService, type JobApplication, type JobApplicationStats } from "../features/jobs/services/jobApplicationService";
+import { jobApplicationService, type JobApplication, type JobApplicationStats } from "../features/opportunities/services/opportunityService";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 

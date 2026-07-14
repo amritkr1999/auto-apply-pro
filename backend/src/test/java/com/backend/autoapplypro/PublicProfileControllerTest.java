@@ -1,9 +1,9 @@
 package com.backend.autoapplypro;
 
-import com.backend.autoapplypro.modules.users.model.Candidate;
+import com.backend.autoapplypro.modules.users.model.ProfessionalProfile;
 import com.backend.autoapplypro.modules.users.model.User;
 import com.backend.autoapplypro.modules.users.model.UserRole;
-import com.backend.autoapplypro.modules.users.repository.CandidateRepository;
+import com.backend.autoapplypro.modules.users.repository.ProfessionalProfileRepository;
 import com.backend.autoapplypro.modules.users.repository.UserRepository;
 import com.backend.autoapplypro.modules.users.dto.CandidateProfileDto;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +35,7 @@ public class PublicProfileControllerTest {
     private UserRepository userRepository;
 
     @Autowired
-    private CandidateRepository candidateRepository;
+    private ProfessionalProfileRepository professionalProfileRepository;
 
     private String publicUsername;
     private String privateUsername;
@@ -58,7 +58,7 @@ public class PublicProfileControllerTest {
                 .build();
         publicUser = userRepository.save(publicUser);
 
-        Candidate publicCand = Candidate.builder()
+        ProfessionalProfile publicCand = ProfessionalProfile.builder()
                 .user(publicUser)
                 .summary("This is a public bio")
                 .githubUsername("pubgithub")
@@ -68,7 +68,7 @@ public class PublicProfileControllerTest {
                 .skills(new HashSet<>())
                 .githubStats(new HashMap<>(Map.of("repos", 20)))
                 .build();
-        candidateRepository.save(publicCand);
+        professionalProfileRepository.save(publicCand);
 
         // 2. Create a private user
         User privateUser = User.builder()
@@ -82,12 +82,12 @@ public class PublicProfileControllerTest {
                 .build();
         privateUser = userRepository.save(privateUser);
 
-        Candidate privateCand = Candidate.builder()
+        ProfessionalProfile privateCand = ProfessionalProfile.builder()
                 .user(privateUser)
                 .summary("This is a private bio")
                 .skills(new HashSet<>())
                 .build();
-        candidateRepository.save(privateCand);
+        professionalProfileRepository.save(privateCand);
     }
 
     @Test
@@ -137,13 +137,13 @@ public class PublicProfileControllerTest {
                 .build();
         user = userRepository.save(user);
 
-        org.junit.jupiter.api.Assertions.assertFalse(candidateRepository.findByUserId(user.getId()).isPresent());
+        org.junit.jupiter.api.Assertions.assertFalse(professionalProfileRepository.findByUserId(user.getId()).isPresent());
 
         CandidateProfileDto profile = userService.getCandidateProfile(user.getId());
 
         org.junit.jupiter.api.Assertions.assertNotNull(profile);
         org.junit.jupiter.api.Assertions.assertEquals(user.getId(), profile.getUserId());
-        org.junit.jupiter.api.Assertions.assertTrue(candidateRepository.findByUserId(user.getId()).isPresent());
+        org.junit.jupiter.api.Assertions.assertTrue(professionalProfileRepository.findByUserId(user.getId()).isPresent());
     }
 
     @Test
@@ -221,14 +221,14 @@ public class PublicProfileControllerTest {
         mockExperience.add(Map.of("title", "Project Director", "company", "Acme Corp"));
         mockExperience.add(Map.of("title", "Engagement Manager", "company", "ConsultCo"));
 
-        Candidate kwCand = Candidate.builder()
+        ProfessionalProfile kwCand = ProfessionalProfile.builder()
                 .user(kwUser)
                 .summary("Knowledge worker summary")
                 .isVerified(true)
                 .skills(new HashSet<>())
                 .experience(mockExperience)
                 .build();
-        candidateRepository.save(kwCand);
+        professionalProfileRepository.save(kwCand);
 
         // Fetch public profile and verify polymorphic metrics
         mockMvc.perform(get("/api/v1/public/profile/" + kwUsername)

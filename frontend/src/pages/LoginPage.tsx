@@ -49,7 +49,7 @@ export const LoginPage: React.FC = () => {
       } else if (userData.role === "COMPANY") {
         navigate("/company-dashboard");
       } else {
-        navigate("/candidate-dashboard");
+        navigate("/dashboard");
       }
       return;
     }
@@ -137,7 +137,7 @@ export const LoginPage: React.FC = () => {
       } else if (userData.role === "COMPANY") {
         navigate("/company-dashboard");
       } else {
-        navigate("/candidate-dashboard");
+        navigate("/dashboard");
       }
     } catch (err: any) {
       setError(err.message || "Invalid credentials. Please try again.");
@@ -175,7 +175,7 @@ export const LoginPage: React.FC = () => {
       } else if (activeUser.role === "COMPANY") {
         navigate("/company-dashboard");
       } else {
-        navigate("/candidate-dashboard");
+        navigate("/dashboard");
       }
     } catch (err: any) {
       setRestoreError(err.message || "Failed to restore account. Please try again.");
@@ -211,7 +211,7 @@ export const LoginPage: React.FC = () => {
       } else if (userData.role === "COMPANY") {
         navigate("/company-dashboard");
       } else {
-        navigate("/candidate-dashboard");
+        navigate("/dashboard");
       }
     } catch (err: any) {
       setError(err.message || "Registration failed. Please try again.");
@@ -257,7 +257,7 @@ export const LoginPage: React.FC = () => {
           }
         }
         localStorage.setItem("user", JSON.stringify(userData));
-        navigate("/candidate-dashboard");
+        navigate("/dashboard");
       } catch (err: any) {
         setError(err.message || "Social login failed.");
       }

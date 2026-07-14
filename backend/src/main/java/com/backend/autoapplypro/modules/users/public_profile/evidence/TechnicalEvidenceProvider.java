@@ -1,7 +1,7 @@
 package com.backend.autoapplypro.modules.users.public_profile.evidence;
 
 import com.backend.autoapplypro.modules.users.model.User;
-import com.backend.autoapplypro.modules.users.model.Candidate;
+import com.backend.autoapplypro.modules.users.model.ProfessionalProfile;
 import com.backend.autoapplypro.modules.users.model.ProfessionalVertical;
 import com.backend.autoapplypro.modules.users.public_profile.dto.AchievementCard;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ import java.util.*;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class DeveloperEvidenceProvider implements EvidenceProvider {
+public class TechnicalEvidenceProvider implements EvidenceProvider {
 
     private final EvidenceVerifier evidenceVerifier;
 
@@ -25,7 +25,7 @@ public class DeveloperEvidenceProvider implements EvidenceProvider {
     public Map<String, Object> getEvidenceMetrics(User user) {
         log.info("Compiling developer evidence metrics for User ID: {}", user.getId());
         Map<String, Object> metrics = new HashMap<>();
-        Candidate candidate = user.getCandidate();
+        ProfessionalProfile candidate = user.getProfessionalProfile();
         if (candidate != null) {
             if (candidate.getGithubUsername() != null) {
                 metrics.put("github", Map.of(
@@ -60,7 +60,7 @@ public class DeveloperEvidenceProvider implements EvidenceProvider {
     @Override
     public List<AchievementCard> getHighlights(User user) {
         List<AchievementCard> cards = new ArrayList<>();
-        Candidate candidate = user.getCandidate();
+        ProfessionalProfile candidate = user.getProfessionalProfile();
         if (candidate != null) {
             Map<String, Object> github = candidate.getGithubStats();
             Map<String, Object> leetcode = candidate.getLeetcodeStats();
@@ -129,7 +129,7 @@ public class DeveloperEvidenceProvider implements EvidenceProvider {
 
     @Override
     public int calculateTrustScore(User user) {
-        Candidate candidate = user.getCandidate();
+        ProfessionalProfile candidate = user.getProfessionalProfile();
         if (candidate == null) {
             return 10;
         }

@@ -41,7 +41,7 @@ export const LandingPage: React.FC = () => {
       case "COMPANY":
         return "/company-dashboard";
       default:
-        return "/candidate-dashboard";
+        return "/dashboard";
     }
   };
 

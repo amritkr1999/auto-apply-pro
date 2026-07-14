@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(exclude = {"candidate", "recruiter", "company"})
+@ToString(exclude = {"professionalProfile", "recruiter", "company"})
 public class User {
 
     @Id
@@ -53,7 +53,7 @@ public class User {
     private String avatar;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Candidate candidate;
+    private ProfessionalProfile professionalProfile;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Recruiter recruiter;

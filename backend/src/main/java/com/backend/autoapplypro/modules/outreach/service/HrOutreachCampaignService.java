@@ -8,9 +8,9 @@ import com.backend.autoapplypro.modules.outreach.model.EmailTemplate;
 import com.backend.autoapplypro.modules.outreach.model.OutreachStatus;
 import com.backend.autoapplypro.modules.outreach.repository.EmailQueueRepository;
 import com.backend.autoapplypro.modules.outreach.repository.EmailTemplateRepository;
-import com.backend.autoapplypro.modules.users.model.Candidate;
+import com.backend.autoapplypro.modules.users.model.ProfessionalProfile;
 import com.backend.autoapplypro.modules.users.model.User;
-import com.backend.autoapplypro.modules.users.repository.CandidateRepository;
+import com.backend.autoapplypro.modules.users.repository.ProfessionalProfileRepository;
 import com.backend.autoapplypro.modules.users.repository.UserRepository;
 import com.backend.autoapplypro.testingemails.TestingEmail;
 import com.backend.autoapplypro.testingemails.TestingEmailRepository;
@@ -32,7 +32,7 @@ public class HrOutreachCampaignService {
     private final TestingEmailRepository testingEmailRepository;
     private final HrRepository hrRepository;
     private final OutreachSchedulerService schedulerService;
-    private final CandidateRepository candidateRepository;
+    private final ProfessionalProfileRepository professionalProfileRepository;
     private final SubscriptionGatingService subscriptionGatingService;
 
     @Transactional
@@ -136,8 +136,8 @@ public class HrOutreachCampaignService {
             processedEmails.add(eq.getRecipientEmail().toLowerCase().trim());
         }
 
-        List<String> excludedCompanies = candidateRepository.findByUserId(user.getId())
-                .map(Candidate::getExcludedCompanies)
+        List<String> excludedCompanies = professionalProfileRepository.findByUserId(user.getId())
+                .map(ProfessionalProfile::getExcludedCompanies)
                 .orElse(null);
 
         List<RecipientInfo> remainingRecipients = recipients.stream()

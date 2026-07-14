@@ -14,7 +14,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(exclude = "candidate")
+@ToString(exclude = "professionalProfile")
 public class PlaqueCard {
 
     @Id
@@ -23,7 +23,7 @@ public class PlaqueCard {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "candidate_id", nullable = false, unique = true)
-    private Candidate candidate;
+    private ProfessionalProfile professionalProfile;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "theme_config", columnDefinition = "jsonb")

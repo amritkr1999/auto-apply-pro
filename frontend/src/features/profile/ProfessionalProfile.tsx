@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import CandidateProfileView from "./components/CandidateProfileView";
+import ProfessionalProfileView from "./components/ProfessionalProfileView";
 import RecruiterProfileView from "./components/RecruiterProfileView";
 import CompanyProfileView from "./components/CompanyProfileView";
 import { feedbackService } from "./services/feedbackService";
 import { profileService } from "./services/profileService";
 
-export const CandidateProfile: React.FC = () => {
+export const ProfessionalProfile: React.FC = () => {
   const navigate = useNavigate();
   const userStr = localStorage.getItem("user");
   // Provide a mock user fallback for development phase to keep screens open
@@ -176,7 +176,7 @@ export const CandidateProfile: React.FC = () => {
         return <CompanyProfileView userId={user.id} onProfileUpdate={handleProfileUpdate} />;
       default:
         return (
-          <CandidateProfileView 
+          <ProfessionalProfileView 
             userId={user.id} 
             activeTab={activeTab} 
             onProfileUpdate={handleProfileUpdate} 
@@ -216,7 +216,7 @@ export const CandidateProfile: React.FC = () => {
                       ? "/recruiter-dashboard" 
                       : user.role === "COMPANY" 
                         ? "/company-dashboard" 
-                        : "/candidate-dashboard";
+                        : "/dashboard";
                     navigate(dashboardPath);
                     setTimeout(() => {
                       window.dispatchEvent(new CustomEvent("start-walkthrough"));
@@ -585,4 +585,4 @@ export const CandidateProfile: React.FC = () => {
   );
 };
 
-export default CandidateProfile;
+export default ProfessionalProfile;

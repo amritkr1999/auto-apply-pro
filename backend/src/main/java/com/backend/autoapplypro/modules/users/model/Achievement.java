@@ -22,7 +22,7 @@ public class Achievement extends AchievementCard {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "candidate_id", nullable = false)
-    private Candidate candidate;
+    private ProfessionalProfile professionalProfile;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "verification_status", nullable = false)

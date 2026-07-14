@@ -19,7 +19,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
       case "COMPANY":
         return "/company-dashboard";
       default:
-        return "/candidate-dashboard";
+        return "/dashboard";
     }
   };
 
@@ -47,7 +47,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
               <Link to={getDashboardPath()} className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">
                 Dashboard
               </Link>
-              <Link to="/candidate/profile" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">
+              <Link to="/profile/settings" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">
                 Profile
               </Link>
               <Link to="/learning" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">

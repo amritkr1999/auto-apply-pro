@@ -10,13 +10,13 @@ import java.util.Set;
 import java.util.HashSet;
 
 @Entity
-@Table(name = "candidates")
+@Table(name = "professional_profiles")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @ToString(exclude = "user")
-public class Candidate {
+public class ProfessionalProfile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -92,7 +92,7 @@ public class Candidate {
     @Column(name = "is_verified")
     private Boolean isVerified = false;
 
-    @OneToMany(mappedBy = "candidate", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "professionalProfile", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Achievement> achievements = new java.util.ArrayList<>();
 

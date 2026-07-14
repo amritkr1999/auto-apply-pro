@@ -16,7 +16,7 @@ public interface UserService {
     CompanyProfileDto updateCompanyProfile(Long userId, CompanyProfileDto dto);
     
     void uploadResume(Long userId, org.springframework.web.multipart.MultipartFile file) throws java.io.IOException;
-    com.backend.autoapplypro.modules.users.model.Candidate getCandidateResume(Long userId);
+    com.backend.autoapplypro.modules.users.model.ProfessionalProfile getCandidateResume(Long userId);
     void syncProfileFromResume(Long userId);
     
     void initiatePasswordReset(ForgotPasswordRequest request);

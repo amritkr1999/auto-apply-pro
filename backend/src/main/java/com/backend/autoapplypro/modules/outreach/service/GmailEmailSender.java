@@ -71,7 +71,7 @@ public class GmailEmailSender implements EmailSender {
             String resumeContentType = null;
             String resumeFilename = null;
             try {
-                com.backend.autoapplypro.modules.users.model.Candidate candidate = userService.getCandidateResume(userId);
+                com.backend.autoapplypro.modules.users.model.ProfessionalProfile candidate = userService.getCandidateResume(userId);
                 if (candidate != null && candidate.getResumeBytes() != null) {
                     resumeBytes = candidate.getResumeBytes();
                     resumeContentType = candidate.getResumeContentType();

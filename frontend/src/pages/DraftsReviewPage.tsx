@@ -107,7 +107,7 @@ export const DraftsReviewPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 border-b border-slate-200 pb-5">
         <div>
           <button
-            onClick={() => navigate("/candidate-dashboard")}
+            onClick={() => navigate("/dashboard")}
             className="text-xs font-semibold text-primary hover:underline mb-2 block"
           >
             ← Back to Dashboard

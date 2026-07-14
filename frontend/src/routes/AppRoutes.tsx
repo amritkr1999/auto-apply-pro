@@ -6,11 +6,11 @@ import LandingPage from "../pages/LandingPage";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import ResetPasswordPage from "../pages/ResetPasswordPage";
 import UnsubscribePage from "../pages/UnsubscribePage";
-import CandidateDashboardView from "../features/dashboard/components/views/CandidateDashboardView";
+import ProfessionalDashboardView from "../features/dashboard/components/views/ProfessionalDashboardView";
 import RecruiterDashboardView from "../features/dashboard/components/views/RecruiterDashboardView";
 import CompanyDashboardView from "../features/dashboard/components/views/CompanyDashboardView";
-import CandidateProfile from "../features/profile/CandidateProfile";
-import ScreenshotUploader from "../features/jobs/components/ScreenshotUploader";
+import ProfessionalProfile from "../features/profile/ProfessionalProfile";
+import OpportunityImporter from "../features/opportunities/components/OpportunityImporter";
 import { TemplateManager } from "../features/outreach/components/TemplateManager";
 import { OutreachDraftSection } from "../features/outreach/components/OutreachDraftSection";
 import DraftsReviewPage from "../pages/DraftsReviewPage";
@@ -41,8 +41,8 @@ export const AppRoutes: React.FC = () => {
       <Route path="/card/:username" element={<PublicPlaqueCardPage />} />
       <Route element={<Layout />}>
         <Route
-          path="/candidate-dashboard"
-          element={<CandidateDashboardView />}
+          path="/dashboard"
+          element={<ProfessionalDashboardView />}
         />
         <Route
           path="/recruiter-dashboard"
@@ -52,9 +52,9 @@ export const AppRoutes: React.FC = () => {
           path="/company-dashboard"
           element={<CompanyDashboardView />}
         />
-        <Route path="/candidate/profile" element={<CandidateProfile />} />
-        <Route path="/jobs/applications" element={<JobTrackerPage />} />
-        <Route path="/jobs/parse" element={<ScreenshotUploader />} />
+        <Route path="/profile/settings" element={<ProfessionalProfile />} />
+        <Route path="/opportunities/tracker" element={<JobTrackerPage />} />
+        <Route path="/opportunities/import" element={<OpportunityImporter />} />
         <Route path="/outreach/templates" element={<TemplateManager />} />
         <Route path="/outreach/draft" element={<OutreachDraftSection />} />
         <Route path="/outreach/drafts/review" element={<DraftsReviewPage />} />
