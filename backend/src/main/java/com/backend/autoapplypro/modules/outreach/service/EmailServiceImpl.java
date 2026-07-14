@@ -93,7 +93,12 @@ public class EmailServiceImpl implements EmailService {
         boolean callAi = regenerate || (dto.getUseAi() != null && dto.getUseAi());
 
         // 4. Fetch candidate details & construct minimized profile snippet (Data Minimization)
-        CandidateProfileDto profile = userService.getCandidateProfile(userId);
+        CandidateProfileDto profile;
+        if (dto.getProfileId() != null) {
+            profile = userService.getCandidateProfileById(userId, dto.getProfileId());
+        } else {
+            profile = userService.getCandidateProfile(userId);
+        }
         
         // Check if company is excluded
         if (profile.getExcludedCompanies() != null && !profile.getExcludedCompanies().isEmpty()) {
@@ -129,12 +134,16 @@ public class EmailServiceImpl implements EmailService {
 
         // 5. Retrieve Template if specified
         EmailTemplate emailTemplate = null;
-        if (dto.getTemplateId() != null) {
-            emailTemplate = templateRepository.findById(dto.getTemplateId()).orElse(null);
+        String templateIdToUse = dto.getTemplateId();
+        if (templateIdToUse == null && profile.getTargetTemplateId() != null) {
+            templateIdToUse = profile.getTargetTemplateId();
+        }
+        if (templateIdToUse != null) {
+            emailTemplate = templateRepository.findById(templateIdToUse).orElse(null);
             if (emailTemplate != null) {
                 log.info("Using email template from database: {}", emailTemplate.getName());
             } else {
-                log.warn("Requested template ID '{}' not found. Falling back to default layout.", dto.getTemplateId());
+                log.warn("Requested template ID '{}' not found. Falling back to default layout.", templateIdToUse);
             }
         }
 

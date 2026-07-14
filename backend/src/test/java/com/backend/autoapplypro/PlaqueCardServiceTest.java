@@ -49,7 +49,7 @@ class PlaqueCardServiceTest {
                 .summary("Highly motivated tester of plaque cards.")
                 .build();
         candidate = professionalProfileRepository.save(candidate);
-        user.setProfessionalProfile(candidate);
+        user.getProfessionalProfiles().add(candidate);
 
         // 2. Fetch Plaque Card (should generate defaults)
         PlaqueCardDto cardDto = plaqueCardService.getPlaqueCardByUserId(user.getId());

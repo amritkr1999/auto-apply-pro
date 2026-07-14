@@ -43,6 +43,10 @@ export interface OutreachDraft {
   status: "DRAFT" | "SUGGESTION" | "PENDING" | "SENT" | "FAILED" | "BLACKLISTED" | "PAUSED";
   userId?: number;
   scheduledAt?: string;
+  profileId?: number;
+  profileName?: string;
+  companyName?: string;
+  jobTitle?: string;
 }
 
 const DEFAULT_TEMPLATES: EmailTemplate[] = [
@@ -280,14 +284,14 @@ export const outreachService = {
   },
 
   // Generate outreach email draft using AI pipeline
-  async generateOutreachEmail(userId: number, jobDetails: any): Promise<{ subject: string; body: string; recipientEmail: string }> {
+  async generateOutreachEmail(userId: number, jobDetails: any, profileId?: number, templateId?: string, useAi?: boolean): Promise<{ subject: string; body: string; recipientEmail: string }> {
     const response = await fetch(`${API_BASE}/drafts/generate`, {
       method: "POST",
       headers: { 
         "Content-Type": "application/json",
         ...getAuthHeaders(),
       },
-      body: JSON.stringify({ userId, jobDetails })
+      body: JSON.stringify({ userId, jobDetails, profileId, templateId, useAi })
     });
     if (!response.ok) {
       throw new Error("Failed to generate AI outreach email.");
@@ -414,7 +418,12 @@ export const outreachService = {
         return response.json();
       } else {
         const errText = await response.text();
-        throw new Error(errText || "Failed to save outreach settings.");
+        try {
+          const parsed = JSON.parse(errText);
+          throw new Error(parsed.message || "Failed to save outreach settings.");
+        } catch {
+          throw new Error(errText || "Failed to save outreach settings.");
+        }
       }
     } catch (e: any) {
       if (e.message && e.message !== "Failed to fetch" && !e.message.includes("network")) {
@@ -440,7 +449,12 @@ export const outreachService = {
     });
     if (!response.ok) {
       const errText = await response.text();
-      throw new Error(errText || "Failed to toggle campaign.");
+      try {
+        const parsed = JSON.parse(errText);
+        throw new Error(parsed.message || "Failed to toggle campaign.");
+      } catch {
+        throw new Error(errText || "Failed to toggle campaign.");
+      }
     }
     return response.json();
   },

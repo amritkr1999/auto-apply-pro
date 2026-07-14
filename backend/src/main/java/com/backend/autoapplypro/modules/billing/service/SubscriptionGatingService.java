@@ -39,7 +39,7 @@ public class SubscriptionGatingService {
     public void validatePremiumAccess(Long userId) {
         if (!isPremiumUser(userId)) {
             log.warn("Access denied: User ID {} attempted to access premium feature without active subscription.", userId);
-            throw new IllegalArgumentException("Feature locked: This action is restricted to Premium tier subscribers.");
+            throw new IllegalArgumentException("Upgrade to Premium for multiple template use.");
         }
     }
 }

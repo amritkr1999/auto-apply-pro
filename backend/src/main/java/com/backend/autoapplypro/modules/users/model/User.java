@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(exclude = {"professionalProfile", "recruiter", "company"})
+@ToString(exclude = {"professionalProfiles", "recruiter", "company"})
 public class User {
 
     @Id
@@ -52,8 +52,9 @@ public class User {
     @Column(name = "avatar", columnDefinition = "TEXT")
     private String avatar;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private ProfessionalProfile professionalProfile;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    private java.util.List<ProfessionalProfile> professionalProfiles = new java.util.ArrayList<>();
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Recruiter recruiter;
@@ -223,5 +224,15 @@ public class User {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    public ProfessionalProfile getProfessionalProfile() {
+        if (professionalProfiles == null || professionalProfiles.isEmpty()) {
+            return null;
+        }
+        return professionalProfiles.stream()
+                .filter(p -> p.getIsDefault() != null && p.getIsDefault())
+                .findFirst()
+                .orElse(professionalProfiles.get(0));
     }
 }

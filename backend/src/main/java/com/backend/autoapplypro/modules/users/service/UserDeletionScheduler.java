@@ -135,10 +135,10 @@ public class UserDeletionScheduler {
         }
 
         // 9. Delete Professional Profile
-        if (user.getProfessionalProfile() != null) {
-            professionalProfileRepository.delete(user.getProfessionalProfile());
-            user.setProfessionalProfile(null);
-            log.info("Deleted professional profile and resume");
+        if (user.getProfessionalProfiles() != null && !user.getProfessionalProfiles().isEmpty()) {
+            professionalProfileRepository.deleteAll(user.getProfessionalProfiles());
+            user.getProfessionalProfiles().clear();
+            log.info("Deleted all professional profiles and resumes");
         }
 
         // 10. Delete Recruiter profile

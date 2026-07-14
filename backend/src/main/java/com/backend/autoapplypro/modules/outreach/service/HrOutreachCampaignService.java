@@ -40,9 +40,7 @@ public class HrOutreachCampaignService {
         log.info("Toggling HR Outreach Campaign for user ID: {}. Enable: {}, Target Role: {}, Template ID: {}, Source Table: {}",
                 user.getId(), enable, targetRole, templateId, sourceTable);
 
-        if (enable) {
-            subscriptionGatingService.validatePremiumAccess(user.getId());
-        }
+        // Allowed for all users. Premium limits apply to multiple template/profile creations and variations.
 
         // Always update user configuration fields
         user.setHrOutreachTargetRole(targetRole != null ? targetRole : "Software Engineer");

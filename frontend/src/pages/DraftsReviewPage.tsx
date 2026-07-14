@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/ui/Button";
 import { outreachService } from "../features/outreach/services/outreachService";
+import { profileService } from "../features/profile/services/profileService";
+import type { CandidateProfile } from "../features/profile/services/profileService";
 
 export const DraftsReviewPage: React.FC = () => {
   const navigate = useNavigate();
@@ -10,8 +12,10 @@ export const DraftsReviewPage: React.FC = () => {
   const userId = user.id;
 
   const [drafts, setDrafts] = useState<any[]>([]);
+  const [profiles, setProfiles] = useState<CandidateProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingDraftId, setEditingDraftId] = useState<string | null>(null);
+  const [regeneratingDraftId, setRegeneratingDraftId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isApprovingAll, setIsApprovingAll] = useState(false);
@@ -21,8 +25,11 @@ export const DraftsReviewPage: React.FC = () => {
     try {
       const data = await outreachService.getOutreachQueue(userId);
       setDrafts(data.filter((item: any) => item.status === "DRAFT"));
+
+      const candProfiles = await profileService.getCandidateProfiles(userId);
+      setProfiles(candProfiles);
     } catch (err) {
-      console.error("Failed to load drafts", err);
+      console.error("Failed to load drafts or profiles", err);
     } finally {
       setLoading(false);
     }
@@ -32,7 +39,7 @@ export const DraftsReviewPage: React.FC = () => {
     loadDrafts();
   }, [loadDrafts]);
 
-  const handleDraftFieldChange = (id: string, field: string, value: string) => {
+  const handleDraftFieldChange = (id: string, field: string, value: any) => {
     setDrafts(prev => prev.map(d => d.id === id ? { ...d, [field]: value } : d));
   };
 
@@ -45,6 +52,7 @@ export const DraftsReviewPage: React.FC = () => {
         recipientEmail: draft.recipientEmail,
         ccEmails: draft.ccEmails,
         parsedEmails: draft.parsedEmails,
+        profileId: draft.profileId,
         status: "PENDING"
       });
       setDrafts(prev => prev.filter(d => d.id !== id));
@@ -69,6 +77,36 @@ export const DraftsReviewPage: React.FC = () => {
     }
   };
 
+  const handleRegenerateDraft = async (draftId: string, profileId: number) => {
+    try {
+      setRegeneratingDraftId(draftId);
+      setError(null);
+
+      const response = await fetch(`/api/drafts/${draftId}/regenerate?profileId=${profileId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${user.token || ""}`
+        }
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(errText || "Failed to regenerate draft.");
+      }
+
+      const updatedDraft = await response.json();
+      setDrafts(prev => prev.map(d => d.id === draftId ? updatedDraft : d));
+      setMessage("Email draft successfully regenerated for target profile version!");
+      setTimeout(() => setMessage(null), 3000);
+    } catch (err: any) {
+      console.error("Failed to regenerate draft", err);
+      setError(err.message || "Failed to regenerate draft using selected profile version.");
+    } finally {
+      setRegeneratingDraftId(null);
+    }
+  };
+
   const handleApproveAll = async () => {
     if (drafts.length === 0) return;
     
@@ -85,6 +123,7 @@ export const DraftsReviewPage: React.FC = () => {
           recipientEmail: draft.recipientEmail,
           ccEmails: draft.ccEmails,
           parsedEmails: draft.parsedEmails,
+          profileId: draft.profileId,
           status: "PENDING"
         });
         approvedCount++;
@@ -165,10 +204,20 @@ export const DraftsReviewPage: React.FC = () => {
                 {/* Header preview row */}
                 <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50 border-b border-slate-100">
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
                       <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-full uppercase">
                         Draft #{drafts.length - idx}
                       </span>
+                      {draft.profileName && (
+                        <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-full uppercase">
+                          Profile: {draft.profileName}
+                        </span>
+                      )}
+                      {draft.companyName && draft.jobTitle && (
+                        <span className="text-[10px] font-bold text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full uppercase">
+                          {draft.jobTitle} @ {draft.companyName}
+                        </span>
+                      )}
                       <span className="text-xs text-slate-400 font-medium">To: {draft.recipientEmail} {draft.ccEmails ? `(CC: ${draft.ccEmails})` : ''}</span>
                     </div>
                     <h4 className="text-sm font-bold text-slate-700 truncate">{draft.subject}</h4>
@@ -204,6 +253,36 @@ export const DraftsReviewPage: React.FC = () => {
                 {/* Expandable editor panel */}
                 {isEditing && (
                   <div className="p-5 border-t border-slate-100 space-y-4 bg-slate-50/20">
+                    {/* Profile Version Selection & Email Regeneration */}
+                    <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                      <div>
+                        <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Tailored Profile Version:</span>
+                        <p className="text-xs text-slate-500 mb-2">Switch the profile version used to generate this outreach draft and rewrite it using LLM pipeline.</p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <select
+                          value={draft.profileId || ""}
+                          onChange={(e) => handleDraftFieldChange(draft.id, "profileId", e.target.value ? Number(e.target.value) : "")}
+                          className="flex-1 max-w-xs rounded-xl border-slate-200 text-sm focus:ring-primary focus:border-transparent px-3 py-2 bg-white text-slate-700 font-medium"
+                        >
+                          <option value="">Default Profile</option>
+                          {profiles.map(p => (
+                            <option key={p.id} value={p.id}>{p.profileName} {p.isDefault ? "(Default)" : ""}</option>
+                          ))}
+                        </select>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={regeneratingDraftId === draft.id || !draft.profileId}
+                          onClick={() => handleRegenerateDraft(draft.id, draft.profileId)}
+                          className="text-xs font-semibold px-4 py-2 border-indigo-200 text-indigo-700 hover:bg-indigo-50"
+                        >
+                          {regeneratingDraftId === draft.id ? "Regenerating..." : "Regenerate Draft"}
+                        </Button>
+                      </div>
+                    </div>
+
                     {/* Interactive Recipient Management */}
                     <div className="space-y-3">
                       {draft.parsedEmails && (

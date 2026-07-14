@@ -159,12 +159,15 @@ public class ScreenshotProcessorService {
 
             // Fetch Candidate Profile of the uploader
             CandidateProfileDto profile = userService.getCandidateProfile(upload.getUser().getId());
+            ProfessionalProfile uploaderProfile = professionalProfileRepository.findByUserIdAndIsDefaultTrue(upload.getUser().getId()).orElse(null);
 
             // Generate email for uploader
             EmailGenerationResponseDto emailData = generateEmailForCandidate(jobPosting, profile);
             if (emailData != null) {
                 EmailQueue queueItem = EmailQueue.builder()
                         .user(upload.getUser())
+                        .professionalProfile(uploaderProfile)
+                        .jobPosting(jobPosting)
                         .recipientEmail(emailData.getRecipientEmail() != null ? emailData.getRecipientEmail() : primaryEmail)
                         .ccEmails(draftCc)
                         .parsedEmails(commaSeparatedEmails)
@@ -206,6 +209,8 @@ public class ScreenshotProcessorService {
                         if (matchedEmailData != null) {
                             EmailQueue matchedQueueItem = EmailQueue.builder()
                                     .user(candidate.getUser())
+                                    .professionalProfile(candidate)
+                                    .jobPosting(jobPosting)
                                     .recipientEmail(matchedEmailData.getRecipientEmail() != null ? matchedEmailData.getRecipientEmail() : primaryEmail)
                                     .ccEmails(draftCc)
                                     .parsedEmails(commaSeparatedEmails)

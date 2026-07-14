@@ -24,6 +24,11 @@ interface Props {
 }
 
 export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, onProfileUpdate }) => {
+  const [profiles, setProfiles] = useState<CandidateProfile[]>([]);
+  const [selectedProfileId, setSelectedProfileId] = useState<number | null>(null);
+  const [newProfileName, setNewProfileName] = useState("");
+  const [isCreatingProfile, setIsCreatingProfile] = useState(false);
+
   const [profile, setProfile] = useState<CandidateProfile | null>(null);
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
@@ -81,16 +86,68 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
+  const setProfileData = (data: CandidateProfile) => {
+    setProfile(data);
+    setName(data.name || "");
+    setMobile(data.mobile || "");
+    setOfficialEmail(data.officialEmail || "");
+    setSkills(data.skills ? data.skills.join(", ") : "");
+    
+    const prefs = data.jobPreferences || {};
+    setLocationPreference(prefs.locationPreference || "");
+    setExpectedSalary(prefs.expectedSalary || "");
+
+    setSummary(data.summary || "");
+    setEducation(data.education || []);
+    setExperience(data.experience || []);
+    setCertifications(data.certifications || []);
+    setExcludedCompanies(data.excludedCompanies || []);
+    setGithubUsername(data.githubUsername || "");
+    setGithubProfileUrl(data.githubProfileUrl || "");
+    setLinkedinName(data.linkedinName || "");
+    setLinkedinProfileUrl(data.linkedinProfileUrl || "");
+    setIsProfilePublic(data.isProfilePublic || false);
+    setUsername(data.username || "");
+    setLeetcodeUsername(data.leetcodeUsername || "");
+    setIsVerified(data.isVerified || false);
+    setProfessionalVertical(data.professionalVertical || "DEVELOPER");
+
+    onProfileUpdate(data.name, data.avatar || "");
+  };
+
+  const loadProfiles = async (selectId?: number) => {
+    try {
+      setLoading(true);
+      const allProfiles = await profileService.getCandidateProfiles(userId);
+      setProfiles(allProfiles);
+      if (allProfiles.length > 0) {
+        const defaultProfile = allProfiles.find(p => p.isDefault) || allProfiles[0];
+        const toSelect = selectId 
+          ? (allProfiles.find(p => p.id === selectId) || defaultProfile) 
+          : defaultProfile;
+        
+        setSelectedProfileId(toSelect.id || null);
+        setProfileData(toSelect);
+      }
+    } catch (err: any) {
+      setError("Failed to load profiles list.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleUploadResume = async (file: File) => {
+    if (!selectedProfileId) return;
     try {
       setUploadingResume(true);
       setError("");
       setMessage("");
-      await profileService.uploadCandidateResume(userId, file);
+      await profileService.uploadCandidateResumeById(userId, selectedProfileId, file);
       
       // Refetch profile to show new filename
-      const data = await profileService.getCandidateProfile(userId);
-      setProfile(data);
+      const data = await profileService.getCandidateProfileById(userId, selectedProfileId);
+      setProfileData(data);
+      setProfiles(prev => prev.map(p => p.id === selectedProfileId ? data : p));
       
       setMessage("Resume uploaded successfully! Click 'Sync Profile' to auto-populate fields from the new resume.");
     } catch (err: any) {
@@ -101,40 +158,76 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
   };
 
   const handleSyncProfile = async () => {
+    if (!selectedProfileId) return;
     try {
       setSyncingProfile(true);
       setError("");
       setMessage("");
-      await profileService.syncCandidateProfile(userId);
+      await profileService.syncCandidateProfileById(userId, selectedProfileId);
       
       // Refetch profile to load parsed results
-      const data = await profileService.getCandidateProfile(userId);
-      setProfile(data);
-      setName(data.name || "");
-      setMobile(data.mobile || "");
-      setOfficialEmail(data.officialEmail || "");
-      setSkills(data.skills ? data.skills.join(", ") : "");
+      const data = await profileService.getCandidateProfileById(userId, selectedProfileId);
+      setProfileData(data);
+      setProfiles(prev => prev.map(p => p.id === selectedProfileId ? data : p));
       
-      const prefs = data.jobPreferences || {};
-      setLocationPreference(prefs.locationPreference || "");
-      setExpectedSalary(prefs.expectedSalary || "");
-      
-      setSummary(data.summary || "");
-      setEducation(data.education || []);
-      setExperience(data.experience || []);
-      setCertifications(data.certifications || []);
-      setExcludedCompanies(data.excludedCompanies || []);
-      setGithubUsername(data.githubUsername || "");
-      setGithubProfileUrl(data.githubProfileUrl || "");
-      setLinkedinName(data.linkedinName || "");
-      setLinkedinProfileUrl(data.linkedinProfileUrl || "");
-      
-      onProfileUpdate(data.name, data.avatar || "");
       setMessage("Profile successfully synchronized with your resume!");
     } catch (err: any) {
       setError(err.message || "Failed to sync profile.");
     } finally {
       setSyncingProfile(false);
+    }
+  };
+
+  const handleSwitchProfile = (profileId: number) => {
+    const target = profiles.find(p => p.id === profileId);
+    if (target) {
+      setSelectedProfileId(profileId);
+      setProfileData(target);
+      setMessage("");
+      setError("");
+    }
+  };
+
+  const handleCreateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newProfileName.trim()) return;
+    try {
+      setIsCreatingProfile(true);
+      setError("");
+      setMessage("");
+      const newProf = await profileService.createCandidateProfile(userId, newProfileName.trim());
+      setNewProfileName("");
+      await loadProfiles(newProf.id);
+      setMessage(`Profile version "${newProf.profileName}" created successfully!`);
+    } catch (err: any) {
+      setError(err.message || "Failed to create profile version.");
+    } finally {
+      setIsCreatingProfile(false);
+    }
+  };
+
+  const handleSelectDefault = async (profileId: number) => {
+    try {
+      setError("");
+      setMessage("");
+      await profileService.selectDefaultProfile(userId, profileId);
+      await loadProfiles(profileId);
+      setMessage("Set default profile version successfully.");
+    } catch (err: any) {
+      setError(err.message || "Failed to set default profile version.");
+    }
+  };
+
+  const handleDeleteProfile = async (profileId: number) => {
+    if (!window.confirm("Are you sure you want to delete this profile version? All details and resume bytes will be permanently lost.")) return;
+    try {
+      setError("");
+      setMessage("");
+      await profileService.deleteCandidateProfile(userId, profileId);
+      await loadProfiles();
+      setMessage("Profile version deleted successfully.");
+    } catch (err: any) {
+      setError(err.message || "Failed to delete profile version.");
     }
   };
 
@@ -382,38 +475,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
   };
 
   useEffect(() => {
-    profileService
-      .getCandidateProfile(userId)
-      .then((data) => {
-        setProfile(data);
-        setName(data.name || "");
-        setMobile(data.mobile || "");
-        setOfficialEmail(data.officialEmail || "");
-        setSkills(data.skills ? data.skills.join(", ") : "");
-        
-        const prefs = data.jobPreferences || {};
-        setLocationPreference(prefs.locationPreference || "");
-        setExpectedSalary(prefs.expectedSalary || "");
-
-        setSummary(data.summary || "");
-        setEducation(data.education || []);
-        setExperience(data.experience || []);
-        setCertifications(data.certifications || []);
-        setExcludedCompanies(data.excludedCompanies || []);
-        setGithubUsername(data.githubUsername || "");
-        setGithubProfileUrl(data.githubProfileUrl || "");
-        setLinkedinName(data.linkedinName || "");
-        setLinkedinProfileUrl(data.linkedinProfileUrl || "");
-        setIsProfilePublic(data.isProfilePublic || false);
-        setUsername(data.username || "");
-        setLeetcodeUsername(data.leetcodeUsername || "");
-        setIsVerified(data.isVerified || false);
-        setProfessionalVertical(data.professionalVertical || "DEVELOPER");
-
-        onProfileUpdate(data.name, data.avatar || "");
-      })
-      .catch(() => setError("Failed to load profile details."))
-      .finally(() => setLoading(false));
+    loadProfiles();
   }, [userId]);
 
   useEffect(() => {
@@ -473,13 +535,9 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
         professionalVertical,
       };
 
-      const result = await profileService.updateCandidateProfile(userId, updatedProfile);
-      setProfile(result);
-      setIsProfilePublic(result.isProfilePublic || false);
-      setUsername(result.username || "");
-      setLeetcodeUsername(result.leetcodeUsername || "");
-      setIsVerified(result.isVerified || false);
-      setProfessionalVertical(result.professionalVertical || "DEVELOPER");
+      const result = await profileService.updateCandidateProfileById(userId, selectedProfileId!, updatedProfile);
+      setProfiles(prev => prev.map(p => p.id === selectedProfileId ? result : p));
+      setProfileData(result);
       setExcludedCompanies(result.excludedCompanies || []);
       
       // Update local storage user details
@@ -564,6 +622,72 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
       {error && (
         <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-2xl mb-6 text-sm font-medium animate-in fade-in duration-200">
           {error}
+        </div>
+      )}
+
+      {/* Profile Version Switcher & Creator */}
+      {(activeTab === "profile" || activeTab === "preferences") && (
+        <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-5 mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h3 className="text-base font-bold text-slate-800">Active Profile Version</h3>
+              <p className="text-xs text-slate-500 mt-0.5">Switch between different target roles (e.g., Java Full Stack, Python Full Stack, AI Engineer).</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <select
+                value={selectedProfileId || ""}
+                onChange={(e) => handleSwitchProfile(Number(e.target.value))}
+                className="rounded-xl border-slate-200 text-sm focus:ring-primary focus:border-transparent px-3 py-2 bg-white text-slate-700 font-medium"
+              >
+                {profiles.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.profileName} {p.isDefault ? "(Default)" : ""}
+                  </option>
+                ))}
+              </select>
+              {selectedProfileId && !profiles.find(p => p.id === selectedProfileId)?.isDefault && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleSelectDefault(selectedProfileId)}
+                  className="text-xs py-1.5 px-3 rounded-lg border-emerald-300 text-emerald-700 hover:bg-emerald-50 font-semibold"
+                >
+                  Set Default
+                </Button>
+              )}
+              {selectedProfileId && profiles.length > 1 && !profiles.find(p => p.id === selectedProfileId)?.isDefault && (
+                <button
+                  type="button"
+                  onClick={() => handleDeleteProfile(selectedProfileId)}
+                  className="p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors"
+                  title="Delete Profile Version"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          </div>
+
+          <form onSubmit={handleCreateProfile} className="mt-4 pt-4 border-t border-slate-200/60 flex items-center gap-3">
+            <input
+              type="text"
+              placeholder="Create new version (e.g. AI Engineer)"
+              value={newProfileName}
+              onChange={(e) => setNewProfileName(e.target.value)}
+              required
+              className="flex-1 rounded-xl border-slate-200 text-sm focus:ring-primary focus:border-transparent px-3.5 py-2 bg-white"
+            />
+            <Button
+              type="submit"
+              disabled={isCreatingProfile}
+              className="text-sm py-2 px-4 rounded-xl shadow-sm"
+            >
+              {isCreatingProfile ? "Creating..." : "Add Version"}
+            </Button>
+          </form>
         </div>
       )}
 
@@ -1450,6 +1574,9 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
                           <span className="block text-xs font-bold text-slate-600">Activate HR Outreach Campaign</span>
                           <span className="block text-[10px] text-slate-400 font-medium">
                             Start sending cold emails in a random sequence to the chosen HR list.
+                          </span>
+                          <span className="block text-[10px] text-indigo-600 font-semibold mt-1">
+                            * Upgrade to Premium for multiple template use.
                           </span>
                         </label>
                       </div>

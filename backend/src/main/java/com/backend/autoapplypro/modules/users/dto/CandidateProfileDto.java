@@ -14,6 +14,9 @@ import java.util.Map;
 public class CandidateProfileDto {
     private Long id;
     private Long userId;
+    private String profileName;
+    private Boolean isDefault;
+    private String targetTemplateId;
     private String email;
     private String name;
     private String mobile;

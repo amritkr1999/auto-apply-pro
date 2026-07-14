@@ -331,6 +331,7 @@ export const TemplateManager: React.FC = () => {
         <div>
           <h1 className="text-3xl font-bold text-slate-800">Email Templates</h1>
           <p className="text-sm text-slate-500 mt-1">Manage and customize your cold email outreach templates</p>
+          <p className="text-xs text-indigo-600 font-semibold mt-1">Upgrade to Premium for multiple template use.</p>
         </div>
         {!activeTemplate && (
           <div className="flex items-center gap-3 shrink-0 flex-wrap sm:flex-nowrap">

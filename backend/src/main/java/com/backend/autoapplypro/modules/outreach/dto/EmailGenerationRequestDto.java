@@ -9,6 +9,7 @@ import lombok.*;
 @Builder
 public class EmailGenerationRequestDto {
     private Long userId;
+    private Long profileId;
     private JobDetailsDto jobDetails;
     private String templateId;
     private Boolean useAi;

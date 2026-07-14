@@ -477,6 +477,9 @@ export const ProfessionalDashboardView: React.FC = () => {
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xl">
                   Automatically draft and dispatch cold outreach emails to HR contacts in random order. Respects daily quotas, intervals, and active slot windows.
                 </p>
+                <p className="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold mt-1">
+                  * Upgrade to Premium for multiple template use.
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3 self-end md:self-center shrink-0">

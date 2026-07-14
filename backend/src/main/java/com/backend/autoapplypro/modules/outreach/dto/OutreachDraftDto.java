@@ -19,4 +19,8 @@ public class OutreachDraftDto {
     private String scheduledAt;
     private String errorMessage;
     private Long userId;
+    private Long profileId;
+    private String profileName;
+    private String companyName;
+    private String jobTitle;
 }

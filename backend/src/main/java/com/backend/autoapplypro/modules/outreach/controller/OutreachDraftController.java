@@ -31,6 +31,8 @@ public class OutreachDraftController {
     private final OutreachSchedulerService schedulerService;
     private final com.backend.autoapplypro.modules.outreach.service.EmailService emailService;
     private final SubscriptionGatingService subscriptionGatingService;
+    private final com.backend.autoapplypro.modules.users.repository.ProfessionalProfileRepository professionalProfileRepository;
+    private final com.backend.autoapplypro.modules.jobs.repository.JobPostingRepository jobPostingRepository;
 
     @PostMapping("/generate")
     public ResponseEntity<?> generateEmail(
@@ -117,9 +119,17 @@ public class OutreachDraftController {
             scheduledAt = schedulerService.calculateNextScheduleTime(user);
         }
 
+        com.backend.autoapplypro.modules.users.model.ProfessionalProfile prof = null;
+        if (dto.getProfileId() != null) {
+            prof = professionalProfileRepository.findById(dto.getProfileId()).orElse(null);
+        } else {
+            prof = professionalProfileRepository.findByUserIdAndIsDefaultTrue(targetUserId).orElse(null);
+        }
+
         // Build queue entity
         EmailQueue queueItem = EmailQueue.builder()
                 .user(user)
+                .professionalProfile(prof)
                 .recipientEmail(dto.getRecipientEmail())
                 .ccEmails(dto.getCcEmails())
                 .parsedEmails(dto.getParsedEmails())
@@ -138,6 +148,10 @@ public class OutreachDraftController {
         dto.setCcEmails(saved.getCcEmails());
         dto.setParsedEmails(saved.getParsedEmails());
         dto.setScheduledAt(saved.getScheduledAt() != null ? saved.getScheduledAt().toString() : null);
+        dto.setProfileId(saved.getProfessionalProfile() != null ? saved.getProfessionalProfile().getId() : null);
+        dto.setProfileName(saved.getProfessionalProfile() != null ? saved.getProfessionalProfile().getProfileName() : null);
+        dto.setCompanyName(saved.getJobPosting() != null ? saved.getJobPosting().getCompany() : null);
+        dto.setJobTitle(saved.getJobPosting() != null ? saved.getJobPosting().getTitle() : null);
         return ResponseEntity.ok(dto);
     }
 
@@ -156,6 +170,12 @@ public class OutreachDraftController {
         return emailQueueRepository.findById(id).map(item -> {
             if (!item.getUser().getId().equals(callerUserId) && !isAdmin) {
                 return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
+            }
+
+            if (dto.getProfileId() != null) {
+                com.backend.autoapplypro.modules.users.model.ProfessionalProfile prof = 
+                    professionalProfileRepository.findById(dto.getProfileId()).orElse(null);
+                item.setProfessionalProfile(prof);
             }
 
             item.setRecipientEmail(dto.getRecipientEmail());
@@ -196,9 +216,127 @@ public class OutreachDraftController {
                     .scheduledAt(saved.getScheduledAt() != null ? saved.getScheduledAt().toString() : null)
                     .errorMessage(saved.getErrorMessage())
                     .userId(saved.getUser().getId())
+                    .profileId(saved.getProfessionalProfile() != null ? saved.getProfessionalProfile().getId() : null)
+                    .profileName(saved.getProfessionalProfile() != null ? saved.getProfessionalProfile().getProfileName() : null)
+                    .companyName(saved.getJobPosting() != null ? saved.getJobPosting().getCompany() : null)
+                    .jobTitle(saved.getJobPosting() != null ? saved.getJobPosting().getTitle() : null)
                     .build();
 
             return ResponseEntity.ok(responseDto);
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/{id}/regenerate")
+    public ResponseEntity<?> regenerateDraft(
+            Authentication authentication,
+            @PathVariable Long id,
+            @RequestParam("profileId") Long profileId) {
+        log.info("Received request to regenerate email draft ID: {} using profile ID: {}", id, profileId);
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED).build();
+        }
+        Long callerUserId = (Long) authentication.getCredentials();
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        return emailQueueRepository.findById(id).map(item -> {
+            if (!item.getUser().getId().equals(callerUserId) && !isAdmin) {
+                return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
+            }
+
+            try {
+                // Centralized Subscription Gating
+                subscriptionGatingService.validatePremiumAccess(item.getUser().getId());
+
+                // Find the target profile
+                com.backend.autoapplypro.modules.users.model.ProfessionalProfile targetProfile = 
+                        professionalProfileRepository.findById(profileId).orElse(null);
+                if (targetProfile == null || !targetProfile.getUser().getId().equals(item.getUser().getId())) {
+                    return ResponseEntity.badRequest().body("Invalid profile ID for this user");
+                }
+
+                // If we don't have job posting associated, create a placeholder from existing subject/body details
+                com.backend.autoapplypro.modules.jobs.model.JobPosting job = item.getJobPosting();
+                com.backend.autoapplypro.modules.jobs.dto.JobDetailsDto jobDetailsDto;
+                if (job != null) {
+                    java.util.List<String> skills = java.util.Collections.emptyList();
+                    if (job.getSkills() != null) {
+                        skills = job.getSkills().stream()
+                                .map(com.backend.autoapplypro.modules.users.model.Skill::getName)
+                                .toList();
+                    }
+
+                    java.util.List<String> hrEmails = java.util.Collections.emptyList();
+                    if (job.getHrEmails() != null && !job.getHrEmails().trim().isEmpty()) {
+                        hrEmails = java.util.Arrays.asList(job.getHrEmails().split(","));
+                    }
+
+                    jobDetailsDto = com.backend.autoapplypro.modules.jobs.dto.JobDetailsDto.builder()
+                            .title(job.getTitle())
+                            .company(job.getCompany())
+                            .location(job.getLocation())
+                            .description(job.getDescription())
+                            .requirements(job.getRequirements())
+                            .salary(job.getSalary())
+                            .sourceUrl(job.getSourceUrl())
+                            .skills(skills)
+                            .hrEmails(hrEmails)
+                            .build();
+                } else {
+                    // Fallback to placeholder details parsed from subject
+                    String company = "Target Company";
+                    String title = "Software Engineer";
+                    jobDetailsDto = com.backend.autoapplypro.modules.jobs.dto.JobDetailsDto.builder()
+                            .title(title)
+                            .company(company)
+                            .build();
+                }
+
+                EmailGenerationRequestDto requestDto = EmailGenerationRequestDto.builder()
+                        .userId(item.getUser().getId())
+                        .profileId(profileId)
+                        .jobDetails(jobDetailsDto)
+                        .useAi(true) // force AI regeneration to rewrite email for target profile
+                        .build();
+
+                EmailGenerationResponseDto regenerated = emailService.generateEmail(requestDto, true);
+
+                item.setSubject(regenerated.getSubject());
+                item.setBody(regenerated.getBody());
+                item.setProfessionalProfile(targetProfile);
+                if (regenerated.getRecipientEmail() != null) {
+                    item.setRecipientEmail(regenerated.getRecipientEmail());
+                }
+
+                EmailQueue saved = emailQueueRepository.save(item);
+                log.info("Regenerated draft ID: {} using profile ID: {}", saved.getId(), profileId);
+
+                OutreachDraftDto responseDto = OutreachDraftDto.builder()
+                        .id(saved.getId().toString())
+                        .recipientEmail(saved.getRecipientEmail())
+                        .ccEmails(saved.getCcEmails())
+                        .parsedEmails(saved.getParsedEmails())
+                        .subject(saved.getSubject())
+                        .body(saved.getBody())
+                        .status(saved.getStatus().name())
+                        .sentAt(saved.getSentAt() != null ? saved.getSentAt().toString() : null)
+                        .scheduledAt(saved.getScheduledAt() != null ? saved.getScheduledAt().toString() : null)
+                        .errorMessage(saved.getErrorMessage())
+                        .userId(saved.getUser().getId())
+                        .profileId(saved.getProfessionalProfile() != null ? saved.getProfessionalProfile().getId() : null)
+                        .profileName(saved.getProfessionalProfile() != null ? saved.getProfessionalProfile().getProfileName() : null)
+                        .companyName(saved.getJobPosting() != null ? saved.getJobPosting().getCompany() : null)
+                        .jobTitle(saved.getJobPosting() != null ? saved.getJobPosting().getTitle() : null)
+                        .build();
+
+                return ResponseEntity.ok(responseDto);
+
+            } catch (Exception e) {
+                log.error("Failed to regenerate email draft", e);
+                return ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("Failed to regenerate email: " + e.getMessage());
+            }
         }).orElse(ResponseEntity.notFound().build());
     }
 
@@ -254,6 +392,10 @@ public class OutreachDraftController {
                 dto.setScheduledAt(item.getScheduledAt() != null ? item.getScheduledAt().toString() : null);
                 dto.setErrorMessage(item.getErrorMessage());
                 dto.setUserId(item.getUser().getId());
+                dto.setProfileId(item.getProfessionalProfile() != null ? item.getProfessionalProfile().getId() : null);
+                dto.setProfileName(item.getProfessionalProfile() != null ? item.getProfessionalProfile().getProfileName() : null);
+                dto.setCompanyName(item.getJobPosting() != null ? item.getJobPosting().getCompany() : null);
+                dto.setJobTitle(item.getJobPosting() != null ? item.getJobPosting().getTitle() : null);
                 dtos.add(dto);
             }
             return ResponseEntity.ok(dtos);

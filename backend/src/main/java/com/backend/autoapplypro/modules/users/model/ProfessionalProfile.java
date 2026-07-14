@@ -22,9 +22,20 @@ public class ProfessionalProfile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @Column(name = "profile_name", nullable = false)
+    @Builder.Default
+    private String profileName = "Default Profile";
+
+    @Column(name = "is_default", nullable = false)
+    @Builder.Default
+    private Boolean isDefault = false;
+
+    @Column(name = "target_template_id")
+    private String targetTemplateId;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(

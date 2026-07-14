@@ -74,6 +74,8 @@ public class UserServiceImpl implements UserService {
                     .user(user)
                     .skills(new java.util.HashSet<>())
                     .jobPreferences(new java.util.HashMap<>())
+                    .profileName("Default Profile")
+                    .isDefault(true)
                     .build();
             professionalProfileRepository.save(candidate);
         } else if (role == UserRole.RECRUITER) {
@@ -174,19 +176,38 @@ public class UserServiceImpl implements UserService {
                             .skills(new java.util.HashSet<>())
                             .jobPreferences(new java.util.HashMap<>())
                             .isVerified(false)
+                            .profileName("Default Profile")
+                            .isDefault(true)
                             .build();
                     return professionalProfileRepository.save(newCand);
                 });
     }
 
-    @Override
-    @Transactional
-    public CandidateProfileDto getCandidateProfile(Long userId) {
-        ProfessionalProfile candidate = getOrCreateCandidate(userId);
+    private ProfessionalProfile getOrCreateCandidateProfile(Long userId, Long profileId) {
+        if (profileId == null) {
+            return getOrCreateCandidate(userId);
+        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        if (user.getRole() != UserRole.CANDIDATE) {
+            throw new IllegalArgumentException("User is not a candidate");
+        }
+        ProfessionalProfile profile = professionalProfileRepository.findById(profileId)
+                .orElseThrow(() -> new IllegalArgumentException("Profile not found with id: " + profileId));
+        if (!profile.getUser().getId().equals(userId)) {
+            throw new IllegalArgumentException("Profile does not belong to the user");
+        }
+        return profile;
+    }
+
+    private CandidateProfileDto mapToDto(ProfessionalProfile candidate) {
         User user = candidate.getUser();
         return CandidateProfileDto.builder()
                 .id(candidate.getId())
                 .userId(user.getId())
+                .profileName(candidate.getProfileName())
+                .isDefault(candidate.getIsDefault())
+                .targetTemplateId(candidate.getTargetTemplateId())
                 .email(user.getEmail())
                 .name(user.getName())
                 .mobile(user.getMobile())
@@ -228,8 +249,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public CandidateProfileDto updateCandidateProfile(Long userId, CandidateProfileDto dto) {
+    public CandidateProfileDto getCandidateProfile(Long userId) {
         ProfessionalProfile candidate = getOrCreateCandidate(userId);
+        return mapToDto(candidate);
+    }
+
+    private CandidateProfileDto updateProfileInternal(ProfessionalProfile candidate, CandidateProfileDto dto) {
         User user = candidate.getUser();
         
         user.setName(dto.getName());
@@ -256,6 +281,13 @@ public class UserServiceImpl implements UserService {
             }
         }
         userRepository.save(user);
+
+        if (dto.getProfileName() != null && !dto.getProfileName().trim().isEmpty()) {
+            candidate.setProfileName(dto.getProfileName().trim());
+        }
+        if (dto.getTargetTemplateId() != null) {
+            candidate.setTargetTemplateId(dto.getTargetTemplateId());
+        }
 
         java.util.Set<Skill> dbSkills = new java.util.HashSet<>();
         if (dto.getSkills() != null) {
@@ -353,47 +385,21 @@ public class UserServiceImpl implements UserService {
         }
 
         candidate = professionalProfileRepository.save(candidate);
+        return mapToDto(candidate);
+    }
 
-        return CandidateProfileDto.builder()
-                .id(candidate.getId())
-                .userId(user.getId())
-                .email(user.getEmail())
-                .name(user.getName())
-                .mobile(user.getMobile())
-                .officialEmail(user.getOfficialEmail())
-                .skills(candidate.getSkills().stream().map(Skill::getName).collect(java.util.stream.Collectors.toList()))
-                .jobPreferences(candidate.getJobPreferences())
-                .resumeFilename(candidate.getResumeFilename())
-                .summary(candidate.getSummary())
-                .education(candidate.getEducation())
-                .experience(candidate.getExperience())
-                .certifications(candidate.getCertifications())
-                .githubUsername(candidate.getGithubUsername())
-                .githubProfileUrl(candidate.getGithubProfileUrl())
-                .linkedinProfileUrl(candidate.getLinkedinProfileUrl())
-                .linkedinName(candidate.getLinkedinName())
-                .avatar(user.getAvatar())
-                .isProfilePublic(user.getIsProfilePublic())
-                .username(user.getUsername())
-                .githubStats(candidate.getGithubStats())
-                .leetcodeStats(candidate.getLeetcodeStats())
-                .leetcodeUsername(candidate.getLeetcodeUsername())
-                .isVerified(candidate.getIsVerified())
-                .professionalVertical(user.getProfessionalVertical() != null ? user.getProfessionalVertical().name() : "DEVELOPER")
-                .achievements(candidate.getAchievements() != null ? candidate.getAchievements().stream()
-                        .map(ach -> AchievementDto.builder()
-                                .id(ach.getId())
-                                .title(ach.getTitle())
-                                .description(ach.getDescription())
-                                .category(ach.getCategory())
-                                .badgeUrl(ach.getBadgeUrl())
-                                .verificationStatus(ach.getVerificationStatus() != null ? ach.getVerificationStatus().name() : "NONE")
-                                .trustScore(ach.getTrustScore())
-                                .isVerified(ach.getIsVerified())
-                                .build())
-                        .collect(java.util.stream.Collectors.toList()) : new java.util.ArrayList<>())
-                .excludedCompanies(candidate.getExcludedCompanies() != null ? candidate.getExcludedCompanies() : new java.util.ArrayList<>())
-                .build();
+    @Override
+    @Transactional
+    public CandidateProfileDto updateCandidateProfile(Long userId, CandidateProfileDto dto) {
+        ProfessionalProfile candidate = getOrCreateCandidate(userId);
+        return updateProfileInternal(candidate, dto);
+    }
+
+    @Override
+    @Transactional
+    public CandidateProfileDto updateCandidateProfile(Long userId, Long profileId, CandidateProfileDto dto) {
+        ProfessionalProfile candidate = getOrCreateCandidateProfile(userId, profileId);
+        return updateProfileInternal(candidate, dto);
     }
 
     @Override
@@ -532,9 +538,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void syncProfileFromResume(Long userId) {
-        ProfessionalProfile candidate = getOrCreateCandidate(userId);
-        
+    public void uploadResume(Long userId, Long profileId, org.springframework.web.multipart.MultipartFile file) throws java.io.IOException {
+        ProfessionalProfile candidate = getOrCreateCandidateProfile(userId, profileId);
+        candidate.setResumeFilename(file.getOriginalFilename());
+        candidate.setResumeContentType(file.getContentType());
+        candidate.setResumeBytes(file.getBytes());
+        professionalProfileRepository.save(candidate);
+    }
+
+    private void syncProfileFromResumeInternal(ProfessionalProfile candidate) {
         if (candidate.getResumeBytes() == null || candidate.getResumeBytes().length == 0) {
             throw new IllegalStateException("No resume uploaded to sync profile from.");
         }
@@ -603,6 +615,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    public void syncProfileFromResume(Long userId) {
+        ProfessionalProfile candidate = getOrCreateCandidate(userId);
+        syncProfileFromResumeInternal(candidate);
+    }
+
+    @Override
+    @Transactional
+    public void syncProfileFromResume(Long userId, Long profileId) {
+        ProfessionalProfile candidate = getOrCreateCandidateProfile(userId, profileId);
+        syncProfileFromResumeInternal(candidate);
+    }
+
+    @Override
+    @Transactional
     public ProfessionalProfile getCandidateResume(Long userId) {
         ProfessionalProfile candidate = getOrCreateCandidate(userId);
         // Force eager initialization of lazy @Lob resumeBytes while the transaction is active
@@ -610,6 +636,85 @@ public class UserServiceImpl implements UserService {
             int length = candidate.getResumeBytes().length;
         }
         return candidate;
+    }
+
+    @Override
+    @Transactional
+    public ProfessionalProfile getCandidateResume(Long userId, Long profileId) {
+        ProfessionalProfile candidate = getOrCreateCandidateProfile(userId, profileId);
+        // Force eager initialization of lazy @Lob resumeBytes while the transaction is active
+        if (candidate.getResumeBytes() != null) {
+            int length = candidate.getResumeBytes().length;
+        }
+        return candidate;
+    }
+
+    @Override
+    @Transactional
+    public CandidateProfileDto getCandidateProfileById(Long userId, Long profileId) {
+        ProfessionalProfile candidate = getOrCreateCandidateProfile(userId, profileId);
+        return mapToDto(candidate);
+    }
+
+    @Override
+    @Transactional
+    public java.util.List<CandidateProfileDto> getCandidateProfiles(Long userId) {
+        getOrCreateCandidate(userId); // ensure a default profile is created
+        java.util.List<ProfessionalProfile> profiles = professionalProfileRepository.findAllByUserId(userId);
+        return profiles.stream().map(this::mapToDto).collect(java.util.stream.Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public CandidateProfileDto createCandidateProfile(Long userId, String profileName) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        if (user.getRole() != UserRole.CANDIDATE) {
+            throw new IllegalArgumentException("User is not a candidate");
+        }
+        
+        java.util.List<ProfessionalProfile> existing = professionalProfileRepository.findAllByUserId(userId);
+        boolean isFirst = existing.isEmpty();
+
+        ProfessionalProfile newProfile = ProfessionalProfile.builder()
+                .user(user)
+                .skills(new java.util.HashSet<>())
+                .jobPreferences(new java.util.HashMap<>())
+                .isVerified(false)
+                .profileName(profileName != null ? profileName.trim() : "New Profile")
+                .isDefault(isFirst)
+                .build();
+        newProfile = professionalProfileRepository.save(newProfile);
+        return mapToDto(newProfile);
+    }
+
+    @Override
+    @Transactional
+    public void selectDefaultProfile(Long userId, Long profileId) {
+        java.util.List<ProfessionalProfile> profiles = professionalProfileRepository.findAllByUserId(userId);
+        boolean found = false;
+        for (ProfessionalProfile profile : profiles) {
+            if (profile.getId().equals(profileId)) {
+                profile.setIsDefault(true);
+                found = true;
+            } else {
+                profile.setIsDefault(false);
+            }
+        }
+        if (!found) {
+            throw new IllegalArgumentException("Profile not found with id: " + profileId);
+        }
+        professionalProfileRepository.saveAll(profiles);
+    }
+
+    @Override
+    @Transactional
+    public void deleteCandidateProfile(Long userId, Long profileId) {
+        ProfessionalProfile profile = getOrCreateCandidateProfile(userId, profileId);
+        if (profile.getIsDefault()) {
+            throw new IllegalArgumentException("Cannot delete the default profile. Please select another profile as default first.");
+        }
+        professionalProfileRepository.delete(profile);
     }
 
     @Override

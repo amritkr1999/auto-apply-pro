@@ -101,7 +101,7 @@ class EvidenceVerifierTest {
         ProfessionalProfile candidate = new ProfessionalProfile();
         candidate.setId(1L);
         candidate.setUser(user);
-        user.setProfessionalProfile(candidate);
+        user.getProfessionalProfiles().add(candidate);
 
         Achievement verifiedAch = Achievement.builder()
                 .id(100L)
