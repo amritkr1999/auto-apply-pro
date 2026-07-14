@@ -70,6 +70,15 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<FeedbackResponseDto> getPublicFeedbacks() {
+        return feedbackRepository.findAllByOrderByCreatedAtDesc().stream()
+                .filter(f -> f.getRating() != null && f.getRating() >= 4)
+                .map(this::mapToResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public FeedbackStatusResponse getFeedbackStatus(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));

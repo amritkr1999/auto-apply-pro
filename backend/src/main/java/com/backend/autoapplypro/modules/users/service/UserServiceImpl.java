@@ -284,30 +284,11 @@ public class UserServiceImpl implements UserService {
         candidate.setLinkedinName(dto.getLinkedinName());
         
         candidate.setLeetcodeUsername(dto.getLeetcodeUsername());
-        if (dto.getLeetcodeUsername() != null && !dto.getLeetcodeUsername().trim().isEmpty()) {
-            if (candidate.getLeetcodeStats() == null || candidate.getLeetcodeStats().isEmpty()) {
-                java.util.Map<String, Object> mockLeetcode = new java.util.HashMap<>();
-                mockLeetcode.put("easySolved", 52);
-                mockLeetcode.put("mediumSolved", 114);
-                mockLeetcode.put("hardSolved", 27);
-                mockLeetcode.put("totalSolved", 193);
-                mockLeetcode.put("ranking", "Top 7.4%");
-                candidate.setLeetcodeStats(mockLeetcode);
-            }
-        } else {
+        if (dto.getLeetcodeUsername() == null || dto.getLeetcodeUsername().trim().isEmpty()) {
             candidate.setLeetcodeStats(null);
         }
 
-        if (candidate.getGithubUsername() != null && !candidate.getGithubUsername().trim().isEmpty()) {
-            if (candidate.getGithubStats() == null || candidate.getGithubStats().isEmpty()) {
-                java.util.Map<String, Object> mockGithub = new java.util.HashMap<>();
-                mockGithub.put("publicRepos", 31);
-                mockGithub.put("stars", 148);
-                mockGithub.put("contributions", 1204);
-                mockGithub.put("followers", 42);
-                candidate.setGithubStats(mockGithub);
-            }
-        } else {
+        if (candidate.getGithubUsername() == null || candidate.getGithubUsername().trim().isEmpty()) {
             candidate.setGithubStats(null);
         }
 

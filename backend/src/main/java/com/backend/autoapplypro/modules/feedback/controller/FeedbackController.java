@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.List;
 
 @RestController
@@ -34,8 +35,14 @@ public class FeedbackController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<FeedbackResponseDto>> getAllFeedbacks() {
         return ResponseEntity.ok(feedbackService.getAllFeedbacks());
+    }
+
+    @GetMapping("/public")
+    public ResponseEntity<List<FeedbackResponseDto>> getPublicFeedbacks() {
+        return ResponseEntity.ok(feedbackService.getPublicFeedbacks());
     }
 
     @GetMapping("/status")

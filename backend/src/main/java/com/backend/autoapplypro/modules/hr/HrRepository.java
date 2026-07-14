@@ -1,4 +1,4 @@
-package com.backend.autoapplypro.HrList;
+package com.backend.autoapplypro.modules.hr;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

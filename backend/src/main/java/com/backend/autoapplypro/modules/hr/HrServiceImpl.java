@@ -1,7 +1,7 @@
-package com.backend.autoapplypro.HrList;
+package com.backend.autoapplypro.modules.hr;
 
-import com.backend.autoapplypro.HrList.dto.HrRequestDto;
-import com.backend.autoapplypro.HrList.dto.HrResponseDto;
+import com.backend.autoapplypro.modules.hr.dto.HrRequestDto;
+import com.backend.autoapplypro.modules.hr.dto.HrResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;

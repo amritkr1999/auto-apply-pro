@@ -27,7 +27,8 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Enable configured CORS support
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/feedback").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/feedback/public").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/feedback").hasRole("ADMIN")
                 .requestMatchers(
                     "/api/v1/auth/**",
                     "/api/v1/public/**",

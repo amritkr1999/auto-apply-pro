@@ -16,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
+import com.backend.autoapplypro.modules.billing.service.SubscriptionGatingService;
 
 @RestController
 @RequestMapping("/api/drafts")
@@ -28,15 +30,31 @@ public class OutreachDraftController {
     private final UserService userService;
     private final OutreachSchedulerService schedulerService;
     private final com.backend.autoapplypro.modules.outreach.service.EmailService emailService;
+    private final SubscriptionGatingService subscriptionGatingService;
 
     @PostMapping("/generate")
     public ResponseEntity<?> generateEmail(
+            Authentication authentication,
             @RequestBody EmailGenerationRequestDto dto,
             @RequestParam(value = "regenerate", required = false, defaultValue = "false") boolean regenerate) {
         log.info("Received request to generate outreach email for user: {} for job: {}, regenerate: {}", 
                 dto.getUserId(), dto.getJobDetails().getTitle(), regenerate);
 
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED).build();
+        }
+        Long callerUserId = (Long) authentication.getCredentials();
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!dto.getUserId().equals(callerUserId) && !isAdmin) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
+        }
+
         try {
+            // Centralized Subscription Gating
+            subscriptionGatingService.validatePremiumAccess(dto.getUserId());
+
             EmailGenerationResponseDto response = emailService.generateEmail(dto, regenerate);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -48,15 +66,26 @@ public class OutreachDraftController {
 
     @Transactional
     @PostMapping
-    public ResponseEntity<OutreachDraftDto> saveDraft(@RequestBody OutreachDraftDto dto) {
+    public ResponseEntity<?> saveDraft(Authentication authentication, @RequestBody OutreachDraftDto dto) {
         log.info("Received request to queue email draft to: {}", dto.getRecipientEmail());
 
-        User user = null;
-        if (dto.getUserId() != null) {
-            user = userRepository.findById(dto.getUserId()).orElse(null);
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED).build();
         }
+        Long callerUserId = (Long) authentication.getCredentials();
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (dto.getUserId() != null && !dto.getUserId().equals(callerUserId) && !isAdmin) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
+        }
+
+        User user = null;
+        Long targetUserId = dto.getUserId() != null ? dto.getUserId() : callerUserId;
+        user = userRepository.findById(targetUserId).orElse(null);
+
         if (user == null) {
-            log.info("No user ID provided or found. Bypassing auth check for test/dev fallback.");
+            log.info("No user ID found. Bypassing auth check for test/dev fallback.");
             user = userRepository.findAll().stream()
                     .filter(u -> u.getRole() == UserRole.CANDIDATE)
                     .findFirst()
@@ -114,9 +143,21 @@ public class OutreachDraftController {
 
     @Transactional
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateAndApproveDraft(@PathVariable Long id, @RequestBody OutreachDraftDto dto) {
+    public ResponseEntity<?> updateAndApproveDraft(Authentication authentication, @PathVariable Long id, @RequestBody OutreachDraftDto dto) {
         log.info("Received request to update/approve email draft ID: {}", id);
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED).build();
+        }
+        Long callerUserId = (Long) authentication.getCredentials();
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
         return emailQueueRepository.findById(id).map(item -> {
+            if (!item.getUser().getId().equals(callerUserId) && !isAdmin) {
+                return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
+            }
+
             item.setRecipientEmail(dto.getRecipientEmail());
             item.setCcEmails(dto.getCcEmails());
             item.setParsedEmails(dto.getParsedEmails());
@@ -163,19 +204,40 @@ public class OutreachDraftController {
 
     @Transactional
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteDraft(@PathVariable Long id) {
+    public ResponseEntity<?> deleteDraft(Authentication authentication, @PathVariable Long id) {
         log.info("Received request to delete email draft ID: {}", id);
-        if (emailQueueRepository.existsById(id)) {
-            emailQueueRepository.deleteById(id);
-            return ResponseEntity.ok(java.util.Map.of("message", "Draft deleted successfully"));
-        } else {
-            return ResponseEntity.notFound().build();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED).build();
         }
+        Long callerUserId = (Long) authentication.getCredentials();
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        return emailQueueRepository.findById(id).map(item -> {
+            if (!item.getUser().getId().equals(callerUserId) && !isAdmin) {
+                return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
+            }
+            emailQueueRepository.delete(item);
+            return ResponseEntity.ok(java.util.Map.of("message", "Draft deleted successfully"));
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getQueueItems(@PathVariable Long userId) {
+    public ResponseEntity<?> getQueueItems(Authentication authentication, @PathVariable Long userId) {
         log.info("Fetching email queue items for user: {}", userId);
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED).build();
+        }
+        Long callerUserId = (Long) authentication.getCredentials();
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!userId.equals(callerUserId) && !isAdmin) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
+        }
+
         try {
             java.util.List<EmailQueue> items = emailQueueRepository.findByUserId(userId);
             java.util.List<OutreachDraftDto> dtos = new java.util.ArrayList<>();

@@ -1,7 +1,8 @@
 package com.backend.autoapplypro.modules.outreach.service;
 
-import com.backend.autoapplypro.HrList.HrDetails;
-import com.backend.autoapplypro.HrList.HrRepository;
+import com.backend.autoapplypro.modules.hr.HrDetails;
+import com.backend.autoapplypro.modules.hr.HrRepository;
+import com.backend.autoapplypro.modules.billing.service.SubscriptionGatingService;
 import com.backend.autoapplypro.modules.outreach.model.EmailQueue;
 import com.backend.autoapplypro.modules.outreach.model.EmailTemplate;
 import com.backend.autoapplypro.modules.outreach.model.OutreachStatus;
@@ -32,11 +33,16 @@ public class HrOutreachCampaignService {
     private final HrRepository hrRepository;
     private final OutreachSchedulerService schedulerService;
     private final CandidateRepository candidateRepository;
+    private final SubscriptionGatingService subscriptionGatingService;
 
     @Transactional
     public void toggleCampaign(User user, boolean enable, String targetRole, String templateId, String sourceTable) {
         log.info("Toggling HR Outreach Campaign for user ID: {}. Enable: {}, Target Role: {}, Template ID: {}, Source Table: {}",
                 user.getId(), enable, targetRole, templateId, sourceTable);
+
+        if (enable) {
+            subscriptionGatingService.validatePremiumAccess(user.getId());
+        }
 
         // Always update user configuration fields
         user.setHrOutreachTargetRole(targetRole != null ? targetRole : "Software Engineer");

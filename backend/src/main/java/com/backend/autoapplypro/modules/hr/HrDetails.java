@@ -1,4 +1,4 @@
-package com.backend.autoapplypro.HrList;
+package com.backend.autoapplypro.modules.hr;
 
 import jakarta.persistence.*;
 import lombok.*;
