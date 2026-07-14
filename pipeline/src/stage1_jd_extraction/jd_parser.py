@@ -7,6 +7,45 @@ from src.stage1_jd_extraction.schemas import JobDescription
 
 logger = logging.getLogger(__name__)
 
+job_description_schema = {
+    "type": "OBJECT",
+    "properties": {
+        "job_title": {"type": "STRING"},
+        "company": {"type": "STRING"},
+        "skills": {
+            "type": "ARRAY",
+            "items": {"type": "STRING"}
+        },
+        "salary": {
+            "type": "OBJECT",
+            "properties": {
+                "min": {"type": "INTEGER"},
+                "max": {"type": "INTEGER"},
+                "currency": {"type": "STRING"}
+            }
+        },
+        "recruiter_emails": {
+            "type": "ARRAY",
+            "items": {"type": "STRING"}
+        },
+        "experience_required": {"type": "STRING"},
+        "location": {"type": "STRING"},
+        "job_type": {"type": "STRING"},
+        "description": {"type": "STRING"}
+    },
+    "required": ["job_title", "company", "skills"]
+}
+
+def clean_json_text(text: str) -> str:
+    text = text.strip()
+    if text.startswith("```json"):
+        text = text[7:]
+    elif text.startswith("```"):
+        text = text[3:]
+    if text.endswith("```"):
+        text = text[:-3]
+    return text.strip()
+
 class JDParser:
     def __init__(self, config: Settings, session: aiohttp.ClientSession):
         self.config = config
@@ -14,34 +53,36 @@ class JDParser:
 
     async def parse(self, ocr_text: str, source_filename: str) -> JobDescription:
         """Uses Ollama instruction model to extract structured data from raw OCR text and validates using Pydantic."""
-        prompt = f"""
+        system_prompt = """
         Extract the following job description details from the OCR text into a JSON object matching this schema:
-        {{
+        {
             "job_title": "string (Required)",
             "company": "string (Required)",
             "skills": ["string"] (Required, list of skills),
-            "salary": {{
+            "salary": {
                 "min": int or null,
                 "max": int or null,
                 "currency": "string"
-            }} or null,
-            "recruiter_emails": ["string"] (Search for all email patterns matching [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{{2,}}),
+            } or null,
+            "recruiter_emails": ["string"] (Search for all email patterns matching [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}),
             "experience_required": "string" or null,
             "location": "string" or null,
             "job_type": "string" or null (e.g. Full-time, Contract, Part-time, Internship),
             "description": "string (Required, a clean, readable, professional summary of the job description. Do not include coordinates, HTML tags, or email/contact instructions)"
-        }}
+        }
 
         Ensure all keys are present. If a field is missing, assign it null.
         Only output the raw JSON object. Do not wrap it in markdown or formatting blocks.
-
-        OCR text:
-        {ocr_text}
         """
+
+        user_prompt = f"OCR text:\n{ocr_text}"
 
         payload = {
             "model": self.config.ollama_llm_model,
-            "prompt": prompt,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
             "format": "json",
             "stream": False,
             "options": {
@@ -49,47 +90,119 @@ class JDParser:
             }
         }
 
-        logger.info(f"Sending OCR text to Ollama LLM model {self.config.ollama_llm_model} for parsing")
+        # ==========================================
+        # LEGACY LOCAL INFERENCE (Preserved)
+        # ==========================================
+        # logger.info(f"Sending OCR text to LLM model {self.config.ollama_llm_model} for parsing")
+        # try:
+        #     from src.llm_client import call_llm
+        #     response_text = await call_llm(
+        #         config=self.config,
+        #         session=self.session,
+        #         model=self.config.ollama_llm_model,
+        #         purpose="jd_parsing",
+        #         prompt=user_prompt,
+        #         system_prompt=system_prompt,
+        #         json_format=True,
+        #         temperature=self.config.ollama_temperature
+        #     )
+        #     parsed_json = json.loads(response_text)
+        # except json.JSONDecodeError as jde:
+        #     logger.error(f"Failed to decode JSON response from Ollama: {jde}. Raw text: {response_text}")
+        #     raise RuntimeError(f"Ollama returned invalid JSON: {jde}")
+        # except Exception as e:
+        #     logger.error(f"Error calling Ollama instruction API for JD parsing: {e}")
+        #     raise RuntimeError(f"Ollama JD parsing call failed: {e}")
+        # ==========================================
+
+        if self.config.use_local_model:
+            logger.info(f"Sending OCR text to LLM model {self.config.ollama_llm_model} for parsing (Local Model)")
+            try:
+                from src.llm_client import call_llm
+                response_text = await call_llm(
+                    config=self.config,
+                    session=self.session,
+                    model=self.config.ollama_llm_model,
+                    purpose="jd_parsing",
+                    prompt=user_prompt,
+                    system_prompt=system_prompt,
+                    json_format=True,
+                    temperature=self.config.ollama_temperature
+                )
+                cleaned_text = clean_json_text(response_text)
+                parsed_json = json.loads(cleaned_text)
+            except json.JSONDecodeError as jde:
+                logger.error(f"Failed to decode JSON response from Ollama: {jde}. Raw text: {response_text}")
+                raise RuntimeError(f"Ollama returned invalid JSON: {jde}")
+            except Exception as e:
+                logger.error(f"Error calling Ollama instruction API for JD parsing: {e}")
+                raise RuntimeError(f"Ollama JD parsing call failed: {e}")
+        else:
+            logger.info("Routing JD parsing request to Google Gemini API")
+            try:
+                import os
+                import google.generativeai as genai
+                
+                api_key = os.environ.get("GEMINI_API_KEY") or self.config.gemini_api_key
+                if not api_key:
+                    raise RuntimeError("GEMINI_API_KEY environment variable is not set")
+                genai.configure(api_key=api_key)
+                
+                model_name = self.config.ollama_llm_model
+                if "gemini-1.5-flash" in model_name.lower():
+                    model_name = "gemini-3.5-flash"
+                elif "gemini-1.5-pro" in model_name.lower():
+                    model_name = "gemini-2.5-pro"
+                elif "gemini" not in model_name.lower():
+                    model_name = "gemini-3.5-flash"
+                
+                model = genai.GenerativeModel(
+                    model_name=model_name,
+                    system_instruction=system_prompt,
+                    generation_config={
+                        "response_mime_type": "application/json",
+                        "response_schema": job_description_schema,
+                        "temperature": self.config.ollama_temperature
+                    }
+                )
+                
+                response = await model.generate_content_async(user_prompt)
+                response_text = response.text.strip()
+                cleaned_text = clean_json_text(response_text)
+                parsed_json = json.loads(cleaned_text)
+            except json.JSONDecodeError as jde:
+                logger.error(f"Failed to decode JSON response from Gemini: {jde}. Raw text: {response_text}")
+                raise RuntimeError(f"Gemini returned invalid JSON: {jde}")
+            except Exception as e:
+                logger.error(f"Error calling Google Gemini API for JD parsing: {e}")
+                raise RuntimeError(f"Gemini JD parsing call failed: {e}")
+
         try:
-            async with self.session.post(
-                f"{self.config.ollama_base_url}/api/generate",
-                json=payload,
-                timeout=self.config.ollama_timeout_seconds
-            ) as resp:
-                resp.raise_for_status()
-                data = await resp.json()
-                response_text = data.get("response", "{}").strip()
-                
-                parsed_json = json.loads(response_text)
-                
-                # Populate metadata fields required by the JobDescription model
-                parsed_json["raw_ocr_text"] = ocr_text
-                parsed_json["source_filename"] = source_filename
-                parsed_json["extracted_at"] = datetime.utcnow().isoformat()
-                
-                # Extract and deduplicate all emails from OCR text as fallback or additional validation
-                import re
-                email_pattern = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
-                found_emails = re.findall(email_pattern, ocr_text)
-                unique_emails = list(dict.fromkeys(found_emails))
-                
-                if not parsed_json.get("recruiter_emails"):
-                    parsed_json["recruiter_emails"] = unique_emails
+            # Populate metadata fields required by the JobDescription model
+            parsed_json["raw_ocr_text"] = ocr_text
+            parsed_json["source_filename"] = source_filename
+            parsed_json["extracted_at"] = datetime.utcnow().isoformat()
+            
+            # Extract and deduplicate all emails from OCR text as fallback or additional validation
+            import re
+            email_pattern = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
+            found_emails = re.findall(email_pattern, ocr_text)
+            unique_emails = list(dict.fromkeys(found_emails))
+            
+            if not parsed_json.get("recruiter_emails"):
+                parsed_json["recruiter_emails"] = unique_emails
 
-                # Enforce fallback defaults if required Pydantic fields are missing/null
-                if not parsed_json.get("job_title"):
-                    parsed_json["job_title"] = "Unknown Job Title"
-                if not parsed_json.get("company"):
-                    parsed_json["company"] = "Unknown Company"
-                if not isinstance(parsed_json.get("skills"), list):
-                    parsed_json["skills"] = []
-                if not parsed_json.get("description"):
-                    parsed_json["description"] = ocr_text or "No description provided."
+            # Enforce fallback defaults if required Pydantic fields are missing/null
+            if not parsed_json.get("job_title"):
+                parsed_json["job_title"] = "Unknown Job Title"
+            if not parsed_json.get("company"):
+                parsed_json["company"] = "Unknown Company"
+            if not isinstance(parsed_json.get("skills"), list):
+                parsed_json["skills"] = []
+            if not parsed_json.get("description"):
+                parsed_json["description"] = ocr_text or "No description provided."
 
-                return JobDescription(**parsed_json)
-        except json.JSONDecodeError as jde:
-            logger.error(f"Failed to decode JSON response from Ollama: {jde}. Raw text: {response_text}")
-            raise RuntimeError(f"Ollama returned invalid JSON: {jde}")
+            return JobDescription(**parsed_json)
         except Exception as e:
-            logger.error(f"Error calling Ollama instruction API for JD parsing: {e}")
-            raise RuntimeError(f"Ollama JD parsing call failed: {e}")
+            logger.error(f"Error building JobDescription model from parsed json: {e}")
+            raise RuntimeError(f"JobDescription model instantiation failed: {e}")

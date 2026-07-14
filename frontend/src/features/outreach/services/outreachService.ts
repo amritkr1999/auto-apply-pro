@@ -1,4 +1,4 @@
-import { API_BASE } from "../../../config/api";
+import { API_BASE, buildApiUrl } from "../../../config/api";
 
 const API_BASE_V1 = `${API_BASE}/v1`;
 
@@ -24,6 +24,12 @@ export interface EmailTemplate {
   name: string;
   subject: string;
   body: string;
+  isSystemTemplate?: boolean;
+  isPublic?: boolean;
+  creatorId?: number;
+  averageRating?: number;
+  isFavorited?: boolean;
+  userRating?: number;
 }
 
 export interface OutreachDraft {
@@ -37,6 +43,10 @@ export interface OutreachDraft {
   status: "DRAFT" | "SUGGESTION" | "PENDING" | "SENT" | "FAILED" | "BLACKLISTED" | "PAUSED";
   userId?: number;
   scheduledAt?: string;
+  profileId?: number;
+  profileName?: string;
+  companyName?: string;
+  jobTitle?: string;
 }
 
 const DEFAULT_TEMPLATES: EmailTemplate[] = [
@@ -70,18 +80,25 @@ const saveLocalTemplates = (templates: EmailTemplate[]) => {
 
 export const outreachService = {
   // Get all email templates
-  async getTemplates(): Promise<EmailTemplate[]> {
+  async getTemplates(sortBy?: string): Promise<EmailTemplate[]> {
     try {
-      const response = await fetch(`${API_BASE}/templates`, {
+      const url = sortBy ? `${API_BASE}/templates?sortBy=${sortBy}` : `${API_BASE}/templates`;
+      const response = await fetch(url, {
         headers: getAuthHeaders(),
       });
       if (response.ok) {
         return response.json();
       }
-    } catch {
-      console.warn("Backend /api/templates unavailable. Falling back to local storage.");
+    } catch (e) {
+      console.warn("Backend /api/templates unavailable. Falling back to local storage.", e);
     }
-    return getLocalTemplates();
+    const tpls = getLocalTemplates();
+    const favorites = JSON.parse(localStorage.getItem("email_template_favorites") || "[]");
+    return tpls.map(t => ({
+      ...t,
+      isFavorited: favorites.includes(t.id),
+      averageRating: t.averageRating || 0.0
+    }));
   },
 
   // Save/Create a new template
@@ -104,9 +121,15 @@ export const outreachService = {
       });
       if (response.ok) {
         return response.json();
+      } else {
+        const errMsg = await response.text();
+        throw new Error(errMsg || "Failed to save template.");
       }
-    } catch {
-      console.warn("Backend save template failed. Saving to local storage fallback.");
+    } catch (e: any) {
+      if (e.message && e.message !== "Failed to fetch" && !e.message.includes("network")) {
+        throw e;
+      }
+      console.warn("Backend save template failed. Saving to local storage fallback.", e);
     }
 
     const current = getLocalTemplates();
@@ -138,6 +161,61 @@ export const outreachService = {
     const filtered = current.filter(t => t.id !== id);
     saveLocalTemplates(filtered);
     return true;
+  },
+
+  // Toggle template favorite bookmark status
+  async toggleFavorite(id: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${API_BASE}/templates/${id}/favorite`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+      });
+      if (response.ok) {
+        return response.json();
+      }
+    } catch (e) {
+      console.warn("Backend toggle favorite failed.", e);
+    }
+    const favorites = JSON.parse(localStorage.getItem("email_template_favorites") || "[]");
+    const index = favorites.indexOf(id);
+    if (index > -1) {
+      favorites.splice(index, 1);
+      localStorage.setItem("email_template_favorites", JSON.stringify(favorites));
+      return false;
+    } else {
+      favorites.push(id);
+      localStorage.setItem("email_template_favorites", JSON.stringify(favorites));
+      return true;
+    }
+  },
+
+  // Rate a template
+  async rateTemplate(id: string, rating: number, comment?: string): Promise<any> {
+    try {
+      const response = await fetch(`${API_BASE}/templates/${id}/rate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders(),
+        },
+        body: JSON.stringify({ rating, comment }),
+      });
+      if (response.ok) {
+        return response.json();
+      } else {
+        const errMsg = await response.text();
+        throw new Error(errMsg || "Failed to submit rating.");
+      }
+    } catch (e: any) {
+      if (e.message && e.message !== "Failed to fetch" && !e.message.includes("network")) {
+        throw e;
+      }
+      console.warn("Backend rate template failed. Simulating locally.", e);
+    }
+    const ratings = JSON.parse(localStorage.getItem("email_template_ratings") || "{}");
+    ratings[id] = rating;
+    localStorage.setItem("email_template_ratings", JSON.stringify(ratings));
+    return { templateId: id, rating };
   },
 
   // Save an outreach draft to the sending queue
@@ -206,14 +284,14 @@ export const outreachService = {
   },
 
   // Generate outreach email draft using AI pipeline
-  async generateOutreachEmail(userId: number, jobDetails: any): Promise<{ subject: string; body: string; recipientEmail: string }> {
+  async generateOutreachEmail(userId: number, jobDetails: any, profileId?: number, templateId?: string, useAi?: boolean): Promise<{ subject: string; body: string; recipientEmail: string }> {
     const response = await fetch(`${API_BASE}/drafts/generate`, {
       method: "POST",
       headers: { 
         "Content-Type": "application/json",
         ...getAuthHeaders(),
       },
-      body: JSON.stringify({ userId, jobDetails })
+      body: JSON.stringify({ userId, jobDetails, profileId, templateId, useAi })
     });
     if (!response.ok) {
       throw new Error("Failed to generate AI outreach email.");
@@ -280,13 +358,36 @@ export const outreachService = {
     hrOutreachSourceTable: string;
     marketingEmailsEnabled: boolean;
   }> {
-    const response = await fetch(`${API_BASE}/v1/outreach/settings?userId=${userId}`, {
-      headers: getAuthHeaders(),
-    });
-    if (!response.ok) {
-      throw new Error("Failed to load outreach settings.");
+    try {
+      const response = await fetch(`${API_BASE}/v1/outreach/settings?userId=${userId}`, {
+        headers: getAuthHeaders(),
+      });
+      if (response.ok) {
+        return response.json();
+      }
+    } catch (e) {
+      console.warn("Backend /settings unavailable. Falling back to local storage.", e);
     }
-    return response.json();
+
+    // local storage fallback
+    const localSettingsStr = localStorage.getItem(`outreach_settings_${userId}`);
+    if (localSettingsStr) {
+      return JSON.parse(localSettingsStr);
+    }
+    return {
+      dailyLimit: 50,
+      minIntervalMinutes: 10,
+      maxIntervalMinutes: 30,
+      slotStart: "09:00",
+      slotEnd: "17:00",
+      timezone: "UTC",
+      skipWeekends: true,
+      hrOutreachCampaignEnabled: false,
+      hrOutreachTargetRole: "Software Engineer",
+      hrOutreachTemplateId: "default-1",
+      hrOutreachSourceTable: "TESTING",
+      marketingEmailsEnabled: true
+    };
   },
 
   // Save outreach scheduling settings
@@ -304,19 +405,38 @@ export const outreachService = {
     hrOutreachSourceTable?: string;
     marketingEmailsEnabled?: boolean;
   }): Promise<{ message: string }> {
-    const response = await fetch(`${API_BASE}/v1/outreach/settings?userId=${userId}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...getAuthHeaders(),
-      },
-      body: JSON.stringify(settings)
-    });
-    if (!response.ok) {
-      const errText = await response.text();
-      throw new Error(errText || "Failed to save outreach settings.");
+    try {
+      const response = await fetch(`${API_BASE}/v1/outreach/settings?userId=${userId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders(),
+        },
+        body: JSON.stringify(settings)
+      });
+      if (response.ok) {
+        return response.json();
+      } else {
+        const errText = await response.text();
+        try {
+          const parsed = JSON.parse(errText);
+          throw new Error(parsed.message || "Failed to save outreach settings.");
+        } catch {
+          throw new Error(errText || "Failed to save outreach settings.");
+        }
+      }
+    } catch (e: any) {
+      if (e.message && e.message !== "Failed to fetch" && !e.message.includes("network")) {
+        throw e;
+      }
+      console.warn("Backend save settings failed. Saving to local storage fallback.", e);
     }
-    return response.json();
+
+    // local storage fallback
+    const currentSettings = await this.getOutreachSettings(userId);
+    const updatedSettings = { ...currentSettings, ...settings };
+    localStorage.setItem(`outreach_settings_${userId}`, JSON.stringify(updatedSettings));
+    return { message: "Outreach settings updated successfully." };
   },
 
   // Quick toggle HR outreach campaign
@@ -329,7 +449,12 @@ export const outreachService = {
     });
     if (!response.ok) {
       const errText = await response.text();
-      throw new Error(errText || "Failed to toggle campaign.");
+      try {
+        const parsed = JSON.parse(errText);
+        throw new Error(parsed.message || "Failed to toggle campaign.");
+      } catch {
+        throw new Error(errText || "Failed to toggle campaign.");
+      }
     }
     return response.json();
   },
@@ -390,8 +515,4 @@ export const outreachService = {
     return response.json();
   }
 };
-function buildApiUrl(path: string): RequestInfo | URL {
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  return `${API_BASE}${normalizedPath}`;
-}
 

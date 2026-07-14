@@ -87,8 +87,11 @@ public class LearningServiceImpl implements LearningService {
                 .choices(q.getChoices())
                 .completed(completed)
                 .topicName(q.getTopic() != null ? q.getTopic().getName() : "")
+                .averageRating(q.getAverageRating() != null ? q.getAverageRating() : 0.0)
+                .totalRatings(q.getTotalRatings() != null ? q.getTotalRatings() : 0)
                 .build();
     }
+
 
     @Override
     @Transactional

@@ -33,6 +33,9 @@ public class ReferralServiceImpl implements ReferralService {
     private final UserRepository userRepository;
     private final EmailSender emailSender;
 
+    @org.springframework.beans.factory.annotation.Value("${pipeline.service.url:http://localhost:8000}")
+    private String pythonServiceUrl;
+
     @Override
     @Transactional
     public ReferralRequestDto createRequest(Long userId, ReferralRequestCreateDto dto) {
@@ -84,10 +87,10 @@ public class ReferralServiceImpl implements ReferralService {
             
             // Call Python AI Service
             RestTemplate restTemplate = new RestTemplate();
-            String pythonServiceUrl = "http://localhost:8000/parse-job-url";
+            String requestUrl = pythonServiceUrl + "/parse-job-url";
 
             Map<String, String> requestBody = Map.of("url", request.getJobLink());
-            Map<?, ?> response = restTemplate.postForObject(pythonServiceUrl, requestBody, Map.class);
+            Map<?, ?> response = restTemplate.postForObject(requestUrl, requestBody, Map.class);
 
             if (response != null) {
                 request.setJobTitle((String) response.get("title"));

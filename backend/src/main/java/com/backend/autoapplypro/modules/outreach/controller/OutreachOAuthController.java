@@ -4,9 +4,9 @@ import com.backend.autoapplypro.modules.outreach.model.GmailCredential;
 import com.backend.autoapplypro.modules.outreach.repository.GmailCredentialRepository;
 import com.backend.autoapplypro.modules.users.model.User;
 import com.backend.autoapplypro.modules.users.model.UserRole;
-import com.backend.autoapplypro.modules.users.model.Candidate;
+import com.backend.autoapplypro.modules.users.model.ProfessionalProfile;
 import com.backend.autoapplypro.modules.users.repository.UserRepository;
-import com.backend.autoapplypro.modules.users.repository.CandidateRepository;
+import com.backend.autoapplypro.modules.users.repository.ProfessionalProfileRepository;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
@@ -27,14 +27,14 @@ import java.util.Arrays;
 @RequestMapping("/api/v1/outreach")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class OutreachOAuthController {
 
     private final GmailCredentialRepository credentialRepository;
     private final UserRepository userRepository;
-    private final CandidateRepository candidateRepository;
+    private final ProfessionalProfileRepository professionalProfileRepository;
     private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
     private final com.backend.autoapplypro.config.JwtUtil jwtUtil;
+    private final com.backend.autoapplypro.modules.users.service.MarketingEmailCampaignService marketingCampaignService;
 
     @Value("${spring.security.oauth2.client.registration.google.client-id:dev-client-id}")
     private String clientId;
@@ -42,7 +42,12 @@ public class OutreachOAuthController {
     @Value("${spring.security.oauth2.client.registration.google.client-secret:dev-client-secret}")
     private String clientSecret;
 
-    private static final String CALLBACK_URL = "http://localhost:8060/api/v1/outreach/oauth2/callback";
+    @Value("${google.oauth2.redirect-uri:http://localhost:8060/api/v1/outreach/oauth2/callback}")
+    private String callbackUrl;
+
+    @Value("${app.frontend.url:http://localhost:5173}")
+    private String frontendUrl;
+
     private static final String GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
 
     /**
@@ -59,7 +64,7 @@ public class OutreachOAuthController {
         String authUrl = new GoogleAuthorizationCodeRequestUrl(
                 GOOGLE_AUTH_URL,
                 clientId,
-                CALLBACK_URL,
+                callbackUrl,
                 Arrays.asList("https://www.googleapis.com/auth/gmail.send", "email", "openid")
         )
         .setAccessType("offline")
@@ -102,7 +107,7 @@ public class OutreachOAuthController {
                         clientId,
                         clientSecret,
                         code,
-                        CALLBACK_URL
+                        callbackUrl
                 ).execute();
             }
 
@@ -135,17 +140,19 @@ public class OutreachOAuthController {
                             .lastLoginDate(java.time.LocalDate.now())
                             .build();
                     user = userRepository.save(user);
+                    marketingCampaignService.sendWelcomeEmail(user);
 
-                    Candidate candidate = Candidate.builder()
+                    ProfessionalProfile candidate = ProfessionalProfile.builder()
                             .user(user)
                             .skills(new java.util.HashSet<>())
                             .jobPreferences(new java.util.HashMap<>())
                             .build();
-                    candidateRepository.save(candidate);
+                    professionalProfileRepository.save(candidate);
                 }
 
                 String jwtToken = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getRole().name());
-                String targetUrl = String.format("http://localhost:5173/login?token=%s&id=%d&email=%s&name=%s&role=%s&loginStreak=%d&mobile=%s",
+                String targetUrl = String.format("%s/login?token=%s&id=%d&email=%s&name=%s&role=%s&loginStreak=%d&mobile=%s",
+                        frontendUrl,
                         jwtToken,
                         user.getId(),
                         java.net.URLEncoder.encode(user.getEmail(), "UTF-8"),
@@ -183,7 +190,7 @@ public class OutreachOAuthController {
                 log.info("OAuth credentials securely saved for user ID: {}", userId);
 
                 // Redirect back to frontend profile page
-                return new RedirectView("http://localhost:5173/candidate/profile?status=success");
+                return new RedirectView(frontendUrl + "/candidate/profile?status=success");
             }
 
         } catch (Exception e) {
@@ -193,9 +200,9 @@ public class OutreachOAuthController {
                 errMsg = java.net.URLEncoder.encode(errMsg, "UTF-8");
             } catch (Exception ex) {}
             if (isLogin) {
-                return new RedirectView("http://localhost:5173/login?status=error&errorMsg=" + errMsg);
+                return new RedirectView(frontendUrl + "/login?status=error&errorMsg=" + errMsg);
             } else {
-                return new RedirectView("http://localhost:5173/candidate/profile?status=error&errorMsg=" + errMsg);
+                return new RedirectView(frontendUrl + "/candidate/profile?status=error&errorMsg=" + errMsg);
             }
         }
     }

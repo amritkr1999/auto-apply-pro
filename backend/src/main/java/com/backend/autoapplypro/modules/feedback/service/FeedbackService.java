@@ -8,5 +8,6 @@ import java.util.List;
 public interface FeedbackService {
     FeedbackResponseDto submitFeedback(Long userId, FeedbackRequestDto requestDto);
     List<FeedbackResponseDto> getAllFeedbacks();
+    List<FeedbackResponseDto> getPublicFeedbacks();
     FeedbackStatusResponse getFeedbackStatus(Long userId);
 }

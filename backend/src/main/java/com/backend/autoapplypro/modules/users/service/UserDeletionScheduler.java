@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,7 +29,7 @@ import java.util.UUID;
 public class UserDeletionScheduler {
 
     private final UserRepository userRepository;
-    private final CandidateRepository candidateRepository;
+    private final ProfessionalProfileRepository professionalProfileRepository;
     private final RecruiterRepository recruiterRepository;
     private final CompanyRepository companyRepository;
     private final GmailCredentialRepository gmailCredentialRepository;
@@ -39,10 +40,10 @@ public class UserDeletionScheduler {
     private final ReferralOutreachRepository referralOutreachRepository;
     private final UserLearningProgressRepository userLearningProgressRepository;
     private final UserActivityLogRepository userActivityLogRepository;
+    private final TransactionTemplate transactionTemplate;
 
     // Run every hour to check for expired accounts scheduled for deletion
     @Scheduled(cron = "0 0 * * * ?")
-    @Transactional
     public void executeAccountDeletions() {
         LocalDateTime now = LocalDateTime.now();
         List<User> usersToDelete = userRepository.findByStatusAndDeletionScheduledAtBefore(UserStatus.PENDING_DELETION, now);
@@ -55,7 +56,9 @@ public class UserDeletionScheduler {
 
         for (User user : usersToDelete) {
             try {
-                purgeUserData(user);
+                transactionTemplate.executeWithoutResult(status -> {
+                    purgeUserData(user);
+                });
             } catch (Exception e) {
                 log.error("Failed to permanently delete user ID: {} / Email: {}", user.getId(), user.getEmail(), e);
             }
@@ -131,11 +134,11 @@ public class UserDeletionScheduler {
             log.info("Deleted {} user activity logs", activityLogs.size());
         }
 
-        // 9. Delete Candidate profile
-        if (user.getCandidate() != null) {
-            candidateRepository.delete(user.getCandidate());
-            user.setCandidate(null);
-            log.info("Deleted candidate profile and resume");
+        // 9. Delete Professional Profile
+        if (user.getProfessionalProfiles() != null && !user.getProfessionalProfiles().isEmpty()) {
+            professionalProfileRepository.deleteAll(user.getProfessionalProfiles());
+            user.getProfessionalProfiles().clear();
+            log.info("Deleted all professional profiles and resumes");
         }
 
         // 10. Delete Recruiter profile

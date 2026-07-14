@@ -12,7 +12,7 @@ class OCRHandler:
         self.session = session
 
     async def extract_ocr(self, image_path: Path) -> str:
-        """Loads a local image, encodes it to base64, and sends it to Ollama Deepseek Vision model for OCR."""
+        """Loads a local image, encodes it to base64, and sends it to either Gemini API or local Ollama Deepseek Vision model for OCR."""
         if not image_path.exists():
             raise FileNotFoundError(f"Job description image not found: {image_path}")
 
@@ -23,37 +23,38 @@ class OCRHandler:
             logger.error(f"Failed to read/encode image {image_path}: {e}")
             raise RuntimeError(f"Failed to read image: {e}")
 
-        if "deepseek-ocr" in self.config.ollama_deepseek_model.lower():
-            prompt = "Free OCR."
+        if self.config.use_local_model:
+            model_name = self.config.ollama_deepseek_model
+            if "deepseek-ocr" in model_name.lower():
+                prompt = "Free OCR."
+            else:
+                prompt = (
+                    "Perform OCR on this image. Extract all text content verbatim from this job description. "
+                    "Do not add any preamble, comments, or summaries. Output only the extracted text."
+                )
         else:
+            # Route to live Gemini API for OCR
+            model_name = "gemini-3.5-flash"
             prompt = (
                 "Perform OCR on this image. Extract all text content verbatim from this job description. "
                 "Do not add any preamble, comments, or summaries. Output only the extracted text."
             )
 
-        payload = {
-            "model": self.config.ollama_deepseek_model,
-            "prompt": prompt,
-            "images": [encoded_string],
-            "stream": False,
-            "options": {
-                "temperature": 0.0  # Keep it deterministic for OCR
-            }
-        }
-
-        logger.info(f"Sending JD image {image_path.name} to Ollama Vision model: {self.config.ollama_deepseek_model}")
+        logger.info(f"Sending JD image {image_path.name} to vision model: {model_name}")
         try:
-            async with self.session.post(
-                f"{self.config.ollama_base_url}/api/generate",
-                json=payload,
-                timeout=self.config.ollama_timeout_seconds
-            ) as resp:
-                resp.raise_for_status()
-                data = await resp.json()
-                ocr_text = data.get("response", "").strip()
-                if not ocr_text:
-                    logger.warning(f"Ollama returned empty OCR text for {image_path.name}")
-                return ocr_text
+            from src.llm_client import call_llm
+            ocr_text = await call_llm(
+                config=self.config,
+                session=self.session,
+                model=model_name,
+                purpose="ocr_extraction",
+                prompt=prompt,
+                images=[encoded_string],
+                temperature=0.0
+            )
+            if not ocr_text:
+                logger.warning(f"Vision model returned empty OCR text for {image_path.name}")
+            return ocr_text
         except Exception as e:
-            logger.error(f"Error calling Ollama vision API: {e}")
-            raise RuntimeError(f"Ollama vision OCR call failed: {e}")
+            logger.error(f"Error calling vision OCR API: {e}")
+            raise RuntimeError(f"Vision OCR call failed: {e}")

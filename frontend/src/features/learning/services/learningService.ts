@@ -62,7 +62,31 @@ export interface PracticeQuestion {
   choices: string[];
   completed: boolean;
   topicName?: string;
+  averageRating?: number;
+  totalRatings?: number;
 }
+
+export interface QuestionSubmission {
+  id: number;
+  title: string;
+  content: string;
+  difficulty: "EASY" | "MEDIUM" | "HARD";
+  choices: string[];
+  correctAnswer: string;
+  explanation: string;
+  subjectId: number;
+  subjectName: string;
+  topicId: number;
+  topicName: string;
+  submittedByEmail: string;
+  submittedByName: string;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  adminFeedback?: string;
+  reviewedByEmail?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 
 export interface SubmitResponse {
   correct: boolean;
@@ -191,6 +215,89 @@ export const learningService = {
     });
     if (!response.ok) {
       throw new Error("Failed to load roadmap details");
+    }
+    return response.json();
+  },
+
+  async submitQuestion(payload: {
+    title: string;
+    content: string;
+    difficulty: "EASY" | "MEDIUM" | "HARD";
+    choices: string[];
+    correctAnswer: string;
+    explanation: string;
+    subjectId: number;
+    topicId: number;
+  }): Promise<QuestionSubmission> {
+    const response = await fetch(`${API_BASE_V1}/learning/submissions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || "Failed to submit question");
+    }
+    return response.json();
+  },
+
+  async getUserSubmissions(): Promise<QuestionSubmission[]> {
+    const response = await fetch(`${API_BASE_V1}/learning/submissions/my`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to load your submissions");
+    }
+    return response.json();
+  },
+
+  async getPendingSubmissions(): Promise<QuestionSubmission[]> {
+    const response = await fetch(`${API_BASE_V1}/learning/submissions/pending`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to load pending submissions");
+    }
+    return response.json();
+  },
+
+  async reviewSubmission(
+    submissionId: number,
+    payload: { status: "APPROVED" | "REJECTED"; feedback: string }
+  ): Promise<QuestionSubmission> {
+    const response = await fetch(`${API_BASE_V1}/learning/submissions/${submissionId}/review`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || "Failed to review submission");
+    }
+    return response.json();
+  },
+
+  async rateQuestion(
+    questionId: number,
+    payload: { rating: number; comment?: string }
+  ): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_V1}/learning/questions/${questionId}/rate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || "Failed to submit rating");
     }
     return response.json();
   },

@@ -176,7 +176,7 @@ const PricingPage: React.FC = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
             <Link
-              to="/candidate-dashboard"
+              to="/dashboard"
               className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 shadow-lg shadow-indigo-500/25"
             >
               Go to Dashboard

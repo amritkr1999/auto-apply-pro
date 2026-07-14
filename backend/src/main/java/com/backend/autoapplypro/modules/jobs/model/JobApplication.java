@@ -1,6 +1,7 @@
 package com.backend.autoapplypro.modules.jobs.model;
 
 import com.backend.autoapplypro.modules.users.model.User;
+import com.backend.autoapplypro.modules.users.model.ProfessionalProfile;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -11,7 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(exclude = "user")
+@ToString(exclude = {"user", "professionalProfile"})
 public class JobApplication {
 
     @Id
@@ -21,6 +22,10 @@ public class JobApplication {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "profile_id")
+    private ProfessionalProfile professionalProfile;
 
     @Column(name = "company_name", nullable = false)
     private String companyName;

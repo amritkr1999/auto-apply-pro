@@ -1,13 +1,16 @@
 package com.backend.autoapplypro.modules.outreach.service;
 
-import com.backend.autoapplypro.HrList.HrDetails;
-import com.backend.autoapplypro.HrList.HrRepository;
+import com.backend.autoapplypro.modules.hr.HrDetails;
+import com.backend.autoapplypro.modules.hr.HrRepository;
+import com.backend.autoapplypro.modules.billing.service.SubscriptionGatingService;
 import com.backend.autoapplypro.modules.outreach.model.EmailQueue;
 import com.backend.autoapplypro.modules.outreach.model.EmailTemplate;
 import com.backend.autoapplypro.modules.outreach.model.OutreachStatus;
 import com.backend.autoapplypro.modules.outreach.repository.EmailQueueRepository;
 import com.backend.autoapplypro.modules.outreach.repository.EmailTemplateRepository;
+import com.backend.autoapplypro.modules.users.model.ProfessionalProfile;
 import com.backend.autoapplypro.modules.users.model.User;
+import com.backend.autoapplypro.modules.users.repository.ProfessionalProfileRepository;
 import com.backend.autoapplypro.modules.users.repository.UserRepository;
 import com.backend.autoapplypro.testingemails.TestingEmail;
 import com.backend.autoapplypro.testingemails.TestingEmailRepository;
@@ -29,11 +32,15 @@ public class HrOutreachCampaignService {
     private final TestingEmailRepository testingEmailRepository;
     private final HrRepository hrRepository;
     private final OutreachSchedulerService schedulerService;
+    private final ProfessionalProfileRepository professionalProfileRepository;
+    private final SubscriptionGatingService subscriptionGatingService;
 
     @Transactional
     public void toggleCampaign(User user, boolean enable, String targetRole, String templateId, String sourceTable) {
         log.info("Toggling HR Outreach Campaign for user ID: {}. Enable: {}, Target Role: {}, Template ID: {}, Source Table: {}",
                 user.getId(), enable, targetRole, templateId, sourceTable);
+
+        // Allowed for all users. Premium limits apply to multiple template/profile creations and variations.
 
         // Always update user configuration fields
         user.setHrOutreachTargetRole(targetRole != null ? targetRole : "Software Engineer");
@@ -127,8 +134,18 @@ public class HrOutreachCampaignService {
             processedEmails.add(eq.getRecipientEmail().toLowerCase().trim());
         }
 
+        List<String> excludedCompanies = professionalProfileRepository.findByUserId(user.getId())
+                .map(ProfessionalProfile::getExcludedCompanies)
+                .orElse(null);
+
         List<RecipientInfo> remainingRecipients = recipients.stream()
                 .filter(r -> !processedEmails.contains(r.email.toLowerCase().trim()))
+                .filter(r -> {
+                    if (excludedCompanies == null || excludedCompanies.isEmpty() || r.companyName == null) {
+                        return true;
+                    }
+                    return excludedCompanies.stream().noneMatch(c -> c.trim().equalsIgnoreCase(r.companyName.trim()));
+                })
                 .toList();
 
         if (remainingRecipients.isEmpty()) {

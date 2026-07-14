@@ -4,6 +4,7 @@ Auto Apply Pro is an AI-powered career coach and job search automation platform 
 
 * **System Design Architecture**: View the design diagrams on [Lucidchart](https://lucid.app/lucidchart/6707ac3d-7e0e-43f8-a861-53cf3db1c9ba/edit?viewport_loc=32%2C-11%2C1575%2C895%2C0_0&invitationId=inv_8000be9d-0c0e-47eb-b0a4-2e5fdc796501).
 * **UI/UX Design**: View the SaaS Dashboard mockup on [Figma](https://www.figma.com/make/BuR77V0IplrEwWdMx8wGda/SaaS-Dashboard-for-AutoApply-Pro?t=th4ZFWN23WX9ofYJ-1).
+* **Stitch Project**: View the project details on [Stitch](https://stitch.withgoogle.com/projects/12832452661997110383).
 
 ---
 
@@ -119,6 +120,28 @@ The backend is built with Spring Boot and Maven.
 3. Once running, the server will start on port `8060`.
 4. You can access the OpenAPI Swagger documentation at:
    [http://localhost:8060/swagger-ui.html](http://localhost:8060/swagger-ui.html)
+
+#### Running with Environment-Specific Profiles
+
+You can start the backend with environment-specific profiles to dynamically manage the Google OAuth2 `redirect_uri` and server ports:
+
+* **Default Profile** (Runs on port `8060`, Google OAuth redirect URI targets `http://localhost:8060`):
+  ```bash
+  ./mvnw spring-boot:run
+  ```
+* **Local Development Profile (`dev-local`)** (Runs on port `8080`, Google OAuth redirect URI targets `http://localhost:8080`):
+  ```bash
+  ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev-local
+  ```
+  > [!IMPORTANT]
+  > When starting the backend with the `dev-local` profile on port `8080`, make sure to start the Vite frontend with the proxy target set to port `8080` as well:
+  > ```bash
+  > VITE_API_PROXY_TARGET=http://localhost:8080 npm run dev
+  > ```
+* **Ngrok Tunnel Profile (`dev-ngrok`)** (Runs on port `8060`, Google OAuth redirect URI targets `https://deskbound-many-zeppelin.ngrok-free.dev`):
+  ```bash
+  ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev-ngrok
+  ```
 
 ---
 

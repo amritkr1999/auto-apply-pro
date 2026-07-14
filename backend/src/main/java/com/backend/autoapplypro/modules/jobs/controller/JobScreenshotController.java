@@ -20,12 +20,12 @@ import java.io.IOException;
 @RequestMapping("/api/jobs")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class JobScreenshotController {
 
     private final SkillRepository skillRepository;
     private final RestTemplate restTemplate = new RestTemplate();
-    private static final String PYTHON_SERVICE_URL = "http://localhost:8000/extract-job-details";
+    @org.springframework.beans.factory.annotation.Value("${pipeline.service.url:http://localhost:8000}")
+    private String pythonServiceUrl;
 
     /**
      * Accepts a screenshot image, forwards it to the local Python OCR/AI service,
@@ -63,11 +63,12 @@ public class JobScreenshotController {
 
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
-            log.info("Forwarding screenshot payload to Python extraction service at {}", PYTHON_SERVICE_URL);
+            String requestUrl = pythonServiceUrl + "/extract-job-details";
+            log.info("Forwarding screenshot payload to Python extraction service at {}", requestUrl);
             
             // Call Python FastAPI/Flask extraction endpoint
             ResponseEntity<JobDetailsDto> response = restTemplate.postForEntity(
-                    PYTHON_SERVICE_URL,
+                    requestUrl,
                     requestEntity,
                     JobDetailsDto.class
             );
@@ -98,8 +99,9 @@ public class JobScreenshotController {
             return ResponseEntity.ok(dto);
 
         } catch (ResourceAccessException e) {
+            String requestUrl = pythonServiceUrl + "/extract-job-details";
             log.error("Failed to connect to the Python service at {}. Is the service running? Error: {}", 
-                    PYTHON_SERVICE_URL, e.getMessage());
+                    requestUrl, e.getMessage());
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body("The background AI parsing service is currently offline or unreachable. Please try again later.");
         } catch (IOException e) {

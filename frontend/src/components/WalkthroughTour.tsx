@@ -114,14 +114,14 @@ export const WalkthroughTour: React.FC = () => {
         description: "Let's take a quick 1-minute tour of your candidate dashboard to automate your job application outreach.",
       },
       {
-        title: "Candidate Dashboard",
-        description: "This is your main view. Here you can track submitted applications, pending drafts, match suggestions, and sent emails.",
+        title: "Professional Dashboard",
+        description: "This is your main view. Here you can track active opportunities, pending drafts, match suggestions, and sent emails.",
         targetSelector: "[data-tour='dashboard-header']",
         placement: "bottom",
       },
       {
         title: "Quick Navigation Sidebar",
-        description: "Jump between active applications, upload and parse screenshots of job postings, manage outreach templates, and review billing.",
+        description: "Jump between active opportunities, import opportunities, manage outreach templates, and review billing.",
         targetSelector: "[data-tour='sidebar-nav']",
         placement: "right",
       },
@@ -272,6 +272,7 @@ export const WalkthroughTour: React.FC = () => {
     console.log("Walkthrough: Tour completed / saved.");
     setActive(false);
     localStorage.setItem(`walkthrough_completed_${userId}`, "true");
+    window.dispatchEvent(new CustomEvent("walkthrough-finished"));
   };
 
   if (!active || !activeStep) return null;

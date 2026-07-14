@@ -28,6 +28,7 @@ export interface UserAuthData {
   officialEmail?: string;
   role: string;
   isPendingDeletion: boolean;
+  avatar?: string;
 }
 
 export interface CandidateProfile {
@@ -48,6 +49,48 @@ export interface CandidateProfile {
   githubProfileUrl?: string;
   linkedinProfileUrl?: string;
   linkedinName?: string;
+  avatar?: string;
+  isProfilePublic?: boolean;
+  username?: string;
+  githubStats?: Record<string, any>;
+  leetcodeStats?: Record<string, any>;
+  leetcodeUsername?: string;
+  isVerified?: boolean;
+  professionalVertical?: string;
+  achievements?: AchievementCard[];
+  excludedCompanies?: string[];
+  isDefault?: boolean;
+  profileName?: string;
+}
+
+export interface AchievementCard {
+  id?: number;
+  title: string;
+  description: string;
+  category: string;
+  badgeUrl?: string;
+  trustScore?: number;
+  isVerified?: boolean;
+}
+
+export interface PublicProfile {
+  username: string;
+  name: string;
+  summary?: string;
+  avatar?: string;
+  isVerified: boolean;
+  skills: string[];
+  professionalVertical: string;
+  evidenceMetrics?: Record<string, any>;
+  highlights?: AchievementCard[];
+  // Legacy compatibility fields
+  githubUsername?: string;
+  githubProfileUrl?: string;
+  linkedinProfileUrl?: string;
+  linkedinName?: string;
+  githubStats?: Record<string, any>;
+  leetcodeStats?: Record<string, any>;
+  leetcodeUsername?: string;
 }
 
 export interface RecruiterProfile {
@@ -59,6 +102,7 @@ export interface RecruiterProfile {
   officialEmail?: string;
   companyId?: number | null;
   companyName?: string | null;
+  avatar?: string;
 }
 
 export interface CompanyProfile {
@@ -70,6 +114,7 @@ export interface CompanyProfile {
   industry: string;
   website: string;
   description: string;
+  avatar?: string;
 }
 
 export const profileService = {
@@ -133,6 +178,16 @@ export const profileService = {
     });
     if (!response.ok) {
       throw new Error("Failed to load candidate profile");
+    }
+    return response.json();
+  },
+
+  async getCandidateProfileById(userId: number, profileId: number): Promise<CandidateProfile> {
+    const response = await fetch(`${API_BASE_V1}/profiles/candidate/${userId}/profile/${profileId}`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to load candidate profile version");
     }
     return response.json();
   },
@@ -272,6 +327,115 @@ export const profileService = {
     });
     if (!response.ok) {
       throw new Error("Failed to disconnect LinkedIn");
+    }
+    return response.json();
+  },
+
+  async getPublicProfile(username: string): Promise<PublicProfile> {
+    const response = await fetch(`${API_BASE_V1}/public/profile/${username}`);
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMsg = "Profile not found or private";
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMsg = errorJson.message || errorMsg;
+      } catch (e) {}
+      throw new Error(errorMsg);
+    }
+    return response.json();
+  },
+
+  async checkUsernameAvailability(username: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${API_BASE_V1}/public/profile/check-username?username=${username}`);
+      if (!response.ok) return false;
+      const data = await response.json();
+      return !!data.available;
+    } catch {
+      return false;
+    }
+  },
+
+  async getCandidateProfiles(userId: number): Promise<CandidateProfile[]> {
+    const response = await fetch(`${API_BASE_V1}/profiles/candidate/${userId}/all`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to load candidate profiles");
+    }
+    return response.json();
+  },
+
+  async createCandidateProfile(userId: number, profileName: string): Promise<CandidateProfile> {
+    const response = await fetch(`${API_BASE_V1}/profiles/candidate/${userId}/create?profileName=${encodeURIComponent(profileName)}`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to create candidate profile");
+    }
+    return response.json();
+  },
+
+  async selectDefaultProfile(userId: number, profileId: number): Promise<any> {
+    const response = await fetch(`${API_BASE_V1}/profiles/candidate/${userId}/select/${profileId}`, {
+      method: "PUT",
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to set default profile");
+    }
+    return response.json();
+  },
+
+  async deleteCandidateProfile(userId: number, profileId: number): Promise<any> {
+    const response = await fetch(`${API_BASE_V1}/profiles/candidate/${userId}/profile/${profileId}`, {
+      method: "DELETE",
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to delete candidate profile");
+    }
+    return response.json();
+  },
+
+  async updateCandidateProfileById(userId: number, profileId: number, profile: CandidateProfile): Promise<CandidateProfile> {
+    const response = await fetch(`${API_BASE_V1}/profiles/candidate/${userId}/profile/${profileId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify(profile),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to update candidate profile");
+    }
+    return response.json();
+  },
+
+  async uploadCandidateResumeById(userId: number, profileId: number, file: File): Promise<{ message: string }> {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await fetch(`${API_BASE_V1}/profiles/candidate/${userId}/profile/${profileId}/resume`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: formData,
+    });
+    if (!response.ok) {
+      throw new Error("Failed to upload candidate resume");
+    }
+    return response.json();
+  },
+
+  async syncCandidateProfileById(userId: number, profileId: number): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_V1}/profiles/candidate/${userId}/profile/${profileId}/resume/sync`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || "Failed to sync candidate profile from resume");
     }
     return response.json();
   },

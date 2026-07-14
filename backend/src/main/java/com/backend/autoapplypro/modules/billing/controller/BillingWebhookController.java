@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/billing")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class BillingWebhookController {
 
     private final BillingService billingService;

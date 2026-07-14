@@ -36,7 +36,7 @@ export const QueueDetailsPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 border-b border-slate-200 pb-5">
         <div>
           <button
-            onClick={() => navigate("/candidate-dashboard")}
+            onClick={() => navigate("/dashboard")}
             className="text-xs font-semibold text-primary hover:underline mb-2 block"
           >
             ← Back to Dashboard
@@ -45,8 +45,8 @@ export const QueueDetailsPage: React.FC = () => {
           <p className="text-sm text-slate-500 mt-1">Scheduled recruiter outreach emails, dispatched statuses, and log details</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button size="sm" onClick={() => navigate("/jobs/parse")} className="text-xs font-semibold px-4 py-2">
-            Parse New Screenshot
+          <Button size="sm" onClick={() => navigate("/opportunities/import")} className="text-xs font-semibold px-4 py-2">
+            Import Opportunity
           </Button>
         </div>
       </div>

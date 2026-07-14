@@ -100,7 +100,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isMobile = f
       case "COMPANY":
         return "/company-dashboard";
       default:
-        return "/candidate-dashboard";
+        return "/dashboard";
     }
   };
 
@@ -110,11 +110,11 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isMobile = f
   const linkStyle = ({ isActive }: { isActive: boolean }) =>
     `flex items-center ${minimizedState ? "justify-center px-2" : "px-3"} py-2.5 text-sm font-medium rounded-btn transition-all duration-150 ${
       isActive
-        ? "bg-slate-100 text-primary border-l-4 border-primary pl-2"
-        : "text-slate-600 hover:bg-slate-50 hover:text-primary"
+        ? "bg-slate-100 dark:bg-slate-800 text-primary border-l-4 border-primary pl-2"
+        : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary"
     }`;
 
-  const anchorStyle = `flex items-center ${minimizedState ? "justify-center px-2" : "px-3"} py-2.5 text-sm font-medium rounded-btn text-slate-600 hover:bg-slate-50 hover:text-primary transition-all duration-150`;
+  const anchorStyle = `flex items-center ${minimizedState ? "justify-center px-2" : "px-3"} py-2.5 text-sm font-medium rounded-btn text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary transition-all duration-150`;
 
   const handleLinkClick = () => {
     if (isMobile && onClose) {
@@ -130,13 +130,13 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isMobile = f
         ? "w-full h-full" 
         : minimizedState ? "w-[72px]" : "w-[240px]"
     } shrink-0 p-4 ${
-      isMobile ? "" : "border-r border-slate-200 h-full overflow-y-auto"
-    } bg-white flex flex-col justify-between transition-all duration-300`}>
+      isMobile ? "" : "border-r border-slate-200 dark:border-slate-800 h-full overflow-y-auto"
+    } bg-white dark:bg-slate-900 flex flex-col justify-between transition-all duration-300`}>
       <div className="flex-1">
         {/* Sidebar Toggle & Header */}
         <div className={`flex items-center ${minimizedState ? "justify-center" : "justify-between"} mb-6`}>
           {!minimizedState && (
-            <h3 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <h3 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
               Menu ({role.toLowerCase()})
             </h3>
           )}
@@ -144,7 +144,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isMobile = f
             <button
               type="button"
               onClick={() => setIsMinimized(!isMinimized)}
-              className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+              className="p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
               title={minimizedState ? "Expand Sidebar" : "Minimize Sidebar"}
             >
               {minimizedState ? (
@@ -169,17 +169,17 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isMobile = f
 
           {role === "CANDIDATE" && (
             <>
-              <NavLink to="/jobs/applications" className={linkStyle} title={minimizedState ? "Applications" : undefined} onClick={handleLinkClick}>
+              <NavLink to="/opportunities/tracker" className={linkStyle} title={minimizedState ? "Opportunity Tracker" : undefined} onClick={handleLinkClick}>
                 <ApplicationsIcon className={iconClass} />
-                {!minimizedState && <span>Applications</span>}
+                {!minimizedState && <span>Opportunity Tracker</span>}
               </NavLink>
               <a href="#saved" className={anchorStyle} title={minimizedState ? "Saved Jobs" : undefined} onClick={handleLinkClick}>
                 <SavedJobsIcon className={iconClass} />
                 {!minimizedState && <span>Saved Jobs</span>}
               </a>
-              <NavLink to="/jobs/parse" className={linkStyle} title={minimizedState ? "Parse Screenshot" : undefined} onClick={handleLinkClick}>
+              <NavLink to="/opportunities/import" className={linkStyle} title={minimizedState ? "Import Opportunity" : undefined} onClick={handleLinkClick}>
                 <ParseIcon className={iconClass} />
-                {!minimizedState && <span>Parse Screenshot</span>}
+                {!minimizedState && <span>Import Opportunity</span>}
               </NavLink>
               <NavLink to="/outreach/templates" className={linkStyle} title={minimizedState ? "Email Templates" : undefined} onClick={handleLinkClick}>
                 <TemplatesIcon className={iconClass} />
@@ -222,18 +222,29 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isMobile = f
             </>
           )}
 
-          <NavLink to="/candidate/profile" data-tour="sidebar-profile" className={linkStyle} title={minimizedState ? "Profile Settings" : undefined} onClick={handleLinkClick}>
+          {role === "ADMIN" && (
+            <>
+              <NavLink to="/admin/telemetry" className={linkStyle} title={minimizedState ? "AI Telemetry" : undefined} onClick={handleLinkClick}>
+                <svg className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                {!minimizedState && <span>AI Telemetry</span>}
+              </NavLink>
+            </>
+          )}
+
+          <NavLink to="/profile/settings" data-tour="sidebar-profile" className={linkStyle} title={minimizedState ? "Profile Settings" : undefined} onClick={handleLinkClick}>
             <ProfileIcon className={iconClass} />
             {!minimizedState && <span>Profile Settings</span>}
           </NavLink>
         </nav>
       </div>
 
-      <div className="pt-4 border-t border-slate-100">
+      <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
         <button
           type="button"
           onClick={handleLogout}
-          className={`flex items-center justify-center ${minimizedState ? "w-10 h-10 p-0" : "w-full py-2.5 px-4"} rounded-btn border border-rose-200 bg-rose-50 text-rose-600 font-medium hover:bg-rose-100 transition-colors text-sm mx-auto`}
+          className={`flex items-center justify-center ${minimizedState ? "w-10 h-10 p-0" : "w-full py-2.5 px-4"} rounded-btn border border-rose-200 dark:border-rose-950 bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 font-medium hover:bg-rose-100 dark:hover:bg-rose-900/30 transition-colors text-sm mx-auto`}
           title={minimizedState ? "Logout" : undefined}
         >
           <LogoutIcon className="w-5 h-5 shrink-0" />

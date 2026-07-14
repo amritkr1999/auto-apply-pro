@@ -20,12 +20,27 @@ import java.util.*;
 @RequestMapping("/api/screenshots")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class ScreenshotUploadController {
 
     private final ScreenshotUploadRepository screenshotRepository;
     private final UserRepository userRepository;
     private final ScreenshotProcessorService processorService;
+
+    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+    private static final List<String> ALLOWED_MIME_TYPES = Arrays.asList("image/png", "image/jpeg", "image/jpg", "image/webp");
+
+    private void validateUpload(MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("Uploaded file is empty");
+        }
+        if (file.getSize() > MAX_FILE_SIZE) {
+            throw new IllegalArgumentException("File size exceeds 5MB limit: " + file.getOriginalFilename());
+        }
+        String contentType = file.getContentType();
+        if (contentType == null || !ALLOWED_MIME_TYPES.contains(contentType.toLowerCase())) {
+            throw new IllegalArgumentException("Invalid file type. Only PNG, JPEG, and WEBP images are allowed: " + file.getOriginalFilename());
+        }
+    }
 
     @PostMapping(value = "/upload", consumes = "multipart/form-data")
     public ResponseEntity<?> uploadScreenshots(
@@ -43,6 +58,13 @@ public class ScreenshotUploadController {
 
         for (MultipartFile file : files) {
             if (file.isEmpty()) continue;
+
+            try {
+                validateUpload(file);
+            } catch (IllegalArgumentException e) {
+                log.warn("File validation failed: {}", e.getMessage());
+                return ResponseEntity.badRequest().body(e.getMessage());
+            }
 
             try {
                 ScreenshotUpload upload = ScreenshotUpload.builder()

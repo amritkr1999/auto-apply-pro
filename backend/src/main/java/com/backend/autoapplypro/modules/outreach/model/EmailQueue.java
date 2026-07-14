@@ -1,6 +1,7 @@
 package com.backend.autoapplypro.modules.outreach.model;
 
 import com.backend.autoapplypro.modules.users.model.User;
+import com.backend.autoapplypro.modules.users.model.ProfessionalProfile;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -11,7 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(exclude = "user")
+@ToString(exclude = {"user", "professionalProfile", "jobPosting"})
 public class EmailQueue {
 
     @Id
@@ -21,6 +22,14 @@ public class EmailQueue {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "profile_id")
+    private ProfessionalProfile professionalProfile;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "job_id")
+    private com.backend.autoapplypro.modules.jobs.model.JobPosting jobPosting;
 
     @Column(name = "recipient_email", nullable = false)
     private String recipientEmail;

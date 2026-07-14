@@ -14,6 +14,9 @@ import java.util.Map;
 public class CandidateProfileDto {
     private Long id;
     private Long userId;
+    private String profileName;
+    private Boolean isDefault;
+    private String targetTemplateId;
     private String email;
     private String name;
     private String mobile;
@@ -29,4 +32,14 @@ public class CandidateProfileDto {
     private String githubProfileUrl;
     private String linkedinProfileUrl;
     private String linkedinName;
+    private String avatar;
+    private Boolean isProfilePublic;
+    private String username;
+    private Map<String, Object> githubStats;
+    private Map<String, Object> leetcodeStats;
+    private String leetcodeUsername;
+    private Boolean isVerified;
+    private String professionalVertical;
+    private List<AchievementDto> achievements;
+    private List<String> excludedCompanies;
 }

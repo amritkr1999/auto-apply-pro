@@ -11,7 +11,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/marketing")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class MarketingCampaignController {
 
     private final MarketingEmailCampaignService campaignService;

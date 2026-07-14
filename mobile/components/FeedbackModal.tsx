@@ -78,13 +78,13 @@ export default function FeedbackModal({ visible, onClose, onSubmitSuccess }: Fee
       onRequestClose={onClose}
     >
       <TouchableWithoutFeedback onPress={onClose}>
-        <View className="flex-1 justify-center items-center bg-slate-950/80 px-5">
+        <View className="flex-1 justify-center items-center bg-black/60 px-5">
           <TouchableWithoutFeedback>
             <KeyboardAvoidingView
               behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
               className="w-full max-w-sm"
             >
-              <View className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl relative overflow-hidden">
+              <View className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl relative overflow-hidden">
                 {/* Decorative Elements */}
                 <View className="absolute -top-10 -right-10 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl pointer-events-none" />
                 <View className="absolute -bottom-10 -left-10 w-24 h-24 bg-teal-500/10 rounded-full blur-xl pointer-events-none" />
@@ -92,7 +92,7 @@ export default function FeedbackModal({ visible, onClose, onSubmitSuccess }: Fee
                 {/* Close Button */}
                 <TouchableOpacity
                   onPress={onClose}
-                  className="absolute top-4 right-4 text-slate-400 p-1 rounded-full bg-slate-950/40 border border-slate-800"
+                  className="absolute top-4 right-4 text-slate-400 p-1 rounded-full bg-slate-100 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800"
                 >
                   <Ionicons name="close" size={20} color="#94a3b8" />
                 </TouchableOpacity>
@@ -102,8 +102,8 @@ export default function FeedbackModal({ visible, onClose, onSubmitSuccess }: Fee
                     <View className="w-16 h-16 bg-emerald-500/15 rounded-full items-center justify-center mb-4">
                       <Text className="text-3xl">🎉</Text>
                     </View>
-                    <Text className="text-white text-xl font-bold text-center">Thank You!</Text>
-                    <Text className="text-slate-400 text-sm text-center mt-2 px-2 leading-relaxed">
+                    <Text className="text-slate-900 dark:text-white text-xl font-bold text-center">Thank You!</Text>
+                    <Text className="text-slate-500 dark:text-slate-400 text-sm text-center mt-2 px-2 leading-relaxed">
                       Your feedback has been submitted successfully. We appreciate your response and help in making Auto Apply Pro better!
                     </Text>
                   </View>
@@ -114,8 +114,8 @@ export default function FeedbackModal({ visible, onClose, onSubmitSuccess }: Fee
                       <View className="w-10 h-10 bg-emerald-500/10 rounded-xl items-center justify-center mb-2">
                         <Ionicons name="sparkles" size={20} color="#10b981" />
                       </View>
-                      <Text className="text-white text-lg font-bold text-center">Enjoying Auto Apply Pro?</Text>
-                      <Text className="text-slate-400 text-xs text-center mt-1">
+                      <Text className="text-slate-900 dark:text-white text-lg font-bold text-center">Enjoying Auto Apply Pro?</Text>
+                      <Text className="text-slate-500 dark:text-slate-400 text-xs text-center mt-1 font-medium">
                         We'd love to hear your feedback! Let us know how your automated job search is going.
                       </Text>
                     </View>
@@ -140,7 +140,7 @@ export default function FeedbackModal({ visible, onClose, onSubmitSuccess }: Fee
                         ))}
                       </View>
                       {rating > 0 && (
-                        <Text className="text-emerald-400 text-xs font-semibold mt-2">
+                        <Text className="text-emerald-500 dark:text-emerald-400 text-xs font-semibold mt-2">
                           {rating === 5 ? 'Excellent! 😍' : rating === 4 ? 'Very Good! 😊' : rating === 3 ? 'Good 🙂' : rating === 2 ? 'Fair 😐' : 'Poor 😞'}
                         </Text>
                       )}
@@ -150,7 +150,7 @@ export default function FeedbackModal({ visible, onClose, onSubmitSuccess }: Fee
                     <View className="mt-2">
                       <Text className="text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1 ml-1">Review Comment</Text>
                       <TextInput
-                        className="bg-slate-950 border border-slate-800 rounded-2xl px-4 py-3 text-white text-sm h-24"
+                        className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 text-slate-900 dark:text-white text-sm h-24"
                         placeholder="What has been your experience using the platform? Any suggestions for improvement?"
                         placeholderTextColor="#475569"
                         multiline
@@ -171,9 +171,9 @@ export default function FeedbackModal({ visible, onClose, onSubmitSuccess }: Fee
                     <View className="flex-row gap-3 mt-4">
                       <TouchableOpacity
                         onPress={handleSnooze}
-                        className="flex-1 border border-slate-800 bg-slate-950 rounded-2xl py-3 items-center active:bg-slate-900"
+                        className="flex-1 border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 rounded-2xl py-3 items-center active:bg-slate-200 dark:active:bg-slate-900"
                       >
-                        <Text className="text-slate-400 font-semibold text-sm">Maybe Later</Text>
+                        <Text className="text-slate-650 dark:text-slate-400 font-semibold text-sm">Maybe Later</Text>
                       </TouchableOpacity>
 
                       <TouchableOpacity

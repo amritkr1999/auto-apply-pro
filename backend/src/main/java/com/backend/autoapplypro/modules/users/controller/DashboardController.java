@@ -24,7 +24,6 @@ import java.util.*;
 @RequestMapping("/api/v1/dashboard")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class DashboardController {
 
     private final UserRepository userRepository;

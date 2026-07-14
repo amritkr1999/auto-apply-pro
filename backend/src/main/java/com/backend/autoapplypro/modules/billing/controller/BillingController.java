@@ -15,7 +15,6 @@ import java.util.Map;
 @RequestMapping("/api/v1/billing")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class BillingController {
 
     private final BillingService billingService;

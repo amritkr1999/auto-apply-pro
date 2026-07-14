@@ -2,6 +2,7 @@ package com.backend.autoapplypro.modules.users.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 import java.time.LocalDateTime;
 
 @Entity
@@ -10,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(exclude = {"candidate", "recruiter", "company"})
+@ToString(exclude = {"professionalProfiles", "recruiter", "company"})
 public class User {
 
     @Id
@@ -27,17 +28,35 @@ public class User {
     @Column(nullable = false)
     private UserRole role;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "professional_vertical")
+    @ColumnDefault("'DEVELOPER'")
+    @Builder.Default
+    private ProfessionalVertical professionalVertical = ProfessionalVertical.DEVELOPER;
+
     @Column(nullable = false)
     private String name;
 
     @Column(nullable = false)
     private String mobile;
 
+    @Column(name = "username", unique = true)
+    private String username;
+
+    @Builder.Default
+    @Column(name = "is_profile_public")
+    private Boolean isProfilePublic = false;
+
     @Column(name = "official_email")
     private String officialEmail;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Candidate candidate;
+    @Lob
+    @Column(name = "avatar", columnDefinition = "TEXT")
+    private String avatar;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    private java.util.List<ProfessionalProfile> professionalProfiles = new java.util.ArrayList<>();
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Recruiter recruiter;
@@ -195,10 +214,27 @@ public class User {
         if (status == null) {
             status = UserStatus.ACTIVE;
         }
+        if (username == null && email != null) {
+            String base = email.split("@")[0].replaceAll("[^a-zA-Z0-9_]", "");
+            username = base + "_" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        }
+        if (isProfilePublic == null) {
+            isProfilePublic = false;
+        }
     }
 
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    public ProfessionalProfile getProfessionalProfile() {
+        if (professionalProfiles == null || professionalProfiles.isEmpty()) {
+            return null;
+        }
+        return professionalProfiles.stream()
+                .filter(p -> p.getIsDefault() != null && p.getIsDefault())
+                .findFirst()
+                .orElse(professionalProfiles.get(0));
     }
 }

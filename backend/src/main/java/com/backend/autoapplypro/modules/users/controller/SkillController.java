@@ -10,7 +10,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/skills")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class SkillController {
 
     private final SkillRepository skillRepository;

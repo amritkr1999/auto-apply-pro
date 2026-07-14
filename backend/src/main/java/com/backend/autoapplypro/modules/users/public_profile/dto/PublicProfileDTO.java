@@ -1,0 +1,24 @@
+package com.backend.autoapplypro.modules.users.public_profile.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import java.util.List;
+import java.util.Map;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class PublicProfileDTO {
+    private String username;
+    private String name;
+    private String summary;
+    private String avatar;
+    private Boolean isVerified;
+    private List<String> skills;
+    private String professionalVertical; // e.g. "DEVELOPER", "KNOWLEDGE_WORKER", "DOCUMENT_VERIFICATION"
+    private Map<String, Object> evidenceMetrics;
+    private List<AchievementCard> highlights;
+}

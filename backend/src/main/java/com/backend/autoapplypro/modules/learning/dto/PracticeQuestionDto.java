@@ -20,4 +20,7 @@ public class PracticeQuestionDto {
     private List<String> choices;
     private boolean completed;
     private String topicName;
+    private Double averageRating;
+    private Integer totalRatings;
 }
+

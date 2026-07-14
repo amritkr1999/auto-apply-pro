@@ -27,22 +27,22 @@ public class SkillMigrationRunner implements CommandLineRunner {
                 log.warn("Could not check/update user statuses. The column might not exist yet.", ex);
             }
 
-            // Check if candidates table has skills column and does not have legacy_skills column
+            // Check if professional_profiles table has skills column and does not have legacy_skills column
             Boolean hasSkillsColumn = jdbcTemplate.queryForObject(
-                "SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='candidates' AND column_name='skills')",
+                "SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='professional_profiles' AND column_name='skills')",
                 Boolean.class
             );
             Boolean hasLegacyColumn = jdbcTemplate.queryForObject(
-                "SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='candidates' AND column_name='legacy_skills')",
+                "SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='professional_profiles' AND column_name='legacy_skills')",
                 Boolean.class
             );
 
             if (Boolean.TRUE.equals(hasSkillsColumn) && !Boolean.TRUE.equals(hasLegacyColumn)) {
-                log.info("Found legacy 'skills' JSONB column in candidates table. Starting migration...");
+                log.info("Found legacy 'skills' JSONB column in professional_profiles table. Starting migration...");
 
-                // Fetch candidates with non-null legacy skills
+                // Fetch professional profiles with non-null legacy skills
                 List<LegacyCandidateSkills> legacyList = jdbcTemplate.query(
-                    "SELECT id, skills FROM candidates WHERE skills IS NOT NULL",
+                    "SELECT id, skills FROM professional_profiles WHERE skills IS NOT NULL",
                     (rs, rowNum) -> {
                         Long id = rs.getLong("id");
                         String skillsJson = rs.getString("skills");
@@ -87,10 +87,10 @@ public class SkillMigrationRunner implements CommandLineRunner {
                 }
 
                 // Rename the column to legacy_skills to avoid future runs or conflicts
-                jdbcTemplate.execute("ALTER TABLE candidates RENAME COLUMN skills TO legacy_skills");
+                jdbcTemplate.execute("ALTER TABLE professional_profiles RENAME COLUMN skills TO legacy_skills");
                 log.info("Skill migration completed successfully. Legacy column renamed to 'legacy_skills'.");
             } else {
-                log.info("No legacy 'skills' JSONB column found in candidates table. No migration needed.");
+                log.info("No legacy 'skills' JSONB column found in professional_profiles table. No migration needed.");
             }
         } catch (Exception e) {
             log.error("Error running skill migration", e);

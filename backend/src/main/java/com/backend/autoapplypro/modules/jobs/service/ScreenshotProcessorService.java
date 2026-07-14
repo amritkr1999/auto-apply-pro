@@ -8,14 +8,16 @@ import com.backend.autoapplypro.modules.jobs.dto.JobDetailsDto;
 import com.backend.autoapplypro.modules.outreach.model.EmailQueue;
 import com.backend.autoapplypro.modules.outreach.model.OutreachStatus;
 import com.backend.autoapplypro.modules.outreach.repository.EmailQueueRepository;
-import com.backend.autoapplypro.modules.users.model.Candidate;
+import com.backend.autoapplypro.modules.users.model.ProfessionalProfile;
 import com.backend.autoapplypro.modules.users.model.Skill;
-import com.backend.autoapplypro.modules.users.repository.CandidateRepository;
+import com.backend.autoapplypro.modules.users.repository.ProfessionalProfileRepository;
 import com.backend.autoapplypro.modules.users.repository.SkillRepository;
 import com.backend.autoapplypro.modules.users.repository.UserRepository;
 import com.backend.autoapplypro.modules.users.dto.CandidateProfileDto;
 import com.backend.autoapplypro.modules.users.service.UserService;
 import com.backend.autoapplypro.modules.outreach.dto.EmailGenerationResponseDto;
+import com.backend.autoapplypro.modules.outreach.dto.EmailGenerationRequestDto;
+import com.backend.autoapplypro.modules.outreach.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
@@ -40,13 +42,14 @@ public class ScreenshotProcessorService {
     private final ScreenshotUploadRepository screenshotRepository;
     private final JobPostingRepository jobPostingRepository;
     private final EmailQueueRepository emailQueueRepository;
-    private final CandidateRepository candidateRepository;
+    private final ProfessionalProfileRepository professionalProfileRepository;
     private final SkillRepository skillRepository;
     private final UserService userService;
+    private final EmailService emailService;
     private final RestTemplate restTemplate = new RestTemplate();
 
-    private static final String PYTHON_EXTRACT_URL = "http://localhost:8000/extract-job-details";
-    private static final String PYTHON_GENERATE_URL = "http://localhost:8000/generate-email";
+    @org.springframework.beans.factory.annotation.Value("${pipeline.service.url:http://localhost:8000}")
+    private String pythonServiceUrl;
 
     @Async
     @Transactional
@@ -80,7 +83,7 @@ public class ScreenshotProcessorService {
 
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
             ResponseEntity<JobDetailsDto> parseResponse = restTemplate.postForEntity(
-                    PYTHON_EXTRACT_URL,
+                    pythonServiceUrl + "/extract-job-details",
                     requestEntity,
                     JobDetailsDto.class
             );
@@ -156,12 +159,15 @@ public class ScreenshotProcessorService {
 
             // Fetch Candidate Profile of the uploader
             CandidateProfileDto profile = userService.getCandidateProfile(upload.getUser().getId());
+            ProfessionalProfile uploaderProfile = professionalProfileRepository.findByUserIdAndIsDefaultTrue(upload.getUser().getId()).orElse(null);
 
             // Generate email for uploader
             EmailGenerationResponseDto emailData = generateEmailForCandidate(jobPosting, profile);
             if (emailData != null) {
                 EmailQueue queueItem = EmailQueue.builder()
                         .user(upload.getUser())
+                        .professionalProfile(uploaderProfile)
+                        .jobPosting(jobPosting)
                         .recipientEmail(emailData.getRecipientEmail() != null ? emailData.getRecipientEmail() : primaryEmail)
                         .ccEmails(draftCc)
                         .parsedEmails(commaSeparatedEmails)
@@ -176,10 +182,10 @@ public class ScreenshotProcessorService {
             }
 
             // 4. Match Other Candidates in the system by skillset
-            List<Candidate> allCandidates = candidateRepository.findAll();
+            List<ProfessionalProfile> allCandidates = professionalProfileRepository.findAll();
             log.info("Checking skill matching for {} system candidates...", allCandidates.size());
             
-            for (Candidate candidate : allCandidates) {
+            for (ProfessionalProfile candidate : allCandidates) {
                 // Skip the uploader
                 if (candidate.getUser().getId().equals(upload.getUser().getId())) {
                     continue;
@@ -203,6 +209,8 @@ public class ScreenshotProcessorService {
                         if (matchedEmailData != null) {
                             EmailQueue matchedQueueItem = EmailQueue.builder()
                                     .user(candidate.getUser())
+                                    .professionalProfile(candidate)
+                                    .jobPosting(jobPosting)
                                     .recipientEmail(matchedEmailData.getRecipientEmail() != null ? matchedEmailData.getRecipientEmail() : primaryEmail)
                                     .ccEmails(draftCc)
                                     .parsedEmails(commaSeparatedEmails)
@@ -238,51 +246,39 @@ public class ScreenshotProcessorService {
 
     private EmailGenerationResponseDto generateEmailForCandidate(JobPosting job, CandidateProfileDto profile) {
         try {
-            Map<String, Object> pythonPayload = new HashMap<>();
-
-            Map<String, Object> jobMap = new HashMap<>();
-            jobMap.put("job_title", job.getTitle());
-            jobMap.put("company", job.getCompany());
-            jobMap.put("skills", job.getSkills() != null ? job.getSkills().stream().map(Skill::getName).toList() : Collections.emptyList());
-            jobMap.put("location", job.getLocation());
-            jobMap.put("job_type", "Full-time");
-            jobMap.put("recruiter_email", job.getHrEmail());
-            pythonPayload.put("job_details", jobMap);
-
-            Map<String, Object> candidateMap = new HashMap<>();
-            candidateMap.put("name", profile.getName());
-            candidateMap.put("email", profile.getEmail());
-            candidateMap.put("phone", profile.getMobile());
-            candidateMap.put("skills", profile.getSkills() != null ? profile.getSkills() : Collections.emptyList());
-            candidateMap.put("summary", profile.getSummary());
-
-            List<Map<String, Object>> expList = new ArrayList<>();
-            if (profile.getExperience() != null) {
-                for (Map<String, Object> exp : profile.getExperience()) {
-                    Map<String, Object> expMap = new HashMap<>();
-                    expMap.put("title", exp.get("title") != null ? exp.get("title") : "Software Engineer");
-                    expMap.put("company", exp.get("company") != null ? exp.get("company") : "Unknown Company");
-                    expMap.put("duration", exp.get("duration") != null ? exp.get("duration") : "N/A");
-                    expMap.put("description", exp.get("description") != null ? exp.get("description") : "No description");
-                    expList.add(expMap);
-                }
+            java.util.List<String> skills = java.util.Collections.emptyList();
+            if (job.getSkills() != null) {
+                skills = job.getSkills().stream()
+                        .map(com.backend.autoapplypro.modules.users.model.Skill::getName)
+                        .toList();
             }
-            candidateMap.put("experience", expList);
-            pythonPayload.put("candidate", candidateMap);
 
-            HttpHeaders jsonHeaders = new HttpHeaders();
-            jsonHeaders.setContentType(MediaType.APPLICATION_JSON);
+            java.util.List<String> hrEmails = java.util.Collections.emptyList();
+            if (job.getHrEmails() != null && !job.getHrEmails().trim().isEmpty()) {
+                hrEmails = java.util.Arrays.asList(job.getHrEmails().split(","));
+            }
 
-            HttpEntity<Map<String, Object>> jsonRequest = new HttpEntity<>(pythonPayload, jsonHeaders);
-            ResponseEntity<EmailGenerationResponseDto> genResponse = restTemplate.postForEntity(
-                    PYTHON_GENERATE_URL,
-                    jsonRequest,
-                    EmailGenerationResponseDto.class
-            );
+            JobDetailsDto jobDetailsDto = JobDetailsDto.builder()
+                    .title(job.getTitle())
+                    .company(job.getCompany())
+                    .location(job.getLocation())
+                    .description(job.getDescription())
+                    .requirements(job.getRequirements())
+                    .salary(job.getSalary())
+                    .sourceUrl(job.getSourceUrl())
+                    .skills(skills)
+                    .hrEmails(hrEmails)
+                    .build();
 
-            return genResponse.getBody();
+            EmailGenerationRequestDto requestDto = EmailGenerationRequestDto.builder()
+                    .userId(profile.getUserId())
+                    .jobDetails(jobDetailsDto)
+                    .useAi(false)
+                    .build();
+
+            return emailService.generateEmail(requestDto, false);
         } catch (Exception e) {
-            log.error("Error making FastAPI email generation request", e);
+            log.error("Error generating local outreach email for candidate", e);
             return null;
         }
     }

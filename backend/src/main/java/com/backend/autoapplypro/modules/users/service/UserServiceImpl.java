@@ -16,7 +16,7 @@ import java.util.HashMap;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final CandidateRepository candidateRepository;
+    private final ProfessionalProfileRepository professionalProfileRepository;
     private final RecruiterRepository recruiterRepository;
     private final CompanyRepository companyRepository;
     private final PasswordEncoder passwordEncoder;
@@ -24,6 +24,10 @@ public class UserServiceImpl implements UserService {
     private final JwtUtil jwtUtil;
     private final UserActivityLogRepository userActivityLogRepository;
     private final SystemEmailService systemEmailService;
+    private final MarketingEmailCampaignService marketingCampaignService;
+
+    @org.springframework.beans.factory.annotation.Value("${pipeline.service.url:http://localhost:8000}")
+    private String pythonServiceUrl;
 
     @Override
     @Transactional
@@ -54,6 +58,9 @@ public class UserServiceImpl implements UserService {
 
         user = userRepository.save(user);
 
+        // Send welcome email immediately
+        marketingCampaignService.sendWelcomeEmail(user);
+
         // Log LOGIN activity
         userActivityLogRepository.save(UserActivityLog.builder()
                 .user(user)
@@ -63,12 +70,14 @@ public class UserServiceImpl implements UserService {
 
         // Create associated profile based on role
         if (role == UserRole.CANDIDATE) {
-            Candidate candidate = Candidate.builder()
+            ProfessionalProfile candidate = ProfessionalProfile.builder()
                     .user(user)
                     .skills(new java.util.HashSet<>())
                     .jobPreferences(new java.util.HashMap<>())
+                    .profileName("Default Profile")
+                    .isDefault(true)
                     .build();
-            candidateRepository.save(candidate);
+            professionalProfileRepository.save(candidate);
         } else if (role == UserRole.RECRUITER) {
             Recruiter recruiter = Recruiter.builder()
                     .user(user)
@@ -95,6 +104,7 @@ public class UserServiceImpl implements UserService {
                 .officialEmail(user.getOfficialEmail())
                 .role(user.getRole().name())
                 .loginStreak(user.getLoginStreak())
+                .avatar(user.getAvatar())
                 .build();
     }
 
@@ -149,18 +159,55 @@ public class UserServiceImpl implements UserService {
                 .loginStreak(user.getLoginStreak())
                 .isPendingDeletion(user.getStatus() == UserStatus.PENDING_DELETION)
                 .deletionScheduledAt(user.getDeletionScheduledAt() != null ? user.getDeletionScheduledAt().toString() : null)
+                .avatar(user.getAvatar())
                 .build();
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public CandidateProfileDto getCandidateProfile(Long userId) {
-        Candidate candidate = candidateRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Candidate profile not found"));
+    private ProfessionalProfile getOrCreateCandidate(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        if (user.getRole() != UserRole.CANDIDATE) {
+            throw new IllegalArgumentException("User is not a candidate");
+        }
+        return professionalProfileRepository.findByUserId(userId)
+                .orElseGet(() -> {
+                    ProfessionalProfile newCand = ProfessionalProfile.builder()
+                            .user(user)
+                            .skills(new java.util.HashSet<>())
+                            .jobPreferences(new java.util.HashMap<>())
+                            .isVerified(false)
+                            .profileName("Default Profile")
+                            .isDefault(true)
+                            .build();
+                    return professionalProfileRepository.save(newCand);
+                });
+    }
+
+    private ProfessionalProfile getOrCreateCandidateProfile(Long userId, Long profileId) {
+        if (profileId == null) {
+            return getOrCreateCandidate(userId);
+        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        if (user.getRole() != UserRole.CANDIDATE) {
+            throw new IllegalArgumentException("User is not a candidate");
+        }
+        ProfessionalProfile profile = professionalProfileRepository.findById(profileId)
+                .orElseThrow(() -> new IllegalArgumentException("Profile not found with id: " + profileId));
+        if (!profile.getUser().getId().equals(userId)) {
+            throw new IllegalArgumentException("Profile does not belong to the user");
+        }
+        return profile;
+    }
+
+    private CandidateProfileDto mapToDto(ProfessionalProfile candidate) {
         User user = candidate.getUser();
         return CandidateProfileDto.builder()
                 .id(candidate.getId())
                 .userId(user.getId())
+                .profileName(candidate.getProfileName())
+                .isDefault(candidate.getIsDefault())
+                .targetTemplateId(candidate.getTargetTemplateId())
                 .email(user.getEmail())
                 .name(user.getName())
                 .mobile(user.getMobile())
@@ -176,20 +223,71 @@ public class UserServiceImpl implements UserService {
                 .githubProfileUrl(candidate.getGithubProfileUrl())
                 .linkedinProfileUrl(candidate.getLinkedinProfileUrl())
                 .linkedinName(candidate.getLinkedinName())
+                .avatar(user.getAvatar())
+                .isProfilePublic(user.getIsProfilePublic())
+                .username(user.getUsername())
+                .githubStats(candidate.getGithubStats())
+                .leetcodeStats(candidate.getLeetcodeStats())
+                .leetcodeUsername(candidate.getLeetcodeUsername())
+                .isVerified(candidate.getIsVerified())
+                .professionalVertical(user.getProfessionalVertical() != null ? user.getProfessionalVertical().name() : "DEVELOPER")
+                .achievements(candidate.getAchievements() != null ? candidate.getAchievements().stream()
+                        .map(ach -> AchievementDto.builder()
+                                .id(ach.getId())
+                                .title(ach.getTitle())
+                                .description(ach.getDescription())
+                                .category(ach.getCategory())
+                                .badgeUrl(ach.getBadgeUrl())
+                                .verificationStatus(ach.getVerificationStatus() != null ? ach.getVerificationStatus().name() : "NONE")
+                                .trustScore(ach.getTrustScore())
+                                .isVerified(ach.getIsVerified())
+                                .build())
+                        .collect(java.util.stream.Collectors.toList()) : new java.util.ArrayList<>())
+                .excludedCompanies(candidate.getExcludedCompanies() != null ? candidate.getExcludedCompanies() : new java.util.ArrayList<>())
                 .build();
     }
 
     @Override
     @Transactional
-    public CandidateProfileDto updateCandidateProfile(Long userId, CandidateProfileDto dto) {
-        Candidate candidate = candidateRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Candidate profile not found"));
+    public CandidateProfileDto getCandidateProfile(Long userId) {
+        ProfessionalProfile candidate = getOrCreateCandidate(userId);
+        return mapToDto(candidate);
+    }
+
+    private CandidateProfileDto updateProfileInternal(ProfessionalProfile candidate, CandidateProfileDto dto) {
         User user = candidate.getUser();
         
         user.setName(dto.getName());
         user.setMobile(dto.getMobile());
         user.setOfficialEmail(dto.getOfficialEmail());
+        user.setAvatar(dto.getAvatar());
+        if (dto.getIsProfilePublic() != null) {
+            user.setIsProfilePublic(dto.getIsProfilePublic());
+        }
+        if (dto.getProfessionalVertical() != null) {
+            try {
+                user.setProfessionalVertical(com.backend.autoapplypro.modules.users.model.ProfessionalVertical.valueOf(dto.getProfessionalVertical().toUpperCase()));
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Invalid professional vertical: " + dto.getProfessionalVertical());
+            }
+        }
+        if (dto.getUsername() != null && !dto.getUsername().trim().isEmpty()) {
+            String newUsername = dto.getUsername().trim().toLowerCase().replaceAll("[^a-zA-Z0-9_]", "");
+            if (!newUsername.isEmpty() && !newUsername.equals(user.getUsername())) {
+                if (userRepository.existsByUsername(newUsername)) {
+                    throw new IllegalArgumentException("Username is already taken");
+                }
+                user.setUsername(newUsername);
+            }
+        }
         userRepository.save(user);
+
+        if (dto.getProfileName() != null && !dto.getProfileName().trim().isEmpty()) {
+            candidate.setProfileName(dto.getProfileName().trim());
+        }
+        if (dto.getTargetTemplateId() != null) {
+            candidate.setTargetTemplateId(dto.getTargetTemplateId());
+        }
 
         java.util.Set<Skill> dbSkills = new java.util.HashSet<>();
         if (dto.getSkills() != null) {
@@ -211,31 +309,97 @@ public class UserServiceImpl implements UserService {
         candidate.setEducation(dto.getEducation());
         candidate.setExperience(dto.getExperience());
         candidate.setCertifications(dto.getCertifications());
+        candidate.setExcludedCompanies(dto.getExcludedCompanies() != null ? dto.getExcludedCompanies() : new java.util.ArrayList<>());
         candidate.setGithubUsername(dto.getGithubUsername());
         candidate.setGithubProfileUrl(dto.getGithubProfileUrl());
         candidate.setLinkedinProfileUrl(dto.getLinkedinProfileUrl());
         candidate.setLinkedinName(dto.getLinkedinName());
-        candidate = candidateRepository.save(candidate);
+        
+        candidate.setLeetcodeUsername(dto.getLeetcodeUsername());
+        if (dto.getLeetcodeUsername() == null || dto.getLeetcodeUsername().trim().isEmpty()) {
+            candidate.setLeetcodeStats(null);
+        }
 
-        return CandidateProfileDto.builder()
-                .id(candidate.getId())
-                .userId(user.getId())
-                .email(user.getEmail())
-                .name(user.getName())
-                .mobile(user.getMobile())
-                .officialEmail(user.getOfficialEmail())
-                .skills(candidate.getSkills().stream().map(Skill::getName).collect(java.util.stream.Collectors.toList()))
-                .jobPreferences(candidate.getJobPreferences())
-                .resumeFilename(candidate.getResumeFilename())
-                .summary(candidate.getSummary())
-                .education(candidate.getEducation())
-                .experience(candidate.getExperience())
-                .certifications(candidate.getCertifications())
-                .githubUsername(candidate.getGithubUsername())
-                .githubProfileUrl(candidate.getGithubProfileUrl())
-                .linkedinProfileUrl(candidate.getLinkedinProfileUrl())
-                .linkedinName(candidate.getLinkedinName())
-                .build();
+        if (candidate.getGithubUsername() == null || candidate.getGithubUsername().trim().isEmpty()) {
+            candidate.setGithubStats(null);
+        }
+
+        // Trigger / hook: if user manually edits a previously 'VERIFIED' achievement, reset status and score
+        if (dto.getAchievements() != null) {
+            java.util.List<Achievement> currentAchievements = candidate.getAchievements();
+            if (currentAchievements == null) {
+                currentAchievements = new java.util.ArrayList<>();
+                candidate.setAchievements(currentAchievements);
+            }
+
+            java.util.Map<Long, Achievement> currentMap = new java.util.HashMap<>();
+            for (Achievement ach : currentAchievements) {
+                if (ach.getId() != null) {
+                    currentMap.put(ach.getId(), ach);
+                }
+            }
+
+            java.util.List<Achievement> updatedAchievements = new java.util.ArrayList<>();
+            for (AchievementDto achDto : dto.getAchievements()) {
+                if (achDto.getId() != null && currentMap.containsKey(achDto.getId())) {
+                    Achievement existing = currentMap.get(achDto.getId());
+
+                    // Check for changes in title, description, category, or badgeUrl
+                    boolean changed = !java.util.Objects.equals(existing.getTitle(), achDto.getTitle())
+                            || !java.util.Objects.equals(existing.getDescription(), achDto.getDescription())
+                            || !java.util.Objects.equals(existing.getCategory(), achDto.getCategory())
+                            || !java.util.Objects.equals(existing.getBadgeUrl(), achDto.getBadgeUrl());
+
+                    if (changed) {
+                        if (existing.getVerificationStatus() == com.backend.autoapplypro.modules.users.public_profile.evidence.VerificationStatus.VERIFIED) {
+                            existing.setVerificationStatus(com.backend.autoapplypro.modules.users.public_profile.evidence.VerificationStatus.NONE);
+                            existing.setTrustScore(10); // baseline
+                            existing.setIsVerified(false);
+                        }
+                    }
+
+                    existing.setTitle(achDto.getTitle());
+                    existing.setDescription(achDto.getDescription());
+                    existing.setCategory(achDto.getCategory());
+                    existing.setBadgeUrl(achDto.getBadgeUrl());
+
+                    updatedAchievements.add(existing);
+                } else {
+                    // New Achievement
+                    Achievement newAch = Achievement.builder()
+                            .professionalProfile(candidate)
+                            .title(achDto.getTitle())
+                            .description(achDto.getDescription())
+                            .category(achDto.getCategory())
+                            .badgeUrl(achDto.getBadgeUrl())
+                            .verificationStatus(com.backend.autoapplypro.modules.users.public_profile.evidence.VerificationStatus.NONE)
+                            .trustScore(10)
+                            .isVerified(false)
+                            .build();
+                    updatedAchievements.add(newAch);
+                }
+            }
+
+            currentAchievements.clear();
+            currentAchievements.addAll(updatedAchievements);
+        }
+
+        candidate = professionalProfileRepository.save(candidate);
+        return mapToDto(candidate);
+    }
+
+    @Override
+    @Transactional
+    public CandidateProfileDto updateCandidateProfile(Long userId, CandidateProfileDto dto) {
+        ProfessionalProfile candidate = getOrCreateCandidate(userId);
+        return updateProfileInternal(candidate, dto);
+    }
+
+    @Override
+    @Transactional
+    public CandidateProfileDto updateCandidateProfile(Long userId, Long profileId, CandidateProfileDto dto) {
+        ProfessionalProfile candidate = getOrCreateCandidateProfile(userId, profileId);
+        return updateProfileInternal(candidate, dto);
     }
 
     @Override
@@ -257,6 +421,7 @@ public class UserServiceImpl implements UserService {
                 .officialEmail(user.getOfficialEmail())
                 .companyId(companyId)
                 .companyName(companyName)
+                .avatar(user.getAvatar())
                 .build();
     }
 
@@ -270,6 +435,7 @@ public class UserServiceImpl implements UserService {
         user.setName(dto.getName());
         user.setMobile(dto.getMobile());
         user.setOfficialEmail(dto.getOfficialEmail());
+        user.setAvatar(dto.getAvatar());
         userRepository.save(user);
 
         recruiter.setName(dto.getName());
@@ -303,6 +469,7 @@ public class UserServiceImpl implements UserService {
                 .officialEmail(user.getOfficialEmail())
                 .companyId(companyId)
                 .companyName(companyName)
+                .avatar(user.getAvatar())
                 .build();
     }
 
@@ -322,6 +489,7 @@ public class UserServiceImpl implements UserService {
                 .industry(company.getIndustry())
                 .website(company.getWebsite())
                 .description(company.getDescription())
+                .avatar(user.getAvatar())
                 .build();
     }
 
@@ -335,6 +503,7 @@ public class UserServiceImpl implements UserService {
         User user = company.getUser();
         user.setName(dto.getName()); // Owner's name or company name update
         user.setOfficialEmail(dto.getOfficialEmail());
+        user.setAvatar(dto.getAvatar());
         userRepository.save(user);
 
         company.setName(dto.getName());
@@ -353,33 +522,38 @@ public class UserServiceImpl implements UserService {
                 .industry(company.getIndustry())
                 .website(company.getWebsite())
                 .description(company.getDescription())
+                .avatar(user.getAvatar())
                 .build();
     }
 
     @Override
     @Transactional
     public void uploadResume(Long userId, org.springframework.web.multipart.MultipartFile file) throws java.io.IOException {
-        Candidate candidate = candidateRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Candidate profile not found"));
+        ProfessionalProfile candidate = getOrCreateCandidate(userId);
         candidate.setResumeFilename(file.getOriginalFilename());
         candidate.setResumeContentType(file.getContentType());
         candidate.setResumeBytes(file.getBytes());
-        candidateRepository.save(candidate);
+        professionalProfileRepository.save(candidate);
     }
 
     @Override
     @Transactional
-    public void syncProfileFromResume(Long userId) {
-        Candidate candidate = candidateRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Candidate profile not found"));
-        
+    public void uploadResume(Long userId, Long profileId, org.springframework.web.multipart.MultipartFile file) throws java.io.IOException {
+        ProfessionalProfile candidate = getOrCreateCandidateProfile(userId, profileId);
+        candidate.setResumeFilename(file.getOriginalFilename());
+        candidate.setResumeContentType(file.getContentType());
+        candidate.setResumeBytes(file.getBytes());
+        professionalProfileRepository.save(candidate);
+    }
+
+    private void syncProfileFromResumeInternal(ProfessionalProfile candidate) {
         if (candidate.getResumeBytes() == null || candidate.getResumeBytes().length == 0) {
             throw new IllegalStateException("No resume uploaded to sync profile from.");
         }
 
         try {
             org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
-            String pythonServiceUrl = "http://localhost:8000/parse-resume";
+            String requestUrl = pythonServiceUrl + "/parse-resume";
 
             org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
             headers.setContentType(org.springframework.http.MediaType.MULTIPART_FORM_DATA);
@@ -399,7 +573,7 @@ public class UserServiceImpl implements UserService {
                 new org.springframework.http.HttpEntity<>(body, headers);
 
             org.springframework.http.ResponseEntity<ParsedResumeDto> response = restTemplate.postForEntity(
-                pythonServiceUrl,
+                requestUrl,
                 requestEntity,
                 ParsedResumeDto.class
             );
@@ -430,7 +604,7 @@ public class UserServiceImpl implements UserService {
                     }
                     candidate.setSkills(dbSkills);
                 }
-                candidateRepository.save(candidate);
+                professionalProfileRepository.save(candidate);
             } else {
                 throw new RuntimeException("Python AI parsing service returned an error status.");
             }
@@ -440,15 +614,107 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Candidate getCandidateResume(Long userId) {
-        Candidate candidate = candidateRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Candidate profile not found"));
+    @Transactional
+    public void syncProfileFromResume(Long userId) {
+        ProfessionalProfile candidate = getOrCreateCandidate(userId);
+        syncProfileFromResumeInternal(candidate);
+    }
+
+    @Override
+    @Transactional
+    public void syncProfileFromResume(Long userId, Long profileId) {
+        ProfessionalProfile candidate = getOrCreateCandidateProfile(userId, profileId);
+        syncProfileFromResumeInternal(candidate);
+    }
+
+    @Override
+    @Transactional
+    public ProfessionalProfile getCandidateResume(Long userId) {
+        ProfessionalProfile candidate = getOrCreateCandidate(userId);
         // Force eager initialization of lazy @Lob resumeBytes while the transaction is active
         if (candidate.getResumeBytes() != null) {
             int length = candidate.getResumeBytes().length;
         }
         return candidate;
+    }
+
+    @Override
+    @Transactional
+    public ProfessionalProfile getCandidateResume(Long userId, Long profileId) {
+        ProfessionalProfile candidate = getOrCreateCandidateProfile(userId, profileId);
+        // Force eager initialization of lazy @Lob resumeBytes while the transaction is active
+        if (candidate.getResumeBytes() != null) {
+            int length = candidate.getResumeBytes().length;
+        }
+        return candidate;
+    }
+
+    @Override
+    @Transactional
+    public CandidateProfileDto getCandidateProfileById(Long userId, Long profileId) {
+        ProfessionalProfile candidate = getOrCreateCandidateProfile(userId, profileId);
+        return mapToDto(candidate);
+    }
+
+    @Override
+    @Transactional
+    public java.util.List<CandidateProfileDto> getCandidateProfiles(Long userId) {
+        getOrCreateCandidate(userId); // ensure a default profile is created
+        java.util.List<ProfessionalProfile> profiles = professionalProfileRepository.findAllByUserId(userId);
+        return profiles.stream().map(this::mapToDto).collect(java.util.stream.Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public CandidateProfileDto createCandidateProfile(Long userId, String profileName) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        if (user.getRole() != UserRole.CANDIDATE) {
+            throw new IllegalArgumentException("User is not a candidate");
+        }
+        
+        java.util.List<ProfessionalProfile> existing = professionalProfileRepository.findAllByUserId(userId);
+        boolean isFirst = existing.isEmpty();
+
+        ProfessionalProfile newProfile = ProfessionalProfile.builder()
+                .user(user)
+                .skills(new java.util.HashSet<>())
+                .jobPreferences(new java.util.HashMap<>())
+                .isVerified(false)
+                .profileName(profileName != null ? profileName.trim() : "New Profile")
+                .isDefault(isFirst)
+                .build();
+        newProfile = professionalProfileRepository.save(newProfile);
+        return mapToDto(newProfile);
+    }
+
+    @Override
+    @Transactional
+    public void selectDefaultProfile(Long userId, Long profileId) {
+        java.util.List<ProfessionalProfile> profiles = professionalProfileRepository.findAllByUserId(userId);
+        boolean found = false;
+        for (ProfessionalProfile profile : profiles) {
+            if (profile.getId().equals(profileId)) {
+                profile.setIsDefault(true);
+                found = true;
+            } else {
+                profile.setIsDefault(false);
+            }
+        }
+        if (!found) {
+            throw new IllegalArgumentException("Profile not found with id: " + profileId);
+        }
+        professionalProfileRepository.saveAll(profiles);
+    }
+
+    @Override
+    @Transactional
+    public void deleteCandidateProfile(Long userId, Long profileId) {
+        ProfessionalProfile profile = getOrCreateCandidateProfile(userId, profileId);
+        if (profile.getIsDefault()) {
+            throw new IllegalArgumentException("Cannot delete the default profile. Please select another profile as default first.");
+        }
+        professionalProfileRepository.delete(profile);
     }
 
     @Override

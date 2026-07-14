@@ -12,9 +12,10 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import { useAuth } from '../../context/AuthContext';
-import { api, API_BASE_URL } from '../../services/api';
+import { api } from '../../services/api';
 import * as SecureStore from 'expo-secure-store';
 import { feedbackService } from '../../services/feedbackService';
+import { useTheme } from '../../components/useColorScheme';
 
 interface ProfileData {
   name: string;
@@ -28,6 +29,7 @@ interface ProfileData {
 
 export default function ProfileScreen() {
   const { user } = useAuth();
+  const { themeMode, setTheme } = useTheme();
   const [loading, setLoading] = useState(false);
   const [uploadingResume, setUploadingResume] = useState(false);
   const [syncingProfile, setSyncingProfile] = useState(false);
@@ -132,7 +134,7 @@ export default function ProfileScreen() {
   const handleUpdateProfile = async () => {
     setLoading(true);
     try {
-      const response = await api.put(`/profiles/candidate/${user?.id}`, {
+      await api.put(`/profiles/candidate/${user?.id}`, {
         ...profile,
         userId: user?.id,
       });
@@ -239,29 +241,29 @@ export default function ProfileScreen() {
 
   if (loading && profile.skills.length === 0) {
     return (
-      <View className="flex-1 bg-slate-950 items-center justify-center">
+      <View className="flex-1 bg-slate-50 dark:bg-slate-950 items-center justify-center">
         <ActivityIndicator size="large" color="#10b981" />
       </View>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-950">
+    <SafeAreaView className="flex-grow flex-1 bg-slate-50 dark:bg-slate-950">
       <ScrollView contentContainerStyle={{ paddingBottom: 32 }} className="px-5">
         
         {/* Resume Management Card */}
-        <View className="bg-slate-900 border border-slate-800 rounded-3xl p-5 mt-6 mb-6">
-          <Text className="text-white text-lg font-bold mb-3">Resume Document</Text>
+        <View className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 mt-6 mb-6">
+          <Text className="text-slate-900 dark:text-white text-lg font-bold mb-3">Resume Document</Text>
           {profile.resumeFilename ? (
-            <View className="flex-row items-center bg-slate-950/80 border border-emerald-500/20 rounded-2xl p-4 mb-4">
+            <View className="flex-row items-center bg-slate-100 dark:bg-slate-950/80 border border-emerald-500/20 rounded-2xl p-4 mb-4">
               <View className="w-10 h-10 bg-emerald-500/10 rounded-xl items-center justify-center">
                 <Ionicons name="document-text" size={22} color="#10b981" />
               </View>
               <View className="flex-1 ml-3 pr-2">
-                <Text className="text-white font-semibold text-sm" numberOfLines={1}>
+                <Text className="text-slate-900 dark:text-white font-semibold text-sm" numberOfLines={1}>
                   {profile.resumeFilename}
                 </Text>
-                <Text className="text-slate-400 text-xs mt-0.5">Ready for auto-outreach</Text>
+                <Text className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">Ready for auto-outreach</Text>
               </View>
               <TouchableOpacity onPress={handlePickAndUploadResume}>
                 <Text className="text-emerald-400 text-xs font-bold uppercase">Replace</Text>
@@ -271,15 +273,15 @@ export default function ProfileScreen() {
             <TouchableOpacity
               onPress={handlePickAndUploadResume}
               disabled={uploadingResume}
-              className="border-2 border-dashed border-slate-700 bg-slate-950/40 rounded-2xl p-6 items-center mb-4"
+              className="border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-100/40 dark:bg-slate-950/40 rounded-2xl p-6 items-center mb-4"
             >
               {uploadingResume ? (
                 <ActivityIndicator color="#10b981" />
               ) : (
                 <>
                   <Ionicons name="cloud-upload-outline" size={28} color="#94a3b8" />
-                  <Text className="text-slate-300 font-semibold text-sm mt-2">Upload Resume PDF</Text>
-                  <Text className="text-slate-500 text-xs mt-1">Supports file sizes up to 10MB</Text>
+                  <Text className="text-slate-700 dark:text-slate-300 font-semibold text-sm mt-2">Upload Resume PDF</Text>
+                  <Text className="text-slate-400 dark:text-slate-500 text-xs mt-1">Supports file sizes up to 10MB</Text>
                 </>
               )}
             </TouchableOpacity>
@@ -291,8 +293,8 @@ export default function ProfileScreen() {
             disabled={syncingProfile || !profile.resumeFilename}
             className={`flex-row items-center justify-center py-3 rounded-2xl border ${
               profile.resumeFilename
-                ? 'bg-slate-950 border-slate-800 active:bg-slate-800'
-                : 'bg-slate-900 border-slate-800 opacity-50'
+                ? 'bg-slate-100 dark:bg-slate-950 border-slate-200 dark:border-slate-800 active:bg-slate-200 dark:active:bg-slate-800'
+                : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 opacity-50'
             }`}
           >
             {syncingProfile ? (
@@ -300,7 +302,7 @@ export default function ProfileScreen() {
             ) : (
               <>
                 <Ionicons name="sync-outline" size={16} color={profile.resumeFilename ? '#10b981' : '#64748b'} />
-                <Text className={`font-semibold text-sm ml-2 ${profile.resumeFilename ? 'text-white' : 'text-slate-500'}`}>
+                <Text className={`font-semibold text-sm ml-2 ${profile.resumeFilename ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-500'}`}>
                   Sync Profile with AI Parser
                 </Text>
               </>
@@ -309,45 +311,45 @@ export default function ProfileScreen() {
         </View>
 
         {/* Profile Form Details */}
-        <Text className="text-white text-lg font-bold mb-4">Contact Details</Text>
-        <View className="bg-slate-900 border border-slate-800 rounded-3xl p-5 mb-6 space-y-4">
+        <Text className="text-slate-900 dark:text-white text-lg font-bold mb-4">Contact Details</Text>
+        <View className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 mb-6 space-y-4">
           <View>
-            <Text className="text-slate-400 text-xs font-semibold mb-1.5 ml-1">FULL NAME</Text>
+            <Text className="text-slate-500 dark:text-slate-400 text-xs font-semibold mb-1.5 ml-1">FULL NAME</Text>
             <TextInput
               value={profile.name}
               onChangeText={(t) => setProfile(p => ({ ...p, name: t }))}
               placeholder="Your full name"
               placeholderTextColor="#475569"
-              className="bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-3 text-white text-base"
+              className="bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-3 text-slate-900 dark:text-white text-base"
             />
           </View>
 
           <View className="mt-3">
-            <Text className="text-slate-400 text-xs font-semibold mb-1.5 ml-1">PHONE NUMBER</Text>
+            <Text className="text-slate-500 dark:text-slate-400 text-xs font-semibold mb-1.5 ml-1">PHONE NUMBER</Text>
             <TextInput
               value={profile.mobile}
               onChangeText={(t) => setProfile(p => ({ ...p, mobile: t }))}
               placeholder="+1 (555) 000-0000"
               placeholderTextColor="#475569"
-              className="bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-3 text-white text-base"
+              className="bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-3 text-slate-900 dark:text-white text-base"
             />
           </View>
 
           <View className="mt-3">
-            <Text className="text-slate-400 text-xs font-semibold mb-1.5 ml-1">OFFICIAL EMAIL (FOR OUTREACH)</Text>
+            <Text className="text-slate-500 dark:text-slate-400 text-xs font-semibold mb-1.5 ml-1">OFFICIAL EMAIL (FOR OUTREACH)</Text>
             <TextInput
               value={profile.officialEmail}
               onChangeText={(t) => setProfile(p => ({ ...p, officialEmail: t }))}
               placeholder="you.outreach@domain.com"
               placeholderTextColor="#475569"
-              className="bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-3 text-white text-base"
+              className="bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-3 text-slate-900 dark:text-white text-base"
               autoCapitalize="none"
               keyboardType="email-address"
             />
           </View>
 
           <View className="mt-3">
-            <Text className="text-slate-400 text-xs font-semibold mb-1.5 ml-1">PROFESSIONAL SUMMARY</Text>
+            <Text className="text-slate-500 dark:text-slate-400 text-xs font-semibold mb-1.5 ml-1">PROFESSIONAL SUMMARY</Text>
             <TextInput
               value={profile.summary}
               onChangeText={(t) => setProfile(p => ({ ...p, summary: t }))}
@@ -356,21 +358,21 @@ export default function ProfileScreen() {
               multiline
               numberOfLines={4}
               style={{ textAlignVertical: 'top', height: 100 }}
-              className="bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-3 text-white text-base leading-relaxed"
+              className="bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-3 text-slate-900 dark:text-white text-base leading-relaxed"
             />
           </View>
         </View>
 
         {/* Skills Tag Management */}
-        <Text className="text-white text-lg font-bold mb-4">Core Skills</Text>
-        <View className="bg-slate-900 border border-slate-800 rounded-3xl p-5 mb-6">
+        <Text className="text-slate-900 dark:text-white text-lg font-bold mb-4">Core Skills</Text>
+        <View className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 mb-6">
           <View className="flex-row mb-4">
             <TextInput
               value={newSkill}
               onChangeText={setNewSkill}
               placeholder="Add skill (e.g. Docker)"
               placeholderTextColor="#475569"
-              className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-white text-base"
+              className="flex-1 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-slate-900 dark:text-white text-base"
               onSubmitEditing={handleAddSkill}
             />
             <TouchableOpacity
@@ -386,46 +388,78 @@ export default function ProfileScreen() {
             {profile.skills.map((skill) => (
               <View
                 key={skill}
-                className="flex-row items-center bg-slate-950 border border-slate-800 rounded-full px-3.5 py-1.5"
+                className="flex-row items-center bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-full px-3.5 py-1.5"
               >
-                <Text className="text-slate-200 text-sm font-medium">{skill}</Text>
+                <Text className="text-slate-700 dark:text-slate-200 text-sm font-medium">{skill}</Text>
                 <TouchableOpacity onPress={() => handleRemoveSkill(skill)} className="ml-2">
                   <Ionicons name="close-circle" size={16} color="#64748b" />
                 </TouchableOpacity>
               </View>
             ))}
             {profile.skills.length === 0 && (
-              <Text className="text-slate-500 text-sm italic py-2 ml-1">No skills added yet.</Text>
+              <Text className="text-slate-400 dark:text-slate-500 text-sm italic py-2 ml-1">No skills added yet.</Text>
             )}
           </View>
         </View>
 
+        {/* Appearance Settings Card */}
+        <Text className="text-slate-900 dark:text-white text-lg font-bold mb-4 mt-6">Appearance</Text>
+        <View className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 mb-6">
+          <Text className="text-slate-500 dark:text-slate-400 text-xs mt-0.5 leading-relaxed mb-4">
+            Customize how Auto Apply Pro looks on your device. Choose Light, Dark, or System Default theme.
+          </Text>
+          <View className="flex-row bg-slate-100 dark:bg-slate-950 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800">
+            {(['system', 'light', 'dark'] as const).map((mode) => {
+              const isActive = themeMode === mode;
+              return (
+                <TouchableOpacity
+                  key={mode}
+                  onPress={() => setTheme(mode)}
+                  className={`flex-1 py-3 items-center justify-center rounded-xl transition-all ${
+                    isActive
+                      ? 'bg-white dark:bg-slate-900 shadow-sm border border-slate-200/50 dark:border-slate-800'
+                      : 'bg-transparent'
+                  }`}
+                >
+                  <Text
+                    className={`font-semibold text-xs capitalize ${
+                      isActive ? 'text-emerald-500' : 'text-slate-500 dark:text-slate-400'
+                    }`}
+                  >
+                    {mode}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+
         {/* Help & Guided Tour Section */}
-        <Text className="text-white text-lg font-bold mb-4 mt-6">Help & Onboarding</Text>
-        <View className="bg-slate-900 border border-slate-800 rounded-3xl p-5 mb-6 flex-row justify-between items-center">
+        <Text className="text-slate-900 dark:text-white text-lg font-bold mb-4 mt-6">Help & Onboarding</Text>
+        <View className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 mb-6 flex-row justify-between items-center">
           <View className="flex-1 pr-4">
-            <Text className="text-white font-bold text-sm">Need a refresher?</Text>
-            <Text className="text-slate-400 text-xs mt-1 leading-relaxed">
+            <Text className="text-slate-900 dark:text-white font-bold text-sm">Need a refresher?</Text>
+            <Text className="text-slate-500 dark:text-slate-400 text-xs mt-1 leading-relaxed">
               Replay the 1-minute guided tour to learn how to manage and optimize your job applications.
             </Text>
           </View>
           <TouchableOpacity
             onPress={handleReplayTour}
-            className="bg-slate-950 border border-slate-805 rounded-xl px-4 py-2.5 active:bg-slate-850"
+            className="bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 active:bg-slate-200 dark:active:bg-slate-850"
           >
             <Text className="text-emerald-400 text-xs font-bold uppercase">Replay Tour</Text>
           </TouchableOpacity>
         </View>
 
         {/* Share Your Feedback Section */}
-        <Text className="text-white text-lg font-bold mb-4">Share Your Feedback</Text>
-        <View className="bg-slate-900 border border-slate-800 rounded-3xl p-5 mb-6">
-          <Text className="text-slate-400 text-xs mt-0.5 leading-relaxed mb-4">
+        <Text className="text-slate-900 dark:text-white text-lg font-bold mb-4">Share Your Feedback</Text>
+        <View className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 mb-6">
+          <Text className="text-slate-500 dark:text-slate-400 text-xs mt-0.5 leading-relaxed mb-4">
             Your feedback helps us improve Auto Apply Pro. Share your rating and review with us.
           </Text>
 
           <View className="mb-4">
-            <Text className="text-slate-400 text-xs font-semibold mb-2 ml-1">SELECT RATING</Text>
+            <Text className="text-slate-500 dark:text-slate-400 text-xs font-semibold mb-2 ml-1">SELECT RATING</Text>
             <View className="flex-row items-center gap-2">
               {[1, 2, 3, 4, 5].map((star) => (
                 <TouchableOpacity
@@ -441,7 +475,7 @@ export default function ProfileScreen() {
                 </TouchableOpacity>
               ))}
               {feedbackRating > 0 && (
-                <Text className="text-slate-400 text-xs font-semibold ml-2">
+                <Text className="text-slate-450 dark:text-slate-400 text-xs font-semibold ml-2">
                   {feedbackRating === 5 ? 'Excellent!' : feedbackRating === 4 ? 'Very Good!' : feedbackRating === 3 ? 'Good' : feedbackRating === 2 ? 'Fair' : 'Poor'}
                 </Text>
               )}
@@ -449,7 +483,7 @@ export default function ProfileScreen() {
           </View>
 
           <View className="mb-4">
-            <Text className="text-slate-400 text-xs font-semibold mb-2 ml-1">REVIEW COMMENT</Text>
+            <Text className="text-slate-500 dark:text-slate-400 text-xs font-semibold mb-2 ml-1">REVIEW COMMENT</Text>
             <TextInput
               value={feedbackComment}
               onChangeText={setFeedbackComment}
@@ -458,7 +492,7 @@ export default function ProfileScreen() {
               multiline
               numberOfLines={4}
               style={{ textAlignVertical: 'top', height: 80 }}
-              className="bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-3 text-white text-sm"
+              className="bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-3 text-slate-900 dark:text-white text-sm"
               maxLength={500}
             />
           </View>
@@ -478,7 +512,7 @@ export default function ProfileScreen() {
           <TouchableOpacity
             onPress={handleFeedbackSubmit}
             disabled={feedbackSubmitting}
-            className="bg-emerald-500/15 border border-emerald-500/30 rounded-2xl py-3.5 items-center active:opacity-90 disabled:opacity-50"
+            className="bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/20 dark:border-emerald-500/30 rounded-2xl py-3.5 items-center active:opacity-90 disabled:opacity-50"
           >
             {feedbackSubmitting ? (
               <ActivityIndicator color="#10b981" />
@@ -492,7 +526,7 @@ export default function ProfileScreen() {
         <TouchableOpacity
           onPress={handleUpdateProfile}
           disabled={loading}
-          className="bg-emerald-500 rounded-2xl py-3.5 items-center shadow-lg shadow-emerald-500/20 active:opacity-90"
+          className="bg-emerald-50 rounded-2xl py-3.5 items-center shadow-lg shadow-emerald-500/20 active:opacity-90 bg-emerald-500"
         >
           {loading ? (
             <ActivityIndicator color="#fff" />
