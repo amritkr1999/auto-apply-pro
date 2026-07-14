@@ -1,5 +1,5 @@
 # --- Build Stage ---
-FROM eclipse-temurin:25-jdk AS build
+FROM docker.io/library/eclipse-temurin:25-jdk AS build
 WORKDIR /app
 
 # Copy Maven wrapper configuration and project descriptor
@@ -19,7 +19,7 @@ COPY src ./src
 RUN ./mvnw clean package -DskipTests
 
 # --- Runtime Stage ---
-FROM eclipse-temurin:25-jre-alpine
+FROM docker.io/library/eclipse-temurin:25-jre-alpine
 WORKDIR /app
 
 # Copy the built jar from the build stage

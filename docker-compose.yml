@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:17-alpine
+    image: docker.io/library/postgres:17-alpine
     container_name: auto-apply-db
     environment:
       POSTGRES_DB: ${DB_NAME:-autoapplypro}
@@ -9,7 +9,7 @@ services:
     ports:
       # Expose postgres on localhost for development/debugging if needed.
       # In a strict production environment, you may want to map this to '127.0.0.1:5432:5432'
-      - "5432:5432"
+      - "${DB_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -76,10 +76,10 @@ services:
     restart: unless-stopped
 
   redis:
-    image: redis:7-alpine
+    image: docker.io/library/redis:7-alpine
     container_name: auto-apply-redis
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:6379"
     networks:
       - app-network
     restart: unless-stopped
