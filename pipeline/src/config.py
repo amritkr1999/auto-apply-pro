@@ -1,8 +1,10 @@
+from typing import Optional
+
 from pydantic_settings import BaseSettings
 from pathlib import Path
 
 class Settings(BaseSettings):
-    # Ollama
+    # Ollama (kept for jd_parser / LLM routing)
     ollama_base_url: str = "http://localhost:11434"
     ollama_deepseek_model: str = "deepseek-vision:7b"
     ollama_llm_model: str = "ollama3.1:8b"
@@ -12,6 +14,13 @@ class Settings(BaseSettings):
     # Gemini
     gemini_api_key: str = ""
     use_local_model: bool = False
+
+    # OCR Provider — "pytesseract" (default) or "vision" (Ollama/Gemini fallback)
+    ocr_provider: str = "pytesseract"
+    pytesseract_language: str = "eng"
+    pytesseract_data_path: Optional[str] = None
+    ocr_image_preprocessing: bool = True
+    ocr_timeout_seconds: int = 30
     
     # Pipeline
     pipeline_batch_size: int = 5

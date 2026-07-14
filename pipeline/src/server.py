@@ -81,7 +81,7 @@ async def startup_event():
     global session, ocr_handler, jd_parser, file_loader, resume_parser, email_generator
     logger.info("Initializing pipeline components...")
     session = aiohttp.ClientSession()
-    ocr_handler = OCRHandler(config, session)
+    ocr_handler = OCRHandler(config, session=session)
     jd_parser = JDParser(config, session)
     file_loader = FileLoader(config)
     resume_parser = ResumeParser(config, session)

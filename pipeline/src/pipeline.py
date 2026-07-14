@@ -35,7 +35,7 @@ class Pipeline:
     async def __aenter__(self):
         """Startup: initialize connections and connection pool."""
         self.session = aiohttp.ClientSession()
-        self.ocr_handler = OCRHandler(self.config, self.session)
+        self.ocr_handler = OCRHandler(self.config, session=self.session)
         self.jd_parser = JDParser(self.config, self.session)
         self.resume_parser = ResumeParser(self.config, self.session)
         self.email_generator = EmailGenerator(self.config, self.session)

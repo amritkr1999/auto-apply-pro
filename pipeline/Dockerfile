@@ -2,7 +2,14 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# Install dependencies directly to keep build fast
+# Install Tesseract OCR system packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    tesseract-ocr \
+    libleptonica-dev \
+    libtesseract-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies (includes pytesseract)
 RUN pip install --no-cache-dir \
     fastapi==0.100.0 \
     uvicorn==0.22.0 \
@@ -20,13 +27,18 @@ RUN pip install --no-cache-dir \
     psutil>=5.9 \
     loguru>=0.7 \
     python-multipart>=0.0.6 \
-    google-generativeai>=0.8.3
+    google-generativeai>=0.8.3 \
+    pytesseract>=0.3.10
 
 # Copy the rest of the application code
 COPY . .
 
 # Set PYTHONPATH so src modules resolve correctly
 ENV PYTHONPATH=/app
+
+# Health check — verify Tesseract + pytesseract are functional
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+    CMD python -c "import pytesseract; print('OK')" || exit 1
 
 # Expose FastAPI port
 EXPOSE 8000
