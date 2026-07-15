@@ -26,7 +26,6 @@ export const TemplateManager: React.FC = () => {
   const [hasCheckedDraft, setHasCheckedDraft] = useState(false);
 
   const [profileSkills, setProfileSkills] = useState<string[]>([]);
-  const [selectedPreviewSkills, setSelectedPreviewSkills] = useState<string[]>([]);
 
   const userStr = localStorage.getItem("user");
   const currentUser = userStr ? JSON.parse(userStr) : null;
@@ -223,7 +222,6 @@ export const TemplateManager: React.FC = () => {
         .then(profile => {
           if (profile && profile.skills) {
             setProfileSkills(profile.skills);
-            setSelectedPreviewSkills(profile.skills.slice(0, 3)); // select first 3 by default
           }
         })
         .catch(err => console.warn("Failed to load profile skills for mockup:", err));
@@ -379,6 +377,42 @@ export const TemplateManager: React.FC = () => {
     setTimeout(() => {
       textarea.focus();
       textarea.selectionStart = textarea.selectionEnd = start + placeholder.length;
+    }, 0);
+  };
+
+  const handleSelectSkillPill = (skillName: string) => {
+    const textarea = document.getElementById("template-skills-textarea") as HTMLTextAreaElement;
+    if (!textarea) {
+      setSkillsTemplate(prev => {
+        const prefix = prev && !prev.endsWith(" ") && !prev.endsWith(",") && !prev.endsWith("\n") ? ", " : "";
+        return prev + prefix + skillName;
+      });
+      return;
+    }
+    const start = textarea.selectionStart ?? 0;
+    const end = textarea.selectionEnd ?? 0;
+    const text = textarea.value;
+    
+    let prefix = "";
+    if (start > 0) {
+      const beforeChar = text.charAt(start - 1);
+      if (beforeChar !== " " && beforeChar !== "," && beforeChar !== "\n") {
+        prefix = ", ";
+      } else if (beforeChar === ",") {
+        prefix = " ";
+      }
+    }
+    
+    const insertText = prefix + skillName;
+    const before = text.substring(0, start);
+    const after = text.substring(end, text.length);
+    const newText = before + insertText + after;
+    
+    setSkillsTemplate(newText);
+    
+    setTimeout(() => {
+      textarea.focus();
+      textarea.selectionStart = textarea.selectionEnd = start + insertText.length;
     }, 0);
   };
 
@@ -799,21 +833,15 @@ export const TemplateManager: React.FC = () => {
                                 <span className="text-[9px] text-slate-400 italic">No skills in profile. Please add them on your profile page.</span>
                               ) : (
                                 profileSkills.map(skill => {
-                                  const isSelected = selectedPreviewSkills.includes(skill);
+                                  const isSelected = skillsTemplate.toLowerCase().includes(skill.toLowerCase());
                                   return (
                                     <button
                                       type="button"
                                       key={skill}
-                                      onClick={() => {
-                                        if (isSelected) {
-                                          setSelectedPreviewSkills(prev => prev.filter(s => s !== skill));
-                                        } else {
-                                          setSelectedPreviewSkills(prev => [...prev, skill]);
-                                        }
-                                      }}
+                                      onClick={() => handleSelectSkillPill(skill)}
                                       className={`px-2 py-0.5 rounded text-[9px] font-semibold border transition-all ${
                                         isSelected
-                                          ? "bg-indigo-600 border-indigo-650 text-white shadow-sm font-sans"
+                                          ? "bg-indigo-50 border-indigo-200 text-indigo-700 shadow-sm font-sans"
                                           : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50 font-sans"
                                       }`}
                                     >
@@ -901,7 +929,7 @@ export const TemplateManager: React.FC = () => {
                           .replace("{{recruiterName}}", "Hiring Team")
                           .replace("{{jobRole}}", "Software Architect")
                           .replace("{{companyName}}", "ScaleFintech")
-                          .replace("{{skills}}", selectedPreviewSkills.join(", ") || "{{skills}}")
+                          .replace("{{skills}}", profileSkills.join(", ") || "{{skills}}")
                           .replace("{{experienceYears}}", "5")
                           .replace("{{candidateName}}", currentUser?.name || "Jane Doe")
                           .replace("{{candidateMobile}}", currentUser?.mobile || "+1 (555) 0199")
