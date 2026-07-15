@@ -68,8 +68,8 @@ public class EmailServiceImpl implements EmailService {
         String companyName = dto.getJobDetails().getCompany();
         String jobTitle = dto.getJobDetails().getTitle();
 
-        log.info("Orchestrating email generation for User ID: {}, Company: {}, Role: {}, regenerate: {}", 
-                userId, companyName, jobTitle, regenerate);
+        log.info("Orchestrating email generation for User ID: {}, Company: {}, Role: {}, regenerate: {}, userTier: {}", 
+                userId, companyName, jobTitle, regenerate, dto.getUserTier());
 
         // 1. Resolve Company ID (create if missing)
         Company company = companyRepository.findByName(companyName)
@@ -173,11 +173,16 @@ public class EmailServiceImpl implements EmailService {
             recipientEmail = dto.getJobDetails().getHrEmails().get(0);
         }
 
-        // 6. Populate context variables
+        // 6. Programmatically match skills and calculate experience
+        String matchingSkills = getMatchingSkillsString(profile, dto);
+        double experienceYears = calculateExperienceYears(profile);
+
+        // 7. Populate context variables
         Map<String, Object> templateContext = new HashMap<>();
         templateContext.put("recruiterName", "Hiring Team");
         templateContext.put("hrName", "Hiring Team");
         templateContext.put("HOOK", hook);
+        templateContext.put("valueProposition", hook);
         templateContext.put("EXPERIENCE_HIGHLIGHT", constructExperienceHighlight(profile));
         templateContext.put("CLOSING", constructClosing(profile));
         templateContext.put("jobRole", jobTitle);
@@ -185,17 +190,42 @@ public class EmailServiceImpl implements EmailService {
         templateContext.put("companyName", companyName);
         templateContext.put("company", companyName);
         templateContext.put("candidateName", profile.getName());
+        templateContext.put("skills", matchingSkills);
+        templateContext.put("experienceYears", String.valueOf(experienceYears));
 
-        // 7. Render subject and body
+        // 8. Render subject and structured segments (Intro, Skills, Body, Sign-off)
         String renderedSubject;
         String renderedBody;
 
         if (emailTemplate != null) {
             renderedSubject = templateEngine.render(emailTemplate.getSubject(), templateContext);
-            renderedBody = templateEngine.render(emailTemplate.getBody(), templateContext);
+            
+            // Render segments, falling back to default formats if segment columns are empty
+            String introTemplate = (emailTemplate.getIntro() == null || emailTemplate.getIntro().trim().isEmpty())
+                    ? "Dear {{recruiterName}}," : emailTemplate.getIntro();
+            String skillsTemplate = (emailTemplate.getSkillsTemplate() == null || emailTemplate.getSkillsTemplate().trim().isEmpty())
+                    ? "{{HOOK}}" : emailTemplate.getSkillsTemplate();
+            String bodyTemplate = (emailTemplate.getBody() == null || emailTemplate.getBody().trim().isEmpty())
+                    ? "{{EXPERIENCE_HIGHLIGHT}}" : emailTemplate.getBody();
+            String signOffTemplate = (emailTemplate.getSignOff() == null || emailTemplate.getSignOff().trim().isEmpty())
+                    ? "{{CLOSING}}" : emailTemplate.getSignOff();
+
+            String renderedIntro = templateEngine.render(introTemplate, templateContext);
+            String renderedSkills = templateEngine.render(skillsTemplate, templateContext);
+            String renderedBodySeg = templateEngine.render(bodyTemplate, templateContext);
+            String renderedSignOff = templateEngine.render(signOffTemplate, templateContext);
+
+            renderedBody = renderedIntro + "\n\n" + renderedSkills + "\n\n" + renderedBodySeg + "\n\n" + renderedSignOff;
         } else {
             renderedSubject = String.format("Application for %s at %s", jobTitle, companyName);
-            renderedBody = templateEngine.render(null, templateContext);
+            
+            // Build body from standard boilerplate blocks
+            String renderedIntro = templateEngine.render("Dear {{recruiterName}},", templateContext);
+            String renderedSkills = templateEngine.render("{{HOOK}}", templateContext);
+            String renderedBodySeg = templateEngine.render("{{EXPERIENCE_HIGHLIGHT}}", templateContext);
+            String renderedSignOff = templateEngine.render("{{CLOSING}}", templateContext);
+            
+            renderedBody = renderedIntro + "\n\n" + renderedSkills + "\n\n" + renderedBodySeg + "\n\n" + renderedSignOff;
         }
 
         return EmailGenerationResponseDto.builder()
@@ -336,5 +366,58 @@ public class EmailServiceImpl implements EmailService {
             log.error("Failed to fetch statistics from AI pipeline", e);
             throw new RuntimeException("Failed to fetch LLM statistics: " + e.getMessage(), e);
         }
+    }
+
+    private double calculateExperienceYears(CandidateProfileDto profile) {
+        if (profile.getExperience() == null || profile.getExperience().isEmpty()) {
+            return 0.0;
+        }
+        double totalYears = 0.0;
+        for (Map<String, Object> exp : profile.getExperience()) {
+            Object durationObj = exp.get("duration");
+            if (durationObj != null) {
+                String durationStr = String.valueOf(durationObj).toLowerCase();
+                try {
+                    if (durationStr.contains("year") || durationStr.contains("yr")) {
+                        String numericPart = durationStr.replaceAll("[^0-9.]", "");
+                        if (!numericPart.isEmpty()) {
+                            totalYears += Double.parseDouble(numericPart);
+                        }
+                    } else if (durationStr.contains("month") || durationStr.contains("mo")) {
+                        String numericPart = durationStr.replaceAll("[^0-9.]", "");
+                        if (!numericPart.isEmpty()) {
+                            totalYears += Double.parseDouble(numericPart) / 12.0;
+                        }
+                    } else {
+                        String numericPart = durationStr.replaceAll("[^0-9.]", "");
+                        if (!numericPart.isEmpty()) {
+                            totalYears += Double.parseDouble(numericPart);
+                        }
+                    }
+                } catch (NumberFormatException e) {
+                    totalYears += 2.0;
+                }
+            } else {
+                totalYears += 2.0;
+            }
+        }
+        return totalYears;
+    }
+
+    private String getMatchingSkillsString(CandidateProfileDto profile, EmailGenerationRequestDto dto) {
+        List<String> candidateSkills = profile.getSkills();
+        List<String> jobSkills = dto.getJobDetails().getSkills();
+        if (candidateSkills == null || jobSkills == null || candidateSkills.isEmpty() || jobSkills.isEmpty()) {
+            return "";
+        }
+        List<String> matchingSkills = new ArrayList<>();
+        for (String cSkill : candidateSkills) {
+            for (String jSkill : jobSkills) {
+                if (cSkill.trim().equalsIgnoreCase(jSkill.trim())) {
+                    matchingSkills.add(cSkill.trim());
+                }
+            }
+        }
+        return String.join(", ", matchingSkills);
     }
 }

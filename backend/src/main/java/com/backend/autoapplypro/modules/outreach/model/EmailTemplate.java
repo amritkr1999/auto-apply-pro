@@ -20,6 +20,12 @@ public class EmailTemplate {
     @Column(nullable = false)
     private String subject;
 
+    @Column(columnDefinition = "TEXT")
+    private String intro;
+
+    @Column(name = "skills_template", columnDefinition = "TEXT")
+    private String skillsTemplate;
+
     @Column(columnDefinition = "TEXT", nullable = false)
     private String body;
 

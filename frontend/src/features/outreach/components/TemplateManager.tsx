@@ -12,6 +12,8 @@ export const TemplateManager: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [name, setName] = useState("");
   const [subject, setSubject] = useState("");
+  const [intro, setIntro] = useState("");
+  const [skillsTemplate, setSkillsTemplate] = useState("");
   const [body, setBody] = useState("");
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
@@ -176,10 +178,15 @@ export const TemplateManager: React.FC = () => {
       id: "",
       name: "",
       subject: "",
-      body: ""
+      intro: "",
+      skillsTemplate: "",
+      body: "",
+      signOff: ""
     });
     setName("");
     setSubject("");
+    setIntro("");
+    setSkillsTemplate("");
     setBody("");
     setIsEditMode(true);
     setMessage("");
@@ -202,7 +209,7 @@ export const TemplateManager: React.FC = () => {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !subject.trim() || !body.trim()) {
-      setError("Please fill in all template fields.");
+      setError("Please fill in the Name, Subject, and Core Body fields.");
       return;
     }
 
@@ -213,7 +220,10 @@ export const TemplateManager: React.FC = () => {
         id: activeTemplate?.id || undefined,
         name,
         subject,
-        body
+        intro,
+        skillsTemplate,
+        body,
+        signOff
       };
       await outreachService.saveTemplate(payload);
       setMessage(activeTemplate?.id ? "Template updated successfully!" : "Template created successfully!");
@@ -227,9 +237,13 @@ export const TemplateManager: React.FC = () => {
   };
 
   const insertPlaceholder = (placeholder: string) => {
-    const textarea = document.getElementById("template-body-textarea") as HTMLTextAreaElement;
+    const textareaId = `template-${activeTextarea}-textarea`;
+    const textarea = document.getElementById(textareaId) as HTMLTextAreaElement;
     if (!textarea) {
-      setBody(prev => prev + placeholder);
+      if (activeTextarea === "intro") setIntro(prev => prev + placeholder);
+      else if (activeTextarea === "skills") setSkillsTemplate(prev => prev + placeholder);
+      else if (activeTextarea === "body") setBody(prev => prev + placeholder);
+      else if (activeTextarea === "signOff") setSignOff(prev => prev + placeholder);
       return;
     }
     const start = textarea.selectionStart;
@@ -238,7 +252,11 @@ export const TemplateManager: React.FC = () => {
     const before = text.substring(0, start);
     const after = text.substring(end, text.length);
     const newText = before + placeholder + after;
-    setBody(newText);
+    
+    if (activeTextarea === "intro") setIntro(newText);
+    else if (activeTextarea === "skills") setSkillsTemplate(newText);
+    else if (activeTextarea === "body") setBody(newText);
+    else if (activeTextarea === "signOff") setSignOff(newText);
     
     // Reset cursor position after React update
     setTimeout(() => {

@@ -13,4 +13,5 @@ public class EmailGenerationRequestDto {
     private JobDetailsDto jobDetails;
     private String templateId;
     private Boolean useAi;
+    private String userTier; // "free" or "paid"
 }

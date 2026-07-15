@@ -23,6 +23,8 @@ export interface EmailTemplate {
   id: string;
   name: string;
   subject: string;
+  intro?: string;
+  skillsTemplate?: string;
   body: string;
   isSystemTemplate?: boolean;
   isPublic?: boolean;
@@ -53,14 +55,20 @@ const DEFAULT_TEMPLATES: EmailTemplate[] = [
   {
     id: "default-1",
     name: "General Application Outreach",
-    subject: "Application for {{jobRole}} | {{hrName}}",
-    body: `Hi {{hrName}},<br/><br/>I hope you are doing well.<br/><br/>I am reaching out to express my interest in the <strong>{{jobRole}}</strong> position at <strong>{{companyName}}</strong>. Having worked with frontend systems, I believe my background aligns well with your team's current expansion goals.<br/><br/>Please find my profile details attached. I would love to connect and discuss how I can add value to {{companyName}}.<br/><br/>Best regards,<br/>Candidate User`
+    subject: "Application for {{jobRole}} | {{companyName}}",
+    intro: "Dear {{recruiterName}},",
+    skillsTemplate: "I am writing to apply for the {{jobRole}} position. I noticed your team is looking for a developer experienced in {{skills}}, which maps closely to my skillset.",
+    body: "I have over {{experienceYears}} years of software development experience, focusing on building high-performance systems and user-centric features.",
+    signOff: "Best regards,\n{{candidateName}}",
   },
   {
     id: "default-2",
     name: "Quick Follow-Up Template",
     subject: "Follow up: {{jobRole}} application - {{companyName}}",
-    body: `Hi {{hrName}},<br/><br/>Hope your week is going well.<br/><br/>I wanted to quickly check in on my application for the <strong>{{jobRole}}</strong> role. I remain very excited about the opportunity to join <strong>{{companyName}}</strong> and would love to share more about my experience.<br/><br/>Looking forward to hearing from you.<br/><br/>Best,<br/>Candidate User`
+    intro: "Hi {{recruiterName}},",
+    skillsTemplate: "I wanted to follow up on my application for the {{jobRole}} role. My hands-on skills in {{skills}} make me excited about joining {{companyName}}.",
+    body: "I have {{experienceYears}} years of experience building scalable products and would love to connect to share more.",
+    signOff: "Sincerely,\n{{candidateName}}",
   }
 ];
 
@@ -107,7 +115,10 @@ export const outreachService = {
       id: template.id || `tpl-${Date.now()}`,
       name: template.name,
       subject: template.subject,
-      body: template.body
+      intro: template.intro,
+      skillsTemplate: template.skillsTemplate,
+      body: template.body,
+      signOff: template.signOff
     };
 
     try {
