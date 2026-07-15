@@ -116,7 +116,7 @@ class EmailServiceCachingTest {
         // Assert
         assertNotNull(response);
         assertEquals("Application for Software Engineer at Google", response.getSubject());
-        assertEquals("Compiled Email Body", response.getBody());
+        assertEquals("Compiled Email Body\n\nCompiled Email Body\n\nCompiled Email Body\n\nCompiled Email Body", response.getBody());
         assertEquals("recruiter@google.com", response.getRecipientEmail());
 
         verify(companyRepository, times(1)).findByName("Google");

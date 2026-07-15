@@ -29,6 +29,9 @@ public class EmailTemplate {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String body;
 
+    @Column(name = "sign_off", columnDefinition = "TEXT")
+    private String signOff;
+
     @Column(name = "creator_id")
     private Long creatorId;
 

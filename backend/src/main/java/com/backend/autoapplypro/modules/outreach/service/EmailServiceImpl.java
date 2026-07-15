@@ -94,8 +94,13 @@ public class EmailServiceImpl implements EmailService {
                 });
         String roleId = String.valueOf(job.getId());
 
-        // 3. Determine if AI should be used based on toggle and subscription
-        boolean isPremium = subscriptionGatingService.isPremiumUser(userId);
+        // 3. Determine if AI should be used based on toggle and subscription/tier override
+        boolean isPremium = false;
+        if (dto.getUserTier() != null) {
+            isPremium = "paid".equalsIgnoreCase(dto.getUserTier()) || "premium".equalsIgnoreCase(dto.getUserTier());
+        } else {
+            isPremium = subscriptionGatingService.isPremiumUser(userId);
+        }
         User user = userRepository.findById(userId).orElse(null);
         boolean aiSettingEnabled = user != null && Boolean.TRUE.equals(user.getAiPersonalizationEnabled());
 
@@ -112,6 +117,7 @@ public class EmailServiceImpl implements EmailService {
             }
             callAi = false;
         }
+        log.info("Subscription billing tier: {}, run AI generation: {}", isPremium ? "PAID" : "FREE", callAi);
 
         // 4. Fetch candidate details & construct minimized profile snippet (Data Minimization)
         CandidateProfileDto profile;

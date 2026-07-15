@@ -15,6 +15,8 @@ export const TemplateManager: React.FC = () => {
   const [intro, setIntro] = useState("");
   const [skillsTemplate, setSkillsTemplate] = useState("");
   const [body, setBody] = useState("");
+  const [signOff, setSignOff] = useState("");
+  const [activeTextarea, setActiveTextarea] = useState<"intro" | "skills" | "body" | "signOff">("body");
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -557,81 +559,167 @@ export const TemplateManager: React.FC = () => {
       {/* UNIFIED MODAL COMPONENT */}
       {activeTemplate && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-slate-200 rounded-card shadow-2xl max-w-2xl w-full p-6 space-y-5 max-h-[90vh] overflow-y-auto relative animate-in fade-in zoom-in-95 duration-200">
+          <div className={`bg-white border border-slate-200 rounded-card shadow-2xl ${isEditMode ? "max-w-4xl" : "max-w-2xl"} w-full p-6 space-y-5 max-h-[90vh] overflow-y-auto relative animate-in fade-in zoom-in-95 duration-200`}>
             {isEditMode ? (
               // EDIT/CREATE MODE FORM IN MODAL
               <div>
                 <h2 className="text-xl font-bold text-slate-800 border-b border-slate-100 pb-3 mb-4">
                   {activeTemplate.id ? "Edit Template" : "New Email Template"}
                 </h2>
-                <form onSubmit={handleSave} className="flex flex-col gap-4">
-                  <div className="flex flex-col">
-                    <label className="text-xs font-semibold text-slate-500 mb-1.5">Template Name</label>
-                    <input
-                      type="text"
-                      placeholder="e.g., General Referral Request"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-input text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
-                      required
-                    />
-                  </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <form onSubmit={handleSave} className="flex flex-col gap-4">
+                    <div className="flex flex-col">
+                      <label className="text-xs font-semibold text-slate-500 mb-1.5">Template Name</label>
+                      <input
+                        type="text"
+                        placeholder="e.g., General Referral Request"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="w-full px-3 py-2 border border-slate-200 rounded-input text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                        required
+                      />
+                    </div>
 
-                  <div className="flex flex-col">
-                    <label className="text-xs font-semibold text-slate-500 mb-1.5">Email Subject</label>
-                    <input
-                      type="text"
-                      placeholder="e.g., Application for {{jobRole}} | {{companyName}}"
-                      value={subject}
-                      onChange={(e) => setSubject(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-input text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
-                      required
-                    />
-                  </div>
+                    <div className="flex flex-col">
+                      <label className="text-xs font-semibold text-slate-500 mb-1.5">Email Subject</label>
+                      <input
+                        type="text"
+                        placeholder="e.g., Application for {{jobRole}} | {{companyName}}"
+                        value={subject}
+                        onChange={(e) => setSubject(e.target.value)}
+                        className="w-full px-3 py-2 border border-slate-200 rounded-input text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                        required
+                      />
+                    </div>
 
-                  <div className="flex flex-col">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1.5">
-                      <label className="text-xs font-semibold text-slate-500">Template Body (HTML Supported)</label>
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <span className="text-[10px] text-slate-400 font-medium">Insert tags:</span>
-                        <button type="button" className="text-[9px] font-bold text-indigo-650 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 px-1.5 py-0.5 rounded transition-colors" onClick={() => insertPlaceholder("{{hrName}}")}>{"{{hrName}}"}</button>
+                    <div className="border border-slate-150 rounded-lg p-3 bg-slate-50/50">
+                      <div className="flex flex-wrap items-center gap-1.5 mb-3 border-b border-slate-150 pb-2">
+                        <span className="text-[10px] text-slate-500 font-semibold">Tags (Focus field, then click to insert):</span>
+                        <button type="button" className="text-[9px] font-bold text-indigo-650 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 px-1.5 py-0.5 rounded transition-colors" onClick={() => insertPlaceholder("{{recruiterName}}")}>{"{{recruiterName}}"}</button>
                         <button type="button" className="text-[9px] font-bold text-indigo-650 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 px-1.5 py-0.5 rounded transition-colors" onClick={() => insertPlaceholder("{{companyName}}")}>{"{{companyName}}"}</button>
                         <button type="button" className="text-[9px] font-bold text-indigo-650 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 px-1.5 py-0.5 rounded transition-colors" onClick={() => insertPlaceholder("{{jobRole}}")}>{"{{jobRole}}"}</button>
+                        <button type="button" className="text-[9px] font-bold text-indigo-650 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 px-1.5 py-0.5 rounded transition-colors" onClick={() => insertPlaceholder("{{skills}}")}>{"{{skills}}"}</button>
+                        <button type="button" className="text-[9px] font-bold text-indigo-650 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 px-1.5 py-0.5 rounded transition-colors" onClick={() => insertPlaceholder("{{experienceYears}}")}>{"{{experienceYears}}"}</button>
+                        <button type="button" className="text-[9px] font-bold text-indigo-650 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 px-1.5 py-0.5 rounded transition-colors" onClick={() => insertPlaceholder("{{candidateName}}")}>{"{{candidateName}}"}</button>
+                      </div>
+
+                      <div className="space-y-3 max-h-[35vh] overflow-y-auto pr-1">
+                        <div className="flex flex-col">
+                          <label className={`text-[10px] font-bold mb-1 transition-colors ${activeTextarea === "intro" ? "text-primary" : "text-slate-500"}`}>
+                            1. Introduction Block {activeTextarea === "intro" && "✍️"}
+                          </label>
+                          <textarea
+                            id="template-intro-textarea"
+                            placeholder="e.g., Dear {{recruiterName}},"
+                            value={intro}
+                            onChange={(e) => setIntro(e.target.value)}
+                            onFocus={() => setActiveTextarea("intro")}
+                            rows={2}
+                            className="w-full px-2.5 py-1.5 border border-slate-200 rounded-input text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 font-mono resize-none"
+                          />
+                        </div>
+
+                        <div className="flex flex-col">
+                          <label className={`text-[10px] font-bold mb-1 transition-colors ${activeTextarea === "skills" ? "text-primary" : "text-slate-500"}`}>
+                            2. Skills Match Block {activeTextarea === "skills" && "✍️"}
+                          </label>
+                          <textarea
+                            id="template-skills-textarea"
+                            placeholder="e.g., I noticed your team needs skills in {{skills}}..."
+                            value={skillsTemplate}
+                            onChange={(e) => setSkillsTemplate(e.target.value)}
+                            onFocus={() => setActiveTextarea("skills")}
+                            rows={3}
+                            className="w-full px-2.5 py-1.5 border border-slate-200 rounded-input text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 font-mono resize-none"
+                          />
+                        </div>
+
+                        <div className="flex flex-col">
+                          <label className={`text-[10px] font-bold mb-1 transition-colors ${activeTextarea === "body" ? "text-primary" : "text-slate-500"}`}>
+                            3. Core Body Block {activeTextarea === "body" && "✍️"}
+                          </label>
+                          <textarea
+                            id="template-body-textarea"
+                            placeholder="e.g., I have {{experienceYears}} years of software development experience..."
+                            value={body}
+                            onChange={(e) => setBody(e.target.value)}
+                            onFocus={() => setActiveTextarea("body")}
+                            rows={4}
+                            className="w-full px-2.5 py-1.5 border border-slate-200 rounded-input text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 font-mono"
+                            required
+                          />
+                        </div>
+
+                        <div className="flex flex-col">
+                          <label className={`text-[10px] font-bold mb-1 transition-colors ${activeTextarea === "signOff" ? "text-primary" : "text-slate-500"}`}>
+                            4. Sign-off Block {activeTextarea === "signOff" && "✍️"}
+                          </label>
+                          <textarea
+                            id="template-signOff-textarea"
+                            placeholder="e.g., Sincerely,\n{{candidateName}}"
+                            value={signOff}
+                            onChange={(e) => setSignOff(e.target.value)}
+                            onFocus={() => setActiveTextarea("signOff")}
+                            rows={2}
+                            className="w-full px-2.5 py-1.5 border border-slate-200 rounded-input text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 font-mono resize-none"
+                          />
+                        </div>
                       </div>
                     </div>
-                    <textarea
-                      id="template-body-textarea"
-                      placeholder="Hi {{hrName}},\n\nI am interested in the {{jobRole}} role at {{companyName}}..."
-                      value={body}
-                      onChange={(e) => setBody(e.target.value)}
-                      rows={8}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-input text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 font-mono leading-relaxed resize-vertical"
-                      required
-                    />
-                  </div>
 
-                  <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (activeTemplate.id) {
-                          setIsEditMode(false);
-                        } else {
-                          setActiveTemplate(null);
-                        }
-                      }}
-                      className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-500 rounded-btn text-xs font-semibold transition-all"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-btn text-xs font-semibold shadow-sm transition-all"
-                    >
-                      Save Template
-                    </button>
+                    <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (activeTemplate.id) {
+                            setIsEditMode(false);
+                          } else {
+                            setActiveTemplate(null);
+                          }
+                        }}
+                        className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-500 rounded-btn text-xs font-semibold transition-all"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-btn text-xs font-semibold shadow-sm transition-all"
+                      >
+                        Save Template
+                      </button>
+                    </div>
+                  </form>
+
+                  <div className="border border-slate-200 rounded-card p-5 bg-slate-50 flex flex-col h-full min-h-[400px]">
+                    <h3 className="text-xs font-bold text-slate-700 mb-2.5 border-b border-slate-200 pb-2 flex items-center gap-1.5">
+                      <span>👁️</span> Real-time Stack Preview (Mockup Variables)
+                    </h3>
+                    <div className="text-[11px] text-slate-500 font-semibold mb-2 truncate">
+                      Subject: <span className="text-slate-700 font-mono">{subject.replace("{{jobRole}}", "Software Architect").replace("{{companyName}}", "ScaleFintech")}</span>
+                    </div>
+                    <div className="flex-1 bg-white border border-slate-200 rounded p-4 font-mono text-[11px] leading-relaxed text-slate-650 overflow-y-auto whitespace-pre-wrap select-none max-h-[50vh]">
+                      {[
+                        intro || "Dear {{recruiterName}},",
+                        skillsTemplate || "{{HOOK}}",
+                        body || "{{EXPERIENCE_HIGHLIGHT}}",
+                        signOff || "{{CLOSING}}"
+                      ]
+                        .map(seg => seg
+                          .replace("{{recruiterName}}", "Hiring Team")
+                          .replace("{{jobRole}}", "Software Architect")
+                          .replace("{{companyName}}", "ScaleFintech")
+                          .replace("{{skills}}", "React, TypeScript, Node.js")
+                          .replace("{{experienceYears}}", "5")
+                          .replace("{{candidateName}}", "Jane Doe")
+                          .replace("{{HOOK}}", "I am writing to express my interest in the Software Architect position...")
+                          .replace("{{EXPERIENCE_HIGHLIGHT}}", "Throughout my career, notably during my time as a Developer...")
+                          .replace("{{CLOSING}}", "Best regards,\nJane Doe")
+                        )
+                        .join("\n\n")
+                      }
+                    </div>
                   </div>
-                </form>
+                </div>
               </div>
             ) : (
               // REVIEW/VIEW MODE IN MODAL
@@ -767,7 +855,10 @@ export const TemplateManager: React.FC = () => {
                         onClick={() => {
                           setName(activeTemplate.name);
                           setSubject(activeTemplate.subject);
+                          setIntro(activeTemplate.intro || "");
+                          setSkillsTemplate(activeTemplate.skillsTemplate || "");
                           setBody(activeTemplate.body);
+                          setSignOff(activeTemplate.signOff || "");
                           setIsEditMode(true);
                         }}
                         className="px-3 py-1.5 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 text-indigo-650 rounded text-xs font-semibold transition-all"
