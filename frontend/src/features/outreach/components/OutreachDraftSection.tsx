@@ -21,6 +21,7 @@ export const OutreachDraftSection: React.FC = () => {
   // Raw subject/body being edited in the main form
   const [rawSubject, setRawSubject] = useState("");
   const [rawBody, setRawBody] = useState("");
+  const [activeTextarea, setActiveTextarea] = useState<"subject" | "body">("body");
 
   // Preview / Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -62,18 +63,22 @@ export const OutreachDraftSection: React.FC = () => {
   };
 
   const insertPlaceholder = (placeholder: string) => {
-    const textarea = document.getElementById("draft-body-textarea") as HTMLTextAreaElement;
+    const inputId = activeTextarea === "subject" ? "draft-subject-input" : "draft-body-textarea";
+    const textarea = document.getElementById(inputId) as HTMLInputElement | HTMLTextAreaElement;
     if (!textarea) {
-      setRawBody(prev => prev + placeholder);
+      if (activeTextarea === "subject") setRawSubject(prev => prev + placeholder);
+      else setRawBody(prev => prev + placeholder);
       return;
     }
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
+    const start = textarea.selectionStart ?? 0;
+    const end = textarea.selectionEnd ?? 0;
     const text = textarea.value;
     const before = text.substring(0, start);
     const after = text.substring(end, text.length);
     const newText = before + placeholder + after;
-    setRawBody(newText);
+    
+    if (activeTextarea === "subject") setRawSubject(newText);
+    else setRawBody(newText);
     
     // Reset cursor position
     setTimeout(() => {
@@ -249,10 +254,12 @@ export const OutreachDraftSection: React.FC = () => {
 
             {/* Raw Subject Field */}
             <Input
+              id="draft-subject-input"
               label="Edit Subject Structure"
               type="text"
               value={rawSubject}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRawSubject(e.target.value)}
+              onFocus={() => setActiveTextarea("subject")}
             />
 
             {/* Raw Body Editor */}
@@ -295,6 +302,7 @@ export const OutreachDraftSection: React.FC = () => {
                 id="draft-body-textarea"
                 value={rawBody}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setRawBody(e.target.value)}
+                onFocus={() => setActiveTextarea("body")}
                 rows={8}
                 className="w-full px-3 py-2 border border-[#b2bec3] rounded-input text-sm text-base-text bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 font-mono leading-relaxed"
               />
