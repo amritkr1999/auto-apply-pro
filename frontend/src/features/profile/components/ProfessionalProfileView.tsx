@@ -312,7 +312,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
         setHrOutreachTemplateId(data.hrOutreachTemplateId || "default-1");
         setHrOutreachSourceTable(data.hrOutreachSourceTable || "TESTING");
 
-        if (data.timezone) {
+        if (data.timezone && data.timezone !== "UTC") {
           setTimezone(data.timezone);
         } else {
           const localTz = Intl.DateTimeFormat().resolvedOptions().timeZone;

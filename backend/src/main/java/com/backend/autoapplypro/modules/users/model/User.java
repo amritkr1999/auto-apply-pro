@@ -91,9 +91,8 @@ public class User {
     @Column(name = "outreach_slot_end")
     private java.time.LocalTime outreachSlotEnd = java.time.LocalTime.of(17, 0);
 
-    @Builder.Default
     @Column(name = "outreach_timezone")
-    private String outreachTimezone = "UTC";
+    private String outreachTimezone;
 
     @Builder.Default
     @Column(name = "outreach_skip_weekends")

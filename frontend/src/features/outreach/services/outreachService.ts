@@ -381,7 +381,7 @@ export const outreachService = {
       maxIntervalMinutes: 30,
       slotStart: "09:00",
       slotEnd: "17:00",
-      timezone: "UTC",
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
       skipWeekends: true,
       hrOutreachCampaignEnabled: false,
       hrOutreachTargetRole: "Software Engineer",

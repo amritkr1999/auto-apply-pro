@@ -35,7 +35,7 @@ public class OutreachSettingsController {
                 .maxIntervalMinutes(user.getOutreachMaxIntervalMin() != null ? user.getOutreachMaxIntervalMin() : 30)
                 .slotStart(user.getOutreachSlotStart() != null ? user.getOutreachSlotStart().toString() : "09:00")
                 .slotEnd(user.getOutreachSlotEnd() != null ? user.getOutreachSlotEnd().toString() : "17:00")
-                .timezone(user.getOutreachTimezone() != null ? user.getOutreachTimezone() : "UTC")
+                .timezone(user.getOutreachTimezone())
                 .skipWeekends(user.getOutreachSkipWeekends() != null ? user.getOutreachSkipWeekends() : true)
                 // Campaign settings
                 .hrOutreachCampaignEnabled(user.getHrOutreachCampaignEnabled() != null ? user.getHrOutreachCampaignEnabled() : false)
