@@ -960,7 +960,6 @@ export const TemplateManager: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  </div>
                 </div>
               </div>
             ) : (
