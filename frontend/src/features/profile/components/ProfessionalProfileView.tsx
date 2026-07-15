@@ -34,7 +34,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
   const [officialEmail, setOfficialEmail] = useState("");
-  const [skills, setSkills] = useState("");
+  const [skills, setSkills] = useState<string[]>([]);
   const [locationPreference, setLocationPreference] = useState("");
   const [expectedSalary, setExpectedSalary] = useState("");
   const [summary, setSummary] = useState("");
@@ -57,7 +57,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
   const [professionalVertical, setProfessionalVertical] = useState("DEVELOPER");
   
   const [masterSkills, setMasterSkills] = useState<{ id: number; name: string }[]>([]);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [skillSearchQuery, setSkillSearchQuery] = useState("");
   const [uploadingResume, setUploadingResume] = useState(false);
   const [syncingProfile, setSyncingProfile] = useState(false);
   const [gmailConnected, setGmailConnected] = useState(false);
@@ -94,7 +94,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
     setName(data.name || "");
     setMobile(data.mobile || "");
     setOfficialEmail(data.officialEmail || "");
-    setSkills(data.skills ? data.skills.join(", ") : "");
+    setSkills(data.skills || []);
     
     const prefs = data.jobPreferences || {};
     setLocationPreference(prefs.locationPreference || "");
@@ -451,39 +451,15 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
     }
   };
 
-  useEffect(() => {
-    if (!skills || masterSkills.length === 0) {
-      setSuggestions([]);
-      return;
+  const handleAddSkill = (skillName: string) => {
+    if (!skills.includes(skillName)) {
+      setSkills(prev => [...prev, skillName]);
     }
+    setSkillSearchQuery("");
+  };
 
-    const parts = skills.split(",");
-    const lastPart = parts[parts.length - 1].trim();
-
-    if (lastPart.length < 1) {
-      setSuggestions([]);
-      return;
-    }
-
-    const lowerLastPart = lastPart.toLowerCase();
-    const existingSkillsLower = parts.slice(0, -1).map(p => p.trim().toLowerCase());
-
-    const filtered = masterSkills
-      .map(s => s.name)
-      .filter(name => {
-        const lowerName = name.toLowerCase();
-        return lowerName.includes(lowerLastPart) && !existingSkillsLower.includes(lowerName);
-      })
-      .slice(0, 5);
-
-    setSuggestions(filtered);
-  }, [skills, masterSkills]);
-
-  const handleSelectSuggestion = (suggestion: string) => {
-    const parts = skills.split(",");
-    const updatedParts = [...parts.slice(0, -1), suggestion];
-    setSkills(updatedParts.join(", ") + ", ");
-    setSuggestions([]);
+  const handleRemoveSkill = (skillName: string) => {
+    setSkills(prev => prev.filter(s => s !== skillName));
   };
 
   useEffect(() => {
@@ -527,7 +503,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
         name,
         mobile,
         officialEmail,
-        skills: skills.split(",").map((s) => s.trim()).filter((s) => s.length > 0),
+        skills,
         jobPreferences: {
           locationPreference,
           expectedSalary,
@@ -749,28 +725,60 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
             />
           </div>
 
-          <div className="relative w-full">
-            <Input
-              label="Skills (comma-separated)"
-              type="text"
-              value={skills}
-              placeholder="React, TypeScript, Java, Spring Boot"
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSkills(e.target.value)}
-              className="rounded-xl border-slate-200 focus:ring-primary focus:border-transparent px-4 py-2.5"
-            />
-            {suggestions.length > 0 && (
-              <div className="absolute top-[100%] left-0 right-0 z-50 bg-white border border-slate-200 rounded-xl mt-1 shadow-lg max-h-[200px] overflow-y-auto p-1.5 animate-in slide-in-from-top-2 duration-150">
-                {suggestions.map((suggestion) => (
-                  <div
-                    key={suggestion}
-                    onClick={() => handleSelectSuggestion(suggestion)}
-                    className="px-3.5 py-2 cursor-pointer transition-colors duration-150 rounded-lg text-slate-700 font-semibold hover:bg-slate-50 text-sm"
-                  >
-                    {suggestion}
-                  </div>
-                ))}
-              </div>
-            )}
+          <div className="w-full space-y-2">
+            <label className="block text-xs font-semibold text-slate-500 mb-1">
+              Skills
+            </label>
+            <div className="flex flex-wrap gap-2 min-h-[46px] p-2 bg-slate-50 border border-slate-200 rounded-xl">
+              {skills.length === 0 ? (
+                <span className="text-xs text-slate-400 italic p-1.5">No skills selected. Search and select from the list below.</span>
+              ) : (
+                skills.map(skill => (
+                  <span key={skill} className="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-50 border border-indigo-150 text-indigo-700 rounded-full text-xs font-semibold shadow-sm">
+                    {skill}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveSkill(skill)}
+                      className="text-indigo-450 hover:text-indigo-650 focus:outline-none font-bold text-sm"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))
+              )}
+            </div>
+            
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Type to search and select skills..."
+                value={skillSearchQuery}
+                onChange={(e) => setSkillSearchQuery(e.target.value)}
+                className="w-full rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent px-4 py-2.5 text-sm outline-none transition-all bg-white"
+              />
+              {skillSearchQuery.trim() !== "" && (
+                <div className="absolute top-[100%] left-0 right-0 z-50 bg-white border border-slate-200 rounded-xl mt-1 shadow-lg max-h-[200px] overflow-y-auto p-1.5 animate-in slide-in-from-top-2 duration-150">
+                  {masterSkills
+                    .filter(s => s.name.toLowerCase().includes(skillSearchQuery.toLowerCase()) && !skills.includes(s.name))
+                    .slice(0, 10)
+                    .map(s => (
+                      <div
+                        key={s.id}
+                        onClick={() => handleAddSkill(s.name)}
+                        className="px-3.5 py-2 cursor-pointer transition-colors duration-150 rounded-lg text-slate-700 font-semibold hover:bg-slate-50 text-sm"
+                      >
+                        {s.name}
+                      </div>
+                    ))
+                  }
+                  {masterSkills.filter(s => s.name.toLowerCase().includes(skillSearchQuery.toLowerCase()) && !skills.includes(s.name)).length === 0 && (
+                    <div className="px-3.5 py-2 text-slate-400 text-xs italic">
+                      No matching skills found
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="w-full">
