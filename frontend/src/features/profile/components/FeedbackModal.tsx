@@ -3,10 +3,11 @@ import { feedbackService } from "../services/feedbackService";
 
 interface FeedbackModalProps {
   onClose: () => void;
+  onLogout: () => void;
   onSubmitSuccess?: () => void;
 }
 
-export const FeedbackModal: React.FC<FeedbackModalProps> = ({ onClose, onSubmitSuccess }) => {
+export const FeedbackModal: React.FC<FeedbackModalProps> = ({ onClose, onLogout, onSubmitSuccess }) => {
   const [rating, setRating] = useState<number>(0);
   const [hoverRating, setHoverRating] = useState<number>(0);
   const [comment, setComment] = useState<string>("");
@@ -33,7 +34,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ onClose, onSubmitS
       setSuccess(true);
       setTimeout(() => {
         if (onSubmitSuccess) onSubmitSuccess();
-        onClose();
+        onLogout();
       }, 2000);
     } catch (err: any) {
       setErrorMsg(err.message || "Something went wrong. Please try again.");
@@ -42,15 +43,13 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ onClose, onSubmitS
     }
   };
 
-  const handleSnooze = () => {
-    // Snooze popup for 3 days
-    const snoozeTime = Date.now() + 3 * 24 * 60 * 60 * 1000;
-    localStorage.setItem("feedback_snoozed_until", snoozeTime.toString());
-    onClose();
+  const handleOptOut = () => {
+    localStorage.setItem("feedback_opt_out", "true");
+    onLogout();
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[100000] overflow-y-auto flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200 relative">
         {/* Decorative background glow */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -148,18 +147,11 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ onClose, onSubmitS
               )}
 
               {/* Actions */}
-              <div className="flex flex-col sm:flex-row gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={handleSnooze}
-                  className="w-full sm:w-1/2 order-2 sm:order-1 px-4 py-2.5 border border-slate-200 text-slate-600 font-semibold text-sm rounded-xl hover:bg-slate-50 transition-colors cursor-pointer text-center"
-                >
-                  Remind Me Later
-                </button>
+              <div className="space-y-3 pt-2">
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full sm:w-1/2 order-1 sm:order-2 px-4 py-2.5 bg-primary hover:bg-primary-hover text-white font-semibold text-sm rounded-xl transition-all shadow-md disabled:opacity-50 flex items-center justify-center cursor-pointer"
+                  className="w-full px-4 py-2.5 bg-primary hover:bg-primary-hover text-white font-semibold text-sm rounded-xl transition-all shadow-md disabled:opacity-50 flex items-center justify-center cursor-pointer font-bold"
                 >
                   {isSubmitting ? (
                     <>
@@ -173,6 +165,23 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ onClose, onSubmitS
                     "Submit Feedback"
                   )}
                 </button>
+
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <button
+                    type="button"
+                    onClick={onLogout}
+                    className="w-full sm:w-1/2 px-4 py-2 border border-slate-200 text-slate-655 dark:text-slate-400 font-semibold text-xs rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer text-center"
+                  >
+                    Skip for Now
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleOptOut}
+                    className="w-full sm:w-1/2 px-4 py-2 border border-rose-200 text-rose-600 dark:text-rose-400 font-semibold text-xs rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-colors cursor-pointer text-center"
+                  >
+                    Don't Show Again
+                  </button>
+                </div>
               </div>
             </form>
           )}

@@ -44,7 +44,7 @@ export default function DashboardScreen() {
   const [showFeedback, setShowFeedback] = useState(false);
   const [showTour, setShowTour] = useState(false);
 
-  // Check tour & feedback popup on mount
+  // Check tour on mount
   useEffect(() => {
     if (!user?.id) return;
 
@@ -60,27 +60,33 @@ export default function DashboardScreen() {
       }
     };
     checkTour();
-
-    // Check feedback eligibility after a short delay
-    const timer = setTimeout(async () => {
-      try {
-        // Check local snooze
-        const snoozedUntil = await SecureStore.getItemAsync('feedback_snoozed_until');
-        if (snoozedUntil && Date.now() < parseInt(snoozedUntil, 10)) {
-          return;
-        }
-
-        const status = await feedbackService.getFeedbackStatus();
-        if (status.showPopup) {
-          setShowFeedback(true);
-        }
-      } catch (err) {
-        console.log('Failed to check feedback eligibility:', err);
-      }
-    }, 2500);
-
-    return () => clearTimeout(timer);
   }, [user?.id]);
+
+  const handleLogoutPress = async () => {
+    if (!user?.id) {
+      signOut();
+      return;
+    }
+
+    try {
+      // Check if user has opted out of feedback
+      const feedbackOptOut = await SecureStore.getItemAsync('feedback_opt_out');
+      if (feedbackOptOut === 'true') {
+        signOut();
+        return;
+      }
+
+      const status = await feedbackService.getFeedbackStatus();
+      if (status.showPopup) {
+        setShowFeedback(true);
+      } else {
+        signOut();
+      }
+    } catch (err) {
+      console.log('Failed to check feedback status on logout, signing out', err);
+      signOut();
+    }
+  };
 
   // Mock statistics & history
   const [stats] = useState({
@@ -128,7 +134,7 @@ export default function DashboardScreen() {
               <Ionicons name="help-circle-outline" size={20} color="#10b981" />
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={signOut}
+              onPress={handleLogoutPress}
               className="w-10 h-10 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full items-center justify-center shadow-sm"
             >
               <Ionicons name="log-out-outline" size={20} color="#f43f5e" />
@@ -228,6 +234,10 @@ export default function DashboardScreen() {
           <FeedbackModal
             visible={showFeedback}
             onClose={() => setShowFeedback(false)}
+            onLogout={() => {
+              setShowFeedback(false);
+              signOut();
+            }}
           />
           <WalkthroughTour
             userId={String(user.id)}

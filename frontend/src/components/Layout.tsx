@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
@@ -16,33 +16,37 @@ export const Layout: React.FC = () => {
   const userStr = localStorage.getItem("user");
   const user = userStr ? JSON.parse(userStr) : null;
 
-  useEffect(() => {
-    if (!user) return;
+  const performLogout = () => {
+    localStorage.removeItem("user");
+    setShowFeedbackModal(false);
+    navigate("/");
+  };
 
-    // Check if feedback is snoozed
-    const snoozedUntil = localStorage.getItem("feedback_snoozed_until");
-    if (snoozedUntil && Date.now() < parseInt(snoozedUntil, 10)) {
+  const handleLogoutRequest = async () => {
+    if (!user) {
+      performLogout();
       return;
     }
 
-    const checkFeedbackStatus = async () => {
-      try {
-        const status = await feedbackService.getFeedbackStatus();
-        if (status.showPopup) {
-          setShowFeedbackModal(true);
-        }
-      } catch (err) {
-        console.error("Failed to check feedback status", err);
+    // Check if user has opted out of feedback
+    const feedbackOptOut = localStorage.getItem("feedback_opt_out");
+    if (feedbackOptOut === "true") {
+      performLogout();
+      return;
+    }
+
+    try {
+      const status = await feedbackService.getFeedbackStatus();
+      if (status.showPopup) {
+        setShowFeedbackModal(true);
+      } else {
+        performLogout();
       }
-    };
-
-    // Delay check for better UX after layout settles
-    const timer = setTimeout(() => {
-      checkFeedbackStatus();
-    }, 2500);
-
-    return () => clearTimeout(timer);
-  }, [userStr]);
+    } catch (err) {
+      console.error("Failed to check feedback status, logging out", err);
+      performLogout();
+    }
+  };
 
   // Hide the back button on primary dashboards to avoid redundant navigation
   const isDashboard = ["/dashboard", "/recruiter-dashboard", "/company-dashboard"].includes(location.pathname);
@@ -67,7 +71,10 @@ export const Layout: React.FC = () => {
       <Header onMenuClick={() => setMobileMenuOpen(true)} />
       {user && <WalkthroughTour />}
       {showFeedbackModal && (
-        <FeedbackModal onClose={() => setShowFeedbackModal(false)} />
+        <FeedbackModal
+          onClose={() => setShowFeedbackModal(false)}
+          onLogout={performLogout}
+        />
       )}
 
       {/* Mobile Drawer Overlay */}
@@ -93,7 +100,11 @@ export const Layout: React.FC = () => {
               </button>
             </div>
             <div className="flex-1 h-full overflow-y-auto mt-4">
-              <DashboardSidebar isMobile onClose={() => setMobileMenuOpen(false)} />
+              <DashboardSidebar
+                isMobile
+                onClose={() => setMobileMenuOpen(false)}
+                onLogout={handleLogoutRequest}
+              />
             </div>
           </div>
         </div>
@@ -104,7 +115,7 @@ export const Layout: React.FC = () => {
         {/* Desktop Persistent Sidebar (hidden on mobile) */}
         {user && (
           <div className="hidden lg:block sticky top-16 h-[calc(100vh-64px)] shrink-0">
-            <DashboardSidebar />
+            <DashboardSidebar onLogout={handleLogoutRequest} />
           </div>
         )}
 

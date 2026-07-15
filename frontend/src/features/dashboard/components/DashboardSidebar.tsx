@@ -78,9 +78,10 @@ const LogoutIcon: React.FC<{ className?: string }> = ({ className }) => (
 interface DashboardSidebarProps {
   isMobile?: boolean;
   onClose?: () => void;
+  onLogout?: () => void;
 }
 
-export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isMobile = false, onClose }) => {
+export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isMobile = false, onClose, onLogout }) => {
   const navigate = useNavigate();
   const [isMinimized, setIsMinimized] = useState(true);
   const userStr = localStorage.getItem("user");
@@ -88,9 +89,13 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isMobile = f
   const role = user?.role || "CANDIDATE";
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    if (onClose) onClose();
-    navigate("/");
+    if (onLogout) {
+      onLogout();
+    } else {
+      localStorage.removeItem("user");
+      if (onClose) onClose();
+      navigate("/");
+    }
   };
 
   const getOverviewPath = () => {

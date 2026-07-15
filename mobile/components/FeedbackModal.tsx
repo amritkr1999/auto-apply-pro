@@ -17,10 +17,11 @@ import * as SecureStore from 'expo-secure-store';
 interface FeedbackModalProps {
   visible: boolean;
   onClose: () => void;
+  onLogout: () => void;
   onSubmitSuccess?: () => void;
 }
 
-export default function FeedbackModal({ visible, onClose, onSubmitSuccess }: FeedbackModalProps) {
+export default function FeedbackModal({ visible, onClose, onLogout, onSubmitSuccess }: FeedbackModalProps) {
   const [rating, setRating] = useState<number>(0);
   const [comment, setComment] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -45,7 +46,7 @@ export default function FeedbackModal({ visible, onClose, onSubmitSuccess }: Fee
       setSuccess(true);
       setTimeout(() => {
         if (onSubmitSuccess) onSubmitSuccess();
-        onClose();
+        onLogout();
         // Reset state
         setRating(0);
         setComment('');
@@ -59,15 +60,17 @@ export default function FeedbackModal({ visible, onClose, onSubmitSuccess }: Fee
     }
   };
 
-  const handleSnooze = async () => {
-    // Snooze popup for 3 days
-    const snoozeTime = Date.now() + 3 * 24 * 60 * 60 * 1000;
+  const handleSkip = () => {
+    onLogout();
+  };
+
+  const handleOptOut = async () => {
     try {
-      await SecureStore.setItemAsync('feedback_snoozed_until', snoozeTime.toString());
+      await SecureStore.setItemAsync('feedback_opt_out', 'true');
     } catch (e) {
-      console.log('Error setting snooze in SecureStore:', e);
+      console.log('Error setting feedback_opt_out in SecureStore:', e);
     }
-    onClose();
+    onLogout();
   };
 
   return (
@@ -168,18 +171,11 @@ export default function FeedbackModal({ visible, onClose, onSubmitSuccess }: Fee
                     ) : null}
 
                     {/* Buttons */}
-                    <View className="flex-row gap-3 mt-4">
-                      <TouchableOpacity
-                        onPress={handleSnooze}
-                        className="flex-1 border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 rounded-2xl py-3 items-center active:bg-slate-200 dark:active:bg-slate-900"
-                      >
-                        <Text className="text-slate-650 dark:text-slate-400 font-semibold text-sm">Maybe Later</Text>
-                      </TouchableOpacity>
-
+                    <View className="gap-3 mt-4">
                       <TouchableOpacity
                         onPress={handleSubmit}
                         disabled={isSubmitting}
-                        className="flex-1 bg-emerald-500 rounded-2xl py-3 items-center active:opacity-90 disabled:opacity-50"
+                        className="w-full bg-emerald-500 rounded-2xl py-3.5 items-center active:opacity-90 disabled:opacity-50"
                       >
                         {isSubmitting ? (
                           <ActivityIndicator color="#fff" size="small" />
@@ -187,6 +183,22 @@ export default function FeedbackModal({ visible, onClose, onSubmitSuccess }: Fee
                           <Text className="text-white font-bold text-sm">Submit Feedback</Text>
                         )}
                       </TouchableOpacity>
+
+                      <View className="flex-row gap-3">
+                        <TouchableOpacity
+                          onPress={handleSkip}
+                          className="flex-1 border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 rounded-2xl py-2.5 items-center active:bg-slate-200 dark:active:bg-slate-900"
+                        >
+                          <Text className="text-slate-650 dark:text-slate-400 font-semibold text-xs text-center">Skip for Now</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                          onPress={handleOptOut}
+                          className="flex-1 border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/20 rounded-2xl py-2.5 items-center active:bg-rose-100 dark:active:bg-rose-900/40"
+                        >
+                          <Text className="text-rose-600 dark:text-rose-400 font-semibold text-xs text-center">Don't Show Again</Text>
+                        </TouchableOpacity>
+                      </View>
                     </View>
                   </View>
                 )}
