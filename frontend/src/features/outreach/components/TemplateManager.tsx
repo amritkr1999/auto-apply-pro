@@ -21,8 +21,7 @@ export const TemplateManager: React.FC = () => {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [sortBy, setSortBy] = useState("");
-  const [pendingDraft, setPendingDraft] = useState<any | null>(null);
-  const [showDraftPrompt, setShowDraftPrompt] = useState(false);
+  const [pageDraft, setPageDraft] = useState<any | null>(null);
   const [hasCheckedDraft, setHasCheckedDraft] = useState(false);
 
   const userStr = localStorage.getItem("user");
@@ -196,26 +195,71 @@ export const TemplateManager: React.FC = () => {
     }
   }, [isEditMode, activeTemplate, hasCheckedDraft, name, subject, intro, skillsTemplate, body, signOff, currentUserId]);
 
-  const checkAndSetDraft = (targetTemplateId: string): boolean => {
+  // Load page draft on mount and when modal opens/closes
+  useEffect(() => {
+    if (!activeTemplate) {
+      try {
+        const draftKey = `auto_apply_pro_template_draft_${currentUserId}`;
+        const draftStr = localStorage.getItem(draftKey);
+        if (draftStr) {
+          setPageDraft(JSON.parse(draftStr));
+        } else {
+          setPageDraft(null);
+        }
+      } catch (e) {
+        console.warn("Failed to check template draft:", e);
+      }
+    }
+  }, [activeTemplate, currentUserId]);
+
+  const handleResumeDraftFromPage = (draft: any) => {
+    if (draft.templateId) {
+      const matched = templates.find(t => t.id === draft.templateId);
+      if (matched) {
+        setActiveTemplate(matched);
+      } else {
+        setActiveTemplate({
+          id: draft.templateId,
+          name: draft.name || "",
+          subject: draft.subject || "",
+          intro: draft.intro || "",
+          skillsTemplate: draft.skillsTemplate || "",
+          body: draft.body || "",
+          signOff: draft.signOff || ""
+        });
+      }
+    } else {
+      setActiveTemplate({
+        id: "",
+        name: "",
+        subject: "",
+        intro: "",
+        skillsTemplate: "",
+        body: "",
+        signOff: ""
+      });
+    }
+
+    setName(draft.name || "");
+    setSubject(draft.subject || "");
+    setIntro(draft.intro || "");
+    setSkillsTemplate(draft.skillsTemplate || "");
+    setBody(draft.body || "");
+    setSignOff(draft.signOff || "");
+
+    setIsEditMode(true);
+    setHasCheckedDraft(true);
+    setPageDraft(null);
+  };
+
+  const handleDiscardDraftFromPage = () => {
     try {
       const draftKey = `auto_apply_pro_template_draft_${currentUserId}`;
-      const draftStr = localStorage.getItem(draftKey);
-      if (draftStr) {
-        const draft = JSON.parse(draftStr);
-        if (draft.templateId === targetTemplateId) {
-          setPendingDraft(draft);
-          setShowDraftPrompt(true);
-          setHasCheckedDraft(false);
-          return true;
-        }
-      }
+      localStorage.removeItem(draftKey);
     } catch (e) {
-      console.warn("Failed to check template draft:", e);
+      console.warn(e);
     }
-    setHasCheckedDraft(true);
-    setShowDraftPrompt(false);
-    setPendingDraft(null);
-    return false;
+    setPageDraft(null);
   };
 
   const handleCreateNew = () => {
@@ -235,9 +279,9 @@ export const TemplateManager: React.FC = () => {
     setBody("");
     setSignOff("");
     setIsEditMode(true);
+    setHasCheckedDraft(true);
     setMessage("");
     setError("");
-    checkAndSetDraft("");
   };
 
   const handleDelete = async (id: string): Promise<boolean> => {
@@ -279,7 +323,6 @@ export const TemplateManager: React.FC = () => {
         localStorage.removeItem(draftKey);
       } catch (e) {}
       setHasCheckedDraft(false);
-      setPendingDraft(null);
       setActiveTemplate(null);
       setIsEditMode(false);
       fetchTemplates();
@@ -448,6 +491,36 @@ export const TemplateManager: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* UNSAVED DRAFT ALERT SECTION */}
+      {!activeTemplate && pageDraft && (
+        <div className="mb-8 bg-amber-50/60 dark:bg-amber-950/25 border border-amber-200 dark:border-amber-900/60 p-5 rounded-card shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-300">
+          <div className="flex items-start gap-3">
+            <span className="text-xl mt-0.5">📝</span>
+            <div>
+              <h4 className="text-sm font-bold text-amber-900 dark:text-amber-300">Unsaved Template Draft Detected</h4>
+              <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
+                You have an unsaved draft for the template <span className="font-semibold text-amber-950 dark:text-amber-200">"{pageDraft.name || "New Template"}"</span> last updated on{" "}
+                <span className="font-mono bg-amber-100 dark:bg-amber-950/40 px-1.5 py-0.5 rounded text-amber-950 dark:text-amber-200">{new Date(pageDraft.updatedAt).toLocaleString()}</span>.
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2 shrink-0">
+            <button
+              onClick={() => handleResumeDraftFromPage(pageDraft)}
+              className="px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-btn text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5"
+            >
+              <span>✏️</span> Resume Editing
+            </button>
+            <button
+              onClick={handleDiscardDraftFromPage}
+              className="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-btn text-xs font-semibold transition-all"
+            >
+              Discard
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* CURRENTLY USING TEMPLATE SECTION */}
       {!activeTemplate && (
@@ -628,50 +701,6 @@ export const TemplateManager: React.FC = () => {
                   )}
                 </div>
 
-                {showDraftPrompt && pendingDraft && (
-                  <div className="bg-amber-50 border border-amber-250 p-4 rounded-card text-xs text-amber-900 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
-                    <div>
-                      <span className="font-bold">Unsaved draft detected!</span> We found an unsaved session for this template from{" "}
-                      <span className="font-mono bg-amber-100 px-1 py-0.5 rounded font-semibold text-amber-950">
-                        {new Date(pendingDraft.updatedAt).toLocaleString()}
-                      </span>
-                      . Would you like to resume editing?
-                    </div>
-                    <div className="flex gap-2 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setName(pendingDraft.name || "");
-                          setSubject(pendingDraft.subject || "");
-                          setIntro(pendingDraft.intro || "");
-                          setSkillsTemplate(pendingDraft.skillsTemplate || "");
-                          setBody(pendingDraft.body || "");
-                          setSignOff(pendingDraft.signOff || "");
-                          setHasCheckedDraft(true);
-                          setShowDraftPrompt(false);
-                        }}
-                        className="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded font-bold shadow-sm transition-all"
-                      >
-                        Resume Draft
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          try {
-                            const draftKey = `auto_apply_pro_template_draft_${currentUserId}`;
-                            localStorage.removeItem(draftKey);
-                          } catch (e) {}
-                          setHasCheckedDraft(true);
-                          setShowDraftPrompt(false);
-                          setPendingDraft(null);
-                        }}
-                        className="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded font-bold transition-all"
-                      >
-                        Start Fresh
-                      </button>
-                    </div>
-                  </div>
-                )}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <form onSubmit={handleSave} className="flex flex-col gap-4">
                     <div className="flex flex-col">
@@ -785,8 +814,6 @@ export const TemplateManager: React.FC = () => {
                             setActiveTemplate(null);
                           }
                           setHasCheckedDraft(false);
-                          setShowDraftPrompt(false);
-                          setPendingDraft(null);
                         }}
                         className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-500 rounded-btn text-xs font-semibold transition-all"
                       >
@@ -971,7 +998,7 @@ export const TemplateManager: React.FC = () => {
                           setBody(activeTemplate.body);
                           setSignOff(activeTemplate.signOff || "");
                           setIsEditMode(true);
-                          checkAndSetDraft(activeTemplate.id);
+                          setHasCheckedDraft(true);
                         }}
                         className="px-3 py-1.5 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 text-indigo-650 rounded text-xs font-semibold transition-all"
                       >
