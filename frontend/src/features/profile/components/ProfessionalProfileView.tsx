@@ -74,6 +74,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
   const [skipWeekends, setSkipWeekends] = useState(true);
   const [marketingEmailsEnabled, setMarketingEmailsEnabled] = useState(true);
   const [aiPersonalizationEnabled, setAiPersonalizationEnabled] = useState(false);
+  const [outreachSkillsFormat, setOutreachSkillsFormat] = useState("COMMA");
   const [isPremium, setIsPremium] = useState(false);
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [savingSettings, setSavingSettings] = useState(false);
@@ -305,6 +306,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
         setSkipWeekends(data.skipWeekends !== false);
         setMarketingEmailsEnabled(data.marketingEmailsEnabled !== false);
         setAiPersonalizationEnabled(!!data.aiPersonalizationEnabled);
+        setOutreachSkillsFormat(data.outreachSkillsFormat || "COMMA");
         
         // Populate campaign settings
         setHrOutreachCampaignEnabled(!!data.hrOutreachCampaignEnabled);
@@ -343,6 +345,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
         skipWeekends,
         marketingEmailsEnabled,
         aiPersonalizationEnabled,
+        outreachSkillsFormat,
         hrOutreachCampaignEnabled,
         hrOutreachTargetRole,
         hrOutreachTemplateId,
@@ -1536,6 +1539,25 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
                           </span>
                         )}
                       </label>
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-100 mt-2">
+                      <label className="block text-xs font-bold text-slate-600 mb-1.5">
+                        Skills Formatting Style in Emails
+                      </label>
+                      <select
+                        value={outreachSkillsFormat}
+                        onChange={(e) => setOutreachSkillsFormat(e.target.value)}
+                        className="w-full px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white cursor-pointer"
+                      >
+                        <option value="COMMA">Comma Separated List (e.g., React, Java)</option>
+                        <option value="BADGES">Visual Tag Pills (Modern HTML Badges)</option>
+                        <option value="CALLOUT">Bordered Accent Callout Box</option>
+                        <option value="BULLET">Line-by-line Bullet Points</option>
+                      </select>
+                      <span className="block text-[10px] text-slate-400 font-medium mt-1">
+                        Choose how your skills are presented to recruiters when parsed inside templates or draft emails.
+                      </span>
                     </div>
                   </div>
 

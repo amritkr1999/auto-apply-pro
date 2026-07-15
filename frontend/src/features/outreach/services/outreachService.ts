@@ -26,6 +26,7 @@ export interface EmailTemplate {
   intro?: string;
   skillsTemplate?: string;
   body: string;
+  signOff?: string;
   isSystemTemplate?: boolean;
   isPublic?: boolean;
   creatorId?: number;
@@ -369,6 +370,7 @@ export const outreachService = {
     hrOutreachSourceTable: string;
     marketingEmailsEnabled: boolean;
     aiPersonalizationEnabled: boolean;
+    outreachSkillsFormat: string;
   }> {
     try {
       const response = await fetch(`${API_BASE}/v1/outreach/settings?userId=${userId}`, {
@@ -399,7 +401,8 @@ export const outreachService = {
       hrOutreachTemplateId: "default-1",
       hrOutreachSourceTable: "TESTING",
       marketingEmailsEnabled: true,
-      aiPersonalizationEnabled: false
+      aiPersonalizationEnabled: false,
+      outreachSkillsFormat: "COMMA"
     };
   },
 
@@ -418,6 +421,7 @@ export const outreachService = {
     hrOutreachSourceTable?: string;
     marketingEmailsEnabled?: boolean;
     aiPersonalizationEnabled?: boolean;
+    outreachSkillsFormat?: string;
   }): Promise<{ message: string }> {
     try {
       const response = await fetch(`${API_BASE}/v1/outreach/settings?userId=${userId}`, {

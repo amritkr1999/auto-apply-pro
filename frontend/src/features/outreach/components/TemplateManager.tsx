@@ -26,6 +26,8 @@ export const TemplateManager: React.FC = () => {
   const [hasCheckedDraft, setHasCheckedDraft] = useState(false);
 
   const [profileSkills, setProfileSkills] = useState<string[]>([]);
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [outreachSkillsFormat, setOutreachSkillsFormat] = useState("COMMA");
 
   const userStr = localStorage.getItem("user");
   const currentUser = userStr ? JSON.parse(userStr) : null;
@@ -225,8 +227,22 @@ export const TemplateManager: React.FC = () => {
           }
         })
         .catch(err => console.warn("Failed to load profile skills for mockup:", err));
+
+      outreachService.getOutreachSettings(currentUserId)
+        .then(settings => {
+          if (settings && settings.outreachSkillsFormat) {
+            setOutreachSkillsFormat(settings.outreachSkillsFormat);
+          }
+        })
+        .catch(err => console.warn("Failed to load outreach settings for format preview:", err));
     }
   }, [currentUserId]);
+
+  useEffect(() => {
+    if (profileSkills.length > 0) {
+      setSelectedSkills(profileSkills);
+    }
+  }, [profileSkills]);
 
   const handleResumeDraftFromPage = (draft: any) => {
     if (draft.templateId) {
@@ -381,39 +397,77 @@ export const TemplateManager: React.FC = () => {
   };
 
   const handleSelectSkillPill = (skillName: string) => {
-    const textarea = document.getElementById("template-skills-textarea") as HTMLTextAreaElement;
-    if (!textarea) {
-      setSkillsTemplate(prev => {
-        const prefix = prev && !prev.endsWith(" ") && !prev.endsWith(",") && !prev.endsWith("\n") ? ", " : "";
-        return prev + prefix + skillName;
-      });
-      return;
-    }
-    const start = textarea.selectionStart ?? 0;
-    const end = textarea.selectionEnd ?? 0;
-    const text = textarea.value;
+    const hasSkillsTag = skillsTemplate.toLowerCase().includes("{{skills}}");
     
-    let prefix = "";
-    if (start > 0) {
-      const beforeChar = text.charAt(start - 1);
-      if (beforeChar !== " " && beforeChar !== "," && beforeChar !== "\n") {
-        prefix = ", ";
-      } else if (beforeChar === ",") {
-        prefix = " ";
+    if (hasSkillsTag) {
+      setSelectedSkills(prev => 
+        prev.includes(skillName) 
+          ? prev.filter(s => s !== skillName) 
+          : [...prev, skillName]
+      );
+    } else {
+      const textarea = document.getElementById("template-skills-textarea") as HTMLTextAreaElement;
+      if (!textarea) {
+        setSkillsTemplate(prev => {
+          const suffix = prev && !prev.endsWith(" ") ? " " : "";
+          return prev + suffix + "{{skills}}";
+        });
+        setSelectedSkills([skillName]);
+        return;
       }
+      
+      const start = textarea.selectionStart ?? 0;
+      const end = textarea.selectionEnd ?? 0;
+      const text = textarea.value;
+      
+      let prefix = "";
+      if (start > 0) {
+        const beforeChar = text.charAt(start - 1);
+        if (beforeChar !== " " && beforeChar !== "\n") {
+          prefix = " ";
+        }
+      }
+      
+      const insertText = prefix + "{{skills}}";
+      const before = text.substring(0, start);
+      const after = text.substring(end, text.length);
+      const newText = before + insertText + after;
+      
+      setSkillsTemplate(newText);
+      setSelectedSkills([skillName]);
+      
+      setTimeout(() => {
+        textarea.focus();
+        textarea.selectionStart = textarea.selectionEnd = start + insertText.length;
+      }, 0);
+    }
+  };
+
+  const formatSkillsForPreview = (skills: string[], format: string) => {
+    const skillsToUse = skills && skills.length > 0 ? skills : ["React", "TypeScript", "Node.js", "Java"];
+    if (format == null) {
+      format = "COMMA";
     }
     
-    const insertText = prefix + skillName;
-    const before = text.substring(0, start);
-    const after = text.substring(end, text.length);
-    const newText = before + insertText + after;
-    
-    setSkillsTemplate(newText);
-    
-    setTimeout(() => {
-      textarea.focus();
-      textarea.selectionStart = textarea.selectionEnd = start + insertText.length;
-    }, 0);
+    switch (format.toUpperCase()) {
+      case "BADGES":
+        return skillsToUse.map(skill => 
+          `<span style="display: inline-block; background-color: #f3f4f6; color: #1f2937; border: 1px solid #e5e7eb; padding: 3px 10px; margin: 2px 4px; border-radius: 9999px; font-size: 12px; font-weight: 600; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${skill}</span>`
+        ).join("");
+        
+      case "CALLOUT":
+        return `<div style="margin: 14px 0; padding: 12px 16px; border-left: 4px solid #4f46e5; background-color: #f9fafb; border-radius: 0 8px 8px 0; font-family: sans-serif;">` +
+               `<strong style="color: #4f46e5; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Core Expertise:</strong>` +
+               `<span style="color: #374151; font-size: 13px; margin-left: 6px;">${skillsToUse.join(" • ")}</span>` +
+               `</div>`;
+               
+      case "BULLET":
+        return `Core Technologies:\n` + skillsToUse.map(s => `• ${s}`).join("\n");
+        
+      case "COMMA":
+      default:
+        return skillsToUse.join(", ");
+    }
   };
 
   const customTemplatesCount = templates.filter(t => !t.id.startsWith("default-")).length;
@@ -833,7 +887,10 @@ export const TemplateManager: React.FC = () => {
                                 <span className="text-[9px] text-slate-400 italic">No skills in profile. Please add them on your profile page.</span>
                               ) : (
                                 profileSkills.map(skill => {
-                                  const isSelected = skillsTemplate.toLowerCase().includes(skill.toLowerCase());
+                                  const hasSkillsTag = skillsTemplate.toLowerCase().includes("{{skills}}");
+                                  const isSelected = hasSkillsTag 
+                                    ? selectedSkills.includes(skill)
+                                    : skillsTemplate.toLowerCase().includes(skill.toLowerCase());
                                   return (
                                     <button
                                       type="button"
@@ -851,6 +908,40 @@ export const TemplateManager: React.FC = () => {
                                 })
                               )}
                             </div>
+                            
+                            <div className="mt-2 pt-2 border-t border-slate-200/60 flex items-center justify-between gap-2">
+                              <label className="text-[9px] font-bold text-slate-400 select-none">Skills Presentation Style:</label>
+                              <select
+                                value={outreachSkillsFormat}
+                                onChange={async (e) => {
+                                  const newVal = e.target.value;
+                                  setOutreachSkillsFormat(newVal);
+                                  if (currentUserId) {
+                                    try {
+                                      const settings = await outreachService.getOutreachSettings(currentUserId);
+                                      await outreachService.saveOutreachSettings(currentUserId, {
+                                        ...settings,
+                                        outreachSkillsFormat: newVal
+                                      });
+                                    } catch (err) {
+                                      console.warn("Failed to persist template editor format change:", err);
+                                    }
+                                  }
+                                }}
+                                className="px-2 py-1 bg-white border border-slate-200 rounded-lg text-[9px] font-semibold text-slate-600 focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer max-w-[150px]"
+                              >
+                                <option value="COMMA">Comma Separated</option>
+                                <option value="BADGES">Visual HTML Badges</option>
+                                <option value="CALLOUT">Accent Callout Box</option>
+                                <option value="BULLET">Bulleted List</option>
+                              </select>
+                            </div>
+                            
+                            {!skillsTemplate.toLowerCase().includes("{{skills}}") && (
+                              <div className="mt-1.5 p-2 bg-amber-50 border border-amber-100 rounded-lg text-[9px] text-amber-700 leading-normal font-sans">
+                                💡 <strong>Tip:</strong> Style formats apply to the <code>{"{{skills}}"}</code> placeholder tag. Make sure <code>{"{{skills}}"}</code> is present in your skills template textarea above to render the selected option style in the preview.
+                              </div>
+                            )}
                           </div>
                         </div>
 
@@ -918,29 +1009,32 @@ export const TemplateManager: React.FC = () => {
                     <div className="text-[11px] text-slate-500 font-semibold mb-2 break-words">
                       Subject: <span className="text-slate-700 font-mono">{subject.replace("{{jobRole}}", "Software Architect").replace("{{companyName}}", "ScaleFintech")}</span>
                     </div>
-                    <div className="flex-1 bg-white border border-slate-200 rounded p-4 font-mono text-[11px] leading-relaxed text-slate-650 overflow-y-auto whitespace-pre-wrap select-none max-h-[50vh]">
-                      {[
-                        intro || "Dear {{recruiterName}},",
-                        skillsTemplate || "{{HOOK}}",
-                        body || "{{EXPERIENCE_HIGHLIGHT}}",
-                        signOff || "{{CLOSING}}"
-                      ]
-                        .map(seg => seg
-                          .replace("{{recruiterName}}", "Hiring Team")
-                          .replace("{{jobRole}}", "Software Architect")
-                          .replace("{{companyName}}", "ScaleFintech")
-                          .replace("{{skills}}", profileSkills.join(", ") || "{{skills}}")
-                          .replace("{{experienceYears}}", "5")
-                          .replace("{{candidateName}}", currentUser?.name || "Jane Doe")
-                          .replace("{{candidateMobile}}", currentUser?.mobile || "+1 (555) 0199")
-                          .replace("{{candidateEmail}}", currentUser?.email || "jane.doe@example.com")
-                          .replace("{{HOOK}}", "I am writing to express my interest in the Software Architect position...")
-                          .replace("{{EXPERIENCE_HIGHLIGHT}}", "Throughout my career, notably during my time as a Developer...")
-                          .replace("{{CLOSING}}", `Regards,\n${currentUser?.name || "Jane Doe"}`)
-                        )
-                        .join("\n\n")
-                      }
-                    </div>
+                    <div 
+                      className="flex-1 bg-white border border-slate-200 rounded p-4 font-mono text-[11px] leading-relaxed text-slate-650 overflow-y-auto whitespace-pre-wrap select-none max-h-[50vh]"
+                      dangerouslySetInnerHTML={{
+                        __html: [
+                          intro || "Dear {{recruiterName}},",
+                          skillsTemplate || "{{HOOK}}",
+                          body || "{{EXPERIENCE_HIGHLIGHT}}",
+                          signOff || "{{CLOSING}}"
+                        ]
+                          .map(seg => seg
+                            .replace(/\{\{recruiterName\}\}/g, "Hiring Team")
+                            .replace(/\{\{jobRole\}\}/g, "Software Architect")
+                            .replace(/\{\{companyName\}\}/g, "ScaleFintech")
+                            .replace(/\{\{skills\}\}/g, formatSkillsForPreview(selectedSkills, outreachSkillsFormat))
+                            .replace(/\{\{experienceYears\}\}/g, "5")
+                            .replace(/\{\{candidateName\}\}/g, currentUser?.name || "Jane Doe")
+                            .replace(/\{\{candidateMobile\}\}/g, currentUser?.mobile || "+1 (555) 0199")
+                            .replace(/\{\{candidateEmail\}\}/g, currentUser?.email || "jane.doe@example.com")
+                            .replace(/\{\{HOOK\}\}/g, "I am writing to express my interest in the Software Architect position...")
+                            .replace(/\{\{EXPERIENCE_HIGHLIGHT\}\}/g, "Throughout my career, notably during my time as a Developer...")
+                            .replace(/\{\{CLOSING\}\}/g, `Regards,\n${currentUser?.name || "Jane Doe"}`)
+                          )
+                          .join("\n\n")
+                          .replace(/\n/g, "<br />")
+                      }}
+                    />
                   </div>
                 </div>
               </div>

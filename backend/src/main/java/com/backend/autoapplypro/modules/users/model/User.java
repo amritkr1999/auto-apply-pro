@@ -119,6 +119,10 @@ public class User {
     private String hrOutreachSourceTable = "TESTING";
 
     @Builder.Default
+    @Column(name = "outreach_skills_format")
+    private String outreachSkillsFormat = "COMMA";
+
+    @Builder.Default
     @Column(name = "login_streak")
     private Integer loginStreak = 0;
 
@@ -201,6 +205,9 @@ public class User {
         }
         if (hrOutreachSourceTable == null) {
             hrOutreachSourceTable = "TESTING";
+        }
+        if (outreachSkillsFormat == null) {
+            outreachSkillsFormat = "COMMA";
         }
         if (loginStreak == null) {
             loginStreak = 0;

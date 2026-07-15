@@ -27,4 +27,5 @@ public class OutreachSettingsDto {
     private Boolean marketingEmailsEnabled;
 
     private Boolean aiPersonalizationEnabled;
+    private String outreachSkillsFormat;
 }

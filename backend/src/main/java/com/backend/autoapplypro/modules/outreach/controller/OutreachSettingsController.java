@@ -44,6 +44,7 @@ public class OutreachSettingsController {
                 .hrOutreachSourceTable(user.getHrOutreachSourceTable() != null ? user.getHrOutreachSourceTable() : "TESTING")
                 .marketingEmailsEnabled(user.getMarketingEmailsEnabled() != null ? user.getMarketingEmailsEnabled() : true)
                 .aiPersonalizationEnabled(user.getAiPersonalizationEnabled() != null ? user.getAiPersonalizationEnabled() : false)
+                .outreachSkillsFormat(user.getOutreachSkillsFormat() != null ? user.getOutreachSkillsFormat() : "COMMA")
                 .build();
 
         return ResponseEntity.ok(dto);
@@ -106,6 +107,10 @@ public class OutreachSettingsController {
 
         if (dto.getAiPersonalizationEnabled() != null) {
             user.setAiPersonalizationEnabled(dto.getAiPersonalizationEnabled());
+        }
+
+        if (dto.getOutreachSkillsFormat() != null) {
+            user.setOutreachSkillsFormat(dto.getOutreachSkillsFormat());
         }
 
         // Campaign settings logic

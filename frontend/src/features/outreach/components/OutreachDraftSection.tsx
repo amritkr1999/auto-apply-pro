@@ -3,6 +3,8 @@ import { outreachService, type EmailTemplate } from "../services/outreachService
 import { GmailComposeModal } from "./GmailComposeModal";
 import Button from "../../../components/ui/Button";
 import Input from "../../../components/ui/Input";
+import { profileService } from "../../profile/services/profileService";
+import "../outreach.css";
 
 export const OutreachDraftSection: React.FC = () => {
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
@@ -23,6 +25,9 @@ export const OutreachDraftSection: React.FC = () => {
   const [rawSubject, setRawSubject] = useState("");
   const [rawBody, setRawBody] = useState("");
   const [activeTextarea, setActiveTextarea] = useState<"subject" | "body">("body");
+
+  const [profileSkills, setProfileSkills] = useState<string[]>([]);
+  const [outreachSkillsFormat, setOutreachSkillsFormat] = useState("COMMA");
 
   // Preview / Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -50,7 +55,25 @@ export const OutreachDraftSection: React.FC = () => {
       }
     };
     loadTemplates();
-  }, []);
+
+    if (currentUser?.id) {
+      profileService.getCandidateProfile(currentUser.id)
+        .then(profile => {
+          if (profile && profile.skills) {
+            setProfileSkills(profile.skills);
+          }
+        })
+        .catch(err => console.warn("Failed to load profile skills for draft composer:", err));
+
+      outreachService.getOutreachSettings(currentUser.id)
+        .then(settings => {
+          if (settings && settings.outreachSkillsFormat) {
+            setOutreachSkillsFormat(settings.outreachSkillsFormat);
+          }
+        })
+        .catch(err => console.warn("Failed to load outreach settings for draft composer:", err));
+    }
+  }, [currentUser?.id]);
 
   // Sync subject and body when selected template changes
   const handleTemplateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -88,6 +111,30 @@ export const OutreachDraftSection: React.FC = () => {
     }, 0);
   };
 
+  const formatSkillsForPreview = (skills: string[], format: string) => {
+    if (!skills || skills.length === 0) return "{{skills}}";
+    
+    switch (format.toUpperCase()) {
+      case "BADGES":
+        return skills.map(skill => 
+          `<span style="display: inline-block; background-color: #f3f4f6; color: #1f2937; border: 1px solid #e5e7eb; padding: 3px 10px; margin: 2px 4px; border-radius: 9999px; font-size: 12px; font-weight: 600; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${skill}</span>`
+        ).join("");
+        
+      case "CALLOUT":
+        return `<div style="margin: 14px 0; padding: 12px 16px; border-left: 4px solid #4f46e5; background-color: #f9fafb; border-radius: 0 8px 8px 0; font-family: sans-serif;">` +
+               `<strong style="color: #4f46e5; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Core Expertise:</strong>` +
+               `<span style="color: #374151; font-size: 13px; margin-left: 6px;">${skills.join(" • ")}</span>` +
+               `</div>`;
+               
+      case "BULLET":
+        return `Core Technologies:\n` + skills.map(s => `• ${s}`).join("\n");
+        
+      case "COMMA":
+      default:
+        return skills.join(", ");
+    }
+  };
+
   const parseText = (text: string) => {
     return text
       .replace(/\{\{hrName\}\}/g, hrName || "{{hrName}}")
@@ -95,11 +142,17 @@ export const OutreachDraftSection: React.FC = () => {
       .replace(/\{\{jobRole\}\}/g, jobRole || "{{jobRole}}")
       .replace(/\{\{candidateName\}\}/g, candidateName || "{{candidateName}}")
       .replace(/\{\{candidateMobile\}\}/g, candidateMobile || "{{candidateMobile}}")
-      .replace(/\{\{candidateEmail\}\}/g, candidateEmail || "{{candidateEmail}}");
+      .replace(/\{\{candidateEmail\}\}/g, candidateEmail || "{{candidateEmail}}")
+      .replace(/\{\{skills\}\}/g, formatSkillsForPreview(profileSkills, outreachSkillsFormat));
   };
 
   const parseTextForPreview = (text: string) => {
     let result = text;
+    
+    // Replace skills first (directly with HTML formatting)
+    const skillsVal = formatSkillsForPreview(profileSkills, outreachSkillsFormat);
+    result = result.replace(/\{\{skills\}\}/g, skillsVal);
+
     const variables = [
       { key: "{{hrName}}", value: hrName },
       { key: "{{companyName}}", value: companyName },

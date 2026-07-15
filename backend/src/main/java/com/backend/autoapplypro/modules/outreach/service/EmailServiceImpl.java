@@ -180,7 +180,8 @@ public class EmailServiceImpl implements EmailService {
         }
 
         // 6. Programmatically match skills and calculate experience
-        String matchingSkills = getMatchingSkillsString(profile, dto);
+        List<String> matchingSkillsList = getMatchingSkillsList(profile, dto);
+        String matchingSkills = formatSkills(matchingSkillsList, user != null ? user.getOutreachSkillsFormat() : "COMMA");
         double experienceYears = calculateExperienceYears(profile);
 
         // 7. Populate context variables
@@ -420,11 +421,14 @@ public class EmailServiceImpl implements EmailService {
         return totalYears;
     }
 
-    private String getMatchingSkillsString(CandidateProfileDto profile, EmailGenerationRequestDto dto) {
+    private List<String> getMatchingSkillsList(CandidateProfileDto profile, EmailGenerationRequestDto dto) {
         List<String> candidateSkills = profile.getSkills();
+        if (dto.getJobDetails() == null || dto.getJobDetails().getSkills() == null) {
+            return candidateSkills != null ? candidateSkills : new ArrayList<>();
+        }
         List<String> jobSkills = dto.getJobDetails().getSkills();
-        if (candidateSkills == null || jobSkills == null || candidateSkills.isEmpty() || jobSkills.isEmpty()) {
-            return "";
+        if (candidateSkills == null || candidateSkills.isEmpty()) {
+            return new ArrayList<>();
         }
         List<String> matchingSkills = new ArrayList<>();
         for (String cSkill : candidateSkills) {
@@ -434,6 +438,52 @@ public class EmailServiceImpl implements EmailService {
                 }
             }
         }
-        return String.join(", ", matchingSkills);
+        // Fallback: if no direct overlaps, use candidate profile skills up to 5
+        if (matchingSkills.isEmpty()) {
+            return candidateSkills.subList(0, Math.min(5, candidateSkills.size()));
+        }
+        return matchingSkills;
+    }
+
+    private String formatSkills(List<String> skills, String format) {
+        if (skills == null || skills.isEmpty()) {
+            return "";
+        }
+        if (format == null) {
+            format = "COMMA";
+        }
+        
+        switch (format.toUpperCase()) {
+            case "BADGES":
+                StringBuilder badgesHtml = new StringBuilder();
+                for (String skill : skills) {
+                    badgesHtml.append("<span style=\"display: inline-block; background-color: #f3f4f6; color: #1f2937; border: 1px solid #e5e7eb; padding: 3px 10px; margin: 2px 4px; border-radius: 9999px; font-size: 12px; font-weight: 600; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;\">")
+                              .append(skill)
+                              .append("</span>");
+                }
+                return badgesHtml.toString();
+                
+            case "CALLOUT":
+                StringBuilder calloutHtml = new StringBuilder();
+                calloutHtml.append("<div style=\"margin: 14px 0; padding: 12px 16px; border-left: 4px solid #4f46e5; background-color: #f9fafb; border-radius: 0 8px 8px 0; font-family: sans-serif;\">")
+                           .append("<strong style=\"color: #4f46e5; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;\">Core Expertise:</strong>")
+                           .append("<span style=\"color: #374151; font-size: 13px; margin-left: 6px;\">")
+                           .append(String.join(" • ", skills))
+                           .append("</span>")
+                           .append("</div>");
+                return calloutHtml.toString();
+                
+            case "BULLET":
+                StringBuilder bulletText = new StringBuilder();
+                bulletText.append("Core Technologies:\n");
+                for (String skill : skills) {
+                    bulletText.append("• ").append(skill).append("\n");
+                }
+                return bulletText.toString();
+                
+            case "COMMA":
+            default:
+                return String.join(", ", skills);
+        }
     }
 }
