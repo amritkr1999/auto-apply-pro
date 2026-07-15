@@ -21,6 +21,9 @@ export const TemplateManager: React.FC = () => {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [sortBy, setSortBy] = useState("");
+  const [pendingDraft, setPendingDraft] = useState<any | null>(null);
+  const [showDraftPrompt, setShowDraftPrompt] = useState(false);
+  const [hasCheckedDraft, setHasCheckedDraft] = useState(false);
 
   const userStr = localStorage.getItem("user");
   const currentUser = userStr ? JSON.parse(userStr) : null;
@@ -175,6 +178,46 @@ export const TemplateManager: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Auto-save draft changes to localStorage
+  useEffect(() => {
+    if (isEditMode && activeTemplate && hasCheckedDraft) {
+      const draft = {
+        templateId: activeTemplate.id || "",
+        name,
+        subject,
+        intro,
+        skillsTemplate,
+        body,
+        signOff,
+        updatedAt: Date.now()
+      };
+      const draftKey = `auto_apply_pro_template_draft_${currentUserId}`;
+      localStorage.setItem(draftKey, JSON.stringify(draft));
+    }
+  }, [isEditMode, activeTemplate, hasCheckedDraft, name, subject, intro, skillsTemplate, body, signOff, currentUserId]);
+
+  const checkAndSetDraft = (targetTemplateId: string): boolean => {
+    try {
+      const draftKey = `auto_apply_pro_template_draft_${currentUserId}`;
+      const draftStr = localStorage.getItem(draftKey);
+      if (draftStr) {
+        const draft = JSON.parse(draftStr);
+        if (draft.templateId === targetTemplateId) {
+          setPendingDraft(draft);
+          setShowDraftPrompt(true);
+          setHasCheckedDraft(false);
+          return true;
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to check template draft:", e);
+    }
+    setHasCheckedDraft(true);
+    setShowDraftPrompt(false);
+    setPendingDraft(null);
+    return false;
+  };
+
   const handleCreateNew = () => {
     setActiveTemplate({
       id: "",
@@ -190,9 +233,11 @@ export const TemplateManager: React.FC = () => {
     setIntro("");
     setSkillsTemplate("");
     setBody("");
+    setSignOff("");
     setIsEditMode(true);
     setMessage("");
     setError("");
+    checkAndSetDraft("");
   };
 
   const handleDelete = async (id: string): Promise<boolean> => {
@@ -229,6 +274,12 @@ export const TemplateManager: React.FC = () => {
       };
       await outreachService.saveTemplate(payload);
       setMessage(activeTemplate?.id ? "Template updated successfully!" : "Template created successfully!");
+      try {
+        const draftKey = `auto_apply_pro_template_draft_${currentUserId}`;
+        localStorage.removeItem(draftKey);
+      } catch (e) {}
+      setHasCheckedDraft(false);
+      setPendingDraft(null);
       setActiveTemplate(null);
       setIsEditMode(false);
       fetchTemplates();
@@ -565,9 +616,62 @@ export const TemplateManager: React.FC = () => {
             {isEditMode ? (
               // EDIT/CREATE MODE FORM IN MODAL
               <div>
-                <h2 className="text-xl font-bold text-slate-800 border-b border-slate-100 pb-3 mb-4">
-                  {activeTemplate.id ? "Edit Template" : "New Email Template"}
-                </h2>
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                  <h2 className="text-xl font-bold text-slate-800">
+                    {activeTemplate.id ? "Edit Template" : "New Email Template"}
+                  </h2>
+                  {hasCheckedDraft && (
+                    <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-150 px-2.5 py-0.5 rounded-full flex items-center gap-1.5 font-semibold animate-pulse shadow-sm">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                      Draft saved locally
+                    </span>
+                  )}
+                </div>
+
+                {showDraftPrompt && pendingDraft && (
+                  <div className="bg-amber-50 border border-amber-250 p-4 rounded-card text-xs text-amber-900 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
+                    <div>
+                      <span className="font-bold">Unsaved draft detected!</span> We found an unsaved session for this template from{" "}
+                      <span className="font-mono bg-amber-100 px-1 py-0.5 rounded font-semibold text-amber-950">
+                        {new Date(pendingDraft.updatedAt).toLocaleString()}
+                      </span>
+                      . Would you like to resume editing?
+                    </div>
+                    <div className="flex gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setName(pendingDraft.name || "");
+                          setSubject(pendingDraft.subject || "");
+                          setIntro(pendingDraft.intro || "");
+                          setSkillsTemplate(pendingDraft.skillsTemplate || "");
+                          setBody(pendingDraft.body || "");
+                          setSignOff(pendingDraft.signOff || "");
+                          setHasCheckedDraft(true);
+                          setShowDraftPrompt(false);
+                        }}
+                        className="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded font-bold shadow-sm transition-all"
+                      >
+                        Resume Draft
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          try {
+                            const draftKey = `auto_apply_pro_template_draft_${currentUserId}`;
+                            localStorage.removeItem(draftKey);
+                          } catch (e) {}
+                          setHasCheckedDraft(true);
+                          setShowDraftPrompt(false);
+                          setPendingDraft(null);
+                        }}
+                        className="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded font-bold transition-all"
+                      >
+                        Start Fresh
+                      </button>
+                    </div>
+                  </div>
+                )}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <form onSubmit={handleSave} className="flex flex-col gap-4">
                     <div className="flex flex-col">
@@ -680,6 +784,9 @@ export const TemplateManager: React.FC = () => {
                           } else {
                             setActiveTemplate(null);
                           }
+                          setHasCheckedDraft(false);
+                          setShowDraftPrompt(false);
+                          setPendingDraft(null);
                         }}
                         className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-500 rounded-btn text-xs font-semibold transition-all"
                       >
@@ -864,6 +971,7 @@ export const TemplateManager: React.FC = () => {
                           setBody(activeTemplate.body);
                           setSignOff(activeTemplate.signOff || "");
                           setIsEditMode(true);
+                          checkAndSetDraft(activeTemplate.id);
                         }}
                         className="px-3 py-1.5 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 text-indigo-650 rounded text-xs font-semibold transition-all"
                       >
