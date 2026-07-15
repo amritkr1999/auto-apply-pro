@@ -27,9 +27,6 @@ export const TemplateManager: React.FC = () => {
 
   const [profileSkills, setProfileSkills] = useState<string[]>([]);
   const [selectedPreviewSkills, setSelectedPreviewSkills] = useState<string[]>([]);
-  const [mockRecruiterName, setMockRecruiterName] = useState("Hiring Team");
-  const [mockCompanyName, setMockCompanyName] = useState("ScaleFintech");
-  const [mockJobRole, setMockJobRole] = useState("Software Architect");
 
   const userStr = localStorage.getItem("user");
   const currentUser = userStr ? JSON.parse(userStr) : null;
@@ -780,7 +777,7 @@ export const TemplateManager: React.FC = () => {
                           />
                         </div>
 
-                        <div className="flex flex-col">
+                        <div className="flex flex-col gap-1.5">
                           <label className={`text-[10px] font-bold mb-1 transition-colors ${activeTextarea === "skills" ? "text-primary" : "text-slate-500"}`}>
                             2. Skills Match Block {activeTextarea === "skills" && "✍️"}
                           </label>
@@ -793,6 +790,40 @@ export const TemplateManager: React.FC = () => {
                             rows={3}
                             className="w-full px-2.5 py-1.5 border border-slate-200 rounded-input text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 font-mono resize-none"
                           />
+                          
+                          {/* Skills Selection from Profile */}
+                          <div className="mt-1 flex flex-col gap-1 bg-slate-50 p-2 rounded-xl border border-slate-150">
+                            <label className="text-[9px] font-bold text-slate-400">Select skills to highlight (from profile):</label>
+                            <div className="flex flex-wrap gap-1">
+                              {profileSkills.length === 0 ? (
+                                <span className="text-[9px] text-slate-400 italic">No skills in profile. Please add them on your profile page.</span>
+                              ) : (
+                                profileSkills.map(skill => {
+                                  const isSelected = selectedPreviewSkills.includes(skill);
+                                  return (
+                                    <button
+                                      type="button"
+                                      key={skill}
+                                      onClick={() => {
+                                        if (isSelected) {
+                                          setSelectedPreviewSkills(prev => prev.filter(s => s !== skill));
+                                        } else {
+                                          setSelectedPreviewSkills(prev => [...prev, skill]);
+                                        }
+                                      }}
+                                      className={`px-2 py-0.5 rounded text-[9px] font-semibold border transition-all ${
+                                        isSelected
+                                          ? "bg-indigo-600 border-indigo-650 text-white shadow-sm font-sans"
+                                          : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50 font-sans"
+                                      }`}
+                                    >
+                                      {skill}
+                                    </button>
+                                  );
+                                })
+                              )}
+                            </div>
+                          </div>
                         </div>
 
                         <div className="flex flex-col">
@@ -857,7 +888,7 @@ export const TemplateManager: React.FC = () => {
                       <span>👁️</span> Real-time Stack Preview (Mockup Variables)
                     </h3>
                     <div className="text-[11px] text-slate-500 font-semibold mb-2 break-words">
-                      Subject: <span className="text-slate-700 font-mono">{subject.replace("{{jobRole}}", mockJobRole).replace("{{companyName}}", mockCompanyName)}</span>
+                      Subject: <span className="text-slate-700 font-mono">{subject.replace("{{jobRole}}", "Software Architect").replace("{{companyName}}", "ScaleFintech")}</span>
                     </div>
                     <div className="flex-1 bg-white border border-slate-200 rounded p-4 font-mono text-[11px] leading-relaxed text-slate-650 overflow-y-auto whitespace-pre-wrap select-none max-h-[50vh]">
                       {[
@@ -867,97 +898,20 @@ export const TemplateManager: React.FC = () => {
                         signOff || "{{CLOSING}}"
                       ]
                         .map(seg => seg
-                          .replace("{{recruiterName}}", mockRecruiterName)
-                          .replace("{{jobRole}}", mockJobRole)
-                          .replace("{{companyName}}", mockCompanyName)
+                          .replace("{{recruiterName}}", "Hiring Team")
+                          .replace("{{jobRole}}", "Software Architect")
+                          .replace("{{companyName}}", "ScaleFintech")
                           .replace("{{skills}}", selectedPreviewSkills.join(", ") || "{{skills}}")
                           .replace("{{experienceYears}}", "5")
                           .replace("{{candidateName}}", currentUser?.name || "Jane Doe")
                           .replace("{{candidateMobile}}", currentUser?.mobile || "+1 (555) 0199")
                           .replace("{{candidateEmail}}", currentUser?.email || "jane.doe@example.com")
-                          .replace("{{HOOK}}", `I am writing to express my interest in the ${mockJobRole} position...`)
+                          .replace("{{HOOK}}", "I am writing to express my interest in the Software Architect position...")
                           .replace("{{EXPERIENCE_HIGHLIGHT}}", "Throughout my career, notably during my time as a Developer...")
                           .replace("{{CLOSING}}", `Regards,\n${currentUser?.name || "Jane Doe"}`)
                         )
                         .join("\n\n")
                       }
-                    </div>
-
-                    {/* Preview Variables Customizer */}
-                    <div className="mt-4 pt-4 border-t border-slate-200 space-y-3 bg-white p-3 rounded-xl border border-slate-150 shadow-sm">
-                      <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Customize Preview Values</h4>
-                      
-                      <div className="grid grid-cols-2 gap-2.5">
-                        <div className="flex flex-col">
-                          <label className="text-[9px] font-bold text-slate-400 mb-0.5">Recruiter Name</label>
-                          <input 
-                            type="text" 
-                            value={mockRecruiterName} 
-                            onChange={(e) => setMockRecruiterName(e.target.value)} 
-                            className="px-2 py-1 border border-slate-200 rounded text-[10px] focus:outline-none focus:ring-1 focus:ring-primary font-sans"
-                          />
-                        </div>
-                        <div className="flex flex-col">
-                          <label className="text-[9px] font-bold text-slate-400 mb-0.5">Company Name</label>
-                          <input 
-                            type="text" 
-                            value={mockCompanyName} 
-                            onChange={(e) => setMockCompanyName(e.target.value)} 
-                            className="px-2 py-1 border border-slate-200 rounded text-[10px] focus:outline-none focus:ring-1 focus:ring-primary font-sans"
-                          />
-                        </div>
-                        <div className="flex flex-col">
-                          <label className="text-[9px] font-bold text-slate-450 mb-0.5">Job Role</label>
-                          <input 
-                            type="text" 
-                            value={mockJobRole} 
-                            onChange={(e) => setMockJobRole(e.target.value)} 
-                            className="px-2 py-1 border border-slate-200 rounded text-[10px] focus:outline-none focus:ring-1 focus:ring-primary font-sans"
-                          />
-                        </div>
-                        <div className="flex flex-col">
-                          <label className="text-[9px] font-bold text-slate-450 mb-0.5">Candidate Name</label>
-                          <input 
-                            type="text" 
-                            value={currentUser?.name || "Jane Doe"} 
-                            disabled
-                            className="px-2 py-1 bg-slate-50 border border-slate-200 rounded text-[10px] text-slate-400 cursor-not-allowed font-sans"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[9px] font-bold text-slate-400">Select matching skills from profile:</label>
-                        <div className="flex flex-wrap gap-1 p-1.5 bg-slate-50 border border-slate-250 rounded-lg max-h-[80px] overflow-y-auto">
-                          {profileSkills.length === 0 ? (
-                            <span className="text-[9px] text-slate-400 italic">No skills in profile. Please add them on your profile page.</span>
-                          ) : (
-                            profileSkills.map(skill => {
-                              const isSelected = selectedPreviewSkills.includes(skill);
-                              return (
-                                <button
-                                  type="button"
-                                  key={skill}
-                                  onClick={() => {
-                                    if (isSelected) {
-                                      setSelectedPreviewSkills(prev => prev.filter(s => s !== skill));
-                                    } else {
-                                      setSelectedPreviewSkills(prev => [...prev, skill]);
-                                    }
-                                  }}
-                                  className={`px-2 py-0.5 rounded text-[9px] font-semibold border transition-all ${
-                                    isSelected
-                                      ? "bg-indigo-600 border-indigo-650 text-white shadow-sm font-sans"
-                                      : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50 font-sans"
-                                  }`}
-                                >
-                                  {skill}
-                                </button>
-                              );
-                            })
-                          )}
-                        </div>
-                      </div>
                     </div>
                   </div>
                 </div>
