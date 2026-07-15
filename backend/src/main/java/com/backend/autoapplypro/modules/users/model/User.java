@@ -104,6 +104,10 @@ public class User {
     private Boolean hrOutreachCampaignEnabled = false;
 
     @Builder.Default
+    @Column(name = "ai_personalization_enabled")
+    private Boolean aiPersonalizationEnabled = false;
+
+    @Builder.Default
     @Column(name = "hr_outreach_target_role")
     private String hrOutreachTargetRole = "Software Engineer";
 
@@ -220,6 +224,9 @@ public class User {
         }
         if (isProfilePublic == null) {
             isProfilePublic = false;
+        }
+        if (aiPersonalizationEnabled == null) {
+            aiPersonalizationEnabled = false;
         }
     }
 

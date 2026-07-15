@@ -4,6 +4,7 @@ import type { CandidateProfile } from "../services/profileService";
 import Button from "../../../components/ui/Button";
 import Input from "../../../components/ui/Input";
 import { outreachService } from "../../outreach/services/outreachService";
+import { getActiveSubscription } from "../../billing/services/billingService";
 
 const GithubIcon = () => (
   <svg className="w-5 h-5 text-slate-800" fill="currentColor" viewBox="0 0 24 24">
@@ -72,6 +73,8 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
   const [timezone, setTimezone] = useState("UTC");
   const [skipWeekends, setSkipWeekends] = useState(true);
   const [marketingEmailsEnabled, setMarketingEmailsEnabled] = useState(true);
+  const [aiPersonalizationEnabled, setAiPersonalizationEnabled] = useState(false);
+  const [isPremium, setIsPremium] = useState(false);
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [savingSettings, setSavingSettings] = useState(false);
 
@@ -278,6 +281,13 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
   useEffect(() => {
     setSettingsLoading(true);
     
+    // Check subscription status
+    getActiveSubscription()
+      .then((sub) => {
+        setIsPremium(!!sub);
+      })
+      .catch((err) => console.warn("Failed to check subscription status", err));
+
     // Fetch email templates for selection dropdown
     outreachService.getTemplates()
       .then((templates) => {
@@ -294,6 +304,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
         setSlotEnd(data.slotEnd ? data.slotEnd.substring(0, 5) : "17:00");
         setSkipWeekends(data.skipWeekends !== false);
         setMarketingEmailsEnabled(data.marketingEmailsEnabled !== false);
+        setAiPersonalizationEnabled(!!data.aiPersonalizationEnabled);
         
         // Populate campaign settings
         setHrOutreachCampaignEnabled(!!data.hrOutreachCampaignEnabled);
@@ -331,6 +342,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
         timezone,
         skipWeekends,
         marketingEmailsEnabled,
+        aiPersonalizationEnabled,
         hrOutreachCampaignEnabled,
         hrOutreachTargetRole,
         hrOutreachTemplateId,
@@ -1481,6 +1493,40 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
                       <label htmlFor="marketingEmailsCheckbox" className="select-none cursor-pointer">
                         <span className="block text-xs font-bold text-slate-600">Marketing Notifications</span>
                         <span className="block text-[10px] text-slate-400 font-medium">Receive updates on job matches, tips, and subscription offers.</span>
+                      </label>
+                    </div>
+
+                    <div className="flex items-start gap-2.5 pt-1">
+                      <input
+                        type="checkbox"
+                        id="aiPersonalizationCheckbox"
+                        checked={aiPersonalizationEnabled}
+                        disabled={!isPremium}
+                        onChange={(e) => {
+                          if (!isPremium) {
+                            return;
+                          }
+                          setAiPersonalizationEnabled(e.target.checked);
+                        }}
+                        className="mt-1 h-4 w-4 text-primary border-slate-300 rounded focus:ring-primary cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      />
+                      <label htmlFor="aiPersonalizationCheckbox" className={`select-none ${isPremium ? "cursor-pointer" : "cursor-not-allowed"}`}>
+                        <span className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
+                          Enable AI Personalized Hook
+                          {!isPremium && (
+                            <span className="bg-indigo-100 text-indigo-700 text-[9px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                              🔒 Premium
+                            </span>
+                          )}
+                        </span>
+                        <span className="block text-[10px] text-slate-400 font-medium">
+                          Tailor your outreach emails using deep vision/language models to match your exact skills with job requirements.
+                        </span>
+                        {!isPremium && (
+                          <span className="block text-[10px] text-indigo-600 font-semibold mt-1">
+                            * Upgrade to Premium to unlock AI Personalized Hook.
+                          </span>
+                        )}
                       </label>
                     </div>
                   </div>

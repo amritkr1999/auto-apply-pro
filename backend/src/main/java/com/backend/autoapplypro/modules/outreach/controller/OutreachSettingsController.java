@@ -43,6 +43,7 @@ public class OutreachSettingsController {
                 .hrOutreachTemplateId(user.getHrOutreachTemplateId() != null ? user.getHrOutreachTemplateId() : "default-1")
                 .hrOutreachSourceTable(user.getHrOutreachSourceTable() != null ? user.getHrOutreachSourceTable() : "TESTING")
                 .marketingEmailsEnabled(user.getMarketingEmailsEnabled() != null ? user.getMarketingEmailsEnabled() : true)
+                .aiPersonalizationEnabled(user.getAiPersonalizationEnabled() != null ? user.getAiPersonalizationEnabled() : false)
                 .build();
 
         return ResponseEntity.ok(dto);
@@ -101,6 +102,10 @@ public class OutreachSettingsController {
 
         if (dto.getMarketingEmailsEnabled() != null) {
             user.setMarketingEmailsEnabled(dto.getMarketingEmailsEnabled());
+        }
+
+        if (dto.getAiPersonalizationEnabled() != null) {
+            user.setAiPersonalizationEnabled(dto.getAiPersonalizationEnabled());
         }
 
         // Campaign settings logic

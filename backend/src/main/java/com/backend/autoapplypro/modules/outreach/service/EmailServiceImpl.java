@@ -9,6 +9,9 @@ import com.backend.autoapplypro.modules.users.dto.CandidateProfileDto;
 import com.backend.autoapplypro.modules.users.model.Company;
 import com.backend.autoapplypro.modules.users.repository.CompanyRepository;
 import com.backend.autoapplypro.modules.users.service.UserService;
+import com.backend.autoapplypro.modules.users.repository.UserRepository;
+import com.backend.autoapplypro.modules.users.model.User;
+import com.backend.autoapplypro.modules.billing.service.SubscriptionGatingService;
 import com.backend.autoapplypro.modules.outreach.model.EmailTemplate;
 import com.backend.autoapplypro.modules.outreach.repository.EmailTemplateRepository;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +45,8 @@ public class EmailServiceImpl implements EmailService {
     private final EmailTemplateEngine templateEngine;
     private final CacheManager cacheManager;
     private final EmailTemplateRepository templateRepository;
+    private final UserRepository userRepository;
+    private final SubscriptionGatingService subscriptionGatingService;
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Autowired
@@ -89,8 +94,24 @@ public class EmailServiceImpl implements EmailService {
                 });
         String roleId = String.valueOf(job.getId());
 
-        // 3. Determine if AI should be used
-        boolean callAi = regenerate || (dto.getUseAi() != null && dto.getUseAi());
+        // 3. Determine if AI should be used based on toggle and subscription
+        boolean isPremium = subscriptionGatingService.isPremiumUser(userId);
+        User user = userRepository.findById(userId).orElse(null);
+        boolean aiSettingEnabled = user != null && Boolean.TRUE.equals(user.getAiPersonalizationEnabled());
+
+        boolean callAi = false;
+        if (isPremium) {
+            if (dto.getUseAi() != null) {
+                callAi = dto.getUseAi();
+            } else {
+                callAi = aiSettingEnabled || regenerate;
+            }
+        } else {
+            if (regenerate || (dto.getUseAi() != null && dto.getUseAi())) {
+                log.warn("Access denied: Non-premium user ID {} attempted to use AI Hook. Falling back to deterministic hook.", userId);
+            }
+            callAi = false;
+        }
 
         // 4. Fetch candidate details & construct minimized profile snippet (Data Minimization)
         CandidateProfileDto profile;

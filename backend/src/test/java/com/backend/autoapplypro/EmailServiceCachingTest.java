@@ -11,6 +11,9 @@ import com.backend.autoapplypro.modules.users.dto.CandidateProfileDto;
 import com.backend.autoapplypro.modules.users.model.Company;
 import com.backend.autoapplypro.modules.users.repository.CompanyRepository;
 import com.backend.autoapplypro.modules.users.service.UserService;
+import com.backend.autoapplypro.modules.users.repository.UserRepository;
+import com.backend.autoapplypro.modules.users.model.User;
+import com.backend.autoapplypro.modules.billing.service.SubscriptionGatingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -48,6 +51,12 @@ class EmailServiceCachingTest {
     @Mock
     private Cache cache;
 
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private SubscriptionGatingService subscriptionGatingService;
+
     @InjectMocks
     private EmailServiceImpl emailService;
 
@@ -59,6 +68,11 @@ class EmailServiceCachingTest {
         ReflectionTestUtils.setField(emailService, "highIntelModel", "gemini-1.5-pro");
         ReflectionTestUtils.setField(emailService, "lowCostModel", "gemini-1.5-flash");
         ReflectionTestUtils.setField(emailService, "llmServiceUrl", "http://localhost:8000/generate-hook");
+
+        // Mock default behavior for premium checks
+        when(subscriptionGatingService.isPremiumUser(anyLong())).thenReturn(true);
+        User dummyUser = User.builder().aiPersonalizationEnabled(true).build();
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(dummyUser));
     }
 
     @Test

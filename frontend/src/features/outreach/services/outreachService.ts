@@ -357,6 +357,7 @@ export const outreachService = {
     hrOutreachTemplateId: string;
     hrOutreachSourceTable: string;
     marketingEmailsEnabled: boolean;
+    aiPersonalizationEnabled: boolean;
   }> {
     try {
       const response = await fetch(`${API_BASE}/v1/outreach/settings?userId=${userId}`, {
@@ -386,7 +387,8 @@ export const outreachService = {
       hrOutreachTargetRole: "Software Engineer",
       hrOutreachTemplateId: "default-1",
       hrOutreachSourceTable: "TESTING",
-      marketingEmailsEnabled: true
+      marketingEmailsEnabled: true,
+      aiPersonalizationEnabled: false
     };
   },
 
@@ -404,6 +406,7 @@ export const outreachService = {
     hrOutreachTemplateId?: string;
     hrOutreachSourceTable?: string;
     marketingEmailsEnabled?: boolean;
+    aiPersonalizationEnabled?: boolean;
   }): Promise<{ message: string }> {
     try {
       const response = await fetch(`${API_BASE}/v1/outreach/settings?userId=${userId}`, {

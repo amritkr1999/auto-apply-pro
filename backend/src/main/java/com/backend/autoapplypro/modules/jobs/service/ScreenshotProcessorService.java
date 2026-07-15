@@ -273,7 +273,7 @@ public class ScreenshotProcessorService {
             EmailGenerationRequestDto requestDto = EmailGenerationRequestDto.builder()
                     .userId(profile.getUserId())
                     .jobDetails(jobDetailsDto)
-                    .useAi(false)
+                    .useAi(null)
                     .build();
 
             return emailService.generateEmail(requestDto, false);

@@ -25,4 +25,6 @@ public class OutreachSettingsDto {
     private String hrOutreachSourceTable;
 
     private Boolean marketingEmailsEnabled;
+
+    private Boolean aiPersonalizationEnabled;
 }
