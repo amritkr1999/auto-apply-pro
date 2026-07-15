@@ -59,7 +59,7 @@ const DEFAULT_TEMPLATES: EmailTemplate[] = [
     intro: "Dear {{recruiterName}},",
     skillsTemplate: "I am writing to apply for the {{jobRole}} position. I noticed your team is looking for a developer experienced in {{skills}}, which maps closely to my skillset.",
     body: "I have over {{experienceYears}} years of software development experience, focusing on building high-performance systems and user-centric features.",
-    signOff: "Best regards,\n{{candidateName}}",
+    signOff: "Regards,\n{{candidateName}}\n{{candidateMobile}}\n{{candidateEmail}}",
   },
   {
     id: "default-2",
@@ -68,7 +68,7 @@ const DEFAULT_TEMPLATES: EmailTemplate[] = [
     intro: "Hi {{recruiterName}},",
     skillsTemplate: "I wanted to follow up on my application for the {{jobRole}} role. My hands-on skills in {{skills}} make me excited about joining {{companyName}}.",
     body: "I have {{experienceYears}} years of experience building scalable products and would love to connect to share more.",
-    signOff: "Sincerely,\n{{candidateName}}",
+    signOff: "Regards,\n{{candidateName}}\n{{candidateMobile}}\n{{candidateEmail}}",
   }
 ];
 

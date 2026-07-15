@@ -17,7 +17,8 @@ export const OutreachDraftSection: React.FC = () => {
   const [companyName, setCompanyName] = useState("");
   const [jobRole, setJobRole] = useState("");
   const [candidateName, setCandidateName] = useState(currentUser?.name || "");
-  
+  const [candidateMobile, setCandidateMobile] = useState(currentUser?.mobile || "");
+  const [candidateEmail, setCandidateEmail] = useState(currentUser?.email || "");
   // Raw subject/body being edited in the main form
   const [rawSubject, setRawSubject] = useState("");
   const [rawBody, setRawBody] = useState("");
@@ -92,7 +93,9 @@ export const OutreachDraftSection: React.FC = () => {
       .replace(/\{\{hrName\}\}/g, hrName || "{{hrName}}")
       .replace(/\{\{companyName\}\}/g, companyName || "{{companyName}}")
       .replace(/\{\{jobRole\}\}/g, jobRole || "{{jobRole}}")
-      .replace(/\{\{candidateName\}\}/g, candidateName || "{{candidateName}}");
+      .replace(/\{\{candidateName\}\}/g, candidateName || "{{candidateName}}")
+      .replace(/\{\{candidateMobile\}\}/g, candidateMobile || "{{candidateMobile}}")
+      .replace(/\{\{candidateEmail\}\}/g, candidateEmail || "{{candidateEmail}}");
   };
 
   const parseTextForPreview = (text: string) => {
@@ -102,6 +105,8 @@ export const OutreachDraftSection: React.FC = () => {
       { key: "{{companyName}}", value: companyName },
       { key: "{{jobRole}}", value: jobRole },
       { key: "{{candidateName}}", value: candidateName },
+      { key: "{{candidateMobile}}", value: candidateMobile },
+      { key: "{{candidateEmail}}", value: candidateEmail },
     ];
     
     variables.forEach(({ key, value }) => {
@@ -248,6 +253,18 @@ export const OutreachDraftSection: React.FC = () => {
                 value={candidateName}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCandidateName(e.target.value)}
               />
+              <Input
+                label="Candidate Mobile ({{candidateMobile}})"
+                placeholder="e.g. +1 (555) 0199"
+                value={candidateMobile}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCandidateMobile(e.target.value)}
+              />
+              <Input
+                label="Candidate Email ({{candidateEmail}})"
+                placeholder="e.g. jane.doe@example.com"
+                value={candidateEmail}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCandidateEmail(e.target.value)}
+              />
             </div>
 
             <hr className="border-slate-100" />
@@ -295,6 +312,20 @@ export const OutreachDraftSection: React.FC = () => {
                     className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200 transition-colors"
                   >
                     {"{{candidateName}}"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertPlaceholder("{{candidateMobile}}")}
+                    className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200 transition-colors"
+                  >
+                    {"{{candidateMobile}}"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertPlaceholder("{{candidateEmail}}")}
+                    className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200 transition-colors"
+                  >
+                    {"{{candidateEmail}}"}
                   </button>
                 </div>
               </div>

@@ -263,6 +263,7 @@ export const TemplateManager: React.FC = () => {
   };
 
   const handleCreateNew = () => {
+    const defaultSignOff = "Regards,\n{{candidateName}}\n{{candidateMobile}}\n{{candidateEmail}}";
     setActiveTemplate({
       id: "",
       name: "",
@@ -270,14 +271,14 @@ export const TemplateManager: React.FC = () => {
       intro: "",
       skillsTemplate: "",
       body: "",
-      signOff: ""
+      signOff: defaultSignOff
     });
     setName("");
     setSubject("");
     setIntro("");
     setSkillsTemplate("");
     setBody("");
-    setSignOff("");
+    setSignOff(defaultSignOff);
     setIsEditMode(true);
     setHasCheckedDraft(true);
     setMessage("");
@@ -738,6 +739,8 @@ export const TemplateManager: React.FC = () => {
                         <button type="button" className="text-[9px] font-bold text-indigo-650 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 px-1.5 py-0.5 rounded transition-colors" onClick={() => insertPlaceholder("{{skills}}")}>{"{{skills}}"}</button>
                         <button type="button" className="text-[9px] font-bold text-indigo-650 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 px-1.5 py-0.5 rounded transition-colors" onClick={() => insertPlaceholder("{{experienceYears}}")}>{"{{experienceYears}}"}</button>
                         <button type="button" className="text-[9px] font-bold text-indigo-650 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 px-1.5 py-0.5 rounded transition-colors" onClick={() => insertPlaceholder("{{candidateName}}")}>{"{{candidateName}}"}</button>
+                        <button type="button" className="text-[9px] font-bold text-indigo-650 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 px-1.5 py-0.5 rounded transition-colors" onClick={() => insertPlaceholder("{{candidateMobile}}")}>{"{{candidateMobile}}"}</button>
+                        <button type="button" className="text-[9px] font-bold text-indigo-650 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 px-1.5 py-0.5 rounded transition-colors" onClick={() => insertPlaceholder("{{candidateEmail}}")}>{"{{candidateEmail}}"}</button>
                       </div>
 
                       <div className="space-y-3 max-h-[35vh] overflow-y-auto pr-1">
@@ -849,6 +852,8 @@ export const TemplateManager: React.FC = () => {
                           .replace("{{skills}}", "React, TypeScript, Node.js")
                           .replace("{{experienceYears}}", "5")
                           .replace("{{candidateName}}", "Jane Doe")
+                          .replace("{{candidateMobile}}", "+1 (555) 0199")
+                          .replace("{{candidateEmail}}", "jane.doe@example.com")
                           .replace("{{HOOK}}", "I am writing to express my interest in the Software Architect position...")
                           .replace("{{EXPERIENCE_HIGHLIGHT}}", "Throughout my career, notably during my time as a Developer...")
                           .replace("{{CLOSING}}", "Best regards,\nJane Doe")

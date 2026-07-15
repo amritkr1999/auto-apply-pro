@@ -199,6 +199,8 @@ public class EmailServiceImpl implements EmailService {
                 ? dto.getCandidateName()
                 : profile.getName();
         templateContext.put("candidateName", candidateName);
+        templateContext.put("candidateMobile", profile.getMobile() != null ? profile.getMobile() : "");
+        templateContext.put("candidateEmail", profile.getEmail() != null ? profile.getEmail() : "");
         templateContext.put("skills", matchingSkills);
         templateContext.put("experienceYears", String.valueOf(experienceYears));
 
@@ -354,10 +356,15 @@ public class EmailServiceImpl implements EmailService {
     }
 
     private String constructClosing(CandidateProfileDto profile) {
-        return String.format("Best regards,\n\n%s\n%s\n%s", 
-                profile.getName(), 
-                profile.getEmail(), 
-                profile.getMobile() != null ? profile.getMobile() : "");
+        StringBuilder sb = new StringBuilder("Regards,\n");
+        sb.append(profile.getName());
+        if (profile.getMobile() != null && !profile.getMobile().trim().isEmpty()) {
+            sb.append("\n").append(profile.getMobile().trim());
+        }
+        if (profile.getEmail() != null && !profile.getEmail().trim().isEmpty()) {
+            sb.append("\n").append(profile.getEmail().trim());
+        }
+        return sb.toString();
     }
 
     @Override
