@@ -698,7 +698,7 @@ export const TemplateManager: React.FC = () => {
                     <h3 className="text-xs font-bold text-slate-700 mb-2.5 border-b border-slate-200 pb-2 flex items-center gap-1.5">
                       <span>👁️</span> Real-time Stack Preview (Mockup Variables)
                     </h3>
-                    <div className="text-[11px] text-slate-500 font-semibold mb-2 truncate">
+                    <div className="text-[11px] text-slate-500 font-semibold mb-2 break-words">
                       Subject: <span className="text-slate-700 font-mono">{subject.replace("{{jobRole}}", "Software Architect").replace("{{companyName}}", "ScaleFintech")}</span>
                     </div>
                     <div className="flex-1 bg-white border border-slate-200 rounded p-4 font-mono text-[11px] leading-relaxed text-slate-650 overflow-y-auto whitespace-pre-wrap select-none max-h-[50vh]">
