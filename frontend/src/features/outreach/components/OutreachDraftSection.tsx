@@ -8,11 +8,15 @@ export const OutreachDraftSection: React.FC = () => {
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
   
+  const userStr = localStorage.getItem("user");
+  const currentUser = userStr ? JSON.parse(userStr) : null;
+
   // Form variables
   const [recipientEmail, setRecipientEmail] = useState("");
   const [hrName, setHrName] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [jobRole, setJobRole] = useState("");
+  const [candidateName, setCandidateName] = useState(currentUser?.name || "");
   
   // Raw subject/body being edited in the main form
   const [rawSubject, setRawSubject] = useState("");
@@ -82,7 +86,8 @@ export const OutreachDraftSection: React.FC = () => {
     return text
       .replace(/\{\{hrName\}\}/g, hrName || "{{hrName}}")
       .replace(/\{\{companyName\}\}/g, companyName || "{{companyName}}")
-      .replace(/\{\{jobRole\}\}/g, jobRole || "{{jobRole}}");
+      .replace(/\{\{jobRole\}\}/g, jobRole || "{{jobRole}}")
+      .replace(/\{\{candidateName\}\}/g, candidateName || "{{candidateName}}");
   };
 
   const parseTextForPreview = (text: string) => {
@@ -91,6 +96,7 @@ export const OutreachDraftSection: React.FC = () => {
       { key: "{{hrName}}", value: hrName },
       { key: "{{companyName}}", value: companyName },
       { key: "{{jobRole}}", value: jobRole },
+      { key: "{{candidateName}}", value: candidateName },
     ];
     
     variables.forEach(({ key, value }) => {
@@ -231,6 +237,12 @@ export const OutreachDraftSection: React.FC = () => {
                 value={jobRole}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setJobRole(e.target.value)}
               />
+              <Input
+                label="Candidate Name ({{candidateName}})"
+                placeholder="e.g. John Doe"
+                value={candidateName}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCandidateName(e.target.value)}
+              />
             </div>
 
             <hr className="border-slate-100" />
@@ -269,6 +281,13 @@ export const OutreachDraftSection: React.FC = () => {
                     className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200 transition-colors"
                   >
                     {"{{jobRole}}"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertPlaceholder("{{candidateName}}")}
+                    className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200 transition-colors"
+                  >
+                    {"{{candidateName}}"}
                   </button>
                 </div>
               </div>

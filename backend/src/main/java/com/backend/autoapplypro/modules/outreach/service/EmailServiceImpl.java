@@ -195,7 +195,10 @@ public class EmailServiceImpl implements EmailService {
         templateContext.put("jobTitle", jobTitle);
         templateContext.put("companyName", companyName);
         templateContext.put("company", companyName);
-        templateContext.put("candidateName", profile.getName());
+        String candidateName = (dto.getCandidateName() != null && !dto.getCandidateName().trim().isEmpty())
+                ? dto.getCandidateName()
+                : profile.getName();
+        templateContext.put("candidateName", candidateName);
         templateContext.put("skills", matchingSkills);
         templateContext.put("experienceYears", String.valueOf(experienceYears));
 

@@ -295,14 +295,14 @@ export const outreachService = {
   },
 
   // Generate outreach email draft using AI pipeline
-  async generateOutreachEmail(userId: number, jobDetails: any, profileId?: number, templateId?: string, useAi?: boolean): Promise<{ subject: string; body: string; recipientEmail: string }> {
+  async generateOutreachEmail(userId: number, jobDetails: any, profileId?: number, templateId?: string, useAi?: boolean, candidateName?: string): Promise<{ subject: string; body: string; recipientEmail: string }> {
     const response = await fetch(`${API_BASE}/drafts/generate`, {
       method: "POST",
       headers: { 
         "Content-Type": "application/json",
         ...getAuthHeaders(),
       },
-      body: JSON.stringify({ userId, jobDetails, profileId, templateId, useAi })
+      body: JSON.stringify({ userId, jobDetails, profileId, templateId, useAi, candidateName })
     });
     if (!response.ok) {
       throw new Error("Failed to generate AI outreach email.");
