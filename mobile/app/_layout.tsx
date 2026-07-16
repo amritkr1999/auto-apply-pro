@@ -8,6 +8,7 @@ import { ActivityIndicator, View } from 'react-native';
 
 import { useColorScheme } from '@/components/useColorScheme';
 import { AuthProvider, useAuth } from '../context/AuthContext';
+import { mobileAnalytics } from '../services/analytics';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -68,6 +69,15 @@ function RootLayoutNav() {
       router.replace('/(tabs)');
     }
   }, [token, isLoading, segments]);
+
+  // Track screen view on segment transitions
+  useEffect(() => {
+    if (segments && segments.length > 0) {
+      const cleanSegments = segments.filter(s => s && !s.startsWith('(') && !s.startsWith('+'));
+      const screenName = cleanSegments.length > 0 ? cleanSegments.join('/') : 'dashboard';
+      mobileAnalytics.trackScreenView(screenName);
+    }
+  }, [segments]);
 
   if (isLoading) {
     return (

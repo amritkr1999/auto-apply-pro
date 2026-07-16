@@ -46,7 +46,10 @@ public class EmailTemplateController {
                     .id("default-1")
                     .name("General Application Outreach")
                     .subject("Application for {{jobRole}} | {{hrName}}")
+                    .intro("Dear {{recruiterName}},")
+                    .skillsTemplate("I am writing to apply for the {{jobRole}} position. I noticed your team is looking for a developer experienced in {{skills}}, which maps closely to my skillset.")
                     .body("Hi {{hrName}},<br/><br/>I hope you are doing well.<br/><br/>I am reaching out to express my interest in the <strong>{{jobRole}}</strong> position at <strong>{{companyName}}</strong>. Having worked with frontend systems, I believe my background aligns well with your team's current expansion goals.<br/><br/>Please find my profile details attached. I would love to connect and discuss how I can add value to {{companyName}}.<br/><br/>Best regards,<br/>Candidate User")
+                    .signOff("Regards,\n{{candidateName}}\n{{candidateMobile}}\n{{candidateEmail}}")
                     .isSystemTemplate(true)
                     .isPublic(true)
                     .build();
@@ -54,12 +57,28 @@ public class EmailTemplateController {
             log.info("Seeded default-1 template.");
         } else {
             templateRepository.findById("default-1").ifPresent(t -> {
+                boolean updated = false;
                 if (!Boolean.TRUE.equals(t.getIsSystemTemplate()) || !Boolean.TRUE.equals(t.getIsPublic()) || t.getCreatorId() != null) {
                     t.setIsSystemTemplate(true);
                     t.setIsPublic(true);
                     t.setCreatorId(null);
+                    updated = true;
+                }
+                if (t.getIntro() == null || t.getIntro().trim().isEmpty()) {
+                    t.setIntro("Dear {{recruiterName}},");
+                    updated = true;
+                }
+                if (t.getSkillsTemplate() == null || t.getSkillsTemplate().trim().isEmpty()) {
+                    t.setSkillsTemplate("I am writing to apply for the {{jobRole}} position. I noticed your team is looking for a developer experienced in {{skills}}, which maps closely to my skillset.");
+                    updated = true;
+                }
+                if (t.getSignOff() == null || t.getSignOff().trim().isEmpty()) {
+                    t.setSignOff("Regards,\n{{candidateName}}\n{{candidateMobile}}\n{{candidateEmail}}");
+                    updated = true;
+                }
+                if (updated) {
                     templateRepository.save(t);
-                    log.info("Migrated default-1 template schema fields.");
+                    log.info("Updated default-1 template with missing fields.");
                 }
             });
         }
@@ -69,7 +88,10 @@ public class EmailTemplateController {
                     .id("default-2")
                     .name("Quick Follow-Up Template")
                     .subject("Follow up: {{jobRole}} application - {{companyName}}")
+                    .intro("Hi {{recruiterName}},")
+                    .skillsTemplate("I wanted to follow up on my application for the {{jobRole}} role. My hands-on skills in {{skills}} make me excited about joining {{companyName}}.")
                     .body("Hi {{hrName}},<br/><br/>Hope your week is going well.<br/><br/>I wanted to quickly check in on my application for the <strong>{{jobRole}}</strong> role. I remain very excited about the opportunity to join <strong>{{companyName}}</strong> and would love to share more about my experience.<br/><br/>Looking forward to hearing from you.<br/><br/>Best,<br/>Candidate User")
+                    .signOff("Regards,\n{{candidateName}}\n{{candidateMobile}}\n{{candidateEmail}}")
                     .isSystemTemplate(true)
                     .isPublic(true)
                     .build();
@@ -77,12 +99,106 @@ public class EmailTemplateController {
             log.info("Seeded default-2 template.");
         } else {
             templateRepository.findById("default-2").ifPresent(t -> {
+                boolean updated = false;
+                if (!Boolean.TRUE.equals(t.getIsSystemTemplate()) || !Boolean.TRUE.equals(t.getIsPublic()) || t.getCreatorId() != null) {
+                    t.setIsSystemTemplate(true);
+                    t.setIsPublic(true);
+                    t.setCreatorId(null);
+                    updated = true;
+                }
+                if (t.getIntro() == null || t.getIntro().trim().isEmpty()) {
+                    t.setIntro("Hi {{recruiterName}},");
+                    updated = true;
+                }
+                if (t.getSkillsTemplate() == null || t.getSkillsTemplate().trim().isEmpty()) {
+                    t.setSkillsTemplate("I wanted to follow up on my application for the {{jobRole}} role. My hands-on skills in {{skills}} make me excited about joining {{companyName}}.");
+                    updated = true;
+                }
+                if (t.getSignOff() == null || t.getSignOff().trim().isEmpty()) {
+                    t.setSignOff("Regards,\n{{candidateName}}\n{{candidateMobile}}\n{{candidateEmail}}");
+                    updated = true;
+                }
+                if (updated) {
+                    templateRepository.save(t);
+                    log.info("Updated default-2 template with missing fields.");
+                }
+            });
+        }
+
+        if (!templateRepository.existsById("default-3")) {
+            EmailTemplate default3 = EmailTemplate.builder()
+                    .id("default-3")
+                    .name("Referral Request")
+                    .subject("Connecting regarding open roles at {{companyName}}")
+                    .intro("Dear {{recruiterName}},")
+                    .skillsTemplate("I noticed that {{companyName}} is expanding and looking for developers skilled in {{skills}}. I wanted to connect to see if my background might be a fit.")
+                    .body("I have {{experienceYears}} years of software engineering experience building highly scalable applications and products. I would be grateful for a referral or any advice you might have on applying.")
+                    .signOff("Best regards,\n{{candidateName}}\n{{candidateMobile}}\n{{candidateEmail}}")
+                    .isSystemTemplate(true)
+                    .isPublic(true)
+                    .build();
+            templateRepository.save(default3);
+            log.info("Seeded default-3 template.");
+        } else {
+            templateRepository.findById("default-3").ifPresent(t -> {
                 if (!Boolean.TRUE.equals(t.getIsSystemTemplate()) || !Boolean.TRUE.equals(t.getIsPublic()) || t.getCreatorId() != null) {
                     t.setIsSystemTemplate(true);
                     t.setIsPublic(true);
                     t.setCreatorId(null);
                     templateRepository.save(t);
-                    log.info("Migrated default-2 template schema fields.");
+                    log.info("Migrated default-3 template schema fields.");
+                }
+            });
+        }
+
+        if (!templateRepository.existsById("default-4")) {
+            EmailTemplate default4 = EmailTemplate.builder()
+                    .id("default-4")
+                    .name("Networking & Informational Interview")
+                    .subject("Inquiry: Engineering team growth at {{companyName}}")
+                    .intro("Hi {{recruiterName}},")
+                    .skillsTemplate("I've been following {{companyName}}'s growth and was particularly interested in your work requiring {{skills}}.")
+                    .body("With {{experienceYears}} years of software development experience, I’m keen to learn more about the team culture, recent challenges, and future direction. Would you be open to a brief 10-minute informational chat sometime next week?")
+                    .signOff("Sincerely,\n{{candidateName}}\n{{candidateMobile}}\n{{candidateEmail}}")
+                    .isSystemTemplate(true)
+                    .isPublic(true)
+                    .build();
+            templateRepository.save(default4);
+            log.info("Seeded default-4 template.");
+        } else {
+            templateRepository.findById("default-4").ifPresent(t -> {
+                if (!Boolean.TRUE.equals(t.getIsSystemTemplate()) || !Boolean.TRUE.equals(t.getIsPublic()) || t.getCreatorId() != null) {
+                    t.setIsSystemTemplate(true);
+                    t.setIsPublic(true);
+                    t.setCreatorId(null);
+                    templateRepository.save(t);
+                    log.info("Migrated default-4 template schema fields.");
+                }
+            });
+        }
+
+        if (!templateRepository.existsById("default-5")) {
+            EmailTemplate default5 = EmailTemplate.builder()
+                    .id("default-5")
+                    .name("Product-focused Application")
+                    .subject("Improving {{companyName}}'s developer experience | {{jobRole}} Application")
+                    .intro("Dear {{recruiterName}},")
+                    .skillsTemplate("I am a software engineer specializing in {{skills}} with a deep passion for building high-quality products that users love.")
+                    .body("Throughout my {{experienceYears}} years of experience, I have focused on shipping user-centric features, optimizing performance, and collaborating closely with design and product teams.")
+                    .signOff("Best,\n{{candidateName}}\n{{candidateMobile}}\n{{candidateEmail}}")
+                    .isSystemTemplate(true)
+                    .isPublic(true)
+                    .build();
+            templateRepository.save(default5);
+            log.info("Seeded default-5 template.");
+        } else {
+            templateRepository.findById("default-5").ifPresent(t -> {
+                if (!Boolean.TRUE.equals(t.getIsSystemTemplate()) || !Boolean.TRUE.equals(t.getIsPublic()) || t.getCreatorId() != null) {
+                    t.setIsSystemTemplate(true);
+                    t.setIsPublic(true);
+                    t.setCreatorId(null);
+                    templateRepository.save(t);
+                    log.info("Migrated default-5 template schema fields.");
                 }
             });
         }

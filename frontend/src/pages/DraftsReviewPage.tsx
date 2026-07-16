@@ -4,9 +4,11 @@ import Button from "../components/ui/Button";
 import { outreachService } from "../features/outreach/services/outreachService";
 import { profileService } from "../features/profile/services/profileService";
 import type { CandidateProfile } from "../features/profile/services/profileService";
+import { useAnalytics } from "../context/AnalyticsContext";
 
 export const DraftsReviewPage: React.FC = () => {
   const navigate = useNavigate();
+  const { trackEvent } = useAnalytics();
   const userStr = localStorage.getItem("user");
   const user = userStr ? JSON.parse(userStr) : { id: 1 };
   const userId = user.id;
@@ -58,9 +60,11 @@ export const DraftsReviewPage: React.FC = () => {
       setDrafts(prev => prev.filter(d => d.id !== id));
       setMessage("Draft approved successfully!");
       setTimeout(() => setMessage(null), 3000);
-    } catch (err) {
+      trackEvent("draft_approved", { draftId: id, company: draft.companyName });
+    } catch (err: any) {
       console.error("Failed to approve draft", err);
       setError("Failed to approve draft.");
+      trackEvent("draft_approve_failed", { draftId: id, error: err.message || "Unknown error" });
     }
   };
 
@@ -71,9 +75,11 @@ export const DraftsReviewPage: React.FC = () => {
       setDrafts(prev => prev.filter(d => d.id !== id));
       setMessage("Draft discarded successfully.");
       setTimeout(() => setMessage(null), 3000);
-    } catch (err) {
+      trackEvent("draft_discarded", { draftId: id });
+    } catch (err: any) {
       console.error("Failed to discard draft", err);
       setError("Failed to discard draft.");
+      trackEvent("draft_discard_failed", { draftId: id, error: err.message || "Unknown error" });
     }
   };
 
@@ -99,9 +105,11 @@ export const DraftsReviewPage: React.FC = () => {
       setDrafts(prev => prev.map(d => d.id === draftId ? updatedDraft : d));
       setMessage("Email draft successfully regenerated for target profile version!");
       setTimeout(() => setMessage(null), 3000);
+      trackEvent("draft_regenerated", { draftId, profileId });
     } catch (err: any) {
       console.error("Failed to regenerate draft", err);
       setError(err.message || "Failed to regenerate draft using selected profile version.");
+      trackEvent("draft_regenerate_failed", { draftId, profileId, error: err.message || "Unknown error" });
     } finally {
       setRegeneratingDraftId(null);
     }
@@ -131,10 +139,12 @@ export const DraftsReviewPage: React.FC = () => {
       setDrafts([]);
       setMessage(`Successfully approved and scheduled all ${approvedCount} email drafts!`);
       setTimeout(() => setMessage(null), 5000);
+      trackEvent("all_drafts_approved", { count: approvedCount });
     } catch (err: any) {
       console.error("Error approving all drafts:", err);
       setError(`Failed to approve all drafts: ${err.message || "Server error"}`);
       loadDrafts();
+      trackEvent("all_drafts_approve_failed", { error: err.message || "Unknown error" });
     } finally {
       setIsApprovingAll(false);
     }

@@ -44,6 +44,9 @@ export const ProfessionalDashboardView: React.FC = () => {
   // Timeframe state
   const [timeframe, setTimeframe] = useState<"all" | "24h" | "7d" | "30d">("all");
 
+  // Outreach Send Queue date filter state
+  const [queueTimeframe, setQueueTimeframe] = useState<"today" | "week" | "month" | "all">("today");
+
   // Streak Widget visibility
   const [showStreak, setShowStreak] = useState(() => localStorage.getItem("show_streak_widget") !== "false");
 
@@ -67,7 +70,34 @@ export const ProfessionalDashboardView: React.FC = () => {
     });
   };
 
+  const filterQueueByDate = (items: any[]) => {
+    const now = new Date();
+    return items.filter(item => {
+      const dateStr = item.sentAt || item.scheduledAt || item.createdAt;
+      if (!dateStr) return false;
+      const itemDate = new Date(dateStr);
+
+      if (queueTimeframe === "today") {
+        return itemDate.getDate() === now.getDate() &&
+               itemDate.getMonth() === now.getMonth() &&
+               itemDate.getFullYear() === now.getFullYear();
+      }
+      if (queueTimeframe === "week") {
+        const diffTime = Math.abs(now.getTime() - itemDate.getTime());
+        const diffDays = diffTime / (1000 * 60 * 60 * 24);
+        return diffDays <= 7;
+      }
+      if (queueTimeframe === "month") {
+        const diffTime = Math.abs(now.getTime() - itemDate.getTime());
+        const diffDays = diffTime / (1000 * 60 * 60 * 24);
+        return diffDays <= 30;
+      }
+      return true; // all
+    });
+  };
+
   const filteredQueueItems = filterByTimeframe(queueItems);
+  const filteredQueue = filterQueueByDate(queueItems);
   const filteredDrafts = filterByTimeframe(drafts);
   const filteredSuggestions = filterByTimeframe(suggestions);
 
@@ -672,19 +702,38 @@ export const ProfessionalDashboardView: React.FC = () => {
 
           {/* Send Queue & Sent History Table */}
           <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-card p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <div>
                 <h3 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
                   <span>📅</span> Outreach Send Queue
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Scheduled chronologies and dispatch history</p>
+                <p className="text-xs text-slate-550 dark:text-slate-400">Scheduled chronologies and dispatch history</p>
               </div>
-              <Badge variant="neutral">{queueItems.length} Total items</Badge>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider">Date Filter:</span>
+                  <select
+                    value={queueTimeframe}
+                    onChange={(e) => setQueueTimeframe(e.target.value as any)}
+                    className="px-3 py-1.5 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-card text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                  >
+                    <option value="today">Current Day</option>
+                    <option value="week">Week</option>
+                    <option value="month">Month</option>
+                    <option value="all">All Time</option>
+                  </select>
+                </div>
+                <Badge variant="neutral">{filteredQueue.length} items</Badge>
+              </div>
             </div>
 
             {queueItems.length === 0 ? (
               <div className="p-8 text-center text-slate-400 text-sm bg-slate-50 dark:bg-slate-950/40 rounded-card border border-dashed border-slate-200 dark:border-slate-850">
                 No outreach emails currently in the queue. Parse a screenshot and generate an email to get started!
+              </div>
+            ) : filteredQueue.length === 0 ? (
+              <div className="p-8 text-center text-slate-400 text-sm bg-slate-50 dark:bg-slate-950/40 rounded-card border border-dashed border-slate-200 dark:border-slate-850">
+                No outreach emails found for the selected timeframe.
               </div>
             ) : (
               <>
@@ -698,7 +747,7 @@ export const ProfessionalDashboardView: React.FC = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {queueItems.slice(0, 5).map((item) => {
+                    {filteredQueue.slice(0, 5).map((item) => {
                       let statusText = "In Queue";
                       let variant: "neutral" | "success" | "warning" | "error" | "info" = "neutral";
                       
@@ -719,6 +768,47 @@ export const ProfessionalDashboardView: React.FC = () => {
                         variant = "info";
                       }
 
+                      const formatQueueDetails = (eqItem: any) => {
+                        if (eqItem.status === "SENT" && eqItem.sentAt) {
+                          return `Dispatched on ${new Date(eqItem.sentAt).toLocaleString()}`;
+                        }
+                        
+                        if (eqItem.status === "PENDING" && eqItem.scheduledAt) {
+                          const scheduledTime = new Date(eqItem.scheduledAt).getTime();
+                          const now = Date.now();
+                          const diffMs = scheduledTime - now;
+                          const diffMins = Math.round(diffMs / 60000);
+                          
+                          const formattedDate = new Date(eqItem.scheduledAt).toLocaleString();
+                          if (diffMs <= 0) {
+                            return `Processing dispatch... (Scheduled: ${formattedDate})`;
+                          } else if (diffMins < 1) {
+                            return `Sending in less than a minute... (Scheduled: ${formattedDate})`;
+                          } else if (diffMins === 1) {
+                            return `Sending in ~1 minute (Scheduled: ${formattedDate})`;
+                          } else if (diffMins < 60) {
+                            return `Sending in ~${diffMins} minutes (Scheduled: ${formattedDate})`;
+                          } else {
+                            const diffHours = Math.round(diffMins / 60);
+                            return `Sending in ~${diffHours} hours (Scheduled: ${formattedDate})`;
+                          }
+                        }
+
+                        if (eqItem.status === "PAUSED") {
+                          return eqItem.errorMessage || "Paused (Daily quota reached or slot ended).";
+                        }
+
+                        if (eqItem.status === "FAILED") {
+                          return `Failed: ${eqItem.errorMessage || "Unknown error"}`;
+                        }
+
+                        if (eqItem.status === "BLACKLISTED") {
+                          return "Excluded: Recipient matches your excluded companies list.";
+                        }
+                        
+                        return eqItem.errorMessage || "Awaiting dispatch (cron scheduled)";
+                      };
+
                       return (
                         <TableRow key={item.id}>
                           <TableCell className="font-semibold text-slate-700 dark:text-slate-350">{item.recipientEmail}</TableCell>
@@ -727,7 +817,7 @@ export const ProfessionalDashboardView: React.FC = () => {
                             <Badge variant={variant}>{statusText}</Badge>
                           </TableCell>
                           <TableCell className="text-xs text-slate-400">
-                            {item.status === "SENT" && item.sentAt ? `Dispatched on ${new Date(item.sentAt).toLocaleString()}` : item.errorMessage || "Awaiting dispatch (cron scheduled every 5m)"}
+                            {formatQueueDetails(item)}
                           </TableCell>
                         </TableRow>
                       );
@@ -735,7 +825,7 @@ export const ProfessionalDashboardView: React.FC = () => {
                   </TableBody>
                 </Table>
                 
-                {queueItems.length > 5 && (
+                {filteredQueue.length > 5 && (
                   <div className="flex justify-center mt-4">
                     <Button 
                       variant="outline" 
@@ -743,7 +833,7 @@ export const ProfessionalDashboardView: React.FC = () => {
                       onClick={() => navigate("/outreach/queue")}
                       className="text-xs font-semibold px-4 py-1.5"
                     >
-                      View Full Outreach Queue ({queueItems.length})
+                      View Full Outreach Queue ({filteredQueue.length})
                     </Button>
                   </div>
                 )}

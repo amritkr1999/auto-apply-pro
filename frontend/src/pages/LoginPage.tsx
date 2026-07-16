@@ -4,6 +4,7 @@ import "./login.css";
 import { profileService } from "../features/profile/services/profileService";
 import { API_BASE } from "../config/api";
 import { useTheme } from "../context/ThemeContext";
+import { useAnalytics } from "../context/AnalyticsContext";
 
 type AuthTab = "login" | "register";
 type UserRole = "candidate" | "recruiter" | "company";
@@ -12,6 +13,7 @@ export const LoginPage: React.FC = () => {
   const { toggleTheme, resolvedTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
+  const { trackEvent } = useAnalytics();
 
   // Tab State: 'login' or 'register'
   const [tab, setTab] = useState<AuthTab>(() => {
@@ -43,6 +45,7 @@ export const LoginPage: React.FC = () => {
       };
       
       localStorage.setItem("user", JSON.stringify(userData));
+      trackEvent("login_success", { method: "oauth", role: userData.role });
       
       if (userData.role === "RECRUITER") {
         navigate("/recruiter-dashboard");
@@ -131,6 +134,7 @@ export const LoginPage: React.FC = () => {
       }
 
       localStorage.setItem("user", JSON.stringify(userData));
+      trackEvent("login_success", { method: "credentials", role: userData.role });
       
       if (userData.role === "RECRUITER") {
         navigate("/recruiter-dashboard");
@@ -141,6 +145,7 @@ export const LoginPage: React.FC = () => {
       }
     } catch (err: any) {
       setError(err.message || "Invalid credentials. Please try again.");
+      trackEvent("login_failed", { method: "credentials", error: err.message || "Unknown error" });
     }
   };
 
@@ -205,6 +210,7 @@ export const LoginPage: React.FC = () => {
         role: selectedRole?.toUpperCase(),
       });
       localStorage.setItem("user", JSON.stringify(userData));
+      trackEvent("registration_success", { role: userData.role });
       
       if (userData.role === "RECRUITER") {
         navigate("/recruiter-dashboard");
@@ -215,11 +221,13 @@ export const LoginPage: React.FC = () => {
       }
     } catch (err: any) {
       setError(err.message || "Registration failed. Please try again.");
+      trackEvent("registration_failed", { error: err.message || "Unknown error" });
     }
   };
 
   const handleSocialAuth = async (provider: string) => {
     console.log(`Authenticating with ${provider}...`);
+    trackEvent("social_auth_initiated", { provider });
     const providerLower = provider.toLowerCase();
     if (providerLower === "google" || providerLower === "github") {
       try {
@@ -234,6 +242,7 @@ export const LoginPage: React.FC = () => {
         window.location.href = redirectUrl;
       } catch (err: any) {
         setError(err.message || `Failed to initiate ${provider} login.`);
+        trackEvent("login_failed", { method: `oauth_${providerLower}`, error: err.message || "Unknown error" });
       }
     } else {
       const email = `social.${providerLower}@example.com`;

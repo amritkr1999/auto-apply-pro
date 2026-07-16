@@ -5,6 +5,7 @@ import Button from "../../../components/ui/Button";
 import Input from "../../../components/ui/Input";
 import { outreachService } from "../../outreach/services/outreachService";
 import { getActiveSubscription } from "../../billing/services/billingService";
+import { useAnalytics } from "../../../context/AnalyticsContext";
 
 const GithubIcon = () => (
   <svg className="w-5 h-5 text-slate-800" fill="currentColor" viewBox="0 0 24 24">
@@ -25,6 +26,7 @@ interface Props {
 }
 
 export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, onProfileUpdate }) => {
+  const { trackEvent } = useAnalytics();
   const [profiles, setProfiles] = useState<CandidateProfile[]>([]);
   const [selectedProfileId, setSelectedProfileId] = useState<number | null>(null);
   const [newProfileName, setNewProfileName] = useState("");
@@ -154,8 +156,10 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
       setProfiles(prev => prev.map(p => p.id === selectedProfileId ? data : p));
       
       setMessage("Resume uploaded successfully! Click 'Sync Profile' to auto-populate fields from the new resume.");
+      trackEvent("resume_uploaded", { filename: file.name, size: file.size });
     } catch (err: any) {
       setError(err.message || "Failed to upload resume.");
+      trackEvent("resume_upload_failed", { filename: file.name, error: err.message || "Unknown error" });
     } finally {
       setUploadingResume(false);
     }
@@ -175,8 +179,10 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
       setProfiles(prev => prev.map(p => p.id === selectedProfileId ? data : p));
       
       setMessage("Profile successfully synchronized with your resume!");
+      trackEvent("profile_synced_from_resume", { profileId: selectedProfileId });
     } catch (err: any) {
       setError(err.message || "Failed to sync profile.");
+      trackEvent("profile_sync_failed", { profileId: selectedProfileId, error: err.message || "Unknown error" });
     } finally {
       setSyncingProfile(false);
     }
@@ -543,8 +549,10 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
 
       onProfileUpdate(name, result.avatar || "");
       setMessage("Profile details saved successfully!");
+      trackEvent("profile_updated", { profileId: selectedProfileId });
     } catch (err: any) {
       setError(err.message || "Failed to update profile.");
+      trackEvent("profile_update_failed", { profileId: selectedProfileId, error: err.message || "Unknown error" });
     }
   };
 

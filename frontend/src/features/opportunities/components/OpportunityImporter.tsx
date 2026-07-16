@@ -5,6 +5,7 @@ import { outreachService, type OutreachDraft } from "../../outreach/services/out
 import { profileService } from "../../profile/services/profileService";
 import Button from "../../../components/ui/Button";
 import Badge from "../../../components/ui/Badge";
+import { useAnalytics } from "../../../context/AnalyticsContext";
 
 interface UploadItem {
   id: string;
@@ -26,6 +27,7 @@ interface EditItem {
 
 export const ScreenshotUploader: React.FC = () => {
   const navigate = useNavigate();
+  const { trackEvent } = useAnalytics();
 
   const userStr = localStorage.getItem("user");
   const user = userStr ? JSON.parse(userStr) : { id: 1 };
@@ -189,6 +191,7 @@ export const ScreenshotUploader: React.FC = () => {
       
       // Fetch latest background status logs
       await loadUploadLogs();
+      trackEvent("screenshot_ocr_triggered", { filename: item.file.name, size: item.file.size });
     } catch (err: any) {
       console.error("Failed to upload file", item.file.name, err);
       setUploadQueue(prev => prev.map(q => q.id === item.id ? { 
@@ -196,6 +199,7 @@ export const ScreenshotUploader: React.FC = () => {
         status: "FAILED", 
         errorMessage: err.message || "Failed to upload to server." 
       } : q));
+      trackEvent("screenshot_ocr_failed", { filename: item.file.name, error: err.message || "Unknown error" });
     } finally {
       setIsCurrentlyUploading(false);
     }

@@ -4,16 +4,20 @@ import "./index.css";
 import { BrowserRouter } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { ThemeProvider } from "./context/ThemeContext";
+import { AnalyticsProvider } from "./context/AnalyticsContext";
 import AppRoutes from "./routes/AppRoutes";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <HelmetProvider>
       <BrowserRouter>
-        <ThemeProvider>
-          <AppRoutes />
-        </ThemeProvider>
+        <AnalyticsProvider>
+          <ThemeProvider>
+            <AppRoutes />
+          </ThemeProvider>
+        </AnalyticsProvider>
       </BrowserRouter>
     </HelmetProvider>
   </StrictMode>,
 );
+

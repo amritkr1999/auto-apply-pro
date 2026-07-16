@@ -70,6 +70,33 @@ const DEFAULT_TEMPLATES: EmailTemplate[] = [
     skillsTemplate: "I wanted to follow up on my application for the {{jobRole}} role. My hands-on skills in {{skills}} make me excited about joining {{companyName}}.",
     body: "I have {{experienceYears}} years of experience building scalable products and would love to connect to share more.",
     signOff: "Regards,\n{{candidateName}}\n{{candidateMobile}}\n{{candidateEmail}}",
+  },
+  {
+    id: "default-3",
+    name: "Referral Request",
+    subject: "Connecting regarding open roles at {{companyName}}",
+    intro: "Dear {{recruiterName}},",
+    skillsTemplate: "I noticed that {{companyName}} is expanding and looking for developers skilled in {{skills}}. I wanted to connect to see if my background might be a fit.",
+    body: "I have {{experienceYears}} years of software engineering experience building highly scalable applications and products. I would be grateful for a referral or any advice you might have on applying.",
+    signOff: "Best regards,\n{{candidateName}}\n{{candidateMobile}}\n{{candidateEmail}}",
+  },
+  {
+    id: "default-4",
+    name: "Networking & Informational Interview",
+    subject: "Inquiry: Engineering team growth at {{companyName}}",
+    intro: "Hi {{recruiterName}},",
+    skillsTemplate: "I've been following {{companyName}}'s growth and was particularly interested in your work requiring {{skills}}.",
+    body: "With {{experienceYears}} years of software development experience, I’m keen to learn more about the team culture, recent challenges, and future direction. Would you be open to a brief 10-minute informational chat sometime next week?",
+    signOff: "Sincerely,\n{{candidateName}}\n{{candidateMobile}}\n{{candidateEmail}}",
+  },
+  {
+    id: "default-5",
+    name: "Product-focused Application",
+    subject: "Improving {{companyName}}'s developer experience | {{jobRole}} Application",
+    intro: "Dear {{recruiterName}},",
+    skillsTemplate: "I am a software engineer specializing in {{skills}} with a deep passion for building high-quality products that users love.",
+    body: "Throughout my {{experienceYears}} years of experience, I have focused on shipping user-centric features, optimizing performance, and collaborating closely with design and product teams.",
+    signOff: "Best,\n{{candidateName}}\n{{candidateMobile}}\n{{candidateEmail}}",
   }
 ];
 
