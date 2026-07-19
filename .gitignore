@@ -8,6 +8,11 @@
 *.sln
 *.swp
 
+# AI Agents
+.agents/
+.claude/
+.gemini/
+
 # Environment files / secrets
 .env
 .env.*
