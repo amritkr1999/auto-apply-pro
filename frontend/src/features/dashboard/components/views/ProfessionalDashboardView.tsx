@@ -47,6 +47,12 @@ export const ProfessionalDashboardView: React.FC = () => {
   // Outreach Send Queue date filter state
   const [queueTimeframe, setQueueTimeframe] = useState<"today" | "week" | "month" | "all">("today");
 
+  // Status filter state for Outreach Send Queue
+  const [queueStatusFilter, setQueueStatusFilter] = useState<string>("all");
+
+  // Scroll coordination target state
+  const [scrollToTarget, setScrollToTarget] = useState<string | null>(null);
+
   // Streak Widget visibility
   const [showStreak, setShowStreak] = useState(() => localStorage.getItem("show_streak_widget") !== "false");
 
@@ -96,8 +102,13 @@ export const ProfessionalDashboardView: React.FC = () => {
     });
   };
 
+  const filterQueueByStatus = (items: any[]) => {
+    if (queueStatusFilter === "all") return items;
+    return items.filter(item => item.status === queueStatusFilter);
+  };
+
   const filteredQueueItems = filterByTimeframe(queueItems);
-  const filteredQueue = filterQueueByDate(queueItems);
+  const filteredQueue = filterQueueByStatus(filterQueueByDate(queueItems));
   const filteredDrafts = filterByTimeframe(drafts);
   const filteredSuggestions = filterByTimeframe(suggestions);
 
@@ -105,6 +116,38 @@ export const ProfessionalDashboardView: React.FC = () => {
   const pendingApprovalCount = filteredDrafts.length;
   const suggestionCount = filteredSuggestions.length;
   const totalApplications = filteredQueueItems.length;
+
+  // Scroll to target element when switching tabs
+  useEffect(() => {
+    if (activeTab === "outreach" && scrollToTarget) {
+      const timer = setTimeout(() => {
+        const element = document.getElementById(scrollToTarget);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        setScrollToTarget(null);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [activeTab, scrollToTarget]);
+
+  const handleCardClick = (cardType: "total" | "pending" | "suggestions" | "sent") => {
+    if (cardType === "pending") {
+      setScrollToTarget("drafts-review");
+      setActiveTab("outreach");
+    } else if (cardType === "suggestions") {
+      setScrollToTarget("suggestions-review");
+      setActiveTab("outreach");
+    } else if (cardType === "total") {
+      setQueueStatusFilter("all");
+      setScrollToTarget("outreach-queue");
+      setActiveTab("outreach");
+    } else if (cardType === "sent") {
+      setQueueStatusFilter("SENT");
+      setScrollToTarget("outreach-queue");
+      setActiveTab("outreach");
+    }
+  };
 
 
   useEffect(() => {
@@ -484,6 +527,7 @@ export const ProfessionalDashboardView: React.FC = () => {
             pendingApprovalCount={pendingApprovalCount} 
             suggestionCount={suggestionCount} 
             sentCount={sentCount} 
+            onCardClick={handleCardClick}
           />
 
           {/* Activity Chart */}
@@ -701,17 +745,32 @@ export const ProfessionalDashboardView: React.FC = () => {
           )}
 
           {/* Send Queue & Sent History Table */}
-          <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-card p-6 shadow-sm">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <section id="outreach-queue" className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-card p-6 shadow-sm">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
               <div>
                 <h3 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
                   <span>📅</span> Outreach Send Queue
                 </h3>
                 <p className="text-xs text-slate-550 dark:text-slate-400">Scheduled chronologies and dispatch history</p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-slate-550 dark:text-slate-400 uppercase tracking-wider">Date Filter:</span>
+                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status:</span>
+                  <select
+                    value={queueStatusFilter}
+                    onChange={(e) => setQueueStatusFilter(e.target.value)}
+                    className="px-3 py-1.5 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-card text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                  >
+                    <option value="all">All Statuses</option>
+                    <option value="SENT">Sent</option>
+                    <option value="PENDING">In Queue</option>
+                    <option value="PAUSED">Paused</option>
+                    <option value="FAILED">Failed</option>
+                    <option value="BLACKLISTED">Blacklisted</option>
+                  </select>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Date:</span>
                   <select
                     value={queueTimeframe}
                     onChange={(e) => setQueueTimeframe(e.target.value as any)}
