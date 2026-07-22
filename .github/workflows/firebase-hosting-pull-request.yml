@@ -18,10 +18,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: npm ci && npm run build
+        working-directory: frontend
         env:
           VITE_API_BASE_URL: https://easynaukri.duckdns.org
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_EASYNAUKRI_2A392 }}
+          entryPoint: frontend
           projectId: easynaukri-2a392
