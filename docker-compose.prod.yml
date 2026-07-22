@@ -1,0 +1,101 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: auto-apply-db
+    environment:
+      POSTGRES_DB: ${DB_NAME:-autoapplypro}
+      POSTGRES_USER: ${DB_USER:-amrit}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-amrit123}
+    ports:
+      # Securely bind postgres to localhost on the host machine to prevent public exposure
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-amrit} -d ${DB_NAME:-autoapplypro}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    image: ghcr.io/amritkr1999/auto-apply-pro-backend:latest
+    container_name: auto-apply-backend
+    ports:
+      - "8060:8060"
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/${DB_NAME:-autoapplypro}
+      DB_USERNAME: ${DB_USER:-amrit}
+      DB_PASSWORD: ${DB_PASSWORD:-amrit123}
+      PIPELINE_SERVICE_URL: http://pipeline:8000
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+      LINKEDIN_CLIENT_ID: ${LINKEDIN_CLIENT_ID}
+      LINKEDIN_CLIENT_SECRET: ${LINKEDIN_CLIENT_SECRET}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_AUTH: ${SMTP_AUTH:-true}
+      SMTP_STARTTLS_ENABLE: ${SMTP_STARTTLS_ENABLE:-true}
+      SMTP_STARTTLS_REQUIRED: ${SMTP_STARTTLS_REQUIRED:-true}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-*}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  pipeline:
+    image: ghcr.io/amritkr1999/auto-apply-pro-pipeline:latest
+    container_name: auto-apply-pipeline
+    ports:
+      - "8000:8000"
+    environment:
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      USE_LOCAL_MODEL: ${USE_LOCAL_MODEL:-false}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      OLLAMA_DEEPSEEK_MODEL: ${OLLAMA_DEEPSEEK_MODEL:-deepseek-vision:7b}
+      OLLAMA_LLM_MODEL: ${OLLAMA_LLM_MODEL:-ollama3.1:8b}
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://${DB_USER:-amrit}:${DB_PASSWORD:-amrit123}@db:5432/${DB_NAME:-autoapplypro}}
+      BACKEND_API_URL: ${BACKEND_API_URL:-http://backend:8060}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: auto-apply-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  frontend:
+    image: ghcr.io/amritkr1999/auto-apply-pro-frontend:latest
+    container_name: auto-apply-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
