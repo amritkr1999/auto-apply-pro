@@ -73,7 +73,6 @@ jobs:
           host: ${{ secrets.OCI_HOST }}
           username: ${{ secrets.OCI_USERNAME }}
           key: ${{ secrets.OCI_PRIVATE_KEY }}
-          port: ${{ secrets.OCI_PORT || '22' }}
           envs: GITHUB_TOKEN,GITHUB_ACTOR
           script: |
             # Exit on error
