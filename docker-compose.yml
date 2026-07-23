@@ -7,9 +7,8 @@ services:
       POSTGRES_USER: ${DB_USER:-amrit}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-amrit123}
     ports:
-      # Expose postgres on localhost for development/debugging if needed.
-      # In a strict production environment, you may want to map this to '127.0.0.1:5432:5432'
-      - "5432:5432"
+      # Securely bind postgres to localhost on the host machine to prevent public exposure
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -22,6 +21,7 @@ services:
       retries: 5
 
   backend:
+    image: ghcr.io/amritkr1999/auto-apply-pro-backend:latest
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -29,24 +29,31 @@ services:
     ports:
       - "8060:8060"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${DB_NAME:-autoapplypro}
-      SPRING_DATASOURCE_USERNAME: ${DB_USER:-amrit}
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-amrit123}
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-*}
+      DB_URL: jdbc:postgresql://db:5432/${DB_NAME:-autoapplypro}
+      DB_USERNAME: ${DB_USER:-amrit}
+      DB_PASSWORD: ${DB_PASSWORD:-amrit123}
+      PIPELINE_SERVICE_URL: http://pipeline:8000
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-http://localhost:8060/api/v1/outreach/oauth2/callback}
       GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
       GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
-      SPRING_MAIL_HOST: ${SPRING_MAIL_HOST:-smtp.gmail.com}
-      SPRING_MAIL_PORT: ${SPRING_MAIL_PORT:-587}
-      SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME}
-      SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD}
-      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
-      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
-      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET}
-      SPRING_DATA_REDIS_HOST: redis
-      SPRING_DATA_REDIS_PORT: 6379
-      PIPELINE_SERVICE_URL: http://pipeline:8000
+      GITHUB_REDIRECT_URI: ${GITHUB_REDIRECT_URI:-http://localhost:8060/api/v1/auth/callback/github}
+      LINKEDIN_CLIENT_ID: ${LINKEDIN_CLIENT_ID}
+      LINKEDIN_CLIENT_SECRET: ${LINKEDIN_CLIENT_SECRET}
+      LINKEDIN_REDIRECT_URI: ${LINKEDIN_REDIRECT_URI:-http://localhost:8060/api/v1/auth/callback/linkedin}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_AUTH: ${SMTP_AUTH:-true}
+      SMTP_STARTTLS_ENABLE: ${SMTP_STARTTLS_ENABLE:-true}
+      SMTP_STARTTLS_REQUIRED: ${SMTP_STARTTLS_REQUIRED:-true}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-*}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      APP_FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
     depends_on:
       db:
         condition: service_healthy

@@ -22,14 +22,16 @@ RUN ./mvnw clean package -DskipTests
 FROM eclipse-temurin:25-jre-alpine
 WORKDIR /app
 
-# Copy the built jar from the build stage
-COPY --from=build /app/target/*.jar app.jar
+# Add a non-root system user for security first
+RUN addgroup -S spring && adduser -S spring -G spring
+
+# Copy the built jar from the build stage with correct ownership
+COPY --from=build --chown=spring:spring /app/target/*.jar app.jar
 
 # Expose backend port
 EXPOSE 8060
 
-# Add a non-root system user for security
-RUN addgroup -S spring && adduser -S spring -G spring
+# Use the secure non-root user
 USER spring:spring
 
 # Run the jar file
