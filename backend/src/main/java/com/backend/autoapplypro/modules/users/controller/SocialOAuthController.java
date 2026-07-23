@@ -240,6 +240,7 @@ public class SocialOAuthController {
                             .mobile("1234567890")
                             .loginStreak(1)
                             .lastLoginDate(java.time.LocalDate.now())
+                            .isEmailVerified(true)
                             .build();
                     user = userRepository.save(user);
                     marketingCampaignService.sendWelcomeEmail(user);

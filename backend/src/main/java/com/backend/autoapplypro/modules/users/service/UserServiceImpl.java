@@ -44,29 +44,24 @@ public class UserServiceImpl implements UserService {
         }
 
         java.time.LocalDate today = java.time.LocalDate.now();
+        String otpCode = String.format("%06d", new java.util.Random().nextInt(1000000));
+        java.time.LocalDateTime expiry = java.time.LocalDateTime.now().plusMinutes(15);
 
-        // Create User
+        // Create User (isEmailVerified = false by default)
         User user = User.builder()
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .role(role)
                 .name(request.getName())
                 .mobile(request.getMobile())
-                .loginStreak(1)
+                .loginStreak(0)
                 .lastLoginDate(today)
+                .isEmailVerified(false)
+                .emailVerificationToken(otpCode)
+                .emailVerificationTokenExpiry(expiry)
                 .build();
 
         user = userRepository.save(user);
-
-        // Send welcome email immediately
-        marketingCampaignService.sendWelcomeEmail(user);
-
-        // Log LOGIN activity
-        userActivityLogRepository.save(UserActivityLog.builder()
-                .user(user)
-                .activityType("LOGIN")
-                .activityDate(today)
-                .build());
 
         // Create associated profile based on role
         if (role == UserRole.CANDIDATE) {
@@ -94,6 +89,74 @@ public class UserServiceImpl implements UserService {
             companyRepository.save(company);
         }
 
+        // Send email verification email safely
+        try {
+            String verificationLink = "http://localhost:5173/verify-email?token=" + otpCode + "&email=" + user.getEmail();
+            systemEmailService.sendEmailVerificationEmail(user.getEmail(), verificationLink, otpCode);
+        } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(UserServiceImpl.class).error("Failed to send verification email: {}", e.getMessage(), e);
+        }
+
+        return AuthResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .name(user.getName())
+                .mobile(user.getMobile())
+                .role(user.getRole().name())
+                .isEmailVerified(false)
+                .requiresVerification(true)
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public AuthResponse verifyEmail(VerifyEmailRequest request) {
+        User user = userRepository.findByEmail(request.getEmail().trim())
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + request.getEmail()));
+
+        if (Boolean.TRUE.equals(user.getIsEmailVerified())) {
+            String token = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getRole().name());
+            return AuthResponse.builder()
+                    .token(token)
+                    .id(user.getId())
+                    .email(user.getEmail())
+                    .name(user.getName())
+                    .mobile(user.getMobile())
+                    .officialEmail(user.getOfficialEmail())
+                    .role(user.getRole().name())
+                    .loginStreak(user.getLoginStreak())
+                    .avatar(user.getAvatar())
+                    .isEmailVerified(true)
+                    .requiresVerification(false)
+                    .build();
+        }
+
+        if (user.getEmailVerificationToken() == null || !user.getEmailVerificationToken().equals(request.getToken().trim())) {
+            throw new IllegalArgumentException("Invalid verification code or link.");
+        }
+
+        if (user.getEmailVerificationTokenExpiry() == null || user.getEmailVerificationTokenExpiry().isBefore(java.time.LocalDateTime.now())) {
+            throw new IllegalArgumentException("Verification code has expired. Please request a new verification code.");
+        }
+
+        // Verification successful
+        user.setIsEmailVerified(true);
+        user.setEmailVerificationToken(null);
+        user.setEmailVerificationTokenExpiry(null);
+        user.setLoginStreak(1);
+        user.setLastLoginDate(java.time.LocalDate.now());
+        user = userRepository.save(user);
+
+        // Send welcome email on verification
+        marketingCampaignService.sendWelcomeEmail(user);
+
+        // Log LOGIN activity
+        userActivityLogRepository.save(UserActivityLog.builder()
+                .user(user)
+                .activityType("LOGIN")
+                .activityDate(java.time.LocalDate.now())
+                .build());
+
         String token = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getRole().name());
         return AuthResponse.builder()
                 .token(token)
@@ -105,7 +168,28 @@ public class UserServiceImpl implements UserService {
                 .role(user.getRole().name())
                 .loginStreak(user.getLoginStreak())
                 .avatar(user.getAvatar())
+                .isEmailVerified(true)
+                .requiresVerification(false)
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public void resendVerification(ResendVerificationRequest request) {
+        User user = userRepository.findByEmail(request.getEmail().trim())
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + request.getEmail()));
+
+        if (Boolean.TRUE.equals(user.getIsEmailVerified())) {
+            throw new IllegalArgumentException("Email is already verified. You can log in directly.");
+        }
+
+        String otpCode = String.format("%06d", new java.util.Random().nextInt(1000000));
+        user.setEmailVerificationToken(otpCode);
+        user.setEmailVerificationTokenExpiry(java.time.LocalDateTime.now().plusMinutes(15));
+        userRepository.save(user);
+
+        String verificationLink = "http://localhost:5173/verify-email?token=" + otpCode + "&email=" + user.getEmail();
+        systemEmailService.sendEmailVerificationEmail(user.getEmail(), verificationLink, otpCode);
     }
 
     @Override
@@ -120,6 +204,10 @@ public class UserServiceImpl implements UserService {
 
         if (request.getPassword() == null || !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new IllegalArgumentException("Invalid email or password");
+        }
+
+        if (Boolean.FALSE.equals(user.getIsEmailVerified())) {
+            throw new IllegalArgumentException("Your email address is not verified. Please check your email for the verification code or request a new one.");
         }
 
         // Calculate login streak
@@ -160,6 +248,8 @@ public class UserServiceImpl implements UserService {
                 .isPendingDeletion(user.getStatus() == UserStatus.PENDING_DELETION)
                 .deletionScheduledAt(user.getDeletionScheduledAt() != null ? user.getDeletionScheduledAt().toString() : null)
                 .avatar(user.getAvatar())
+                .isEmailVerified(true)
+                .requiresVerification(false)
                 .build();
     }
 

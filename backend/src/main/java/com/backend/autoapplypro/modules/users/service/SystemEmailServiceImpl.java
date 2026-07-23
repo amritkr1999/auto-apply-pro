@@ -85,4 +85,41 @@ public class SystemEmailServiceImpl implements SystemEmailService {
             }
         }
     }
+
+    @Override
+    public void sendEmailVerificationEmail(String recipientEmail, String verificationLink, String otpCode) {
+        String subject = "Auto Apply Pro - Verify Your Email Address";
+        String body = "Hello,\n\n"
+                + "Thank you for registering with Auto Apply Pro!\n"
+                + "Please verify your email address to activate your account. Your verification code is:\n\n"
+                + "   VERIFICATION CODE: " + otpCode + "\n\n"
+                + "Alternatively, you can click the link below to verify your email directly:\n\n"
+                + verificationLink + "\n\n"
+                + "This verification code/link is valid for 15 minutes.\n\n"
+                + "If you did not create an account, please ignore this email.\n\n"
+                + "Best regards,\n"
+                + "The Auto Apply Pro Team";
+
+        log.info("\n==================================================\n"
+                + "[SYSTEM EMAIL OUTBOX - EMAIL VERIFICATION]\n"
+                + "To: {}\n"
+                + "Subject: {}\n"
+                + "Verification Code (OTP): {}\n"
+                + "Body:\n{}\n"
+                + "==================================================",
+                recipientEmail, subject, otpCode, body);
+
+        if (mailSender != null) {
+            try {
+                SimpleMailMessage message = new SimpleMailMessage();
+                message.setTo(recipientEmail);
+                message.setSubject(subject);
+                message.setText(body);
+                mailSender.send(message);
+                log.info("Successfully sent verification email to: {}", recipientEmail);
+            } catch (Exception e) {
+                log.error("Failed to send verification email via SMTP, fell back to console logging: {}", e.getMessage());
+            }
+        }
+    }
 }

@@ -21,4 +21,6 @@ public class AuthResponse {
     private Boolean isPendingDeletion;
     private String deletionScheduledAt;
     private String avatar;
+    private Boolean isEmailVerified;
+    private Boolean requiresVerification;
 }

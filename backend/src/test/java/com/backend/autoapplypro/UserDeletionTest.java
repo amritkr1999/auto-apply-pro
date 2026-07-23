@@ -110,6 +110,7 @@ class UserDeletionTest {
         user.setDeletionScheduledAt(LocalDateTime.now().plusDays(10));
         user.setRole(UserRole.CANDIDATE);
         user.setName("Pending User");
+        user.setIsEmailVerified(true);
 
         LoginRequest request = new LoginRequest("pending@example.com", "password");
 

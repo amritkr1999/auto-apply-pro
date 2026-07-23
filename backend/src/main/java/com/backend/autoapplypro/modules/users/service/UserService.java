@@ -4,6 +4,8 @@ import com.backend.autoapplypro.modules.users.dto.*;
 
 public interface UserService {
     AuthResponse register(RegisterRequest request);
+    AuthResponse verifyEmail(VerifyEmailRequest request);
+    void resendVerification(ResendVerificationRequest request);
     AuthResponse login(LoginRequest request);
     
     CandidateProfileDto getCandidateProfile(Long userId);

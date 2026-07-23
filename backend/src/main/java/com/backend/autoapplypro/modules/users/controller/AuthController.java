@@ -12,6 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.backend.autoapplypro.modules.users.dto.VerifyEmailRequest;
+import com.backend.autoapplypro.modules.users.dto.ResendVerificationRequest;
+
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
@@ -25,6 +28,28 @@ public class AuthController {
             return new ResponseEntity<>(userService.register(request), HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(AuthResponse.builder().token(e.getMessage()).build());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(AuthResponse.builder().token("Registration failed: " + e.getMessage()).build());
+        }
+    }
+
+    @PostMapping("/verify-email")
+    public ResponseEntity<AuthResponse> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
+        try {
+            return ResponseEntity.ok(userService.verifyEmail(request));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(AuthResponse.builder().token(e.getMessage()).build());
+        }
+    }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<?> resendVerification(@Valid @RequestBody ResendVerificationRequest request) {
+        try {
+            userService.resendVerification(request);
+            return ResponseEntity.ok(java.util.Map.of("message", "A new verification code has been dispatched to your email address."));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("message", e.getMessage()));
         }
     }
 

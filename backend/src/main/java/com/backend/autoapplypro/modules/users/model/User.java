@@ -136,6 +136,17 @@ public class User {
     private LocalDateTime resetTokenExpiry;
 
     @Builder.Default
+    @Column(name = "is_email_verified")
+    @ColumnDefault("true")
+    private Boolean isEmailVerified = false;
+
+    @Column(name = "email_verification_token")
+    private String emailVerificationToken;
+
+    @Column(name = "email_verification_token_expiry")
+    private LocalDateTime emailVerificationTokenExpiry;
+
+    @Builder.Default
     @Column(name = "marketing_emails_enabled", nullable = false)
     private Boolean marketingEmailsEnabled = true;
 
@@ -233,6 +244,9 @@ public class User {
         }
         if (aiPersonalizationEnabled == null) {
             aiPersonalizationEnabled = false;
+        }
+        if (isEmailVerified == null) {
+            isEmailVerified = false;
         }
     }
 

@@ -50,6 +50,7 @@ class UserServiceStreakTest {
         user.setEmail("test@example.com");
         user.setPasswordHash("hashedPassword");
         user.setRole(com.backend.autoapplypro.modules.users.model.UserRole.CANDIDATE);
+        user.setIsEmailVerified(true);
         user.setLoginStreak(0);
         user.setLastLoginDate(null);
 
@@ -75,6 +76,7 @@ class UserServiceStreakTest {
         user.setEmail("test@example.com");
         user.setPasswordHash("hashedPassword");
         user.setRole(com.backend.autoapplypro.modules.users.model.UserRole.CANDIDATE);
+        user.setIsEmailVerified(true);
         user.setLoginStreak(3);
         user.setLastLoginDate(LocalDate.now().minusDays(1)); // Yesterday
 
@@ -99,6 +101,7 @@ class UserServiceStreakTest {
         user.setEmail("test@example.com");
         user.setPasswordHash("hashedPassword");
         user.setRole(com.backend.autoapplypro.modules.users.model.UserRole.CANDIDATE);
+        user.setIsEmailVerified(true);
         user.setLoginStreak(3);
         user.setLastLoginDate(LocalDate.now()); // Today
 
@@ -123,6 +126,7 @@ class UserServiceStreakTest {
         user.setEmail("test@example.com");
         user.setPasswordHash("hashedPassword");
         user.setRole(com.backend.autoapplypro.modules.users.model.UserRole.CANDIDATE);
+        user.setIsEmailVerified(true);
         user.setLoginStreak(5);
         user.setLastLoginDate(LocalDate.now().minusDays(3)); // 3 days ago
 

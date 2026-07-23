@@ -29,6 +29,8 @@ export interface UserAuthData {
   role: string;
   isPendingDeletion: boolean;
   avatar?: string;
+  isEmailVerified?: boolean;
+  requiresVerification?: boolean;
 }
 
 export interface CandidateProfile {
@@ -130,6 +132,32 @@ export const profileService = {
       throw new Error(errorData.token || "Registration failed");
     }
     return response.json();
+  },
+
+  async verifyEmail(email: string, token: string): Promise<UserAuthData> {
+    const response = await fetch(`${API_BASE_V1}/auth/verify-email`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, token }),
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.token || "Email verification failed");
+    }
+    return response.json();
+  },
+
+  async resendVerification(email: string): Promise<any> {
+    const response = await fetch(`${API_BASE_V1}/auth/resend-verification`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to resend verification email.");
+    }
+    return data;
   },
 
   async login(requestData: any): Promise<UserAuthData> {

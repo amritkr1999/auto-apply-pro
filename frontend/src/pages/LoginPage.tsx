@@ -97,6 +97,13 @@ export const LoginPage: React.FC = () => {
   const [isRestoring, setIsRestoring] = useState<boolean>(false);
   const [restoreError, setRestoreError] = useState<string>("");
 
+  // Email Verification States
+  const [isVerifyingEmail, setIsVerifyingEmail] = useState<boolean>(false);
+  const [verificationCode, setVerificationCode] = useState<string>("");
+  const [isVerifyingSubmit, setIsVerifyingSubmit] = useState<boolean>(false);
+  const [isResendingCode, setIsResendingCode] = useState<boolean>(false);
+  const [resendSuccessMessage, setResendSuccessMessage] = useState<string>("");
+
   const handleTabChange = (newTab: AuthTab) => {
     setTab(newTab);
     setError("");
@@ -247,17 +254,23 @@ export const LoginPage: React.FC = () => {
       clearInterval(stageTimer);
       setRegProgressStage(5); // All steps completed
 
-      // Short delay so user observes completed green checkmarks before navigation
       setTimeout(() => {
-        localStorage.setItem("user", JSON.stringify(userData));
-        trackEvent("registration_success", { role: userData.role });
-        
-        if (userData.role === "RECRUITER") {
-          navigate("/recruiter-dashboard");
-        } else if (userData.role === "COMPANY") {
-          navigate("/company-dashboard");
+        setIsRegisteringSubmit(false);
+        if (userData.requiresVerification) {
+          setIsVerifyingEmail(true);
+          setRegStep(3);
+          trackEvent("registration_verification_required", { email });
         } else {
-          navigate("/dashboard");
+          localStorage.setItem("user", JSON.stringify(userData));
+          trackEvent("registration_success", { role: userData.role });
+          
+          if (userData.role === "RECRUITER") {
+            navigate("/recruiter-dashboard");
+          } else if (userData.role === "COMPANY") {
+            navigate("/company-dashboard");
+          } else {
+            navigate("/dashboard");
+          }
         }
       }, 500);
     } catch (err: any) {
@@ -265,6 +278,55 @@ export const LoginPage: React.FC = () => {
       setIsRegisteringSubmit(false);
       setError(err.message || "Registration failed. Please try again.");
       trackEvent("registration_failed", { error: err.message || "Unknown error" });
+    }
+  };
+
+  const handleVerifyEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!verificationCode) {
+      setError("Please enter the 6-digit verification code.");
+      return;
+    }
+    setIsVerifyingSubmit(true);
+    setError("");
+    setResendSuccessMessage("");
+
+    try {
+      const userData = await profileService.verifyEmail(email, verificationCode);
+      localStorage.setItem("user", JSON.stringify(userData));
+      trackEvent("email_verification_success", { role: userData.role });
+
+      if (userData.role === "RECRUITER") {
+        navigate("/recruiter-dashboard");
+      } else if (userData.role === "COMPANY") {
+        navigate("/company-dashboard");
+      } else {
+        navigate("/dashboard");
+      }
+    } catch (err: any) {
+      setError(err.message || "Verification failed. Please check the code and try again.");
+      trackEvent("email_verification_failed", { error: err.message });
+    } finally {
+      setIsVerifyingSubmit(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    if (!email) {
+      setError("Email address is missing.");
+      return;
+    }
+    setIsResendingCode(true);
+    setError("");
+    setResendSuccessMessage("");
+
+    try {
+      const res = await profileService.resendVerification(email);
+      setResendSuccessMessage(res.message || "A new verification code has been sent to your email address.");
+    } catch (err: any) {
+      setError(err.message || "Failed to resend verification code.");
+    } finally {
+      setIsResendingCode(false);
     }
   };
 
@@ -483,7 +545,30 @@ export const LoginPage: React.FC = () => {
               textAlign: "center"
             }}
           >
-            {error}
+            <div>{error}</div>
+            {error.toLowerCase().includes("not verified") && (
+              <button
+                type="button"
+                onClick={() => {
+                  setTab("register");
+                  setIsVerifyingEmail(true);
+                  setRegStep(3);
+                }}
+                style={{
+                  marginTop: "8px",
+                  background: "#ef4444",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "6px",
+                  padding: "6px 12px",
+                  fontSize: "0.8rem",
+                  cursor: "pointer",
+                  fontWeight: 600
+                }}
+              >
+                Verify Email Now
+              </button>
+            )}
           </div>
         )}
 
@@ -621,7 +706,7 @@ export const LoginPage: React.FC = () => {
             )}
 
             {/* Step 2: Details Registration Form */}
-            {regStep === 2 && (
+            {regStep === 2 && !isVerifyingEmail && (
               <form className={`auth-form ${isRegisteringSubmit ? "submitting" : ""}`} onSubmit={handleRegisterSubmit}>
                 <div className="auth-group">
                   <label className="auth-label" htmlFor="reg-name">
@@ -731,6 +816,91 @@ export const LoginPage: React.FC = () => {
                 >
                   ← Back to role selection
                 </button>
+              </form>
+            )}
+
+            {/* Step 3: Verification Code Form */}
+            {(regStep === 3 || isVerifyingEmail) && (
+              <form className="auth-form" onSubmit={handleVerifyEmail}>
+                <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
+                  <div style={{ fontSize: "2.5rem", marginBottom: "0.5rem" }}>✉️</div>
+                  <h3 style={{ color: "#fff", fontSize: "1.15rem", fontWeight: 600, marginBottom: "0.5rem" }}>
+                    Verify Your Email Address
+                  </h3>
+                  <p style={{ color: "#94a3b8", fontSize: "0.85rem", lineHeight: "1.5" }}>
+                    We've sent a 6-digit verification code to <strong style={{ color: "#e2e8f0" }}>{email}</strong>.<br />
+                    Please enter the code below to activate your account. Code expires in 15 minutes.
+                  </p>
+                </div>
+
+                {resendSuccessMessage && (
+                  <div
+                    style={{
+                      background: "rgba(59, 130, 246, 0.1)",
+                      border: "1px solid rgba(59, 130, 246, 0.2)",
+                      color: "#60a5fa",
+                      fontSize: "0.85rem",
+                      padding: "10px 14px",
+                      borderRadius: "8px",
+                      marginBottom: "1.25rem",
+                      textAlign: "center",
+                    }}
+                  >
+                    {resendSuccessMessage}
+                  </div>
+                )}
+
+                <div className="auth-group">
+                  <label className="auth-label" htmlFor="reg-verification-code">
+                    6-Digit Verification Code (OTP)
+                  </label>
+                  <div className="auth-input-wrapper">
+                    <input
+                      id="reg-verification-code"
+                      type="text"
+                      className="auth-input"
+                      placeholder="Enter 6-digit code"
+                      value={verificationCode}
+                      onChange={(e) => setVerificationCode(e.target.value)}
+                      maxLength={10}
+                      disabled={isVerifyingSubmit}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <button type="submit" className="auth-submit-btn" disabled={isVerifyingSubmit || !verificationCode}>
+                  {isVerifyingSubmit ? (
+                    <>
+                      <span className="btn-spinner"></span> Verifying...
+                    </>
+                  ) : (
+                    "Verify & Activate Account"
+                  )}
+                </button>
+
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "1.25rem" }}>
+                  <button
+                    type="button"
+                    className="forgot-link"
+                    onClick={handleResendCode}
+                    disabled={isResendingCode}
+                    style={{ background: "none", border: "none", cursor: "pointer", padding: 0, fontSize: "0.85rem" }}
+                  >
+                    {isResendingCode ? "Resending..." : "Resend Verification Code"}
+                  </button>
+                  <button
+                    type="button"
+                    className="forgot-link"
+                    onClick={() => {
+                      setIsVerifyingEmail(false);
+                      setRegStep(2);
+                    }}
+                    style={{ background: "none", border: "none", cursor: "pointer", padding: 0, fontSize: "0.85rem" }}
+                  >
+                    Change Details
+                  </button>
+                </div>
               </form>
             )}
           </div>
