@@ -11,6 +11,17 @@ export const LandingPage: React.FC = () => {
   const user = userStr ? JSON.parse(userStr) : null;
 
   const [feedbacks, setFeedbacks] = useState<FeedbackResponse[]>([]);
+  const [activeSlide, setActiveSlide] = useState<string>("intro");
+
+  const slides = [
+    { id: "intro", label: "Intro" },
+    { id: "what-we-do", label: "Workflow Automation" },
+    { id: "benefits", label: "Key Advantages" },
+    { id: "pricing", label: "Pricing Tiers" },
+    { id: "testimonials", label: "Success Stories" },
+    { id: "faqs", label: "Questions & Answers" },
+    { id: "footer", label: "Footer" }
+  ];
 
   useEffect(() => {
     const fetchFeedbacks = async () => {
@@ -22,6 +33,26 @@ export const LandingPage: React.FC = () => {
       }
     };
     fetchFeedbacks();
+  }, []);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSlide(entry.target.id);
+          }
+        });
+      },
+      { threshold: 0.4 }
+    );
+
+    slides.forEach((slide) => {
+      const el = document.getElementById(slide.id);
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
   }, []);
 
   const getInitials = (name: string) => {
@@ -107,8 +138,27 @@ export const LandingPage: React.FC = () => {
         </div>
       </nav>
 
+      {/* Slide Navigation Dots */}
+      <nav className="slide-dots-nav" aria-label="Slide Navigation">
+        {slides.map((slide) => (
+          <button
+            key={slide.id}
+            type="button"
+            className={`slide-dot ${activeSlide === slide.id ? "active" : ""}`}
+            data-label={slide.label}
+            onClick={() => {
+              const el = document.getElementById(slide.id);
+              if (el) {
+                el.scrollIntoView({ behavior: "smooth" });
+              }
+            }}
+            title={slide.label}
+          />
+        ))}
+      </nav>
+
       {/* ==================== Hero Section ==================== */}
-      <header className="hero-section">
+      <header id="intro" className="hero-section">
         <div className="hero-content">
           <span className="hero-tagline">Now in Public Beta</span>
           <h1 className="hero-title">
@@ -542,7 +592,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* ==================== Footer ==================== */}
-      <footer className="landing-footer">
+      <footer id="footer" className="landing-footer">
         <div className="footer-container">
           <div className="footer-brand">
             <h3>Auto Apply Pro</h3>
