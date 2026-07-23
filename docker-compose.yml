@@ -35,10 +35,13 @@ services:
       PIPELINE_SERVICE_URL: http://pipeline:8000
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-http://localhost:8060/api/v1/outreach/oauth2/callback}
       GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
       GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+      GITHUB_REDIRECT_URI: ${GITHUB_REDIRECT_URI:-http://localhost:8060/api/v1/auth/callback/github}
       LINKEDIN_CLIENT_ID: ${LINKEDIN_CLIENT_ID}
       LINKEDIN_CLIENT_SECRET: ${LINKEDIN_CLIENT_SECRET}
+      LINKEDIN_REDIRECT_URI: ${LINKEDIN_REDIRECT_URI:-http://localhost:8060/api/v1/auth/callback/linkedin}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
       SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
@@ -49,7 +52,8 @@ services:
       SMTP_STARTTLS_ENABLE: ${SMTP_STARTTLS_ENABLE:-true}
       SMTP_STARTTLS_REQUIRED: ${SMTP_STARTTLS_REQUIRED:-true}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-*}
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      APP_FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
     depends_on:
       db:
         condition: service_healthy

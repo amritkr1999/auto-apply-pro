@@ -85,6 +85,13 @@ if [ -f "$ENV_FILE" ]; then
   
   # Replace FRONTEND_URL
   sed -i -E 's|FRONTEND_URL=.*|FRONTEND_URL=https://easynaukri-2a392.web.app|' "$ENV_FILE"
+
+  # Replace or add GOOGLE_REDIRECT_URI
+  if grep -q "GOOGLE_REDIRECT_URI=" "$ENV_FILE"; then
+    sed -i -E 's|GOOGLE_REDIRECT_URI=.*|GOOGLE_REDIRECT_URI=https://easynaukri.duckdns.org/api/v1/outreach/oauth2/callback|' "$ENV_FILE"
+  else
+    echo "GOOGLE_REDIRECT_URI=https://easynaukri.duckdns.org/api/v1/outreach/oauth2/callback" >> "$ENV_FILE"
+  fi
   
   echo "[+] .env updated. Restarting the backend Docker container to apply changes..."
   cd /home/ubuntu/auto-apply-pro
