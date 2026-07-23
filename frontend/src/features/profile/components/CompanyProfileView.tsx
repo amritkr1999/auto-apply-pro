@@ -3,6 +3,7 @@ import { profileService } from "../services/profileService";
 import type { CompanyProfile } from "../services/profileService";
 import Input from "../../../components/ui/Input";
 import Button from "../../../components/ui/Button";
+import { isValidEmail, isValidUrl } from "../../../utils/validation";
 
 interface Props {
   userId: number;
@@ -40,6 +41,26 @@ export const CompanyProfileView: React.FC<Props> = ({ userId, onProfileUpdate })
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!profile) return;
+
+    if (!name || name.trim().length < 2 || name.trim().length > 100) {
+      setError("Company Name must be between 2 and 100 characters long.");
+      return;
+    }
+
+    if (officialEmail && !isValidEmail(officialEmail)) {
+      setError("Please enter a valid official email address (e.g. contact@company.com).");
+      return;
+    }
+
+    if (website && !isValidUrl(website)) {
+      setError("Please enter a valid website URL starting with http:// or https:// (e.g. https://example.com).");
+      return;
+    }
+
+    if (description && description.length > 2000) {
+      setError("Company description must not exceed 2000 characters.");
+      return;
+    }
 
     try {
       setMessage("");

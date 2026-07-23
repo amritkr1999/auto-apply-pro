@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { plaqueCardService, type PlaqueCardConfig } from "../services/plaqueCardService";
 import { profileService, type CandidateProfile } from "../services/profileService";
+import { isValidHexColor } from "../../../utils/validation";
 
 interface PlaqueCardEditorProps {
   userId: number;
@@ -46,6 +47,12 @@ export const PlaqueCardEditor: React.FC<PlaqueCardEditorProps> = ({ userId }) =>
 
   const handleSave = async () => {
     if (!config) return;
+
+    if (config.settings?.primaryColor && !isValidHexColor(config.settings.primaryColor)) {
+      setErrorMsg("Primary color must be a valid hex color code (e.g. #2563eb).");
+      return;
+    }
+
     setSaving(true);
     setSuccessMsg("");
     setErrorMsg("");

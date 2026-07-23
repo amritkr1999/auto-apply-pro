@@ -82,12 +82,12 @@ export const SubmitQuestionForm: React.FC = () => {
       setError("Please select a Topic.");
       return;
     }
-    if (!title.trim()) {
-      setError("Please provide a question title.");
+    if (!title.trim() || title.trim().length < 10 || title.trim().length > 150) {
+      setError("Question title must be between 10 and 150 characters.");
       return;
     }
-    if (!content.trim()) {
-      setError("Please provide the question description/content.");
+    if (!content.trim() || content.trim().length < 30) {
+      setError("Question content must be at least 30 characters long.");
       return;
     }
 

@@ -6,6 +6,7 @@ import Input from "../../../components/ui/Input";
 import { outreachService } from "../../outreach/services/outreachService";
 import { getActiveSubscription } from "../../billing/services/billingService";
 import { useAnalytics } from "../../../context/AnalyticsContext";
+import { validateFile, isValidEmail, isValidPhone, isValidUrl, isValidUsername } from "../../../utils/validation";
 
 const GithubIcon = () => (
   <svg className="w-5 h-5 text-slate-800" fill="currentColor" viewBox="0 0 24 24">
@@ -144,6 +145,13 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
 
   const handleUploadResume = async (file: File) => {
     if (!selectedProfileId) return;
+
+    const validation = validateFile(file, 5 * 1024 * 1024, [".pdf", ".doc", ".docx", ".txt"]);
+    if (!validation.valid) {
+      setError(validation.error || "Invalid resume file.");
+      return;
+    }
+
     try {
       setUploadingResume(true);
       setError("");
@@ -497,6 +505,27 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!profile) return;
+
+    if (officialEmail && !isValidEmail(officialEmail)) {
+      setError("Please enter a valid official email address.");
+      return;
+    }
+    if (mobile && !isValidPhone(mobile)) {
+      setError("Please enter a valid mobile phone number.");
+      return;
+    }
+    if (githubProfileUrl && !isValidUrl(githubProfileUrl)) {
+      setError("Please enter a valid GitHub profile URL starting with http:// or https://");
+      return;
+    }
+    if (linkedinProfileUrl && !isValidUrl(linkedinProfileUrl)) {
+      setError("Please enter a valid LinkedIn profile URL starting with http:// or https://");
+      return;
+    }
+    if (username && !isValidUsername(username)) {
+      setError("Username must be 3-30 alphanumeric characters or underscores.");
+      return;
+    }
 
     if (isProfilePublic && usernameAvailable === false) {
       setError("Cannot save profile: Username is already taken.");

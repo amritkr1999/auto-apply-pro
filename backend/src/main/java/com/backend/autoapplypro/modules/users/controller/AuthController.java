@@ -6,6 +6,7 @@ import com.backend.autoapplypro.modules.users.dto.RegisterRequest;
 import com.backend.autoapplypro.modules.users.dto.ForgotPasswordRequest;
 import com.backend.autoapplypro.modules.users.dto.ResetPasswordRequest;
 import com.backend.autoapplypro.modules.users.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ public class AuthController {
     private final UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
         try {
             return new ResponseEntity<>(userService.register(request), HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
@@ -28,7 +29,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         try {
             return ResponseEntity.ok(userService.login(request));
         } catch (IllegalArgumentException e) {
@@ -37,7 +38,7 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+    public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
         try {
             userService.initiatePasswordReset(request);
             return ResponseEntity.ok(java.util.Map.of("message", "If the email is registered, we have sent a reset password link to it."));
@@ -47,7 +48,7 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         try {
             userService.resetPassword(request);
             return ResponseEntity.ok(java.util.Map.of("message", "Password has been reset successfully."));

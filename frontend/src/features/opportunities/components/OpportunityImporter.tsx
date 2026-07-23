@@ -6,6 +6,7 @@ import { profileService } from "../../profile/services/profileService";
 import Button from "../../../components/ui/Button";
 import Badge from "../../../components/ui/Badge";
 import { useAnalytics } from "../../../context/AnalyticsContext";
+import { validateFile } from "../../../utils/validation";
 
 interface UploadItem {
   id: string;
@@ -440,6 +441,12 @@ export const ScreenshotUploader: React.FC = () => {
     if (!files || files.length === 0) return;
 
     const uploadedFile = files[0];
+    const validation = validateFile(uploadedFile, 5 * 1024 * 1024, [".pdf", ".doc", ".docx", ".txt"]);
+    if (!validation.valid) {
+      setError(validation.error || "Invalid file selection.");
+      return;
+    }
+
     try {
       setError(null);
       setSaveMessage("Uploading resume...");

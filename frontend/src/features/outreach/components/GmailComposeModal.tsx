@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { isValidEmail } from "../../../utils/validation";
 
 interface Props {
   isOpen: boolean;
@@ -51,6 +52,12 @@ export const GmailComposeModal: React.FC<Props> = ({
       setError("Recipient email is required.");
       return;
     }
+
+    if (!isValidEmail(recipient.trim())) {
+      setError("Please enter a valid recipient email address.");
+      return;
+    }
+
     if (!subject.trim()) {
       setError("Subject is required.");
       return;

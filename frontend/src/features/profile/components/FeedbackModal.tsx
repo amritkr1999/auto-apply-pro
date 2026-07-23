@@ -21,8 +21,8 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ onClose, onLogout,
       setErrorMsg("Please select a rating of at least 1 star.");
       return;
     }
-    if (!comment.trim()) {
-      setErrorMsg("Please write a short comment about your experience.");
+    if (!comment.trim() || comment.trim().length < 10) {
+      setErrorMsg("Please write at least 10 characters describing your experience.");
       return;
     }
 

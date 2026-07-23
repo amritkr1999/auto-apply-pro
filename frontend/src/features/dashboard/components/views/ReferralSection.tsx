@@ -5,6 +5,7 @@ import Button from "../../../../components/ui/Button";
 import Input from "../../../../components/ui/Input";
 import Badge from "../../../../components/ui/Badge";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../../../../components/ui/Table";
+import { isValidUrl } from "../../../../utils/validation";
 
 interface Props {
   userId: number;
@@ -70,6 +71,11 @@ export const ReferralSection: React.FC<Props> = ({ userId }) => {
     e.preventDefault();
     if (!companyName || !jobId || !jobLink) {
       setError("Please fill in all fields.");
+      return;
+    }
+
+    if (!isValidUrl(jobLink)) {
+      setError("Please enter a valid Job Listing URL starting with http:// or https://");
       return;
     }
 

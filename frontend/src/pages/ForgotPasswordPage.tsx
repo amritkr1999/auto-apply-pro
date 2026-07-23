@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "./login.css";
 import { profileService } from "../features/profile/services/profileService";
+import { isValidEmail } from "../utils/validation";
 
 export const ForgotPasswordPage: React.FC = () => {
   const [email, setEmail] = useState<string>("");
@@ -12,6 +13,12 @@ export const ForgotPasswordPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (!email || !isValidEmail(email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
     setLoading(true);
     try {
       await profileService.forgotPassword(email);

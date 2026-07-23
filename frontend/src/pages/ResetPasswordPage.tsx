@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import "./login.css";
 import { profileService } from "../features/profile/services/profileService";
+import { isValidBasicPassword } from "../utils/validation";
 
 export const ResetPasswordPage: React.FC = () => {
   const location = useLocation();
@@ -31,8 +32,8 @@ export const ResetPasswordPage: React.FC = () => {
       setError("Reset token is missing. Please request a new password reset email.");
       return;
     }
-    if (newPassword.length < 6) {
-      setError("Password must be at least 6 characters long.");
+    if (!isValidBasicPassword(newPassword)) {
+      setError("Password must be at least 8 characters long and contain both letters and numbers.");
       return;
     }
     if (newPassword !== confirmPassword) {

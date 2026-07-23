@@ -5,6 +5,7 @@ import { profileService } from "../features/profile/services/profileService";
 import { API_BASE } from "../config/api";
 import { useTheme } from "../context/ThemeContext";
 import { useAnalytics } from "../context/AnalyticsContext";
+import { isValidEmail, isValidPhone, isValidBasicPassword } from "../utils/validation";
 
 type AuthTab = "login" | "register";
 type UserRole = "candidate" | "recruiter" | "company";
@@ -126,6 +127,11 @@ export const LoginPage: React.FC = () => {
       setError("Please enter both email and password.");
       return;
     }
+
+    if (!isValidEmail(email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
     
     try {
       setError("");
@@ -197,6 +203,22 @@ export const LoginPage: React.FC = () => {
     e.preventDefault();
     if (!name || !mobile || !email || !password || !confirmPassword) {
       setError("All fields are required.");
+      return;
+    }
+    if (name.trim().length < 2) {
+      setError("Name must be at least 2 characters long.");
+      return;
+    }
+    if (!isValidEmail(email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+    if (!isValidPhone(mobile)) {
+      setError("Please enter a valid mobile phone number (7 to 15 digits).");
+      return;
+    }
+    if (!isValidBasicPassword(password)) {
+      setError("Password must be at least 8 characters long and contain both letters and numbers.");
       return;
     }
     if (password !== confirmPassword) {
