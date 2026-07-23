@@ -86,6 +86,10 @@ export const LoginPage: React.FC = () => {
   // Error States
   const [error, setError] = useState<string | null>(null);
 
+  // Registration Submitting & Multi-Step Loader State
+  const [isRegisteringSubmit, setIsRegisteringSubmit] = useState<boolean>(false);
+  const [regProgressStage, setRegProgressStage] = useState<number>(1);
+
   // Account Recovery States
   const [showRecoveryModal, setShowRecoveryModal] = useState<boolean>(false);
   const [pendingUser, setPendingUser] = useState<any>(null);
@@ -200,8 +204,16 @@ export const LoginPage: React.FC = () => {
       return;
     }
 
+    setIsRegisteringSubmit(true);
+    setRegProgressStage(1);
+    setError("");
+
+    // Automatically advance registration stages during backend network request
+    const stageTimer = setInterval(() => {
+      setRegProgressStage((prev) => (prev < 4 ? prev + 1 : prev));
+    }, 850);
+
     try {
-      setError("");
       const userData = await profileService.register({
         name,
         email,
@@ -209,17 +221,26 @@ export const LoginPage: React.FC = () => {
         password,
         role: selectedRole?.toUpperCase(),
       });
-      localStorage.setItem("user", JSON.stringify(userData));
-      trackEvent("registration_success", { role: userData.role });
-      
-      if (userData.role === "RECRUITER") {
-        navigate("/recruiter-dashboard");
-      } else if (userData.role === "COMPANY") {
-        navigate("/company-dashboard");
-      } else {
-        navigate("/dashboard");
-      }
+
+      clearInterval(stageTimer);
+      setRegProgressStage(5); // All steps completed
+
+      // Short delay so user observes completed green checkmarks before navigation
+      setTimeout(() => {
+        localStorage.setItem("user", JSON.stringify(userData));
+        trackEvent("registration_success", { role: userData.role });
+        
+        if (userData.role === "RECRUITER") {
+          navigate("/recruiter-dashboard");
+        } else if (userData.role === "COMPANY") {
+          navigate("/company-dashboard");
+        } else {
+          navigate("/dashboard");
+        }
+      }, 500);
     } catch (err: any) {
+      clearInterval(stageTimer);
+      setIsRegisteringSubmit(false);
       setError(err.message || "Registration failed. Please try again.");
       trackEvent("registration_failed", { error: err.message || "Unknown error" });
     }
@@ -313,6 +334,89 @@ export const LoginPage: React.FC = () => {
       </div>
 
       <div className="auth-container">
+        {/* Descriptive Multi-Step Registration Progress Overlay */}
+        {isRegisteringSubmit && (
+          <div className="reg-loader-overlay">
+            <div className="reg-loader-card">
+              <div className="reg-loader-badge">
+                <span className="reg-loader-badge-pulse"></span>
+                Setting up account
+              </div>
+              <h2 className="reg-loader-title">Setting Up Your Account</h2>
+              <p className="reg-loader-subtitle">
+                Please wait a moment while we provision your credentials and initialize your profile.
+              </p>
+
+              {/* Progress Bar */}
+              <div className="reg-progress-bar-track">
+                <div
+                  className="reg-progress-bar-fill"
+                  style={{ width: `${Math.min(regProgressStage * 20, 100)}%` }}
+                ></div>
+              </div>
+
+              {/* Step Checklist */}
+              <div className="reg-steps-list">
+                {[
+                  {
+                    id: 1,
+                    title: "Validating Account Details",
+                    desc: "Checking email availability & password complexity..."
+                  },
+                  {
+                    id: 2,
+                    title: "Creating Secure Account",
+                    desc: "Encrypting credentials and creating record in database..."
+                  },
+                  {
+                    id: 3,
+                    title: `Initializing ${selectedRole ? selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1) : "Candidate"} Profile`,
+                    desc: "Setting up default workspace preferences and candidate profile..."
+                  },
+                  {
+                    id: 4,
+                    title: "Dispatching Welcome Package",
+                    desc: "Generating JWT authentication token & welcome instructions..."
+                  },
+                  {
+                    id: 5,
+                    title: "Finalizing Workspace Setup",
+                    desc: "Redirecting you directly to your customized dashboard..."
+                  }
+                ].map((step) => {
+                  const isCompleted = regProgressStage > step.id;
+                  const isActive = regProgressStage === step.id;
+
+                  return (
+                    <div
+                      key={step.id}
+                      className={`reg-step-item ${
+                        isCompleted ? "completed" : isActive ? "active" : "pending"
+                      }`}
+                    >
+                      <div className="reg-step-icon-container">
+                        {isCompleted ? (
+                          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        ) : isActive ? (
+                          <div className="reg-step-spinner" />
+                        ) : (
+                          <span style={{ fontSize: "0.75rem", fontWeight: "700" }}>{step.id}</span>
+                        )}
+                      </div>
+                      <div className="reg-step-content">
+                        <span className="reg-step-label">{step.title}</span>
+                        <span className="reg-step-desc">{step.desc}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Logo Header */}
         <header className="auth-header">
           <h1 className="auth-logo">Auto Apply Pro</h1>
@@ -329,6 +433,7 @@ export const LoginPage: React.FC = () => {
             type="button"
             className={`auth-tab-btn ${tab === "login" ? "active" : ""}`}
             onClick={() => handleTabChange("login")}
+            disabled={isRegisteringSubmit}
           >
             Login
           </button>
@@ -336,6 +441,7 @@ export const LoginPage: React.FC = () => {
             type="button"
             className={`auth-tab-btn ${tab === "register" ? "active" : ""}`}
             onClick={() => handleTabChange("register")}
+            disabled={isRegisteringSubmit}
           >
             Register
           </button>
@@ -347,13 +453,12 @@ export const LoginPage: React.FC = () => {
             style={{
               background: "rgba(239, 68, 68, 0.1)",
               border: "1px solid rgba(239, 68, 68, 0.2)",
-              color: "#f87171",
-              fontSize: "0.85rem",
-              padding: "10px 14px",
-              borderRadius: "8px",
-              marginBottom: "1.25rem",
-              textAlign: "center",
-              fontWeight: 500,
+              color: "#ef4444",
+              padding: "12px 16px",
+              borderRadius: "10px",
+              marginBottom: "1.5rem",
+              fontSize: "0.9rem",
+              textAlign: "center"
             }}
           >
             {error}
@@ -365,14 +470,14 @@ export const LoginPage: React.FC = () => {
           <form className="auth-form" onSubmit={handleLoginSubmit}>
             <div className="auth-group">
               <label className="auth-label" htmlFor="login-email">
-                Email / Username
+                Email Address
               </label>
               <div className="auth-input-wrapper">
                 <input
                   id="login-email"
                   type="email"
                   className="auth-input"
-                  placeholder="name@company.com"
+                  placeholder="name@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -396,53 +501,25 @@ export const LoginPage: React.FC = () => {
                 />
                 <button
                   type="button"
-                  className="password-toggle-btn"
+                  className="auth-toggle-pwd"
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? (
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                      <line x1="1" y1="1" x2="23" y2="23"></line>
-                    </svg>
-                  ) : (
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                      <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                  )}
+                  {showPassword ? "Hide" : "Show"}
                 </button>
               </div>
             </div>
 
-            <div className="auth-actions-row">
-              <label className="checkbox-label">
+            <div className="auth-remember-row">
+              <label className="auth-checkbox-label">
                 <input
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
                 />
-                Remember me
+                <span>Remember me</span>
               </label>
-              <Link to="/forgot-password" className="forgot-link">
+              <Link to="/forgot-password" className="auth-forgot-link">
                 Forgot password?
               </Link>
             </div>
@@ -463,7 +540,7 @@ export const LoginPage: React.FC = () => {
                 <div className="role-cards-grid">
                   <div
                     className={`role-card ${selectedRole === "candidate" ? "selected candidate" : ""}`}
-                    onClick={() => handleRoleSelect("candidate")}
+                    onClick={() => !isRegisteringSubmit && handleRoleSelect("candidate")}
                   >
                     <div className="role-icon-wrapper" style={{ color: "var(--candidate-color)" }}>
                       🎓
@@ -479,7 +556,7 @@ export const LoginPage: React.FC = () => {
 
                   <div
                     className={`role-card ${selectedRole === "recruiter" ? "selected recruiter" : ""}`}
-                    onClick={() => handleRoleSelect("recruiter")}
+                    onClick={() => !isRegisteringSubmit && handleRoleSelect("recruiter")}
                   >
                     <div className="role-icon-wrapper" style={{ color: "var(--recruiter-color)" }}>
                       💼
@@ -495,7 +572,7 @@ export const LoginPage: React.FC = () => {
 
                   <div
                     className={`role-card ${selectedRole === "company" ? "selected company" : ""}`}
-                    onClick={() => handleRoleSelect("company")}
+                    onClick={() => !isRegisteringSubmit && handleRoleSelect("company")}
                   >
                     <div className="role-icon-wrapper" style={{ color: "var(--company-color)" }}>
                       🏢
@@ -514,7 +591,7 @@ export const LoginPage: React.FC = () => {
                   type="button"
                   className="auth-submit-btn"
                   onClick={handleRoleContinue}
-                  disabled={!selectedRole}
+                  disabled={!selectedRole || isRegisteringSubmit}
                 >
                   Continue
                 </button>
@@ -523,7 +600,7 @@ export const LoginPage: React.FC = () => {
 
             {/* Step 2: Details Registration Form */}
             {regStep === 2 && (
-              <form className="auth-form" onSubmit={handleRegisterSubmit}>
+              <form className={`auth-form ${isRegisteringSubmit ? "submitting" : ""}`} onSubmit={handleRegisterSubmit}>
                 <div className="auth-group">
                   <label className="auth-label" htmlFor="reg-name">
                     Full Name
@@ -536,6 +613,7 @@ export const LoginPage: React.FC = () => {
                       placeholder="Jane Doe"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
+                      disabled={isRegisteringSubmit}
                       required
                     />
                   </div>
@@ -553,6 +631,7 @@ export const LoginPage: React.FC = () => {
                       placeholder="+91 9876543210"
                       value={mobile}
                       onChange={(e) => setMobile(e.target.value)}
+                      disabled={isRegisteringSubmit}
                       required
                     />
                   </div>
@@ -570,6 +649,7 @@ export const LoginPage: React.FC = () => {
                       placeholder="jane.doe@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
+                      disabled={isRegisteringSubmit}
                       required
                     />
                   </div>
@@ -587,6 +667,7 @@ export const LoginPage: React.FC = () => {
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
+                      disabled={isRegisteringSubmit}
                       required
                     />
                   </div>
@@ -604,19 +685,27 @@ export const LoginPage: React.FC = () => {
                       placeholder="••••••••"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
+                      disabled={isRegisteringSubmit}
                       required
                     />
                   </div>
                 </div>
 
-                <button type="submit" className="auth-submit-btn">
-                  Complete Registration
+                <button type="submit" className="auth-submit-btn" disabled={isRegisteringSubmit}>
+                  {isRegisteringSubmit ? (
+                    <>
+                      <span className="btn-spinner"></span> Creating Account...
+                    </>
+                  ) : (
+                    "Complete Registration"
+                  )}
                 </button>
 
                 <button
                   type="button"
                   className="form-back-btn"
                   onClick={() => setRegStep(1)}
+                  disabled={isRegisteringSubmit}
                 >
                   ← Back to role selection
                 </button>

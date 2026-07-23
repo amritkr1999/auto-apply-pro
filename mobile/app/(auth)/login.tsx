@@ -338,7 +338,12 @@ export default function LoginScreen() {
                     className="bg-emerald-500 rounded-2xl py-3.5 mt-6 items-center shadow-lg shadow-emerald-500/20 active:opacity-90"
                   >
                     {loading ? (
-                      <ActivityIndicator color="#fff" />
+                      <View className="flex-row items-center justify-center space-x-2">
+                        <ActivityIndicator color="#fff" />
+                        <Text className="text-white font-medium text-sm ml-2">
+                          {isRegistering ? 'Creating account & setup...' : 'Authenticating...'}
+                        </Text>
+                      </View>
                     ) : (
                       <Text className="text-white font-bold text-lg">
                         {isRegistering ? 'Create Account' : 'Sign In'}
