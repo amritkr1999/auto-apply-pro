@@ -23,14 +23,47 @@ const loadRazorpayScript = (): Promise<boolean> => {
   });
 };
 
-// --- Static features fallback since they aren't stored in DB ---
-const DEFAULT_FEATURES = [
-  "Unlimited AI Resume Tailoring",
-  "Automated Email Outreach (50/day)",
-  "Real-time Analytics Dashboard",
-  "Learning Path & Interview prep tracking",
-  "Priority Support"
-];
+// --- Dynamic features based on application plan tiers ---
+const getPlanFeatures = (planName: string, amount: number): string[] => {
+  const nameLower = planName.toLowerCase();
+  if (nameLower.includes("starter") || amount <= 70) {
+    return [
+      "15 Submissions per day (450/mo)",
+      "Up to 3 Resume Profiles",
+      "ATS Keyword Optimization",
+      "All Roadmaps & Unlimited Quizzes",
+      "Pipeline Conversion Analytics",
+      "Mobile App Sync & Biometrics",
+    ];
+  }
+  if (nameLower.includes("pro") || (amount > 70 && amount <= 100)) {
+    return [
+      "40 Submissions per day (1,200/mo)",
+      "Unlimited Resume Profiles",
+      "Automated Custom Cover Letters & AI Tailoring",
+      "Automated SMTP Scheduled Outreach",
+      "Rejection Trends & Funnel Stats",
+      "Priority Email Support",
+    ];
+  }
+  if (nameLower.includes("elite") || amount > 100) {
+    return [
+      "Unlimited Submissions (100+/day)",
+      "Priority Instant AI OCR & Parsing",
+      "Full Resume & Cover Letter Suite",
+      "Featured Candidate Recruiter Spotlight",
+      "Dedicated Account Support",
+      "Custom Outreach Mail Config",
+    ];
+  }
+  return [
+    "AI Resume Tailoring",
+    "Automated Email Outreach",
+    "Real-time Analytics Dashboard",
+    "Learning Space & Career Roadmaps",
+    "Application Tracking Board",
+  ];
+};
 
 // --- Icons ---
 const CheckIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -241,8 +274,9 @@ const PricingPage: React.FC = () => {
       {/* Plan Cards */}
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {plans.map((plan) => {
-          const isPopular = plan.razorpayPlanId === "plan_PRM123456789";
+          const isPopular = plan.razorpayPlanId === "plan_PRM99INR" || plan.name.toLowerCase().includes("pro");
           const isSubscribing = subscribingPlanId === plan.id;
+          const planFeatures = getPlanFeatures(plan.name, plan.amount);
 
           return (
             <div
@@ -304,7 +338,7 @@ const PricingPage: React.FC = () => {
 
                 {/* Features */}
                 <ul className="space-y-3">
-                  {DEFAULT_FEATURES.map((feature, idx) => (
+                  {planFeatures.map((feature, idx) => (
                     <li key={idx} className="flex items-start gap-3 text-sm">
                       <CheckIcon className="w-5 h-5 text-green-400 shrink-0 mt-0.5" />
                       <span className="text-slate-300">{feature}</span>

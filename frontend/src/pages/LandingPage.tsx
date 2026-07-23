@@ -302,24 +302,30 @@ export const LandingPage: React.FC = () => {
         </div>
 
         <div className="pricing-grid">
-          {/* Free Tier */}
+          {/* Candidate Free */}
           <div className="pricing-card">
             <h3 className="pricing-tier">Candidate Free</h3>
-            <div className="pricing-price">$0<span>/month</span></div>
-            <p className="pricing-desc">Perfect for testing the system and getting familiar with automation.</p>
+            <div className="pricing-price">₹0<span>/month</span></div>
+            <p className="pricing-desc">Ideal for testing the platform and getting familiar with application automation.</p>
             <div className="pricing-divider"></div>
             <ul className="pricing-features">
               <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> 3 Submissions per day
+                <span className="pricing-feature-check">✓</span> 3 Submissions per day (90/mo)
               </li>
               <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> Standard matching algorithm
+                <span className="pricing-feature-check">✓</span> 1 Resume Profile
               </li>
               <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> Basic interview tracking
+                <span className="pricing-feature-check">✓</span> Standard Job Matching
+              </li>
+              <li className="pricing-feature-item">
+                <span className="pricing-feature-check">✓</span> Basic Roadmaps & 5 Quizzes/day
+              </li>
+              <li className="pricing-feature-item">
+                <span className="pricing-feature-check">✓</span> Simple Application Tracker
               </li>
               <li className="pricing-feature-item" style={{ opacity: 0.4 }}>
-                <span style={{ marginRight: "0.75rem" }}>✕</span> Custom cover letters
+                <span style={{ marginRight: "0.75rem" }}>✕</span> Custom Cover Letters
               </li>
             </ul>
             <Link to="/login?tab=register" className="landing-btn btn-outline pricing-btn">
@@ -327,28 +333,62 @@ export const LandingPage: React.FC = () => {
             </Link>
           </div>
 
-          {/* Premium Tier */}
-          <div className="pricing-card featured">
-            <span className="pricing-badge">Most Popular</span>
-            <h3 className="pricing-tier">Candidate Pro</h3>
-            <div className="pricing-price">$19<span>/month</span></div>
-            <p className="pricing-desc">For serious job seekers looking to land multiple interviews quickly.</p>
+          {/* Starter Plan */}
+          <div className="pricing-card">
+            <h3 className="pricing-tier">Starter Plan</h3>
+            <div className="pricing-price">₹69<span>/month</span></div>
+            <p className="pricing-desc">Great for active candidates seeking a steady daily job outreach volume.</p>
             <div className="pricing-divider"></div>
             <ul className="pricing-features">
               <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> 20 Submissions per day
+                <span className="pricing-feature-check">✓</span> 15 Submissions per day (450/mo)
               </li>
               <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> High-priority matching
+                <span className="pricing-feature-check">✓</span> Up to 3 Resume Profiles
               </li>
               <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> Automated Cover Letter tailoring
+                <span className="pricing-feature-check">✓</span> ATS Keyword Optimization
               </li>
               <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> Custom dashboard statistics
+                <span className="pricing-feature-check">✓</span> All Roadmaps & Unlimited Quizzes
               </li>
               <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> Priority email support
+                <span className="pricing-feature-check">✓</span> Pipeline Conversion Analytics
+              </li>
+              <li className="pricing-feature-item">
+                <span className="pricing-feature-check">✓</span> Mobile App Sync & Biometrics
+              </li>
+            </ul>
+            <Link to="/login?tab=register" className="landing-btn btn-outline pricing-btn">
+              Start Starter Plan
+            </Link>
+          </div>
+
+          {/* Candidate Pro Tier */}
+          <div className="pricing-card featured">
+            <span className="pricing-badge">Most Popular</span>
+            <h3 className="pricing-tier">Candidate Pro</h3>
+            <div className="pricing-price">₹99<span>/month</span></div>
+            <p className="pricing-desc">For serious job seekers looking to maximize outreach and land interview calls fast.</p>
+            <div className="pricing-divider"></div>
+            <ul className="pricing-features">
+              <li className="pricing-feature-item">
+                <span className="pricing-feature-check">✓</span> 40 Submissions per day (1,200/mo)
+              </li>
+              <li className="pricing-feature-item">
+                <span className="pricing-feature-check">✓</span> Unlimited Resume Profiles
+              </li>
+              <li className="pricing-feature-item">
+                <span className="pricing-feature-check">✓</span> Automated Cover Letters & AI Tailoring
+              </li>
+              <li className="pricing-feature-item">
+                <span className="pricing-feature-check">✓</span> Automated SMTP Scheduled Dispatch
+              </li>
+              <li className="pricing-feature-item">
+                <span className="pricing-feature-check">✓</span> Rejection Trends & Funnel Stats
+              </li>
+              <li className="pricing-feature-item">
+                <span className="pricing-feature-check">✓</span> Priority Email Support
               </li>
             </ul>
             <Link to="/login?tab=register" className="landing-btn btn-primary pricing-btn">
@@ -356,31 +396,34 @@ export const LandingPage: React.FC = () => {
             </Link>
           </div>
 
-          {/* Recruiter Tier */}
+          {/* Elite Autopilot Tier */}
           <div className="pricing-card">
-            <h3 className="pricing-tier">Recruiter Elite</h3>
-            <div className="pricing-price">$49<span>/month</span></div>
-            <p className="pricing-desc">For professional recruiters and companies targeting top-tier talents.</p>
+            <h3 className="pricing-tier">Elite Autopilot</h3>
+            <div className="pricing-price">₹199<span>/month</span></div>
+            <p className="pricing-desc">Maximum speed & priority processing for aggressive job hunting campaigns.</p>
             <div className="pricing-divider"></div>
             <ul className="pricing-features">
               <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> Unlimited candidate search
+                <span className="pricing-feature-check">✓</span> Unlimited Submissions (100+/day)
               </li>
               <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> Advanced talent filter pipeline
+                <span className="pricing-feature-check">✓</span> Priority Instant AI OCR & Parsing
               </li>
               <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> Outreach drafts manager
+                <span className="pricing-feature-check">✓</span> Full Resume & Cover Letter Suite
               </li>
               <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> Direct messaging to candidates
+                <span className="pricing-feature-check">✓</span> Featured Candidate Recruiter Spotlight
               </li>
               <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> Dedicated account manager
+                <span className="pricing-feature-check">✓</span> Dedicated Account Support
+              </li>
+              <li className="pricing-feature-item">
+                <span className="pricing-feature-check">✓</span> Custom Outreach Mail Config
               </li>
             </ul>
             <Link to="/login?tab=register" className="landing-btn btn-outline pricing-btn">
-              Get Recruiter License
+              Get Elite Autopilot
             </Link>
           </div>
         </div>

@@ -45,18 +45,46 @@ public class BillingService {
 
     @PostConstruct
     public void init() {
-        if (planRepository.count() == 0) {
-            Plan defaultPlan = Plan.builder()
-                    .name("Premium Monthly Plan")
-                    .description("Full access to job application automation, tailored resumes, and advanced outreach tracking.")
-                    .amount(new BigDecimal("999.00"))
+        if (planRepository.findByRazorpayPlanId("plan_STR69INR").isEmpty()) {
+            Plan starterPlan = Plan.builder()
+                    .name("Starter Plan")
+                    .description("Great for active candidates seeking steady daily job outreach volume (15 applications/day).")
+                    .amount(new BigDecimal("69.00"))
                     .currency("INR")
                     .billingInterval("monthly")
-                    .razorpayPlanId("plan_PRM123456789") // Standard developer test / fallback plan ID
+                    .razorpayPlanId("plan_STR69INR")
                     .isActive(true)
                     .build();
-            planRepository.save(defaultPlan);
-            log.info("Seeded default plan: Premium Monthly Plan");
+            planRepository.save(starterPlan);
+            log.info("Seeded plan: Starter Plan (INR 69)");
+        }
+
+        if (planRepository.findByRazorpayPlanId("plan_PRM99INR").isEmpty()) {
+            Plan proPlan = Plan.builder()
+                    .name("Candidate Pro")
+                    .description("For serious job seekers looking to maximize outreach and land interview calls fast (40 applications/day).")
+                    .amount(new BigDecimal("99.00"))
+                    .currency("INR")
+                    .billingInterval("monthly")
+                    .razorpayPlanId("plan_PRM99INR")
+                    .isActive(true)
+                    .build();
+            planRepository.save(proPlan);
+            log.info("Seeded plan: Candidate Pro (INR 99)");
+        }
+
+        if (planRepository.findByRazorpayPlanId("plan_ELT199INR").isEmpty()) {
+            Plan elitePlan = Plan.builder()
+                    .name("Elite Autopilot")
+                    .description("Maximum speed & priority AI processing for aggressive job hunting campaigns (Unlimited applications).")
+                    .amount(new BigDecimal("199.00"))
+                    .currency("INR")
+                    .billingInterval("monthly")
+                    .razorpayPlanId("plan_ELT199INR")
+                    .isActive(true)
+                    .build();
+            planRepository.save(elitePlan);
+            log.info("Seeded plan: Elite Autopilot (INR 199)");
         }
     }
 
