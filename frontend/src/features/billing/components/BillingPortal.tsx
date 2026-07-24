@@ -4,9 +4,11 @@ import {
   getActiveSubscription,
   cancelSubscription,
   getTransactions,
+  getMyUpiPaymentStatus,
   type SubscriptionDto,
   type PaymentTransactionDto,
 } from "../services/billingService";
+import { UpiPaymentModal } from "./UpiPaymentModal";
 
 // --- Helpers ---
 const formatDate = (dateStr: string) => {
@@ -65,24 +67,39 @@ const SpinnerIcon: React.FC<{ className?: string }> = ({ className }) => (
 const BillingPortal: React.FC = () => {
   const [subscription, setSubscription] = useState<SubscriptionDto | null>(null);
   const [transactions, setTransactions] = useState<PaymentTransactionDto[]>([]);
+  const [upiStatus, setUpiStatus] = useState<{
+    isPremium: boolean;
+    role: string;
+    latestTransaction: {
+      id: number;
+      utrNumber: string;
+      amount: number;
+      status: string;
+      createdAt: string;
+    } | null;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [cancelSuccess, setCancelSuccess] = useState(false);
+  const [isUpiModalOpen, setIsUpiModalOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<{ name: string; amount: number } | null>(null);
 
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const [sub, txns] = await Promise.all([
-        getActiveSubscription(),
-        getTransactions(),
+      const [sub, txns, upiData] = await Promise.all([
+        getActiveSubscription().catch(() => null),
+        getTransactions().catch(() => []),
+        getMyUpiPaymentStatus().catch(() => null),
       ]);
       setSubscription(sub);
       setTransactions(txns);
+      setUpiStatus(upiData);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load billing data");
+      console.error("Error loading billing status:", err);
     } finally {
       setLoading(false);
     }
@@ -150,24 +167,144 @@ const BillingPortal: React.FC = () => {
         </div>
       )}
 
-      {/* No Subscription */}
-      {!subscription && (
-        <div className="bg-slate-800/70 rounded-2xl border border-slate-700/60 p-10 text-center">
-          <div className="w-16 h-16 rounded-full bg-slate-700/50 flex items-center justify-center mx-auto mb-5">
-            <svg className="w-8 h-8 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-            </svg>
+      {/* UPI Pending Banner */}
+      {upiStatus?.latestTransaction?.status === "PENDING" && !subscription && (
+        <div className="mb-6 bg-amber-500/10 border border-amber-500/30 rounded-2xl p-5 flex items-start gap-4">
+          <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400 text-xl">⏳</div>
+          <div className="flex-1">
+            <h4 className="text-base font-bold text-amber-400 mb-1">UPI Payment Pending Verification</h4>
+            <p className="text-xs text-slate-300">
+              UTR Number <code className="px-1.5 py-0.5 bg-slate-800 rounded text-amber-300 font-mono">{upiStatus.latestTransaction.utrNumber}</code> (₹{upiStatus.latestTransaction.amount}) has been submitted. Admin verification is in progress via Telegram.
+            </p>
           </div>
-          <h3 className="text-xl font-semibold text-slate-200 mb-2">No Active Subscription</h3>
-          <p className="text-slate-400 mb-6 max-w-sm mx-auto">
-            You don't have an active subscription yet. Explore our plans to get started.
-          </p>
-          <Link
-            to="/billing/pricing"
-            className="inline-flex items-center px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 shadow-lg shadow-indigo-500/25"
-          >
-            View Plans
-          </Link>
+        </div>
+      )}
+
+      {/* Direct PRO Active Banner */}
+      {(upiStatus?.isPremium || upiStatus?.role === "PRO" || upiStatus?.role === "PREMIUM") && !subscription && (
+        <div className="mb-8 bg-gradient-to-r from-emerald-950/40 via-teal-950/20 to-slate-800 border border-emerald-500/30 rounded-2xl p-6 sm:p-8 flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-wider border border-emerald-500/30">
+                PRO Member Active
+              </span>
+            </div>
+            <h3 className="text-xl font-bold text-white">Full Lifetime / Manual Premium Plan</h3>
+            <p className="text-xs text-slate-400 mt-1">Your account has been upgraded to PRO. You have unlimited outreach & premium features.</p>
+          </div>
+          <span className="text-4xl">👑</span>
+        </div>
+      )}
+
+      {/* Available Plans Grid */}
+      {!subscription && !upiStatus?.isPremium && upiStatus?.role !== "PRO" && (
+        <div className="mb-12">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-white mb-2">Choose Your Upgrade Plan</h2>
+            <p className="text-slate-400 text-sm">Select a plan below to unlock automated applications & AI power.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                id: "starter",
+                name: "Starter Plan",
+                price: 69,
+                interval: "month",
+                description: "Great for active candidates seeking a steady daily job outreach volume.",
+                popular: false,
+                features: [
+                  "15 Submissions per day (450/mo)",
+                  "Up to 3 Resume Profiles",
+                  "ATS Keyword Optimization",
+                  "All Roadmaps & Unlimited Quizzes",
+                  "Pipeline Conversion Analytics",
+                  "Mobile App Sync & Biometrics",
+                ],
+              },
+              {
+                id: "candidate-pro",
+                name: "Candidate Pro",
+                price: 99,
+                interval: "month",
+                description: "For serious job seekers looking to maximize outreach and land interview calls fast.",
+                popular: true,
+                features: [
+                  "40 Submissions per day (1,200/mo)",
+                  "Unlimited Resume Profiles",
+                  "Automated Cover Letters & AI Tailoring",
+                  "Automated SMTP Scheduled Dispatch",
+                  "Rejection Trends & Funnel Stats",
+                  "Priority Email Support",
+                ],
+              },
+              {
+                id: "elite-autopilot",
+                name: "Elite Autopilot",
+                price: 199,
+                interval: "month",
+                description: "Maximum speed & priority processing for aggressive job hunting campaigns.",
+                popular: false,
+                features: [
+                  "Unlimited Submissions (100+/day)",
+                  "Priority Instant AI OCR & Parsing",
+                  "Full Resume & Cover Letter Suite",
+                  "Featured Candidate Recruiter Spotlight",
+                  "Dedicated Account Support",
+                  "Custom Outreach Mail Config",
+                ],
+              },
+            ].map((plan) => (
+              <div
+                key={plan.id}
+                className={`relative flex flex-col justify-between rounded-2xl p-6 transition-all duration-300 ${
+                  plan.popular
+                    ? "bg-gradient-to-b from-indigo-500/20 via-purple-500/10 to-slate-900 border-2 border-indigo-500/60 shadow-xl shadow-indigo-500/10"
+                    : "bg-slate-800/70 border border-slate-700/60 hover:border-slate-600"
+                }`}
+              >
+                {plan.popular && (
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-gradient-to-r from-emerald-400 to-teal-500 text-white font-bold text-[10px] uppercase tracking-wider rounded-full shadow-lg">
+                    ★ Most Popular
+                  </span>
+                )}
+
+                <div>
+                  <h3 className="text-lg font-bold text-white mb-1">{plan.name}</h3>
+                  <p className="text-slate-400 text-xs mb-4 min-h-[32px]">{plan.description}</p>
+                  
+                  <div className="flex items-baseline gap-1 mb-6">
+                    <span className="text-3xl font-extrabold text-white">₹{plan.price}</span>
+                    <span className="text-slate-400 text-xs">/{plan.interval}</span>
+                  </div>
+
+                  <ul className="space-y-2.5 mb-6">
+                    {plan.features.map((feat, idx) => (
+                      <li key={idx} className="flex items-center gap-2 text-xs text-slate-300">
+                        <span className="text-emerald-400 font-bold">✓</span>
+                        {feat}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedPlan({ name: plan.name, amount: plan.price });
+                    setIsUpiModalOpen(true);
+                  }}
+                  className={`w-full py-3 rounded-xl font-bold text-xs transition-all shadow-lg flex items-center justify-center gap-2 ${
+                    plan.popular
+                      ? "bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-emerald-500/20"
+                      : "bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/20"
+                  }`}
+                >
+                  ⚡ Pay ₹{plan.price} via UPI QR
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -313,6 +450,16 @@ const BillingPortal: React.FC = () => {
           </div>
         )}
       </div>
+
+      <UpiPaymentModal
+        isOpen={isUpiModalOpen}
+        onClose={() => setIsUpiModalOpen(false)}
+        planName={selectedPlan?.name || "PRO / PREMIUM Plan"}
+        amount={selectedPlan?.amount || 499}
+        onSuccess={() => {
+          fetchData();
+        }}
+      />
     </div>
   );
 };

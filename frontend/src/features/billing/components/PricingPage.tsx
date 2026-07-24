@@ -7,6 +7,7 @@ import {
   type PlanDto,
 } from "../services/billingService";
 import type { RazorpayResponse } from "../types/razorpay";
+import { UpiPaymentModal } from "./UpiPaymentModal";
 
 // --- Load Razorpay Script ---
 const loadRazorpayScript = (): Promise<boolean> => {
@@ -97,6 +98,8 @@ const PricingPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [subscribingPlanId, setSubscribingPlanId] = useState<number | null>(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [isUpiModalOpen, setIsUpiModalOpen] = useState(false);
+  const [selectedUpiPlan, setSelectedUpiPlan] = useState<{ name: string; amount: number } | null>(null);
 
   const fetchPlans = useCallback(async () => {
     try {
@@ -313,25 +316,38 @@ const PricingPage: React.FC = () => {
                 </div>
 
                 {/* Subscribe Button */}
-                <button
-                  type="button"
-                  onClick={() => handleSubscribe(plan)}
-                  disabled={isSubscribing || subscribingPlanId !== null}
-                  className={`w-full py-3 px-6 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 ${
-                    isPopular
-                      ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 shadow-lg shadow-indigo-500/25 disabled:opacity-60"
-                      : "bg-slate-700 text-slate-200 hover:bg-slate-600 border border-slate-600 disabled:opacity-60"
-                  }`}
-                >
-                  {isSubscribing ? (
-                    <>
-                      <SpinnerIcon className="w-4 h-4" />
-                      Processing...
-                    </>
-                  ) : (
-                    "Subscribe Now"
-                  )}
-                </button>
+                <div className="space-y-2.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedUpiPlan({ name: plan.name, amount: plan.amount });
+                      setIsUpiModalOpen(true);
+                    }}
+                    className="w-full py-3 px-6 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 shadow-lg shadow-emerald-500/25"
+                  >
+                    <span>⚡ Pay Instant via UPI QR</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleSubscribe(plan)}
+                    disabled={isSubscribing || subscribingPlanId !== null}
+                    className={`w-full py-2.5 px-6 rounded-xl font-medium text-xs transition-all duration-200 flex items-center justify-center gap-2 ${
+                      isPopular
+                        ? "bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700"
+                        : "bg-slate-800/60 text-slate-400 hover:bg-slate-700/60 border border-slate-700/40"
+                    }`}
+                  >
+                    {isSubscribing ? (
+                      <>
+                        <SpinnerIcon className="w-4 h-4" />
+                        Processing Card...
+                      </>
+                    ) : (
+                      "Pay via Card / NetBanking (Razorpay)"
+                    )}
+                  </button>
+                </div>
 
                 {/* Divider */}
                 <div className="border-t border-slate-700/60 my-6" />
@@ -373,9 +389,19 @@ const PricingPage: React.FC = () => {
           ))}
         </div>
         <p className="text-slate-600 text-xs mt-6">
-          Payments are securely processed by Razorpay. Your data is encrypted and safe.
+          Payments are securely processed by Razorpay or UPI QR verification. Your data is encrypted and safe.
         </p>
       </div>
+
+      <UpiPaymentModal
+        isOpen={isUpiModalOpen}
+        onClose={() => setIsUpiModalOpen(false)}
+        planName={selectedUpiPlan?.name || "PRO / PREMIUM Plan"}
+        amount={selectedUpiPlan?.amount || 499}
+        onSuccess={() => {
+          setPaymentSuccess(true);
+        }}
+      />
     </div>
   );
 };

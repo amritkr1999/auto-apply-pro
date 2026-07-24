@@ -181,7 +181,7 @@
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 10px;
-  padding: 12px 16px;
+  padding: 12px 44px 12px 16px;
   color: var(--text-primary);
   font-family: var(--font-main);
   font-size: 0.95rem;
@@ -197,9 +197,12 @@
 }
 
 /* Password Toggle Eye Icon */
-.password-toggle-btn {
+.password-toggle-btn,
+.auth-toggle-pwd {
   position: absolute;
   right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
   background: none;
   border: none;
   color: var(--text-secondary);
@@ -208,22 +211,37 @@
   align-items: center;
   justify-content: center;
   padding: 4px;
+  border-radius: 4px;
+  transition: color 0.2s ease;
+  z-index: 2;
 }
 
-.password-toggle-btn:hover {
+.password-toggle-btn:hover,
+.auth-toggle-pwd:hover {
   color: var(--text-primary);
 }
 
+.password-toggle-btn:disabled,
+.auth-toggle-pwd:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Remember Me & Forgot Password Row */
+.auth-remember-row,
 .auth-actions-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
   font-size: 0.85rem;
   margin-top: 0.25rem;
   margin-bottom: 0.5rem;
+  width: 100%;
 }
 
+.auth-checkbox-label,
 .checkbox-label {
   display: flex;
   align-items: center;
@@ -233,20 +251,26 @@
   user-select: none;
 }
 
+.auth-checkbox-label input,
 .checkbox-label input {
   accent-color: var(--accent-color);
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
   cursor: pointer;
+  margin: 0;
 }
 
+.auth-forgot-link,
 .forgot-link {
   color: var(--accent-color);
   text-decoration: none;
   font-weight: 600;
   transition: color 0.2s ease;
+  white-space: nowrap;
+  margin-left: auto;
 }
 
+.auth-forgot-link:hover,
 .forgot-link:hover {
   color: var(--accent-hover);
   text-decoration: underline;

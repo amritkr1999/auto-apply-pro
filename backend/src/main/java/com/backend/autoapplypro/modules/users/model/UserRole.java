@@ -4,5 +4,7 @@ public enum UserRole {
     CANDIDATE,
     RECRUITER,
     COMPANY,
-    ADMIN
+    ADMIN,
+    PRO,
+    PREMIUM
 }

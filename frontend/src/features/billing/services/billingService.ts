@@ -113,17 +113,15 @@ export const verifySubscription = async (data: {
 };
 
 export const getActiveSubscription = async (): Promise<SubscriptionDto | null> => {
-  const res = await fetch(`${API_BASE_V1}/billing/subscription`, {
-    headers: { ...getAuthHeaders() },
-  });
-  if (!res.ok) {
-    throw new Error("Failed to fetch subscription");
-  }
-  // If response is null/empty or 204 No Content, return null
-  if (res.status === 204) return null;
-  const text = await res.text();
-  if (!text) return null;
   try {
+    const res = await fetch(`${API_BASE_V1}/billing/subscription`, {
+      headers: { ...getAuthHeaders() },
+    });
+    if (!res.ok || res.status === 204) {
+      return null;
+    }
+    const text = await res.text();
+    if (!text) return null;
     return JSON.parse(text);
   } catch (e) {
     return null;
@@ -143,11 +141,66 @@ export const cancelSubscription = async (): Promise<SubscriptionDto> => {
 };
 
 export const getTransactions = async (): Promise<PaymentTransactionDto[]> => {
-  const res = await fetch(`${API_BASE_V1}/billing/transactions`, {
-    headers: { ...getAuthHeaders() },
+  try {
+    const res = await fetch(`${API_BASE_V1}/billing/transactions`, {
+      headers: { ...getAuthHeaders() },
+    });
+    if (!res.ok || res.status === 204) {
+      return [];
+    }
+    const text = await res.text();
+    if (!text) return [];
+    return JSON.parse(text);
+  } catch (e) {
+    return [];
+  }
+};
+
+export interface UpiSubmissionResponse {
+  id: number;
+  utrNumber: string;
+  amount: number;
+  status: string;
+  createdAt: string;
+  isPremium: boolean;
+}
+
+export const submitUtrPayment = async (data: {
+  utrNumber: string;
+  amount?: number;
+}): Promise<UpiSubmissionResponse> => {
+  const res = await fetch(`${API_BASE_V1}/payments/submit-utr`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify(data),
   });
   if (!res.ok) {
-    throw new Error("Failed to fetch transactions");
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || "Failed to submit UTR for verification");
   }
   return res.json();
 };
+
+export const getMyUpiPaymentStatus = async (): Promise<{
+  isPremium: boolean;
+  role: string;
+  latestTransaction: {
+    id: number;
+    utrNumber: string;
+    amount: number;
+    status: string;
+    createdAt: string;
+  } | null;
+}> => {
+  const res = await fetch(`${API_BASE_V1}/payments/my-status`, {
+    headers: { ...getAuthHeaders() },
+  });
+  if (!res.ok) {
+    throw new Error("Failed to fetch payment status");
+  }
+  return res.json();
+};
+

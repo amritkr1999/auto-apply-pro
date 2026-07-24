@@ -47,6 +47,10 @@ public class User {
     @Column(name = "is_profile_public")
     private Boolean isProfilePublic = false;
 
+    @Builder.Default
+    @Column(name = "is_premium")
+    private Boolean isPremium = false;
+
     @Column(name = "official_email")
     private String officialEmail;
 
@@ -247,6 +251,9 @@ public class User {
         }
         if (isEmailVerified == null) {
             isEmailVerified = false;
+        }
+        if (isPremium == null) {
+            isPremium = false;
         }
     }
 

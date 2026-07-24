@@ -1,6 +1,8 @@
 package com.backend.autoapplypro.modules.billing.service;
 
 import com.backend.autoapplypro.modules.billing.repository.SubscriptionRepository;
+import com.backend.autoapplypro.modules.users.model.UserRole;
+import com.backend.autoapplypro.modules.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,9 +15,11 @@ import java.util.List;
 public class SubscriptionGatingService {
 
     private final SubscriptionRepository subscriptionRepository;
+    private final UserRepository userRepository;
 
     /**
-     * Checks if a user has an active, authenticated, or pending premium subscription.
+     * Checks if a user has an active, authenticated, or pending premium subscription,
+     * or if user.isPremium is true / user role is PRO or PREMIUM.
      *
      * @param userId the user ID to check
      * @return true if the user is premium, false otherwise
@@ -23,6 +27,12 @@ public class SubscriptionGatingService {
     public boolean isPremiumUser(Long userId) {
         if (userId == null) {
             return false;
+        }
+        boolean hasDirectPremium = userRepository.findById(userId)
+                .map(u -> Boolean.TRUE.equals(u.getIsPremium()) || u.getRole() == UserRole.PRO || u.getRole() == UserRole.PREMIUM)
+                .orElse(false);
+        if (hasDirectPremium) {
+            return true;
         }
         return subscriptionRepository.findTopByUserIdAndStatusInOrderByCreatedAtDesc(
                 userId, List.of("active", "authenticated", "pending")
