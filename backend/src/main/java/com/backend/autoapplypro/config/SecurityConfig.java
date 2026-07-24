@@ -58,10 +58,13 @@ public class SecurityConfig {
                 .collect(java.util.stream.Collectors.toList());
         configuration.setAllowedOriginPatterns(origins);
         configuration.setAllowedMethods(java.util.Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        configuration.setAllowedHeaders(java.util.Arrays.asList("Authorization", "Content-Type", "Cache-Control", "X-Requested-With"));
+        
+        // Allow all headers to prevent preflight rejection from extra headers
+        configuration.setAllowedHeaders(java.util.Arrays.asList("*"));
         configuration.setExposedHeaders(java.util.Arrays.asList("Authorization"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
+        
         org.springframework.web.cors.UrlBasedCorsConfigurationSource source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
