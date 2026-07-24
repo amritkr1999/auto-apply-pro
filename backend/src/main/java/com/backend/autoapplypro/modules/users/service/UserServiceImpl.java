@@ -44,10 +44,10 @@ public class UserServiceImpl implements UserService {
         }
 
         java.time.LocalDate today = java.time.LocalDate.now();
-        String otpCode = String.format("%06d", new java.util.Random().nextInt(1000000));
+        String otpCode = String.valueOf(100000 + new java.security.SecureRandom().nextInt(900000));
         java.time.LocalDateTime expiry = java.time.LocalDateTime.now().plusMinutes(15);
 
-        // Create User (isEmailVerified = false by default)
+        // Create User (isEmailVerified = true by default until paid SMTP is configured)
         User user = User.builder()
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
@@ -56,9 +56,7 @@ public class UserServiceImpl implements UserService {
                 .mobile(request.getMobile())
                 .loginStreak(0)
                 .lastLoginDate(today)
-                .isEmailVerified(false)
-                .emailVerificationToken(otpCode)
-                .emailVerificationTokenExpiry(expiry)
+                .isEmailVerified(true)
                 .build();
 
         user = userRepository.save(user);
@@ -89,22 +87,27 @@ public class UserServiceImpl implements UserService {
             companyRepository.save(company);
         }
 
-        // Send email verification email safely
+        // Email OTP Verification commented out until paid SMTP account is configured
+        /*
         try {
             String verificationLink = "http://localhost:5173/verify-email?token=" + otpCode + "&email=" + user.getEmail();
             systemEmailService.sendEmailVerificationEmail(user.getEmail(), verificationLink, otpCode);
         } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(UserServiceImpl.class).error("Failed to send verification email: {}", e.getMessage(), e);
         }
+        */
+
+        String token = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getRole().name());
 
         return AuthResponse.builder()
+                .token(token)
                 .id(user.getId())
                 .email(user.getEmail())
                 .name(user.getName())
                 .mobile(user.getMobile())
                 .role(user.getRole().name())
-                .isEmailVerified(false)
-                .requiresVerification(true)
+                .isEmailVerified(true)
+                .requiresVerification(false)
                 .build();
     }
 
@@ -183,13 +186,17 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Email is already verified. You can log in directly.");
         }
 
-        String otpCode = String.format("%06d", new java.util.Random().nextInt(1000000));
+        String otpCode = String.valueOf(100000 + new java.security.SecureRandom().nextInt(900000));
         user.setEmailVerificationToken(otpCode);
         user.setEmailVerificationTokenExpiry(java.time.LocalDateTime.now().plusMinutes(15));
         userRepository.save(user);
 
-        String verificationLink = "http://localhost:5173/verify-email?token=" + otpCode + "&email=" + user.getEmail();
-        systemEmailService.sendEmailVerificationEmail(user.getEmail(), verificationLink, otpCode);
+        try {
+            String verificationLink = "http://localhost:5173/verify-email?token=" + otpCode + "&email=" + user.getEmail();
+            systemEmailService.sendEmailVerificationEmail(user.getEmail(), verificationLink, otpCode);
+        } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(UserServiceImpl.class).error("Failed to resend verification email: {}", e.getMessage(), e);
+        }
     }
 
     @Override
@@ -206,9 +213,11 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Invalid email or password");
         }
 
+        /*
         if (Boolean.FALSE.equals(user.getIsEmailVerified())) {
             throw new IllegalArgumentException("Your email address is not verified. Please check your email for the verification code or request a new one.");
         }
+        */
 
         // Calculate login streak
         java.time.LocalDate today = java.time.LocalDate.now();

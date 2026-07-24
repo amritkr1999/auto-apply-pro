@@ -13,7 +13,11 @@ public class SystemEmailServiceImpl implements SystemEmailService {
     @Autowired(required = false)
     private JavaMailSender mailSender;
 
+    @org.springframework.beans.factory.annotation.Value("${spring.mail.username:}")
+    private String fromEmail;
+
     @Override
+    @org.springframework.scheduling.annotation.Async
     public void sendPasswordResetEmail(String recipientEmail, String resetLink) {
         String subject = "Auto Apply Pro - Reset Your Password";
         String body = "Hello,\n\n"
@@ -38,17 +42,21 @@ public class SystemEmailServiceImpl implements SystemEmailService {
             try {
                 SimpleMailMessage message = new SimpleMailMessage();
                 message.setTo(recipientEmail);
+                if (fromEmail != null && !fromEmail.trim().isEmpty()) {
+                    message.setFrom(fromEmail);
+                }
                 message.setSubject(subject);
                 message.setText(body);
                 mailSender.send(message);
                 log.info("Successfully sent password reset email to: {}", recipientEmail);
             } catch (Exception e) {
-                log.error("Failed to send real email via SMTP, fell back to console logging: {}", e.getMessage());
+                log.error("Failed to send real email via SMTP, fell back to console logging: {}", e.getMessage(), e);
             }
         }
     }
 
     @Override
+    @org.springframework.scheduling.annotation.Async
     public void sendPlaqueCardContactEmail(String recipientEmail, String candidateName, String senderName, String senderEmail, String senderCompany, String message) {
         String subject = "New Recruiter Inquiry from your Auto Apply Pro Plaque Card!";
         String body = "Hello " + candidateName + ",\n\n"
@@ -75,18 +83,22 @@ public class SystemEmailServiceImpl implements SystemEmailService {
             try {
                 SimpleMailMessage mailMessage = new SimpleMailMessage();
                 mailMessage.setTo(recipientEmail);
+                if (fromEmail != null && !fromEmail.trim().isEmpty()) {
+                    mailMessage.setFrom(fromEmail);
+                }
                 mailMessage.setReplyTo(senderEmail);
                 mailMessage.setSubject(subject);
                 mailMessage.setText(body);
                 mailSender.send(mailMessage);
                 log.info("Successfully sent plaque card contact email to: {}", recipientEmail);
             } catch (Exception e) {
-                log.error("Failed to send real email via SMTP, fell back to console logging: {}", e.getMessage());
+                log.error("Failed to send real email via SMTP, fell back to console logging: {}", e.getMessage(), e);
             }
         }
     }
 
     @Override
+    @org.springframework.scheduling.annotation.Async
     public void sendEmailVerificationEmail(String recipientEmail, String verificationLink, String otpCode) {
         String subject = "Auto Apply Pro - Verify Your Email Address";
         String body = "Hello,\n\n"
@@ -113,12 +125,15 @@ public class SystemEmailServiceImpl implements SystemEmailService {
             try {
                 SimpleMailMessage message = new SimpleMailMessage();
                 message.setTo(recipientEmail);
+                if (fromEmail != null && !fromEmail.trim().isEmpty()) {
+                    message.setFrom(fromEmail);
+                }
                 message.setSubject(subject);
                 message.setText(body);
                 mailSender.send(message);
                 log.info("Successfully sent verification email to: {}", recipientEmail);
             } catch (Exception e) {
-                log.error("Failed to send verification email via SMTP, fell back to console logging: {}", e.getMessage());
+                log.error("Failed to send verification email via SMTP, fell back to console logging: {}", e.getMessage(), e);
             }
         }
     }

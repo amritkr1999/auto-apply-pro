@@ -28,6 +28,9 @@ public class MarketingEmailCampaignServiceImpl implements MarketingEmailCampaign
     @Value("${app.frontend.url:http://localhost:5173}")
     private String frontendUrl;
 
+    @Value("${spring.mail.username:}")
+    private String fromEmail;
+
     @Override
     @Transactional
     public void runDripCampaign() {
@@ -161,6 +164,9 @@ public class MarketingEmailCampaignServiceImpl implements MarketingEmailCampaign
         if (mailSender != null) {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
+            if (fromEmail != null && !fromEmail.trim().isEmpty()) {
+                helper.setFrom(fromEmail);
+            }
             helper.setTo(recipientEmail);
             helper.setSubject(subject);
             helper.setText(htmlContent, true);

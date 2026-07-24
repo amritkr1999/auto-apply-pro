@@ -259,9 +259,15 @@ export const LoginPage: React.FC = () => {
         if (userData.requiresVerification) {
           setIsVerifyingEmail(true);
           setRegStep(3);
+          if ((userData as any).devVerificationCode) {
+            setVerificationCode((userData as any).devVerificationCode);
+          }
           trackEvent("registration_verification_required", { email });
         } else {
           localStorage.setItem("user", JSON.stringify(userData));
+          if (userData.token) {
+            localStorage.setItem("token", userData.token);
+          }
           trackEvent("registration_success", { role: userData.role });
           
           if (userData.role === "RECRUITER") {
