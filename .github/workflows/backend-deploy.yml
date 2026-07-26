@@ -107,8 +107,12 @@ jobs:
             # Pull the new image quietly to prevent SSH TTY progress bar hanging
             docker compose pull --quiet backend
             
+            # Cleanly stop and remove existing backend container to prevent container name conflicts
+            docker compose stop backend || true
+            docker compose rm -f backend || true
+            
             # Recreate and restart backend container
-            docker compose up -d backend
+            docker compose up -d --force-recreate --remove-orphans backend
             
             # Remove dangling images to preserve OCI storage space
             docker image prune -f
