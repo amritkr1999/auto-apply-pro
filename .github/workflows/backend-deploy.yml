@@ -88,6 +88,9 @@ jobs:
           username: ${{ secrets.OCI_USERNAME }}
           key: ${{ secrets.OCI_PRIVATE_KEY }}
           envs: GITHUB_TOKEN,GITHUB_ACTOR
+          script_stop: true
+          request_pty: true
+          command_timeout: 15m
           script: |
             # Exit on error
             set -e
@@ -95,14 +98,14 @@ jobs:
             # Navigate to deployment directory
             cd ~/auto-apply-pro
             
-            # Rename the production compose file
-            mv docker-compose.prod.yml docker-compose.yml
+            # Copy production compose file into place safely
+            cp -f docker-compose.prod.yml docker-compose.yml
             
             # Log into GHCR on the remote host using the Action's ephemeral token
             echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
             
-            # Pull the new image
-            docker compose pull backend
+            # Pull the new image quietly to prevent SSH TTY progress bar hanging
+            docker compose pull --quiet backend
             
             # Recreate and restart backend container
             docker compose up -d backend
