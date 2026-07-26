@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { profileService } from "../services/profileService";
-import type { CandidateProfile } from "../services/profileService";
+import type { CandidateProfile, ParsedResumeDto } from "../services/profileService";
+import { ResumeSuggestionsModal } from "./ResumeSuggestionsModal";
 import Button from "../../../components/ui/Button";
 import Input from "../../../components/ui/Input";
 import { outreachService } from "../../outreach/services/outreachService";
@@ -63,6 +64,8 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
   const [skillSearchQuery, setSkillSearchQuery] = useState("");
   const [uploadingResume, setUploadingResume] = useState(false);
   const [syncingProfile, setSyncingProfile] = useState(false);
+  const [suggestionsModalOpen, setSuggestionsModalOpen] = useState(false);
+  const [parsedSuggestions, setParsedSuggestions] = useState<ParsedResumeDto | null>(null);
   const [gmailConnected, setGmailConnected] = useState(false);
   const [connectedEmail, setConnectedEmail] = useState<string | null>(null);
   const [gmailLoading, setGmailLoading] = useState(true);
@@ -163,7 +166,15 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
       setProfileData(data);
       setProfiles(prev => prev.map(p => p.id === selectedProfileId ? data : p));
       
-      setMessage("Resume uploaded successfully! Click 'Sync Profile' to auto-populate fields from the new resume.");
+      // Automatically trigger suggestions review modal
+      try {
+        const suggestions = await profileService.syncCandidateProfileById(userId, selectedProfileId);
+        setParsedSuggestions(suggestions);
+        setSuggestionsModalOpen(true);
+        setMessage("Resume uploaded successfully! Review suggestions below.");
+      } catch (parseErr) {
+        setMessage("Resume uploaded successfully! Click 'Sync Profile' to review suggestions.");
+      }
       trackEvent("resume_uploaded", { filename: file.name, size: file.size });
     } catch (err: any) {
       setError(err.message || "Failed to upload resume.");
@@ -179,20 +190,30 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
       setSyncingProfile(true);
       setError("");
       setMessage("");
-      await profileService.syncCandidateProfileById(userId, selectedProfileId);
-      
-      // Refetch profile to load parsed results
-      const data = await profileService.getCandidateProfileById(userId, selectedProfileId);
-      setProfileData(data);
-      setProfiles(prev => prev.map(p => p.id === selectedProfileId ? data : p));
-      
-      setMessage("Profile successfully synchronized with your resume!");
+      const suggestions = await profileService.syncCandidateProfileById(userId, selectedProfileId);
+      setParsedSuggestions(suggestions);
+      setSuggestionsModalOpen(true);
       trackEvent("profile_synced_from_resume", { profileId: selectedProfileId });
     } catch (err: any) {
-      setError(err.message || "Failed to sync profile.");
+      setError(err.message || "Failed to parse resume suggestions.");
       trackEvent("profile_sync_failed", { profileId: selectedProfileId, error: err.message || "Unknown error" });
     } finally {
       setSyncingProfile(false);
+    }
+  };
+
+  const handleApplySuggestions = async (updated: CandidateProfile) => {
+    if (!selectedProfileId) return;
+    try {
+      setError("");
+      setMessage("");
+      const saved = await profileService.updateCandidateProfileById(userId, selectedProfileId, updated);
+      setProfileData(saved);
+      setProfiles(prev => prev.map(p => p.id === selectedProfileId ? saved : p));
+      setMessage("Profile successfully updated with selected resume suggestions!");
+      trackEvent("resume_suggestions_applied", { profileId: selectedProfileId });
+    } catch (err: any) {
+      setError(err.message || "Failed to update profile with suggestions.");
     }
   };
 
@@ -1759,6 +1780,16 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
             )}
           </div>
         </div>
+      )}
+
+      {parsedSuggestions && profile && (
+        <ResumeSuggestionsModal
+          isOpen={suggestionsModalOpen}
+          onClose={() => setSuggestionsModalOpen(false)}
+          parsedData={parsedSuggestions}
+          currentProfile={profile}
+          onApplySuggestions={handleApplySuggestions}
+        />
       )}
     </div>
   );

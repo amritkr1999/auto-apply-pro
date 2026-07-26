@@ -65,6 +65,28 @@ export interface CandidateProfile {
   profileName?: string;
 }
 
+export interface ParsedResumeDto {
+  name?: string;
+  email?: string;
+  phone?: string;
+  location?: string;
+  skills?: string[];
+  experience?: Array<{
+    title?: string;
+    company?: string;
+    duration?: string;
+    description?: string;
+  }>;
+  education?: Array<{
+    degree?: string;
+    institution?: string;
+    graduation_year?: number;
+    field_of_study?: string;
+  }>;
+  certifications?: string[];
+  summary?: string;
+}
+
 export interface AchievementCard {
   id?: number;
   title: string;
@@ -249,7 +271,7 @@ export const profileService = {
     return response.json();
   },
 
-  async syncCandidateProfile(userId: number): Promise<{ message: string }> {
+  async syncCandidateProfile(userId: number): Promise<ParsedResumeDto> {
     const response = await fetch(`${API_BASE_V1}/profiles/candidate/${userId}/resume/sync`, {
       method: "POST",
       headers: getAuthHeaders(),
@@ -456,7 +478,7 @@ export const profileService = {
     return response.json();
   },
 
-  async syncCandidateProfileById(userId: number, profileId: number): Promise<{ message: string }> {
+  async syncCandidateProfileById(userId: number, profileId: number): Promise<ParsedResumeDto> {
     const response = await fetch(`${API_BASE_V1}/profiles/candidate/${userId}/profile/${profileId}/resume/sync`, {
       method: "POST",
       headers: getAuthHeaders(),

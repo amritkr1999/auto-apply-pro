@@ -27,8 +27,8 @@ public interface UserService {
     void uploadResume(Long userId, Long profileId, org.springframework.web.multipart.MultipartFile file) throws java.io.IOException;
     com.backend.autoapplypro.modules.users.model.ProfessionalProfile getCandidateResume(Long userId);
     com.backend.autoapplypro.modules.users.model.ProfessionalProfile getCandidateResume(Long userId, Long profileId);
-    void syncProfileFromResume(Long userId);
-    void syncProfileFromResume(Long userId, Long profileId);
+    ParsedResumeDto syncProfileFromResume(Long userId);
+    ParsedResumeDto syncProfileFromResume(Long userId, Long profileId);
     
     void initiatePasswordReset(ForgotPasswordRequest request);
     void resetPassword(ResetPasswordRequest request);

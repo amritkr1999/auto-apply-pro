@@ -25,6 +25,7 @@ public class UserServiceImpl implements UserService {
     private final UserActivityLogRepository userActivityLogRepository;
     private final SystemEmailService systemEmailService;
     private final MarketingEmailCampaignService marketingCampaignService;
+    private final JavaResumeParserService javaResumeParserService;
 
     @org.springframework.beans.factory.annotation.Value("${pipeline.service.url:http://localhost:8000}")
     private String pythonServiceUrl;
@@ -645,85 +646,29 @@ public class UserServiceImpl implements UserService {
         professionalProfileRepository.save(candidate);
     }
 
-    private void syncProfileFromResumeInternal(ProfessionalProfile candidate) {
+    private ParsedResumeDto syncProfileFromResumeInternal(ProfessionalProfile candidate) {
         if (candidate.getResumeBytes() == null || candidate.getResumeBytes().length == 0) {
             throw new IllegalStateException("No resume uploaded to sync profile from.");
         }
-
-        try {
-            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
-            String requestUrl = pythonServiceUrl + "/parse-resume";
-
-            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
-            headers.setContentType(org.springframework.http.MediaType.MULTIPART_FORM_DATA);
-
-            final String filename = candidate.getResumeFilename() != null ? candidate.getResumeFilename() : "resume.pdf";
-            org.springframework.core.io.ByteArrayResource fileResource = new org.springframework.core.io.ByteArrayResource(candidate.getResumeBytes()) {
-                @Override
-                public String getFilename() {
-                    return filename;
-                }
-            };
-
-            org.springframework.util.MultiValueMap<String, Object> body = new org.springframework.util.LinkedMultiValueMap<>();
-            body.add("file", fileResource);
-
-            org.springframework.http.HttpEntity<org.springframework.util.MultiValueMap<String, Object>> requestEntity = 
-                new org.springframework.http.HttpEntity<>(body, headers);
-
-            org.springframework.http.ResponseEntity<ParsedResumeDto> response = restTemplate.postForEntity(
-                requestUrl,
-                requestEntity,
-                ParsedResumeDto.class
-            );
-
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                ParsedResumeDto parsed = response.getBody();
-                candidate.setSummary(parsed.getSummary());
-                candidate.setEducation(parsed.getEducation());
-                candidate.setExperience(parsed.getExperience());
-                candidate.setCertifications(parsed.getCertifications());
-
-                // Update/link skills
-                if (parsed.getSkills() != null) {
-                    java.util.Set<Skill> dbSkills = candidate.getSkills();
-                    if (dbSkills == null) {
-                        dbSkills = new java.util.HashSet<>();
-                    }
-                    for (String skillName : parsed.getSkills()) {
-                        String trimmedName = skillName.trim();
-                        if (!trimmedName.isEmpty()) {
-                            Skill skill = skillRepository.findByNameIgnoreCase(trimmedName)
-                                .orElseGet(() -> {
-                                    Skill newSkill = Skill.builder().name(trimmedName).build();
-                                    return skillRepository.save(newSkill);
-                                });
-                            dbSkills.add(skill);
-                        }
-                    }
-                    candidate.setSkills(dbSkills);
-                }
-                professionalProfileRepository.save(candidate);
-            } else {
-                throw new RuntimeException("Python AI parsing service returned an error status.");
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to sync profile from resume: " + e.getMessage(), e);
-        }
+        return javaResumeParserService.parseResume(
+                candidate.getResumeBytes(),
+                candidate.getResumeContentType(),
+                candidate.getResumeFilename()
+        );
     }
 
     @Override
     @Transactional
-    public void syncProfileFromResume(Long userId) {
+    public ParsedResumeDto syncProfileFromResume(Long userId) {
         ProfessionalProfile candidate = getOrCreateCandidate(userId);
-        syncProfileFromResumeInternal(candidate);
+        return syncProfileFromResumeInternal(candidate);
     }
 
     @Override
     @Transactional
-    public void syncProfileFromResume(Long userId, Long profileId) {
+    public ParsedResumeDto syncProfileFromResume(Long userId, Long profileId) {
         ProfessionalProfile candidate = getOrCreateCandidateProfile(userId, profileId);
-        syncProfileFromResumeInternal(candidate);
+        return syncProfileFromResumeInternal(candidate);
     }
 
     @Override

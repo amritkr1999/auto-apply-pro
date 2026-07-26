@@ -176,11 +176,10 @@ public class ProfileController {
     @PostMapping("/candidate/{userId}/resume/sync")
     public ResponseEntity<?> syncProfile(@PathVariable Long userId) {
         try {
-            userService.syncProfileFromResume(userId);
-            return ResponseEntity.ok(java.util.Map.of("message", "Profile successfully synchronized with resume."));
+            return ResponseEntity.ok(userService.syncProfileFromResume(userId));
         } catch (Exception e) {
             return ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Failed to sync profile: " + e.getMessage());
+                    .body("Failed to parse resume: " + e.getMessage());
         }
     }
 
@@ -189,11 +188,10 @@ public class ProfileController {
             @PathVariable Long userId,
             @PathVariable Long profileId) {
         try {
-            userService.syncProfileFromResume(userId, profileId);
-            return ResponseEntity.ok(java.util.Map.of("message", "Profile successfully synchronized with resume."));
+            return ResponseEntity.ok(userService.syncProfileFromResume(userId, profileId));
         } catch (Exception e) {
             return ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Failed to sync profile: " + e.getMessage());
+                    .body("Failed to parse resume: " + e.getMessage());
         }
     }
 
