@@ -82,7 +82,7 @@ export const LandingPage: React.FC = () => {
       <nav className="landing-nav">
         <div className="nav-container">
           <a href="#" className="nav-logo">
-            <span>⚡</span> Auto Apply Pro
+            <span>⚡</span> EasyNaukri
           </a>
           <ul className="nav-links">
             <li className="nav-link-item"><a href="#what-we-do">What We Do</a></li>
@@ -160,15 +160,12 @@ export const LandingPage: React.FC = () => {
       {/* ==================== Hero Section ==================== */}
       <header id="intro" className="hero-section">
         <div className="hero-content">
-          <span className="hero-tagline">Now in Public Beta</span>
+          <span className="hero-tagline">EasyNaukri Platform</span>
           <h1 className="hero-title">
-            Automate Your Job Hunt. <br />
-            <span>Land More Interviews.</span>
+            EasyNaukri — Automated Job Application & Resume Matching Platform.
           </h1>
           <p className="hero-subtitle">
-            Auto Apply Pro is your personal AI-driven job application autopilot. 
-            We automatically tailor resumes, fill out application forms, and track 
-            your application queues on autopilot while you focus on preparing for interviews.
+            Streamline your job search, optimize your resume, and track applications effortlessly.
           </p>
           <div className="hero-ctas">
             {user ? (
@@ -186,6 +183,9 @@ export const LandingPage: React.FC = () => {
               </>
             )}
           </div>
+          <p className="hero-auth-note" style={{ marginTop: "1.25rem", fontSize: "0.875rem", color: "var(--text-secondary)", fontWeight: 500 }}>
+            Sign in with Google to create your account profile, save job preferences, and sync your resume securely.
+          </p>
         </div>
 
         <div className="hero-graphic-container">
@@ -243,7 +243,7 @@ export const LandingPage: React.FC = () => {
       <section id="what-we-do" className="landing-section">
         <div className="section-header">
           <span className="section-label">Workflow Automation</span>
-          <h2 className="section-title">How Auto Apply Pro Works</h2>
+          <h2 className="section-title">How EasyNaukri Works</h2>
           <p className="section-subtitle">
             Let our AI assistant manage the entire job hunting pipeline, 
             working behind the scenes to get you noticed.
@@ -576,7 +576,7 @@ export const LandingPage: React.FC = () => {
           <details className="faq-item" name="landing-faqs">
             <summary>Which job boards and systems do you support?</summary>
             <p className="faq-content">
-              Auto Apply Pro supports major job sites like LinkedIn, Indeed, ZipRecruiter, Greenhouse, 
+              EasyNaukri supports major job sites like LinkedIn, Indeed, ZipRecruiter, Greenhouse, 
               and Lever applicant tracking systems (ATS), with support for more portals being updated weekly.
             </p>
           </details>
@@ -595,8 +595,8 @@ export const LandingPage: React.FC = () => {
       <footer id="footer" className="landing-footer">
         <div className="footer-container">
           <div className="footer-brand">
-            <h3>Auto Apply Pro</h3>
-            <p>Automate your application pipelines, track interviews, and focus on preparing for the hiring call.</p>
+            <h3>EasyNaukri</h3>
+            <p>EasyNaukri — Automated Job Application & Resume Matching Platform. Streamline your job search, optimize your resume, and track applications effortlessly.</p>
             <div className="footer-socials">
               <a href="#" className="footer-social-link" aria-label="X (Twitter)">𝕏</a>
               <a href="#" className="footer-social-link" aria-label="GitHub">🐙</a>
@@ -633,7 +633,7 @@ export const LandingPage: React.FC = () => {
         </div>
 
         <div className="footer-bottom">
-          <span>© {new Date().getFullYear()} Auto Apply Pro. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} EasyNaukri. All rights reserved.</span>
           <span>Designed with high-fidelity glassmorphism.</span>
         </div>
       </footer>

@@ -63,7 +63,7 @@ export const ResetPasswordPage: React.FC = () => {
       <div className="auth-container">
         {/* Logo Header */}
         <header className="auth-header">
-          <h1 className="auth-logo">Auto Apply Pro</h1>
+          <h1 className="auth-logo">EasyNaukri</h1>
           <p className="auth-subtitle">Choose a new password</p>
         </header>
 

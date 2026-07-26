@@ -115,7 +115,7 @@ export const VerifyEmailPage: React.FC = () => {
 
       <div className="auth-container">
         <header className="auth-header">
-          <h1 className="auth-logo">Auto Apply Pro</h1>
+          <h1 className="auth-logo">EasyNaukri</h1>
           <p className="auth-subtitle">Email Verification</p>
         </header>
 

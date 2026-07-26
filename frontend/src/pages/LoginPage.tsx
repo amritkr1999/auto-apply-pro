@@ -511,7 +511,7 @@ export const LoginPage: React.FC = () => {
 
         {/* Logo Header */}
         <header className="auth-header">
-          <h1 className="auth-logo">Auto Apply Pro</h1>
+          <h1 className="auth-logo">EasyNaukri</h1>
           <p className="auth-subtitle">
             {tab === "login"
               ? "Sign in to manage your job applications"
@@ -966,6 +966,10 @@ export const LoginPage: React.FC = () => {
         <div className="social-divider">
           <span>Or continue with</span>
         </div>
+
+        <p style={{ textAlign: "center", fontSize: "0.825rem", color: "var(--text-secondary, #94a3b8)", marginBottom: "1rem", lineHeight: "1.4" }}>
+          Sign in with Google to create your account profile, save job preferences, and sync your resume securely.
+        </p>
 
         <div className="social-btn-row">
           <button

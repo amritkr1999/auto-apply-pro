@@ -39,8 +39,9 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
               </svg>
             </button>
           )}
-          <Link to={getDashboardPath()} className="text-xl font-bold text-primary hover:text-primary-hover transition-colors">
-            Auto Apply Pro
+          <Link to={getDashboardPath()} className="text-xl font-bold text-primary hover:text-primary-hover transition-colors flex items-center gap-2">
+            <span className="bg-indigo-600 text-white px-2 py-0.5 rounded-lg text-sm font-extrabold">EN</span>
+            <span>EasyNaukri</span>
           </Link>
           {user && (
             <nav className="hidden lg:flex items-center gap-6">
