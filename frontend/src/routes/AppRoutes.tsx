@@ -29,6 +29,8 @@ import { TelemetryDashboard } from "../features/dashboard/components/views/Telem
 
 import PublicProfilePage from "../pages/PublicProfilePage";
 import PublicPlaqueCardPage from "../pages/PublicPlaqueCardPage";
+import PrivacyPolicy from "../components/pages/PrivacyPolicy";
+import TermsOfService from "../components/pages/TermsOfService";
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -39,6 +41,8 @@ export const AppRoutes: React.FC = () => {
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/verify-email" element={<VerifyEmailPage />} />
       <Route path="/unsubscribe" element={<UnsubscribePage />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/terms" element={<TermsOfService />} />
       <Route path="/profile/:username" element={<PublicProfilePage />} />
       <Route path="/card/:username" element={<PublicPlaqueCardPage />} />
       <Route element={<Layout />}>
