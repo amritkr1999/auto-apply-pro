@@ -161,11 +161,9 @@ export const LandingPage: React.FC = () => {
       <header id="intro" className="hero-section">
         <div className="hero-content">
           <span className="hero-tagline">EasyNaukri Platform</span>
-          <h1 className="hero-title">
-            EasyNaukri — Automated Job Application & Resume Matching Platform.
-          </h1>
+          <h1 className="hero-title">EasyNaukri</h1>
           <p className="hero-subtitle">
-            Streamline your job search, optimize your resume, and track applications effortlessly.
+            Automated Job Application & Resume Matching Platform. Streamline your job search, optimize your resume, and track applications effortlessly.
           </p>
           <div className="hero-ctas">
             {user ? (
