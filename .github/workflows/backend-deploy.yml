@@ -103,4 +103,8 @@ jobs:
             docker compose rm -f backend frontend || true
             docker compose up -d --force-recreate --remove-orphans backend frontend
             
+            # Ensure Nginx port 80 HTTP requests redirect 301 to HTTPS instead of returning 404
+            sudo sed -i 's/return 404;/return 301 https:\/\/$host$request_uri;/g' /etc/nginx/sites-available/* /etc/nginx/sites-enabled/* 2>/dev/null || true
+            sudo systemctl reload nginx || true
+
             docker image prune -f

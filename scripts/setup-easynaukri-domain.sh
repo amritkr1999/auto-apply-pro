@@ -75,6 +75,8 @@ fi
 # 3. Obtain Let's Encrypt SSL Certificate for all 3 domain endpoints
 echo "[+] Requesting SSL certificate from Let's Encrypt..."
 certbot --nginx -d easynaukri.online -d www.easynaukri.online -d api.easynaukri.online --non-interactive --agree-tos --email doctwo561@gmail.com --redirect --expand
+sed -i 's/return 404;/return 301 https:\/\/$host$request_uri;/g' /etc/nginx/sites-available/* /etc/nginx/sites-enabled/* 2>/dev/null || true
+systemctl reload nginx
 
 # 4. Update Backend .env file on Server & Restart Containers
 ENV_FILE="/home/ubuntu/auto-apply-pro/.env"
