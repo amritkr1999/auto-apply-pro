@@ -241,7 +241,7 @@ export const ProfessionalProfile: React.FC = () => {
               <div className="flex-1">
                 <h3 className="text-lg font-bold text-slate-800">Share Your Feedback</h3>
                 <p className="text-sm text-slate-600 mt-1">
-                  Your feedback helps us improve Auto Apply Pro. Share your rating and review with us.
+                  Your feedback helps us improve EasyNaukri. Share your rating and review with us.
                 </p>
 
                 <form onSubmit={handleFeedbackSubmit} className="mt-6 space-y-4">

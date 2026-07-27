@@ -58,7 +58,7 @@ public class MarketingEmailCampaignServiceImpl implements MarketingEmailCampaign
                 // Day 1: Send after 24 hours of signup
                 if (signupDate.isBefore(now.minusHours(24))) {
                     shouldSend = true;
-                    subject = "Welcome to Auto Apply Pro - Let's get you hired!";
+                    subject = "Welcome to EasyNaukri - Let's get you hired!";
                     htmlContent = getWelcomeEmailTemplate(user);
                     user.setMarketingCampaignStep(1);
                 }
@@ -98,7 +98,7 @@ public class MarketingEmailCampaignServiceImpl implements MarketingEmailCampaign
     public void sendWelcomeEmail(User user) {
         if (Boolean.TRUE.equals(user.getMarketingEmailsEnabled())) {
             try {
-                String subject = "Welcome to Auto Apply Pro - Let's get you hired!";
+                String subject = "Welcome to EasyNaukri - Let's get you hired!";
                 String htmlContent = getWelcomeEmailTemplate(user);
                 sendHtmlEmail(user.getEmail(), subject, htmlContent);
                 user.setMarketingCampaignStep(1);
@@ -189,7 +189,7 @@ public class MarketingEmailCampaignServiceImpl implements MarketingEmailCampaign
 
     private String getWelcomeEmailTemplate(User user) {
         String body = "<p style=\"font-size: 18px; font-weight: 500; color: #4f46e5; margin-bottom: 24px;\">Hello " + user.getName() + ", welcome onboard, let's get you hired!</p>\n" +
-                "<p>Welcome to Auto Apply Pro! We are thrilled to help you automate your job search and eliminate application fatigue. Here is what we bring to your career journey:</p>\n" +
+                "<p>Welcome to EasyNaukri! We are thrilled to help you automate your job search and eliminate application fatigue. Here is what we bring to your career journey:</p>\n" +
                 "\n" +
                 "<h3 style=\"color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin-top: 24px;\">Services We Provide</h3>\n" +
                 "<ul style=\"padding-left: 20px; line-height: 1.8;\">\n" +
@@ -215,13 +215,13 @@ public class MarketingEmailCampaignServiceImpl implements MarketingEmailCampaign
                 "<div class=\"button-container\" style=\"margin-top: 32px;\">\n" +
                 "  <a href=\"" + frontendUrl + "/login\" class=\"button\">Complete Your Profile & Start Applying</a>\n" +
                 "</div>";
-        return getHtmlLayout("Welcome to Auto Apply Pro", body, getUnsubscribeUrl(user));
+        return getHtmlLayout("Welcome to EasyNaukri", body, getUnsubscribeUrl(user));
     }
 
     private String getAhaEmailTemplate(User user) {
         String body = "<p>Hi " + user.getName() + ",</p>\n" +
                 "<p>Are you tired of spending hours crafting the perfect email to recruiters?</p>\n" +
-                "<p>Auto Apply Pro uses custom local AI models to scan job descriptions, find matching recruiter contacts, and draft hyper-personalized cold outreach emails automatically.</p>\n" +
+                "<p>EasyNaukri uses custom local AI models to scan job descriptions, find matching recruiter contacts, and draft hyper-personalized cold outreach emails automatically.</p>\n" +
                 "<p>All you have to do is review the draft, click approve, and we handle the rest. Our users report saving up to 15 hours per week!</p>\n" +
                 "<div class=\"button-container\">\n" +
                 "  <a href=\"" + frontendUrl + "/login\" class=\"button\">Try Auto-Outreach Now</a>\n" +
@@ -233,7 +233,7 @@ public class MarketingEmailCampaignServiceImpl implements MarketingEmailCampaign
         String body = "<p>Hi " + user.getName() + ",</p>\n" +
                 "<h2 style=\"color: #4f46e5; margin-top: 0;\">Your dream job is waiting. Go Unlimited!</h2>\n" +
                 "<p>Free tier users are limited to a handful of outreach drafts per day. To truly accelerate your career growth, you need consistent, high-volume, automated outreach.</p>\n" +
-                "<p>Upgrade to <strong>Auto Apply Pro Premium</strong> today to unlock:</p>\n" +
+                "<p>Upgrade to <strong>EasyNaukri Premium</strong> today to unlock:</p>\n" +
                 "<ul>\n" +
                 "  <li><strong>Unlimited daily email drafts</strong> and outreaches</li>\n" +
                 "  <li><strong>Priority access</strong> to faster local deepseek-ocr processing</li>\n" +
@@ -250,7 +250,7 @@ public class MarketingEmailCampaignServiceImpl implements MarketingEmailCampaign
         String body = "<p>Hi " + user.getName() + ",</p>\n" +
                 "<p>You have hit your daily application outreach limit on the free tier.</p>\n" +
                 "<p>Don't let your job search momentum slow down. Recruitment moves fast, and getting your profile in front of hiring managers first is key.</p>\n" +
-                "<p>Upgrade to <strong>Auto Apply Pro Premium</strong> to get unlimited daily applications and keep applying today.</p>\n" +
+                "<p>Upgrade to <strong>EasyNaukri Premium</strong> to get unlimited daily applications and keep applying today.</p>\n" +
                 "<div class=\"button-container\">\n" +
                 "  <a href=\"" + frontendUrl + "/billing\" class=\"button\">Unlock Unlimited Applications</a>\n" +
                 "</div>";
@@ -283,14 +283,14 @@ public class MarketingEmailCampaignServiceImpl implements MarketingEmailCampaign
                 "<body>\n" +
                 "  <div class=\"container\">\n" +
                 "    <div class=\"header\">\n" +
-                "      <h1>Auto Apply Pro</h1>\n" +
+                "      <h1>EasyNaukri</h1>\n" +
                 "    </div>\n" +
                 "    <div class=\"content\">\n" +
                 "      " + bodyContent + "\n" +
                 "    </div>\n" +
                 "    <div class=\"footer\">\n" +
-                "      <p>This email was sent to you because you signed up for Auto Apply Pro.</p>\n" +
-                "      <p>Auto Apply Pro Inc., 123 Tech Boulevard, Suite 500, San Francisco, CA 94107</p>\n" +
+                "      <p>This email was sent to you because you signed up for EasyNaukri.</p>\n" +
+                "      <p>EasyNaukri Inc., 123 Tech Boulevard, Suite 500, San Francisco, CA 94107</p>\n" +
                 "      <p><a href=\"" + unsubscribeUrl + "\">Unsubscribe</a> | <a href=\"" + unsubscribeUrl.replace("unsubscribe", "profile") + "\">Manage Preferences</a></p>\n" +
                 "    </div>\n" +
                 "  </div>\n" +

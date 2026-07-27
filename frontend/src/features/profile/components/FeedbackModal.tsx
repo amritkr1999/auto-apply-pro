@@ -74,14 +74,14 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ onClose, onLogout,
               </div>
               <h3 className="text-2xl font-bold text-slate-800">Thank You!</h3>
               <p className="text-slate-600 text-sm">
-                Your feedback has been submitted successfully. We appreciate your response and help in making Auto Apply Pro better!
+                Your feedback has been submitted successfully. We appreciate your response and help in making EasyNaukri better!
               </p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="text-center space-y-2">
                 <span className="inline-block text-2xl">⚡</span>
-                <h3 className="text-xl font-bold text-slate-800">Enjoying Auto Apply Pro?</h3>
+                <h3 className="text-xl font-bold text-slate-800">Enjoying EasyNaukri?</h3>
                 <p className="text-slate-600 text-sm">
                   We'd love to hear your feedback! Let us know how your automated job search is going.
                 </p>

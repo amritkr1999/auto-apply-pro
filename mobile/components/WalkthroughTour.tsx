@@ -26,7 +26,7 @@ export default function WalkthroughTour({ userId, visible, onClose }: Walkthroug
 
   const steps: TourStep[] = [
     {
-      title: "Welcome to Auto Apply Pro! 🚀",
+      title: "Welcome to EasyNaukri! 🚀",
       description: "Let's take a quick 1-minute tour of your candidate mobile dashboard to automate your job application outreach.",
       icon: "rocket-outline",
       iconColor: "#10b981",

@@ -67,7 +67,7 @@ export const WalkthroughTour: React.FC = () => {
     if (role === "COMPANY") {
       return [
         {
-          title: "Welcome to Auto Apply Pro! 🏢",
+          title: "Welcome to EasyNaukri! 🏢",
           description: "Let's take a quick 1-minute tour to help you manage corporate job listings, applicant queues, and recruiting teams.",
         },
         {
@@ -110,7 +110,7 @@ export const WalkthroughTour: React.FC = () => {
     // Default: CANDIDATE Role Tour
     return [
       {
-        title: "Welcome to Auto Apply Pro! 🚀",
+        title: "Welcome to EasyNaukri! 🚀",
         description: "Let's take a quick 1-minute tour of your candidate dashboard to automate your job application outreach.",
       },
       {

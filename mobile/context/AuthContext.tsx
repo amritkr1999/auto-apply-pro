@@ -42,7 +42,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const isBiometricsSupported = await biometricService.isHardwareAvailable() && await biometricService.isEnrolled();
           
           if (isBiometricsSupported) {
-            const success = await biometricService.authenticate('Unlock Auto Apply Pro');
+            const success = await biometricService.authenticate('Unlock EasyNaukri');
             if (success) {
               setToken(storedToken);
               setUser(storedUser);
@@ -117,7 +117,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const checkBiometrics = async (): Promise<boolean> => {
     try {
-      const success = await biometricService.authenticate('Unlock Auto Apply Pro');
+      const success = await biometricService.authenticate('Unlock EasyNaukri');
       if (success) {
         const storedToken = await secureStore.getToken();
         const storedUser = await secureStore.getUser();

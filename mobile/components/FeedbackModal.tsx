@@ -107,7 +107,7 @@ export default function FeedbackModal({ visible, onClose, onLogout, onSubmitSucc
                     </View>
                     <Text className="text-slate-900 dark:text-white text-xl font-bold text-center">Thank You!</Text>
                     <Text className="text-slate-500 dark:text-slate-400 text-sm text-center mt-2 px-2 leading-relaxed">
-                      Your feedback has been submitted successfully. We appreciate your response and help in making Auto Apply Pro better!
+                      Your feedback has been submitted successfully. We appreciate your response and help in making EasyNaukri better!
                     </Text>
                   </View>
                 ) : (
@@ -117,7 +117,7 @@ export default function FeedbackModal({ visible, onClose, onLogout, onSubmitSucc
                       <View className="w-10 h-10 bg-emerald-500/10 rounded-xl items-center justify-center mb-2">
                         <Ionicons name="sparkles" size={20} color="#10b981" />
                       </View>
-                      <Text className="text-slate-900 dark:text-white text-lg font-bold text-center">Enjoying Auto Apply Pro?</Text>
+                      <Text className="text-slate-900 dark:text-white text-lg font-bold text-center">Enjoying EasyNaukri?</Text>
                       <Text className="text-slate-500 dark:text-slate-400 text-xs text-center mt-1 font-medium">
                         We'd love to hear your feedback! Let us know how your automated job search is going.
                       </Text>

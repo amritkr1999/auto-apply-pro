@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     smtp_port: int = 587
     smtp_username: str = ""
     smtp_password: str = ""
-    smtp_from_name: str = "Auto Apply Pro"
+    smtp_from_name: str = "EasyNaukri"
     smtp_rate_limit_seconds: int = 5
     
     # Backend

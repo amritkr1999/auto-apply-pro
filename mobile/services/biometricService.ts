@@ -26,7 +26,7 @@ export const biometricService = {
    * Trigger the biometric authentication dialog
    * @param reason Custom message explaining why biometrics is required
    */
-  async authenticate(reason: string = 'Unlock Auto Apply Pro'): Promise<boolean> {
+  async authenticate(reason: string = 'Unlock EasyNaukri'): Promise<boolean> {
     const hasHardware = await this.isHardwareAvailable();
     const isEnrolled = await this.isEnrolled();
 

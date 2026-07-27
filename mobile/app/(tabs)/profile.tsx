@@ -406,7 +406,7 @@ export default function ProfileScreen() {
         <Text className="text-slate-900 dark:text-white text-lg font-bold mb-4 mt-6">Appearance</Text>
         <View className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 mb-6">
           <Text className="text-slate-500 dark:text-slate-400 text-xs mt-0.5 leading-relaxed mb-4">
-            Customize how Auto Apply Pro looks on your device. Choose Light, Dark, or System Default theme.
+            Customize how EasyNaukri looks on your device. Choose Light, Dark, or System Default theme.
           </Text>
           <View className="flex-row bg-slate-100 dark:bg-slate-950 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800">
             {(['system', 'light', 'dark'] as const).map((mode) => {
@@ -455,7 +455,7 @@ export default function ProfileScreen() {
         <Text className="text-slate-900 dark:text-white text-lg font-bold mb-4">Share Your Feedback</Text>
         <View className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 mb-6">
           <Text className="text-slate-500 dark:text-slate-400 text-xs mt-0.5 leading-relaxed mb-4">
-            Your feedback helps us improve Auto Apply Pro. Share your rating and review with us.
+            Your feedback helps us improve EasyNaukri. Share your rating and review with us.
           </Text>
 
           <View className="mb-4">

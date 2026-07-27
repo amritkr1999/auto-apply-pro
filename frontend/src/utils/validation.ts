@@ -1,5 +1,5 @@
 /**
- * Centralized Validation Utilities for Auto Apply Pro
+ * Centralized Validation Utilities for EasyNaukri
  */
 
 // Email regex adhering to standard RFC 5322 pattern

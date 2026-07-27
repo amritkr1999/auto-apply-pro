@@ -142,7 +142,7 @@ const PricingPage: React.FC = () => {
       const options = {
         key: checkout.razorpayKeyId,
         subscription_id: checkout.subscriptionId,
-        name: "AutoApply Pro",
+        name: "EasyNaukri",
         description: `${plan.name} Subscription`,
         handler: async (response: RazorpayResponse) => {
           try {
@@ -251,7 +251,7 @@ const PricingPage: React.FC = () => {
           </span>
         </h1>
         <p className="text-slate-400 text-lg sm:text-xl leading-relaxed">
-          Unlock the full power of AutoApply Pro. Pick a plan that fits your career goals.
+          Unlock the full power of EasyNaukri. Pick a plan that fits your career goals.
         </p>
       </div>
 

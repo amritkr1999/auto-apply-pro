@@ -137,7 +137,7 @@ public class ReferralServiceImpl implements ReferralService {
                                 "<p>They have matching skills and have shared their profile for a potential referral.</p>" +
                                 "<p>Please find the job listing here: <a href='%s'>View Job Listing</a></p>" +
                                 "<p>To view their profile and attached resume, please log in to your dashboard.</p>" +
-                                "<br/><p>Best regards,<br/>Auto Apply Pro Team</p>" +
+                                "<br/><p>Best regards,<br/>EasyNaukri Team</p>" +
                                 "</body></html>",
                                 prof.getName(), request.getUser().getName(), request.getJobTitle(), request.getJobId(), request.getCompanyName(), request.getJobLink()
                         );

@@ -201,7 +201,7 @@ export default function LoginScreen() {
                 <View className="w-16 h-16 bg-emerald-500 rounded-2xl items-center justify-center mb-4 shadow-lg shadow-emerald-500/30">
                   <Ionicons name="rocket-outline" size={32} color="#fff" />
                 </View>
-                <Text className="text-3xl font-bold text-white tracking-wide">Auto Apply Pro</Text>
+                <Text className="text-3xl font-bold text-white tracking-wide">EasyNaukri</Text>
                 <Text className="text-slate-400 text-sm mt-1 text-center">
                   Your AI-powered career agent & outreach automated platform.
                 </Text>

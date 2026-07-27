@@ -144,7 +144,7 @@ export const PublicPlaqueCardPage: React.FC = () => {
         {/* BRANDING HEADER */}
         <div className="flex justify-between items-center px-4 shrink-0 opacity-60">
           <span className="text-[10px] uppercase tracking-widest text-primary font-black">
-            Auto Apply Pro Plaque Card
+            EasyNaukri Plaque Card
           </span>
           <span className="text-xl">🤖</span>
         </div>

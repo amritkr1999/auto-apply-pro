@@ -19,14 +19,14 @@ public class SystemEmailServiceImpl implements SystemEmailService {
     @Override
     @org.springframework.scheduling.annotation.Async
     public void sendPasswordResetEmail(String recipientEmail, String resetLink) {
-        String subject = "Auto Apply Pro - Reset Your Password";
+        String subject = "EasyNaukri - Reset Your Password";
         String body = "Hello,\n\n"
-                + "We received a request to reset the password for your Auto Apply Pro account.\n"
+                + "We received a request to reset the password for your EasyNaukri account.\n"
                 + "Please click the link below to set a new password. This link is valid for 15 minutes:\n\n"
                 + resetLink + "\n\n"
                 + "If you did not request a password reset, please ignore this email.\n\n"
                 + "Best regards,\n"
-                + "The Auto Apply Pro Team";
+                + "The EasyNaukri Team";
 
         // Console Logging (Simplicity & Security as requested)
         log.info("\n==================================================\n"
@@ -58,7 +58,7 @@ public class SystemEmailServiceImpl implements SystemEmailService {
     @Override
     @org.springframework.scheduling.annotation.Async
     public void sendPlaqueCardContactEmail(String recipientEmail, String candidateName, String senderName, String senderEmail, String senderCompany, String message) {
-        String subject = "New Recruiter Inquiry from your Auto Apply Pro Plaque Card!";
+        String subject = "New Recruiter Inquiry from your EasyNaukri Plaque Card!";
         String body = "Hello " + candidateName + ",\n\n"
                 + "A visitor left you a message on your Virtual Visiting Card (Plaque Card):\n\n"
                 + "--------------------------------------------------\n"
@@ -69,7 +69,7 @@ public class SystemEmailServiceImpl implements SystemEmailService {
                 + "--------------------------------------------------\n\n"
                 + "You can reply directly to this email to get in touch with them.\n\n"
                 + "Best regards,\n"
-                + "The Auto Apply Pro Team";
+                + "The EasyNaukri Team";
 
         log.info("\n==================================================\n"
                 + "[SYSTEM EMAIL OUTBOX - PLAQUE CARD CONTACT]\n"
@@ -100,9 +100,9 @@ public class SystemEmailServiceImpl implements SystemEmailService {
     @Override
     @org.springframework.scheduling.annotation.Async
     public void sendEmailVerificationEmail(String recipientEmail, String verificationLink, String otpCode) {
-        String subject = "Auto Apply Pro - Verify Your Email Address";
+        String subject = "EasyNaukri - Verify Your Email Address";
         String body = "Hello,\n\n"
-                + "Thank you for registering with Auto Apply Pro!\n"
+                + "Thank you for registering with EasyNaukri!\n"
                 + "Please verify your email address to activate your account. Your verification code is:\n\n"
                 + "   VERIFICATION CODE: " + otpCode + "\n\n"
                 + "Alternatively, you can click the link below to verify your email directly:\n\n"
@@ -110,7 +110,7 @@ public class SystemEmailServiceImpl implements SystemEmailService {
                 + "This verification code/link is valid for 15 minutes.\n\n"
                 + "If you did not create an account, please ignore this email.\n\n"
                 + "Best regards,\n"
-                + "The Auto Apply Pro Team";
+                + "The EasyNaukri Team";
 
         log.info("\n==================================================\n"
                 + "[SYSTEM EMAIL OUTBOX - EMAIL VERIFICATION]\n"

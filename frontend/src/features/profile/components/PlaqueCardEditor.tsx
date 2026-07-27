@@ -343,7 +343,7 @@ export const PlaqueCardEditor: React.FC<PlaqueCardEditorProps> = ({ userId }) =>
           <div className="flex items-center justify-between bg-slate-100 p-2.5 rounded-2xl border border-slate-200">
             <div className="flex items-center gap-2 pl-2">
               <span className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
-              <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">Auto Apply Pro Preview</span>
+              <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">EasyNaukri Preview</span>
             </div>
             <div className="flex rounded-lg bg-white border border-slate-200 p-0.5 shadow-xs">
               <button
@@ -396,7 +396,7 @@ export const PlaqueCardEditor: React.FC<PlaqueCardEditorProps> = ({ userId }) =>
               {/* BRANDING HEADER */}
               <div className="flex justify-between items-center mb-6 shrink-0 border-b border-slate-800 pb-3">
                 <span className="text-[10px] uppercase tracking-widest text-primary font-black">
-                  Auto Apply Pro Card
+                  EasyNaukri Card
                 </span>
                 <span className="text-lg">🤖</span>
               </div>
