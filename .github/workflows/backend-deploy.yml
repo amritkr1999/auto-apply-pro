@@ -1,4 +1,4 @@
-name: Backend Build & Deploy
+name: App Build & Deploy
 
 on:
   push:
@@ -6,29 +6,30 @@ on:
       - main
     paths:
       - 'backend/**'
+      - 'frontend/**'
       - 'docker-compose.prod.yml'
       - 'docker-compose.yml'
       - '.github/workflows/backend-deploy.yml'
   workflow_dispatch:
 
-# Grant write access to packages
 permissions:
   contents: read
   packages: write
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: amritkr1999/auto-apply-pro-backend
+  BACKEND_IMAGE: amritkr1999/auto-apply-pro-backend
+  FRONTEND_IMAGE: amritkr1999/auto-apply-pro-frontend
 
 jobs:
   build-and-push:
-    name: Build & Push Docker Image
+    name: Build & Push Docker Images
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up QEMU (Multi-platform support)
+      - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
@@ -41,23 +42,23 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract Metadata (Tags, Labels)
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=raw,value=latest
-            type=sha,format=long
-
-      - name: Build and Push Docker Image
+      - name: Build and Push Backend Image
         uses: docker/build-push-action@v5
         with:
           context: ./backend
           file: ./backend/Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and Push Frontend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -78,7 +79,7 @@ jobs:
           source: "docker-compose.prod.yml"
           target: "~/auto-apply-pro/"
 
-      - name: SSH and Restart Service
+      - name: SSH and Restart Services
         uses: appleboy/ssh-action@v1.2.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -92,27 +93,14 @@ jobs:
           request_pty: true
           command_timeout: 15m
           script: |
-            # Exit on error
             set -e
-            
-            # Navigate to deployment directory
             cd ~/auto-apply-pro
-            
-            # Copy production compose file into place safely
             cp -f docker-compose.prod.yml docker-compose.yml
-            
-            # Log into GHCR on the remote host using the Action's ephemeral token
             echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
             
-            # Pull the new image quietly to prevent SSH TTY progress bar hanging
-            docker compose pull --quiet backend
+            docker compose pull --quiet backend frontend
+            docker compose stop backend frontend || true
+            docker compose rm -f backend frontend || true
+            docker compose up -d --force-recreate --remove-orphans backend frontend
             
-            # Cleanly stop and remove existing backend container to prevent container name conflicts
-            docker compose stop backend || true
-            docker compose rm -f backend || true
-            
-            # Recreate and restart backend container
-            docker compose up -d --force-recreate --remove-orphans backend
-            
-            # Remove dangling images to preserve OCI storage space
             docker image prune -f
