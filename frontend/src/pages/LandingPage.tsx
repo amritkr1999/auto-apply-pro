@@ -160,7 +160,7 @@ export const LandingPage: React.FC = () => {
       {/* ==================== Hero Section ==================== */}
       <header id="intro" className="hero-section">
         <div className="hero-content">
-          <span className="hero-tagline">EasyNaukri Platform</span>
+          <span className="hero-tagline">EasyNaukri</span>
           <h1 className="hero-title">EasyNaukri</h1>
           <p className="hero-subtitle">
             Automated Job Application & Resume Matching Platform. Streamline your job search, optimize your resume, and track applications effortlessly.
@@ -594,7 +594,7 @@ export const LandingPage: React.FC = () => {
         <div className="footer-container">
           <div className="footer-brand">
             <h3>EasyNaukri</h3>
-            <p>EasyNaukri — Automated Job Application & Resume Matching Platform. Streamline your job search, optimize your resume, and track applications effortlessly.</p>
+            <p>EasyNaukri is an automated job application & resume matching platform. Streamline your job search, optimize your resume, and track applications effortlessly.</p>
             <div className="footer-socials">
               <a href="#" className="footer-social-link" aria-label="X (Twitter)">𝕏</a>
               <a href="#" className="footer-social-link" aria-label="GitHub">🐙</a>
