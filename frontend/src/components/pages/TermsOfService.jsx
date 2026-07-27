@@ -222,7 +222,7 @@ export const TermsOfService = () => {
                 If you have questions or legal inquiries regarding these Terms of Service, please contact our legal and support team:
               </p>
               <div className="p-4 bg-indigo-50/50 dark:bg-indigo-950/30 rounded-xl border border-indigo-100 dark:border-indigo-900/40 inline-block font-mono text-xs sm:text-sm text-indigo-700 dark:text-indigo-300">
-                Email: support@easynaukri.com
+                Email: support@easynaukri.online
               </div>
             </div>
           </section>

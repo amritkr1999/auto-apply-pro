@@ -197,7 +197,7 @@ export const PrivacyPolicy = () => {
                 If you have any questions, concerns, or requests regarding this Privacy Policy or how EasyNaukri processes your personal data, please reach out to us at:
               </p>
               <div className="p-4 bg-indigo-50/50 dark:bg-indigo-950/30 rounded-xl border border-indigo-100 dark:border-indigo-900/40 inline-block font-mono text-xs sm:text-sm text-indigo-700 dark:text-indigo-300">
-                Email: support@easynaukri.com
+                Email: support@easynaukri.online
               </div>
             </div>
           </section>

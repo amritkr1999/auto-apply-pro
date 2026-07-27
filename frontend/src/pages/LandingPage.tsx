@@ -493,7 +493,7 @@ export const LandingPage: React.FC = () => {
           <div className="testimonial-card">
             <div className="testimonial-stars">★★★★★</div>
             <p className="testimonial-quote">
-              Auto Apply Pro saved me weeks of manual copy-pasting. I was able to target 
+              EasyNaukri saved me weeks of manual copy-pasting. I was able to target 
               top companies with customized submissions and landed a Senior Frontend Developer 
               role at a startup within 14 days!
             </p>
