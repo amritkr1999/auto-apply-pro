@@ -1,68 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
-import "./landing.css";
-import { feedbackService } from "../features/profile/services/feedbackService";
-import type { FeedbackResponse } from "../features/profile/services/feedbackService";
 import { useTheme } from "../context/ThemeContext";
 
 export const LandingPage: React.FC = () => {
   const { toggleTheme, resolvedTheme } = useTheme();
   const userStr = localStorage.getItem("user");
   const user = userStr ? JSON.parse(userStr) : null;
-
-  const [feedbacks, setFeedbacks] = useState<FeedbackResponse[]>([]);
-  const [activeSlide, setActiveSlide] = useState<string>("intro");
-
-  const slides = [
-    { id: "intro", label: "Intro" },
-    { id: "what-we-do", label: "Workflow Automation" },
-    { id: "benefits", label: "Key Advantages" },
-    { id: "pricing", label: "Pricing Tiers" },
-    { id: "testimonials", label: "Success Stories" },
-    { id: "faqs", label: "Questions & Answers" },
-    { id: "footer", label: "Footer" }
-  ];
-
-  useEffect(() => {
-    const fetchFeedbacks = async () => {
-      try {
-        const data = await feedbackService.getFeedbacks();
-        setFeedbacks(data.slice(0, 6));
-      } catch (err) {
-        console.error("Failed to fetch testimonials", err);
-      }
-    };
-    fetchFeedbacks();
-  }, []);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSlide(entry.target.id);
-          }
-        });
-      },
-      { threshold: 0.4 }
-    );
-
-    slides.forEach((slide) => {
-      const el = document.getElementById(slide.id);
-      if (el) observer.observe(el);
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
-  const getInitials = (name: string) => {
-    if (!name) return "U";
-    const parts = name.trim().split(/\s+/);
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
-    }
-    return name.slice(0, 2).toUpperCase();
-  };
 
   const getDashboardPath = () => {
     if (!user) return "/login";
@@ -77,562 +20,181 @@ export const LandingPage: React.FC = () => {
   };
 
   return (
-    <div className="landing-root">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200">
       {/* ==================== Navigation Navbar ==================== */}
-      <nav className="landing-nav">
-        <div className="nav-container">
-          <a href="#" className="nav-logo">
-            <span>⚡</span> EasyNaukri
-          </a>
-          <ul className="nav-links">
-            <li className="nav-link-item"><a href="#what-we-do">What We Do</a></li>
-            <li className="nav-link-item"><a href="#benefits">Benefits</a></li>
-            <li className="nav-link-item"><a href="#pricing">Plans</a></li>
-            <li className="nav-link-item"><a href="#testimonials">Testimonials</a></li>
-            <li className="nav-link-item"><a href="#faqs">FAQs</a></li>
-          </ul>
-          <div className="nav-ctas" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+      <header className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2 text-2xl font-black text-indigo-600 dark:text-indigo-400 hover:opacity-90 transition-opacity">
+            <span className="bg-indigo-600 text-white px-2.5 py-1 rounded-xl text-base font-extrabold shadow-sm">EN</span>
+            <span>EasyNaukri</span>
+          </Link>
+
+          <div className="flex items-center gap-4 sm:gap-6">
+            <Link to="/privacy" className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+              Privacy Policy
+            </Link>
+            <Link to="/terms" className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+              Terms of Service
+            </Link>
             <button
               type="button"
               onClick={toggleTheme}
-              className="theme-toggle-btn"
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                padding: "8px",
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "var(--text-secondary)",
-                transition: "opacity 0.2s"
-              }}
+              className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors"
               title={`Switch to ${resolvedTheme === "dark" ? "light" : "dark"} mode`}
             >
               {resolvedTheme === "dark" ? (
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} style={{ width: "20px", height: "20px", color: "#fbbf24" }}>
+                <svg className="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
                 </svg>
               ) : (
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} style={{ width: "20px", height: "20px", color: "#4f46e5" }}>
+                <svg className="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                 </svg>
               )}
             </button>
+
             {user ? (
-              <Link to={getDashboardPath()} className="landing-btn btn-primary">
+              <Link to={getDashboardPath()} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-md transition-all">
                 Go to Dashboard
               </Link>
             ) : (
-              <>
-                <Link to="/login" className="landing-btn btn-text">
-                  Login
-                </Link>
-                <Link to="/login?tab=register" className="landing-btn btn-outline">
-                  Get Started
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      </nav>
-
-      {/* Slide Navigation Dots */}
-      <nav className="slide-dots-nav" aria-label="Slide Navigation">
-        {slides.map((slide) => (
-          <button
-            key={slide.id}
-            type="button"
-            className={`slide-dot ${activeSlide === slide.id ? "active" : ""}`}
-            data-label={slide.label}
-            onClick={() => {
-              const el = document.getElementById(slide.id);
-              if (el) {
-                el.scrollIntoView({ behavior: "smooth" });
-              }
-            }}
-            title={slide.label}
-          />
-        ))}
-      </nav>
-
-      {/* ==================== Hero Section ==================== */}
-      <header id="intro" className="hero-section">
-        <div className="hero-content">
-          <span className="hero-tagline">EasyNaukri</span>
-          <h1 className="hero-title">EasyNaukri</h1>
-          <p className="hero-subtitle">
-            Automated Job Application & Resume Matching Platform. Streamline your job search, optimize your resume, and track applications effortlessly.
-          </p>
-          <div className="hero-ctas">
-            {user ? (
-              <Link to={getDashboardPath()} className="landing-btn btn-primary">
-                Back to Dashboard
+              <Link to="/login" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-md transition-all">
+                Sign In
               </Link>
-            ) : (
-              <>
-                <Link to="/login?tab=register" className="landing-btn btn-primary">
-                  Get Started Free
-                </Link>
-                <a href="#what-we-do" className="landing-btn btn-outline">
-                  How it works
-                </a>
-              </>
             )}
-          </div>
-          <p className="hero-auth-note" style={{ marginTop: "1.25rem", fontSize: "0.875rem", color: "var(--text-secondary)", fontWeight: 500 }}>
-            Sign in with Google to create your account profile, save job preferences, and sync your resume securely.
-          </p>
-        </div>
-
-        <div className="hero-graphic-container">
-          <div className="glow-orb-hero" aria-hidden="true"></div>
-          <div className="hero-mockup-card">
-            <div className="mockup-header">
-              <div className="mockup-dots">
-                <span className="mockup-dot"></span>
-                <span className="mockup-dot"></span>
-                <span className="mockup-dot"></span>
-              </div>
-              <span className="mockup-status">AI Autopilot Running</span>
-            </div>
-            
-            <div className="mockup-row">
-              <span className="mockup-label">Match Score Threshold</span>
-              <span className="mockup-val">85% +</span>
-            </div>
-            <div className="mockup-row">
-              <span className="mockup-label">Daily Submission Limit</span>
-              <span className="mockup-val">15 / day</span>
-            </div>
-            
-            <div className="mockup-row" style={{ marginTop: "1rem" }}>
-              <span className="mockup-label">Weekly Queue Progress</span>
-              <span className="mockup-val">72% Completed</span>
-            </div>
-            <div className="mockup-progress-bar">
-              <div className="mockup-progress-fill"></div>
-            </div>
-
-            <div className="mockup-job-card">
-              <div className="mockup-job-icon">⚛️</div>
-              <div className="mockup-job-info">
-                <h4>Frontend Developer</h4>
-                <p>Vercel Inc. • Remote • 94% Skills Match</p>
-              </div>
-              <span style={{ marginLeft: "auto", fontSize: "0.75rem", color: "#22c55e", fontWeight: 600 }}>
-                Submitted
-              </span>
-            </div>
-          </div>
-
-          <div className="floating-overlay-card">
-            <div className="floating-icon">✓</div>
-            <div className="floating-details">
-              <h5>Applications Submitted</h5>
-              <p>1,482 this month</p>
-            </div>
           </div>
         </div>
       </header>
 
-      {/* ==================== What We Do Section ==================== */}
-      <section id="what-we-do" className="landing-section">
-        <div className="section-header">
-          <span className="section-label">Workflow Automation</span>
-          <h2 className="section-title">How EasyNaukri Works</h2>
-          <p className="section-subtitle">
-            Let our AI assistant manage the entire job hunting pipeline, 
-            working behind the scenes to get you noticed.
+      {/* ==================== Main Verification Landing Section ==================== */}
+      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 space-y-12">
+        
+        {/* Hero Section */}
+        <section className="text-center bg-gradient-to-br from-indigo-900 via-slate-900 to-indigo-950 text-white rounded-3xl p-8 sm:p-14 shadow-2xl relative overflow-hidden">
+          <div className="absolute -right-16 -top-16 w-72 h-72 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+          
+          <div className="inline-flex items-center gap-2 bg-indigo-500/20 border border-indigo-400/30 text-indigo-200 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-6">
+            ✨ Official Application Homepage
+          </div>
+
+          <h1 className="text-4xl sm:text-6xl font-black tracking-tight mb-4 text-white">
+            EasyNaukri
+          </h1>
+
+          <p className="text-xl sm:text-2xl font-semibold text-indigo-200 mb-6 max-w-3xl mx-auto leading-snug">
+            Automated Job Application & Resume Matching Platform
           </p>
-        </div>
 
-        <div className="steps-container">
-          <div className="step-card">
-            <span className="step-number">1</span>
-            <div className="step-icon">📄</div>
-            <h3 className="step-title">Upload & Analyze</h3>
-            <p className="step-description">
-              Drop in your resume and profile details. Our system extracts your key skills, 
-              experience levels, and target job parameters.
-            </p>
-          </div>
-
-          <div className="step-card">
-            <span className="step-number">2</span>
-            <div className="step-icon">🎯</div>
-            <h3 className="step-title">Smart Matching</h3>
-            <p className="step-description">
-              Our matching engine evaluates job descriptions across major websites 
-              to isolate listings that maximize your hiring potential.
-            </p>
-          </div>
-
-          <div className="step-card">
-            <span className="step-number">3</span>
-            <div className="step-icon">🤖</div>
-            <h3 className="step-title">Autopilot Applying</h3>
-            <p className="step-description">
-              The AI dynamically creates tailored answers, customizes your resume 
-              to match keywords, and submits the applications for you.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ==================== Benefits Section ==================== */}
-      <section id="benefits" className="landing-section">
-        <div className="section-header">
-          <span className="section-label">Key Advantages</span>
-          <h2 className="section-title">Designed to Save Your Time</h2>
-          <p className="section-subtitle">
-            Job hunting doesn't have to be a full-time job. Get the competitive edge 
-            needed to succeed.
+          <p className="text-slate-300 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed mb-8">
+            EasyNaukri is an AI-powered career assistant designed to streamline job search, optimize resumes for ATS compatibility, track application pipelines, and manage candidate outreach.
           </p>
-        </div>
 
-        <div className="benefits-grid">
-          <div className="benefit-card">
-            <div className="benefit-icon-wrapper">⏱️</div>
-            <div className="benefit-info">
-              <h3 className="benefit-title">Save 80+ Hours Monthly</h3>
-              <p className="benefit-description">
-                Skip filling repeating application forms on job boards. Spend your time 
-                preparing for upcoming interviews instead.
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto">
+            {user ? (
+              <Link to={getDashboardPath()} className="w-full sm:w-auto px-8 py-3.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-bold text-base shadow-lg transition-all">
+                Open Dashboard
+              </Link>
+            ) : (
+              <Link to="/login" className="w-full sm:w-auto px-8 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-base shadow-lg transition-all">
+                Sign In with Google
+              </Link>
+            )}
+          </div>
+
+          <p className="mt-6 text-xs sm:text-sm text-indigo-200/90 font-medium max-w-lg mx-auto">
+            Sign in with Google to create your EasyNaukri account profile, save job preferences, and sync your resume securely.
+          </p>
+        </section>
+
+        {/* Section 1: Platform Purpose & Key Features */}
+        <section className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-10 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-6">
+          <div className="border-b border-slate-200 dark:border-slate-800 pb-4">
+            <h2 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2.5">
+              <span>🎯</span> Platform Purpose & Features
+            </h2>
+            <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">
+              EasyNaukri empowers candidates by automating repetitive career tasks.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-slate-50 dark:bg-slate-800/60 p-6 rounded-2xl border border-slate-200/60 dark:border-slate-700/60">
+              <div className="text-3xl mb-3">📄</div>
+              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-2">Resume Matching</h3>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                Extract key skills and match candidate profiles against target job descriptions to maximize hiring potential.
+              </p>
+            </div>
+
+            <div className="bg-slate-50 dark:bg-slate-800/60 p-6 rounded-2xl border border-slate-200/60 dark:border-slate-700/60">
+              <div className="text-3xl mb-3">📈</div>
+              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-2">Application Tracking</h3>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                Centralized dashboard to track application status, interview schedules, and response rates.
+              </p>
+            </div>
+
+            <div className="bg-slate-50 dark:bg-slate-800/60 p-6 rounded-2xl border border-slate-200/60 dark:border-slate-700/60">
+              <div className="text-3xl mb-3">✉️</div>
+              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-2">Recruiter Outreach</h3>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                Compose, review, and send candidate-initiated outreach emails directly to hiring recruiters.
               </p>
             </div>
           </div>
+        </section>
 
-          <div className="benefit-card">
-            <div className="benefit-icon-wrapper">🎯</div>
-            <div className="benefit-info">
-              <h3 className="benefit-title">ATS-Optimized Customization</h3>
-              <p className="benefit-description">
-                We rewrite application responses and highlight relevant skills 
-                to ensure your profiles pass automated ATS screening filters.
+        {/* Section 2: Google Authentication & Scopes Purpose */}
+        <section className="bg-indigo-50/60 dark:bg-indigo-950/40 rounded-3xl p-6 sm:p-10 border border-indigo-200 dark:border-indigo-900/60 space-y-6">
+          <div className="border-b border-indigo-200 dark:border-indigo-800/60 pb-4">
+            <h2 className="text-2xl font-extrabold text-indigo-950 dark:text-indigo-200 flex items-center gap-2.5">
+              <span>🔐</span> Google Integration & OAuth Scopes
+            </h2>
+            <p className="text-indigo-900/80 dark:text-indigo-300/80 text-sm mt-1">
+              Detailed breakdown of why EasyNaukri integrates with Google services.
+            </p>
+          </div>
+
+          <div className="space-y-4 text-sm text-indigo-950 dark:text-indigo-200 leading-relaxed">
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-indigo-100 dark:border-indigo-900/40 shadow-xs">
+              <h3 className="font-bold text-base text-indigo-600 dark:text-indigo-400 mb-1">
+                1. Google OAuth Sign-In (`openid`, `email`, `profile`)
+              </h3>
+              <p className="text-slate-600 dark:text-slate-300 text-xs sm:text-sm">
+                Allows job seekers to securely log into EasyNaukri, create their profile, save job preferences, and store resume details safely without maintaining extra passwords.
+              </p>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-indigo-100 dark:border-indigo-900/40 shadow-xs">
+              <h3 className="font-bold text-base text-indigo-600 dark:text-indigo-400 mb-1">
+                2. Gmail API Integration (`gmail.send` - Send-only scope)
+              </h3>
+              <p className="text-slate-600 dark:text-slate-300 text-xs sm:text-sm">
+                EasyNaukri utilizes send-only access to Gmail API solely to allow users to review and send personalized job application emails to recruiters directly from their connected Gmail account. EasyNaukri never reads, modifies, or stores non-outreach inbox messages.
               </p>
             </div>
           </div>
+        </section>
 
-          <div className="benefit-card">
-            <div className="benefit-icon-wrapper">📈</div>
-            <div className="benefit-info">
-              <h3 className="benefit-title">Unified Tracking Dashboard</h3>
-              <p className="benefit-description">
-                Keep tabs on all applications, upcoming stages, and offers in one centralized, 
-                high-fidelity dashboard.
-              </p>
-            </div>
-          </div>
-
-          <div className="benefit-card">
-            <div className="benefit-icon-wrapper">💼</div>
-            <div className="benefit-info">
-              <h3 className="benefit-title">Recruiter Partnerships</h3>
-              <p className="benefit-description">
-                Connect directly with recruiters and businesses looking for verified candidates 
-                matching your specific skillset.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ==================== Pricing Plans Section ==================== */}
-      <section id="pricing" className="landing-section">
-        <div className="section-header">
-          <span className="section-label">Pricing Tiers</span>
-          <h2 className="section-title">Select the Perfect Plan</h2>
-          <p className="section-subtitle">
-            Start free and upgrade as you scale your search. No hidden fees, cancel anytime.
-          </p>
-        </div>
-
-        <div className="pricing-grid">
-          {/* Candidate Free */}
-          <div className="pricing-card">
-            <h3 className="pricing-tier">Candidate Free</h3>
-            <div className="pricing-price">₹0<span>/month</span></div>
-            <p className="pricing-desc">Ideal for testing the platform and getting familiar with application automation.</p>
-            <div className="pricing-divider"></div>
-            <ul className="pricing-features">
-              <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> 3 Submissions per day (90/mo)
-              </li>
-              <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> 1 Resume Profile
-              </li>
-              <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> Standard Job Matching
-              </li>
-              <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> Basic Roadmaps & 5 Quizzes/day
-              </li>
-              <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> Simple Application Tracker
-              </li>
-              <li className="pricing-feature-item" style={{ opacity: 0.4 }}>
-                <span style={{ marginRight: "0.75rem" }}>✕</span> Custom Cover Letters
-              </li>
-            </ul>
-            <Link to="/login?tab=register" className="landing-btn btn-outline pricing-btn">
-              Get Started Free
-            </Link>
-          </div>
-
-          {/* Starter Plan */}
-          <div className="pricing-card">
-            <h3 className="pricing-tier">Starter Plan</h3>
-            <div className="pricing-price">₹69<span>/month</span></div>
-            <p className="pricing-desc">Great for active candidates seeking a steady daily job outreach volume.</p>
-            <div className="pricing-divider"></div>
-            <ul className="pricing-features">
-              <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> 15 Submissions per day (450/mo)
-              </li>
-              <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> Up to 3 Resume Profiles
-              </li>
-              <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> ATS Keyword Optimization
-              </li>
-              <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> All Roadmaps & Unlimited Quizzes
-              </li>
-              <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> Pipeline Conversion Analytics
-              </li>
-              <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> Mobile App Sync & Biometrics
-              </li>
-            </ul>
-            <Link to="/login?tab=register" className="landing-btn btn-outline pricing-btn">
-              Start Starter Plan
-            </Link>
-          </div>
-
-          {/* Candidate Pro Tier */}
-          <div className="pricing-card featured">
-            <span className="pricing-badge">Most Popular</span>
-            <h3 className="pricing-tier">Candidate Pro</h3>
-            <div className="pricing-price">₹99<span>/month</span></div>
-            <p className="pricing-desc">For serious job seekers looking to maximize outreach and land interview calls fast.</p>
-            <div className="pricing-divider"></div>
-            <ul className="pricing-features">
-              <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> 40 Submissions per day (1,200/mo)
-              </li>
-              <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> Unlimited Resume Profiles
-              </li>
-              <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> Automated Cover Letters & AI Tailoring
-              </li>
-              <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> Automated SMTP Scheduled Dispatch
-              </li>
-              <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> Rejection Trends & Funnel Stats
-              </li>
-              <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> Priority Email Support
-              </li>
-            </ul>
-            <Link to="/login?tab=register" className="landing-btn btn-primary pricing-btn">
-              Upgrade to Pro
-            </Link>
-          </div>
-
-          {/* Elite Autopilot Tier */}
-          <div className="pricing-card">
-            <h3 className="pricing-tier">Elite Autopilot</h3>
-            <div className="pricing-price">₹199<span>/month</span></div>
-            <p className="pricing-desc">Maximum speed & priority processing for aggressive job hunting campaigns.</p>
-            <div className="pricing-divider"></div>
-            <ul className="pricing-features">
-              <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> Unlimited Submissions (100+/day)
-              </li>
-              <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> Priority Instant AI OCR & Parsing
-              </li>
-              <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> Full Resume & Cover Letter Suite
-              </li>
-              <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> Featured Candidate Recruiter Spotlight
-              </li>
-              <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> Dedicated Account Support
-              </li>
-              <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> Custom Outreach Mail Config
-              </li>
-            </ul>
-            <Link to="/login?tab=register" className="landing-btn btn-outline pricing-btn">
-              Get Elite Autopilot
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ==================== Testimonials Section ==================== */}
-      <section id="testimonials" className="landing-section">
-        <div className="section-header">
-          <span className="section-label">Success Stories</span>
-          <h2 className="section-title">Loved by Job Seekers</h2>
-          <p className="section-subtitle">
-            Hear from developers and professionals who automated their job hunt and succeeded.
-          </p>
-        </div>
-
-        <div className="testimonials-grid">
-          <div className="testimonial-card">
-            <div className="testimonial-stars">★★★★★</div>
-            <p className="testimonial-quote">
-              EasyNaukri saved me weeks of manual copy-pasting. I was able to target 
-              top companies with customized submissions and landed a Senior Frontend Developer 
-              role at a startup within 14 days!
-            </p>
-            <div className="testimonial-user">
-              <div className="testimonial-avatar">SM</div>
-              <div className="testimonial-meta">
-                <h4>Sarah Jenkins</h4>
-                <p>Senior Frontend Developer</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="testimonial-card">
-            <div className="testimonial-stars">★★★★★</div>
-            <p className="testimonial-quote">
-              The AI resume tailoring works like magic. My response rate increased from less 
-              than 5% to almost 35%. Having a single dashboard to track all of my interview invitations 
-              made the organization a breeze.
-            </p>
-            <div className="testimonial-user">
-              <div className="testimonial-avatar">DK</div>
-              <div className="testimonial-meta">
-                <h4>David Kim</h4>
-                <p>Technical Product Manager</p>
-              </div>
-            </div>
-          </div>
-
-          {feedbacks.map((fb) => (
-            <div key={fb.id} className="testimonial-card animate-in fade-in duration-300">
-              <div className="testimonial-stars">
-                {"★".repeat(fb.rating)}{"☆".repeat(5 - fb.rating)}
-              </div>
-              <p className="testimonial-quote">
-                {fb.comment}
-              </p>
-              <div className="testimonial-user">
-                <div className="testimonial-avatar bg-primary/10 text-primary font-bold">
-                  {getInitials(fb.userName)}
-                </div>
-                <div className="testimonial-meta">
-                  <h4>{fb.userName}</h4>
-                  <p>{fb.userRole}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ==================== FAQs Section ==================== */}
-      <section id="faqs" className="landing-section">
-        <div className="section-header">
-          <span className="section-label">Questions & Answers</span>
-          <h2 className="section-title">Frequently Asked Questions</h2>
-          <p className="section-subtitle">
-            Find answers to commonly asked questions about our automation features and policies.
-          </p>
-        </div>
-
-        <div className="faqs-container">
-          <details className="faq-item" name="landing-faqs" open>
-            <summary>How does the automated application process work?</summary>
-            <p className="faq-content">
-              After you upload your resume and set your target preferences (e.g. roles, location, salary), 
-              our AI agents scan job postings, identify optimal fits, adapt your skills text to matching keywords, 
-              and automatically fill form fields on target websites on your behalf.
-            </p>
-          </details>
-
-          <details className="faq-item" name="landing-faqs">
-            <summary>Can I review applications before they are sent?</summary>
-            <p className="faq-content">
-              Yes! You can choose to enable "Review Mode" in your profile. When enabled, applications 
-              will be drafted in your Outreach Queue, where you can check the customized response, 
-              adjust cover letters, and confirm submission manually.
-            </p>
-          </details>
-
-          <details className="faq-item" name="landing-faqs">
-            <summary>Which job boards and systems do you support?</summary>
-            <p className="faq-content">
-              EasyNaukri supports major job sites like LinkedIn, Indeed, ZipRecruiter, Greenhouse, 
-              and Lever applicant tracking systems (ATS), with support for more portals being updated weekly.
-            </p>
-          </details>
-
-          <details className="faq-item" name="landing-faqs">
-            <summary>Is my personal information secure?</summary>
-            <p className="faq-content">
-              Your security is our priority. We encrypt your personal data and documents during transit 
-              and at rest. We never sell your personal information or resume files to third-party data brokers.
-            </p>
-          </details>
-        </div>
-      </section>
+      </main>
 
       {/* ==================== Footer ==================== */}
-      <footer id="footer" className="landing-footer">
-        <div className="footer-container">
-          <div className="footer-brand">
-            <h3>EasyNaukri</h3>
-            <p>EasyNaukri is an automated job application & resume matching platform. Streamline your job search, optimize your resume, and track applications effortlessly.</p>
-            <div className="footer-socials">
-              <a href="#" className="footer-social-link" aria-label="X (Twitter)">𝕏</a>
-              <a href="#" className="footer-social-link" aria-label="GitHub">🐙</a>
-              <a href="#" className="footer-social-link" aria-label="LinkedIn">in</a>
-            </div>
+      <footer className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-8 transition-colors">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
+          <div>
+            © {new Date().getFullYear()} <strong>EasyNaukri</strong>. All rights reserved.
           </div>
-
-          <div className="footer-column">
-            <h4>Product</h4>
-            <ul className="footer-links">
-              <li className="footer-link-item"><a href="#what-we-do">Features</a></li>
-              <li className="footer-link-item"><a href="#pricing">Pricing Plans</a></li>
-              <li className="footer-link-item"><a href="#faqs">Q&A Support</a></li>
-            </ul>
+          <div className="flex items-center gap-6 font-medium">
+            <Link to="/privacy" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+              Privacy Policy
+            </Link>
+            <Link to="/terms" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+              Terms of Service
+            </Link>
+            <a href="mailto:support@easynaukri.com" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+              Contact: support@easynaukri.com
+            </a>
           </div>
-
-          <div className="footer-column">
-            <h4>Legal</h4>
-            <ul className="footer-links">
-              <li className="footer-link-item"><Link to="/privacy">Privacy Policy</Link></li>
-              <li className="footer-link-item"><Link to="/terms">Terms of Service</Link></li>
-              <li className="footer-link-item"><a href="#">Security Audits</a></li>
-            </ul>
-          </div>
-
-          <div className="footer-column">
-            <h4>Company</h4>
-            <ul className="footer-links">
-              <li className="footer-link-item"><a href="#">About Us</a></li>
-              <li className="footer-link-item"><a href="#">Careers</a></li>
-              <li className="footer-link-item"><a href="#">Contact Us</a></li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="footer-bottom">
-          <span>© {new Date().getFullYear()} EasyNaukri. All rights reserved.</span>
-          <span>Designed with high-fidelity glassmorphism.</span>
         </div>
       </footer>
     </div>

@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import Layout from "../components/Layout";
 import LoginPage from "../pages/LoginPage";
 import LandingPage from "../pages/LandingPage";
+import MainLandingPage from "../pages/MainLandingPage";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import ResetPasswordPage from "../pages/ResetPasswordPage";
 import VerifyEmailPage from "../pages/VerifyEmailPage";
@@ -36,6 +37,7 @@ export const AppRoutes: React.FC = () => {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
+      <Route path="/main" element={<MainLandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
