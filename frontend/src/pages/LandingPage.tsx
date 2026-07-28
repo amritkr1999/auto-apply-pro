@@ -4,16 +4,22 @@ import { Link } from "react-router-dom";
 export const LandingPage: React.FC = () => {
   return (
     <div>
-      <header>
-        <h1>EasyNaukri</h1>
-        <p>Automated Job Application & Resume Matching Platform</p>
+      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1rem 2rem", borderBottom: "1px solid #e2e8f0" }}>
+        <div style={{ fontSize: "1.5rem", fontWeight: "bold" }}>
+          EasyNaukri
+        </div>
+        <nav style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+          <Link to="/login" style={{ padding: "0.5rem 1rem", backgroundColor: "#4f46e5", color: "#fff", borderRadius: "0.375rem", textDecoration: "none", fontWeight: 500 }}>
+            Sign in with Google
+          </Link>
+        </nav>
       </header>
 
-      <main>
-        <section>
-          <h2>Application Purpose</h2>
-          <p>
-            EasyNaukri is an AI-powered career assistant designed to help job seekers match their resumes with job descriptions, optimize ATS keywords, track job application pipelines, and send candidate-authorized recruiter outreach emails automatically.
+      <main style={{ maxWidth: "1000px", margin: "0 auto", padding: "2rem 1rem" }}>
+        <section style={{ textAlign: "center", marginBottom: "3rem" }}>
+          <h1 style={{ fontSize: "2.5rem", fontWeight: "bold", marginBottom: "1rem" }}>Welcome to EasyNaukri</h1>
+          <p style={{ fontSize: "1.125rem", color: "#4b5563", maxWidth: "800px", margin: "0 auto", lineHeight: "1.6" }}>
+            EasyNaukri is an automated job search and resume management platform designed to help job seekers discover matching opportunities, optimize resumes, and streamline application workflows.
           </p>
         </section>
 
@@ -23,9 +29,9 @@ export const LandingPage: React.FC = () => {
             EasyNaukri requests specific Google OAuth permissions to provide authentication and email dispatch services. Below is a detailed breakdown of what data we access, why we need it, and how it is used:
           </p>
 
-          <table border={1} cellPadding={8} cellSpacing={0}>
+          <table border={1} cellPadding={8} cellSpacing={0} style={{ width: "100%", borderCollapse: "collapse", margin: "1.5rem 0" }}>
             <thead>
-              <tr>
+              <tr style={{ backgroundColor: "#f8fafc" }}>
                 <th>Scope Name</th>
                 <th>Permission Type</th>
                 <th>What Data We Access</th>
@@ -77,7 +83,7 @@ export const LandingPage: React.FC = () => {
           </ul>
         </section>
 
-        <section>
+        <section style={{ margin: "2rem 0" }}>
           <h2>Data Privacy & Security Guarantees</h2>
           <ul>
             <li><strong>User Control:</strong> All outreach emails sent using <code>gmail.send</code> are created based on candidate-approved templates and job parameters.</li>
@@ -86,28 +92,28 @@ export const LandingPage: React.FC = () => {
           </ul>
         </section>
 
-        <section>
-          <h2>Sign In with Google</h2>
+        <section style={{ textAlign: "center", margin: "3rem 0", padding: "2rem", backgroundColor: "#f8fafc", borderRadius: "0.5rem" }}>
+          <p style={{ fontSize: "1.05rem", marginBottom: "1rem", color: "#334155", fontWeight: 500 }}>
+            Sign in with Google to securely create your EasyNaukri profile, track your job applications, and save your resume preferences.
+          </p>
           <p>
             <Link to="/login">
-              <button type="button">Sign in with Google</button>
+              <button type="button" style={{ padding: "0.75rem 1.5rem", fontSize: "1rem", fontWeight: 600, backgroundColor: "#4f46e5", color: "#fff", border: "none", borderRadius: "0.375rem", cursor: "pointer" }}>
+                Sign in with Google
+              </button>
             </Link>
           </p>
-          <p>
-            <strong>Permissions Notice:</strong> Signing in with Google authorizes EasyNaukri to verify your identity (<code>openid</code>, <code>email</code>, <code>profile</code>) and grant send-only permission (<code>https://www.googleapis.com/auth/gmail.send</code>) strictly for dispatching candidate-authorized job application outreach emails.
-          </p>
-          <p>
+          <p style={{ marginTop: "1rem", fontSize: "0.9rem", color: "#64748b" }}>
             By continuing, you agree to our <Link to="/privacy">Privacy Policy</Link> and <Link to="/terms">Terms of Service</Link>.
           </p>
         </section>
       </main>
 
-      <footer>
-        <hr />
-        <p>
+      <footer style={{ textAlign: "center", padding: "2rem 1rem", borderTop: "1px solid #e2e8f0" }}>
+        <p style={{ marginBottom: "0.5rem" }}>
           <Link to="/privacy">Privacy Policy</Link> | <Link to="/terms">Terms of Service</Link>
         </p>
-        <p>&copy; {new Date().getFullYear()} EasyNaukri. All rights reserved.</p>
+        <p>&copy; 2026 EasyNaukri. All rights reserved.</p>
       </footer>
     </div>
   );

@@ -161,9 +161,9 @@ export const MainLandingPage: React.FC = () => {
       <header id="intro" className="hero-section">
         <div className="hero-content">
           <span className="hero-tagline">EasyNaukri</span>
-          <h1 className="hero-title">EasyNaukri</h1>
+          <h1 className="hero-title">Welcome to EasyNaukri</h1>
           <p className="hero-subtitle">
-            Automated Job Application & Resume Matching Platform. Streamline your job search, optimize your resume, and track applications effortlessly.
+            EasyNaukri is an automated job search and resume management platform designed to help job seekers discover matching opportunities, optimize resumes, and streamline application workflows.
           </p>
           <div className="hero-ctas">
             {user ? (
@@ -182,7 +182,7 @@ export const MainLandingPage: React.FC = () => {
             )}
           </div>
           <p className="hero-auth-note" style={{ marginTop: "1.25rem", fontSize: "0.875rem", color: "var(--text-secondary)", fontWeight: 500 }}>
-            Sign in with Google to create your account profile, save job preferences, and sync your resume securely.
+            Sign in with Google to securely create your EasyNaukri profile, track your job applications, and save your resume preferences.
           </p>
         </div>
 
@@ -631,7 +631,7 @@ export const MainLandingPage: React.FC = () => {
         </div>
 
         <div className="footer-bottom">
-          <span>© {new Date().getFullYear()} EasyNaukri. All rights reserved.</span>
+          <span>© 2026 EasyNaukri. All rights reserved.</span>
           <span>Designed with high-fidelity glassmorphism.</span>
         </div>
       </footer>
