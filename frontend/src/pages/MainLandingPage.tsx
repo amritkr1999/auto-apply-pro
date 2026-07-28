@@ -163,7 +163,7 @@ export const MainLandingPage: React.FC = () => {
           <span className="hero-tagline">EasyNaukri</span>
           <h1 className="hero-title">Welcome to EasyNaukri</h1>
           <p className="hero-subtitle">
-            EasyNaukri is an automated job search and resume management platform designed to help job seekers discover matching opportunities, optimize resumes, and streamline application workflows.
+            EasyNaukri is an automated job search and resume management platform designed to help job seekers discover matching opportunities, optimize resumes, and track applications effortlessly.
           </p>
           <div className="hero-ctas">
             {user ? (

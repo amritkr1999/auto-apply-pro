@@ -19,7 +19,7 @@ export const LandingPage: React.FC = () => {
         <section style={{ textAlign: "center", marginBottom: "3rem" }}>
           <h1 style={{ fontSize: "2.5rem", fontWeight: "bold", marginBottom: "1rem" }}>Welcome to EasyNaukri</h1>
           <p style={{ fontSize: "1.125rem", color: "#4b5563", maxWidth: "800px", margin: "0 auto", lineHeight: "1.6" }}>
-            EasyNaukri is an automated job search and resume management platform designed to help job seekers discover matching opportunities, optimize resumes, and streamline application workflows.
+            EasyNaukri is an automated job search and resume management platform designed to help job seekers discover matching opportunities, optimize resumes, and track applications effortlessly.
           </p>
         </section>
 
