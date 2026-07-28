@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Allow: /privacy
+Allow: /terms
+Allow: /assets/
+Allow: /dashboard_mockup.png
+
+Sitemap: https://easynaukri.online/sitemap.xml
