@@ -962,14 +962,25 @@ export const LoginPage: React.FC = () => {
           </div>
         )}
 
-        {/* Social Authentication Dividers & Buttons */}
         <div className="social-divider">
-          <span>Or continue with</span>
+          <span>Sign in with Google</span>
         </div>
 
-        <p style={{ textAlign: "center", fontSize: "0.825rem", color: "var(--text-secondary, #94a3b8)", marginBottom: "1rem", lineHeight: "1.4" }}>
-          Sign in with Google to create your account profile, save job preferences, and sync your resume securely.
-        </p>
+        <div style={{ textAlign: "center", fontSize: "0.8rem", color: "var(--text-secondary, #94a3b8)", marginBottom: "1rem", lineHeight: "1.5" }}>
+          <p style={{ marginBottom: "6px" }}>
+            Signing in with Google authenticates your account profile (<code>openid</code>, <code>email</code>, <code>profile</code>) and authorizes Gmail send permission (<code>https://www.googleapis.com/auth/gmail.send</code>) strictly to dispatch user-authorized job application outreach emails to recruiters.
+          </p>
+          <p>
+            By continuing, you agree to EasyNaukri's{" "}
+            <Link to="/privacy" style={{ color: "#818cf8", fontWeight: 600, textDecoration: "underline" }}>
+              Privacy Policy
+            </Link>{" "}
+            and{" "}
+            <Link to="/terms" style={{ color: "#818cf8", fontWeight: 600, textDecoration: "underline" }}>
+              Terms of Service
+            </Link>.
+          </p>
+        </div>
 
         <div className="social-btn-row">
           <button

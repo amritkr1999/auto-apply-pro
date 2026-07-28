@@ -7,10 +7,10 @@
     <title>EasyNaukri</title>
     <meta name="application-name" content="EasyNaukri" />
     <meta name="apple-mobile-web-app-title" content="EasyNaukri" />
-    <meta name="description" content="EasyNaukri is an automated job application & resume matching platform. Streamline your job search, optimize your resume, and track applications effortlessly." />
+    <meta name="description" content="EasyNaukri is an automated job application & resume matching platform. Streamline your job search, optimize your resume, and send recruiter outreach emails effortlessly." />
     <meta property="og:title" content="EasyNaukri" />
     <meta property="og:site_name" content="EasyNaukri" />
-    <meta property="og:description" content="EasyNaukri is an automated job application & resume matching platform. Sign in with Google to create your account profile, save job preferences, and sync your resume securely." />
+    <meta property="og:description" content="EasyNaukri uses Google Authentication (openid, email, profile) to create account profiles and Gmail Send scope (https://www.googleapis.com/auth/gmail.send) strictly to allow users to send personalized job application outreach emails to recruiters." />
     <script>
       (function() {
         const savedTheme = localStorage.getItem('theme');
@@ -29,11 +29,19 @@
         <h1>EasyNaukri</h1>
         <p>Automated Job Application & Resume Matching Platform</p>
         <p>EasyNaukri is an AI-powered career assistant that helps job seekers match their resumes with job descriptions, optimize ATS keywords, track job application pipelines, and manage recruiter outreach.</p>
-        <p>Sign in with Google to create your account profile, save job preferences, and sync your resume securely.</p>
+        
+        <section>
+          <h2>Google Authentication & Permissions Used</h2>
+          <p><strong>1. Basic Profile Authentication (<code>openid</code>, <code>email</code>, <code>profile</code>):</strong> Used to securely sign in users, create account profiles, and save job preferences.</p>
+          <p><strong>2. Gmail Send Scope (<code>https://www.googleapis.com/auth/gmail.send</code>):</strong> EasyNaukri requests send-only access specifically so candidates can compose, review, and send personalized job application & recruiter outreach emails directly from their connected Gmail account. EasyNaukri never reads, accesses, or modifies non-outreach inbox emails.</p>
+        </section>
+
         <a href="/login">Sign In with Google</a>
+        <p>By signing in, you agree to our <a href="/privacy">Privacy Policy</a> and <a href="/terms">Terms of Service</a>.</p>
       </main>
       <footer>
-        <a href="/privacy">Privacy Policy</a> | <a href="/terms">Terms of Use</a>
+        <p>© 2026 EasyNaukri. All rights reserved.</p>
+        <a href="/privacy">Privacy Policy</a> | <a href="/terms">Terms of Service</a>
       </footer>
     </div>
     <script type="module" src="/src/main.tsx"></script>
