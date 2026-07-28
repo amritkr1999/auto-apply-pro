@@ -2,10 +2,12 @@
    Premium Light-Mode Elegant Landing Page Stylesheet
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 
 .landing-root {
-  --font-main: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-main: var(--font-body);
   --bg-color: #f8fafc;
   --bg-radial: radial-gradient(circle at 50% -20%, #e0e7ff 0%, #f8fafc 70%);
   --card-bg: rgba(255, 255, 255, 0.7);
@@ -16,7 +18,7 @@
   --text-secondary: #475569; /* Slate 600 */
   --text-dark: #0f172a;
   
-  font-family: var(--font-main);
+  font-family: var(--font-body);
   background-color: var(--bg-color);
   background-image: var(--bg-radial);
   color: var(--text-primary);
@@ -28,6 +30,19 @@
   scroll-snap-type: y mandatory;
   scroll-behavior: smooth;
   box-sizing: border-box;
+}
+
+.landing-root h1,
+.landing-root h2,
+.landing-root h3,
+.landing-root h4,
+.landing-root h5,
+.landing-root h6,
+.landing-root .nav-logo,
+.landing-root .font-heading,
+.landing-root .hero-title,
+.landing-root .section-title {
+  font-family: var(--font-heading);
 }
 
 .landing-root *, 

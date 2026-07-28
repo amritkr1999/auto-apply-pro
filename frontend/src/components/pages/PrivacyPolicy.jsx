@@ -178,6 +178,7 @@ export const PrivacyPolicy = () => {
               <ul className="list-disc list-inside space-y-2 pl-2 text-slate-700 dark:text-slate-200">
                 <li><strong>Access & Update:</strong> You can view and edit your profile details at any time in Account Settings.</li>
                 <li><strong>Account Deletion:</strong> You have the right to request permanent deletion of your account and associated data (under GDPR, CCPA, and DPDP frameworks). You can trigger account deletion directly in your profile settings or by contacting us.</li>
+                <li><strong>Right to Complain / Appeal:</strong> If you believe that our processing of your personal data infringes applicable data protection laws (including GDPR), you have the right to lodge a complaint or appeal with your relevant Data Protection Authority (DPA) or supervisory body.</li>
               </ul>
             </div>
           </section>
