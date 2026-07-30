@@ -4,6 +4,7 @@ import "./landing.css";
 import { feedbackService } from "../features/profile/services/feedbackService";
 import type { FeedbackResponse } from "../features/profile/services/feedbackService";
 import { useTheme } from "../context/ThemeContext";
+import MobileAppComingSoonModal from "../components/MobileAppComingSoonModal";
 
 export const MainLandingPage: React.FC = () => {
   const { toggleTheme, resolvedTheme } = useTheme();
@@ -12,6 +13,7 @@ export const MainLandingPage: React.FC = () => {
 
   const [feedbacks, setFeedbacks] = useState<FeedbackResponse[]>([]);
   const [activeSlide, setActiveSlide] = useState<string>("intro");
+  const [showMobileAppModal, setShowMobileAppModal] = useState(false);
 
   const slides = [
     { id: "intro", label: "Intro" },
@@ -94,6 +96,16 @@ export const MainLandingPage: React.FC = () => {
           <div className="nav-ctas" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
             <button
               type="button"
+              onClick={() => setShowMobileAppModal(true)}
+              className="landing-btn btn-outline"
+              style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}
+              title="Download Mobile App"
+            >
+              <span>📱</span>
+              <span>Download App</span>
+            </button>
+            <button
+              type="button"
               onClick={toggleTheme}
               className="theme-toggle-btn"
               style={{
@@ -137,6 +149,10 @@ export const MainLandingPage: React.FC = () => {
           </div>
         </div>
       </nav>
+
+      {showMobileAppModal && (
+        <MobileAppComingSoonModal onClose={() => setShowMobileAppModal(false)} />
+      )}
 
       {/* Slide Navigation Dots */}
       <nav className="slide-dots-nav" aria-label="Slide Navigation">

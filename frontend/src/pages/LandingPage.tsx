@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import MobileAppComingSoonModal from "../components/MobileAppComingSoonModal";
 
 export const LandingPage: React.FC = () => {
+  const [showMobileAppModal, setShowMobileAppModal] = useState(false);
+
   return (
     <div className="font-body min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-200 flex flex-col">
       <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50">
@@ -10,7 +13,17 @@ export const LandingPage: React.FC = () => {
             <span className="bg-indigo-600 text-white px-2 py-0.5 rounded-lg text-sm font-extrabold">EN</span>
             <span>EasyNaukri</span>
           </div>
-          <nav className="flex items-center gap-4">
+          <nav className="flex items-center gap-3 sm:gap-4">
+            <button
+              type="button"
+              onClick={() => setShowMobileAppModal(true)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60 rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-sm focus:outline-none cursor-pointer"
+            >
+              <svg className="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+              <span>Download App</span>
+            </button>
             <Link
               to="/login"
               className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium text-sm transition-colors shadow-sm"
@@ -20,6 +33,10 @@ export const LandingPage: React.FC = () => {
           </nav>
         </div>
       </header>
+
+      {showMobileAppModal && (
+        <MobileAppComingSoonModal onClose={() => setShowMobileAppModal(false)} />
+      )}
 
       <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
         {/* Hero Section */}

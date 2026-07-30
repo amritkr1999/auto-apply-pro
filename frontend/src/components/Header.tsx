@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
+import MobileAppComingSoonModal from "./MobileAppComingSoonModal";
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -8,6 +9,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const { toggleTheme, resolvedTheme } = useTheme();
+  const [showMobileAppModal, setShowMobileAppModal] = useState(false);
   const userStr = localStorage.getItem("user");
   const user = userStr ? JSON.parse(userStr) : null;
 
@@ -58,7 +60,20 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           )}
         </div>
         
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <button
+            type="button"
+            onClick={() => setShowMobileAppModal(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60 rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-sm focus:outline-none cursor-pointer"
+            title="Download Mobile App"
+          >
+            <svg className="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+            <span className="hidden xs:inline">Download App</span>
+            <span className="xs:hidden">App</span>
+          </button>
+
           <button
             type="button"
             onClick={toggleTheme}
@@ -99,6 +114,9 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           )}
         </div>
       </div>
+      {showMobileAppModal && (
+        <MobileAppComingSoonModal onClose={() => setShowMobileAppModal(false)} />
+      )}
     </header>
   );
 };
