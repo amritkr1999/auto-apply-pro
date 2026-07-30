@@ -45,10 +45,20 @@ export default function TabLayout() {
       <Tabs.Screen
         name="jobs"
         options={{
-          title: 'Job Queue',
+          title: 'Job Tracker',
           tabBarLabel: 'Jobs',
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'briefcase' : 'briefcase-outline'} size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="learning"
+        options={{
+          title: 'Learning Hub',
+          tabBarLabel: 'Learning',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'school' : 'school-outline'} size={24} color={color} />
           ),
         }}
       />
@@ -65,4 +75,3 @@ export default function TabLayout() {
     </Tabs>
   );
 }
-

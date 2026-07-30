@@ -16,6 +16,7 @@ import { api } from '../../services/api';
 import * as SecureStore from 'expo-secure-store';
 import { feedbackService } from '../../services/feedbackService';
 import { useTheme } from '../../components/useColorScheme';
+import { useRouter } from 'expo-router';
 
 interface ProfileData {
   name: string;
@@ -28,6 +29,7 @@ interface ProfileData {
 }
 
 export default function ProfileScreen() {
+  const router = useRouter();
   const { user } = useAuth();
   const { themeMode, setTheme } = useTheme();
   const [loading, setLoading] = useState(false);
@@ -402,8 +404,66 @@ export default function ProfileScreen() {
           </View>
         </View>
 
+        {/* Outreach Tools & Subscriptions */}
+        <Text className="text-slate-900 dark:text-white text-lg font-bold mb-4">Outreach & Membership</Text>
+        <View className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-3 mb-6 space-y-2">
+          
+          <TouchableOpacity
+            onPress={() => router.push('/outreach/templates')}
+            className="flex-row items-center justify-between p-3 rounded-2xl active:bg-slate-50 dark:active:bg-slate-950"
+          >
+            <View className="flex-row items-center">
+              <View className="w-9 h-9 bg-emerald-500/10 rounded-xl items-center justify-center mr-3">
+                <Ionicons name="mail-open-outline" size={18} color="#10b981" />
+              </View>
+              <Text className="text-slate-900 dark:text-white font-bold text-sm">Outreach Templates</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#94a3b8" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => router.push('/outreach/queue')}
+            className="flex-row items-center justify-between p-3 rounded-2xl active:bg-slate-50 dark:active:bg-slate-950"
+          >
+            <View className="flex-row items-center">
+              <View className="w-9 h-9 bg-emerald-500/10 rounded-xl items-center justify-center mr-3">
+                <Ionicons name="server-outline" size={18} color="#10b981" />
+              </View>
+              <Text className="text-slate-900 dark:text-white font-bold text-sm">Delivery Queue & SMTP Monitor</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#94a3b8" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => router.push('/billing/pricing')}
+            className="flex-row items-center justify-between p-3 rounded-2xl active:bg-slate-50 dark:active:bg-slate-950"
+          >
+            <View className="flex-row items-center">
+              <View className="w-9 h-9 bg-emerald-500/10 rounded-xl items-center justify-center mr-3">
+                <Ionicons name="card-outline" size={18} color="#10b981" />
+              </View>
+              <Text className="text-slate-900 dark:text-white font-bold text-sm">Subscription & Pricing Plans</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#94a3b8" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => router.push('/share/card')}
+            className="flex-row items-center justify-between p-3 rounded-2xl active:bg-slate-50 dark:active:bg-slate-950"
+          >
+            <View className="flex-row items-center">
+              <View className="w-9 h-9 bg-emerald-500/10 rounded-xl items-center justify-center mr-3">
+                <Ionicons name="qr-code-outline" size={18} color="#10b981" />
+              </View>
+              <Text className="text-slate-900 dark:text-white font-bold text-sm">Share Digital Plaque Card</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#94a3b8" />
+          </TouchableOpacity>
+
+        </View>
+
         {/* Appearance Settings Card */}
-        <Text className="text-slate-900 dark:text-white text-lg font-bold mb-4 mt-6">Appearance</Text>
+        <Text className="text-slate-900 dark:text-white text-lg font-bold mb-4 mt-2">Appearance</Text>
         <View className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 mb-6">
           <Text className="text-slate-500 dark:text-slate-400 text-xs mt-0.5 leading-relaxed mb-4">
             Customize how EasyNaukri looks on your device. Choose Light, Dark, or System Default theme.
