@@ -4,6 +4,8 @@ import com.backend.autoapplypro.config.JwtUtil;
 import com.backend.autoapplypro.modules.users.dto.*;
 import com.backend.autoapplypro.modules.users.model.*;
 import com.backend.autoapplypro.modules.users.repository.*;
+import com.backend.autoapplypro.modules.users.public_profile.evidence.EvidenceEngine;
+import com.backend.autoapplypro.modules.users.public_profile.evidence.EvidenceProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ public class UserServiceImpl implements UserService {
     private final SystemEmailService systemEmailService;
     private final MarketingEmailCampaignService marketingCampaignService;
     private final JavaResumeParserService javaResumeParserService;
+    private final EvidenceEngine evidenceEngine;
 
     @org.springframework.beans.factory.annotation.Value("${pipeline.service.url:http://localhost:8000}")
     private String pythonServiceUrl;
@@ -330,7 +333,8 @@ public class UserServiceImpl implements UserService {
                 .leetcodeStats(candidate.getLeetcodeStats())
                 .leetcodeUsername(candidate.getLeetcodeUsername())
                 .isVerified(candidate.getIsVerified())
-                .professionalVertical(user.getProfessionalVertical() != null ? user.getProfessionalVertical().name() : "DEVELOPER")
+                .professionalVertical(user.getProfessionalVertical() != null ? user.getProfessionalVertical().name() : null)
+                .trustScore(evidenceEngine != null && evidenceEngine.getProvider(user.getProfessionalVertical()) != null ? evidenceEngine.getProvider(user.getProfessionalVertical()).calculateTrustScore(user) : 10)
                 .achievements(candidate.getAchievements() != null ? candidate.getAchievements().stream()
                         .map(ach -> AchievementDto.builder()
                                 .id(ach.getId())

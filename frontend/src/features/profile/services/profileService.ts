@@ -59,6 +59,7 @@ export interface CandidateProfile {
   leetcodeUsername?: string;
   isVerified?: boolean;
   professionalVertical?: string;
+  trustScore?: number;
   achievements?: AchievementCard[];
   excludedCompanies?: string[];
   isDefault?: boolean;

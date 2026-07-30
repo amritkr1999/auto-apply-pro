@@ -40,6 +40,7 @@ public class CandidateProfileDto {
     private String leetcodeUsername;
     private Boolean isVerified;
     private String professionalVertical;
+    private Integer trustScore;
     private List<AchievementDto> achievements;
     private List<String> excludedCompanies;
 }

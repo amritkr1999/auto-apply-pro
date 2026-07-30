@@ -134,7 +134,7 @@ public class TechnicalEvidenceProvider implements EvidenceProvider {
             return 10;
         }
         boolean hasOauth = candidate.getGithubUsername() != null || candidate.getLinkedinName() != null;
-        boolean hasDoc = false;
+        boolean hasDoc = candidate.getResumeFilename() != null && !candidate.getResumeFilename().trim().isEmpty();
         boolean hasRef = Boolean.TRUE.equals(candidate.getIsReferenceCheckConfirmed());
         return evidenceVerifier.calculateTrustScore(hasOauth, hasDoc, hasRef);
     }

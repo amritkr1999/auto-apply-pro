@@ -24,6 +24,8 @@ export const ProfessionalDashboardView: React.FC = () => {
   const [gmailConnected, setGmailConnected] = useState(true);
   const [showBanner, setShowBanner] = useState(false);
   const [hasResume, setHasResume] = useState(true);
+  const [candidateProfile, setCandidateProfile] = useState<any>(null);
+  const [outreachTargetRole, setOutreachTargetRole] = useState<string>("");
   const [queueItems, setQueueItems] = useState<any[]>([]);
   const [drafts, setDrafts] = useState<any[]>([]);
   const [suggestions, setSuggestions] = useState<any[]>([]);
@@ -162,9 +164,10 @@ export const ProfessionalDashboardView: React.FC = () => {
       })
       .catch((err) => console.error("Failed to fetch Gmail status", err));
 
-    // Fetch candidate profile to check if a resume exists
+    // Fetch candidate profile to check if a resume exists and store profile data
     profileService.getCandidateProfile(userId)
       .then((profile) => {
+        setCandidateProfile(profile);
         setHasResume(!!profile.resumeFilename);
       })
       .catch((err) => {
@@ -176,6 +179,9 @@ export const ProfessionalDashboardView: React.FC = () => {
     outreachService.getOutreachSettings(userId)
       .then((data) => {
         setHrOutreachCampaignEnabled(!!data.hrOutreachCampaignEnabled);
+        if (data.hrOutreachTargetRole) {
+          setOutreachTargetRole(data.hrOutreachTargetRole);
+        }
       })
       .catch((err) => console.error("Failed to fetch campaign settings", err));
 
@@ -371,19 +377,49 @@ export const ProfessionalDashboardView: React.FC = () => {
             </div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight">{user.name || "Candidate User"}</h1>
             <p className="text-xs sm:text-sm text-slate-400 max-w-xl">
-              Certified Professional Profile ID: <span className="font-mono text-slate-300">#CAND-{userId}</span> | Professional Vertical: <span className="font-semibold text-indigo-400">DEVELOPER</span>
+              Target Role:{" "}
+              {(candidateProfile?.jobPreferences?.targetRole ||
+                candidateProfile?.jobPreferences?.role ||
+                candidateProfile?.jobPreferences?.desiredRole ||
+                outreachTargetRole) ? (
+                <span className="font-semibold text-indigo-400">
+                  {candidateProfile?.jobPreferences?.targetRole ||
+                    candidateProfile?.jobPreferences?.role ||
+                    candidateProfile?.jobPreferences?.desiredRole ||
+                    outreachTargetRole}
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => navigate("/profile/settings")}
+                  className="font-semibold text-amber-400 hover:text-amber-300 underline inline-flex items-center gap-1 transition-colors"
+                >
+                  <span>Please add job profile</span>
+                  <span className="text-xs">➔</span>
+                </button>
+              )}
             </p>
           </div>
           <div className="shrink-0 flex items-center gap-4 bg-slate-900/60 backdrop-blur-md p-4 rounded-card border border-slate-800">
             <div>
               <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
                 <span>Trust Score</span>
-                <span className="text-indigo-400">{(hasResume ? 40 : 0) + (gmailConnected ? 40 : 0) + 20}%</span>
+                <span className="text-indigo-400">
+                  {candidateProfile?.trustScore !== undefined
+                    ? candidateProfile.trustScore
+                    : (hasResume ? 40 : 0) + (gmailConnected ? 40 : 0) + 20}%
+                </span>
               </div>
               <div className="w-32 h-2 bg-slate-800 rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 transition-all duration-500" 
-                  style={{ width: `${(hasResume ? 40 : 0) + (gmailConnected ? 40 : 0) + 20}%` }}
+                  style={{
+                    width: `${
+                      candidateProfile?.trustScore !== undefined
+                        ? candidateProfile.trustScore
+                        : (hasResume ? 40 : 0) + (gmailConnected ? 40 : 0) + 20
+                    }%`
+                  }}
                 />
               </div>
               <p className="text-[10px] text-slate-500 mt-1">Calculated via verification checks</p>

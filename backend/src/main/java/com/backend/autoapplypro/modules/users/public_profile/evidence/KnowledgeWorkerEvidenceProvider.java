@@ -109,7 +109,7 @@ public class KnowledgeWorkerEvidenceProvider implements EvidenceProvider {
             return 10;
         }
         boolean hasOauth = candidate.getLinkedinName() != null;
-        boolean hasDoc = false;
+        boolean hasDoc = candidate.getResumeFilename() != null && !candidate.getResumeFilename().trim().isEmpty();
         boolean hasRef = Boolean.TRUE.equals(candidate.getIsReferenceCheckConfirmed());
         return evidenceVerifier.calculateTrustScore(hasOauth, hasDoc, hasRef);
     }

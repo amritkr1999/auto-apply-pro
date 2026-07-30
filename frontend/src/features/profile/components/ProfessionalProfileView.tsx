@@ -39,6 +39,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
   const [mobile, setMobile] = useState("");
   const [officialEmail, setOfficialEmail] = useState("");
   const [skills, setSkills] = useState<string[]>([]);
+  const [targetRole, setTargetRole] = useState("");
   const [locationPreference, setLocationPreference] = useState("");
   const [expectedSalary, setExpectedSalary] = useState("");
   const [summary, setSummary] = useState("");
@@ -77,6 +78,24 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
   const [slotStart, setSlotStart] = useState("09:00");
   const [slotEnd, setSlotEnd] = useState("17:00");
   const [timezone, setTimezone] = useState("UTC");
+
+  // Interval range options (Min: 2 to 20 mins, Max: 12 to 30 mins)
+  const minIntervalOptions = Array.from({ length: 19 }, (_, i) => i + 2);
+  const maxIntervalOptions = Array.from({ length: 19 }, (_, i) => i + 12);
+
+  const handleMinIntervalChange = (newMin: number) => {
+    setMinInterval(newMin);
+    if (maxInterval < newMin + 10) {
+      setMaxInterval(Math.min(30, newMin + 10));
+    }
+  };
+
+  const handleMaxIntervalChange = (newMax: number) => {
+    setMaxInterval(newMax);
+    if (minInterval > newMax - 10) {
+      setMinInterval(Math.max(2, newMax - 10));
+    }
+  };
   const [skipWeekends, setSkipWeekends] = useState(true);
   const [marketingEmailsEnabled, setMarketingEmailsEnabled] = useState(true);
   const [aiPersonalizationEnabled, setAiPersonalizationEnabled] = useState(false);
@@ -104,6 +123,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
     setSkills(data.skills || []);
     
     const prefs = data.jobPreferences || {};
+    setTargetRole(prefs.targetRole || prefs.role || (data as any).hrOutreachTargetRole || "");
     setLocationPreference(prefs.locationPreference || "");
     setExpectedSalary(prefs.expectedSalary || "");
 
@@ -334,8 +354,15 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
     outreachService.getOutreachSettings(userId)
       .then((data) => {
         setDailyLimit(data.dailyLimit);
-        setMinInterval(data.minIntervalMinutes);
-        setMaxInterval(data.maxIntervalMinutes);
+        const rawMin = data.minIntervalMinutes ?? 10;
+        const rawMax = data.maxIntervalMinutes ?? 30;
+        let validMin = Math.max(2, Math.min(20, rawMin));
+        let validMax = Math.max(validMin + 10, Math.min(30, rawMax));
+        if (validMax - validMin < 10) {
+          validMin = Math.max(2, validMax - 10);
+        }
+        setMinInterval(validMin);
+        setMaxInterval(validMax);
         setSlotStart(data.slotStart ? data.slotStart.substring(0, 5) : "09:00");
         setSlotEnd(data.slotEnd ? data.slotEnd.substring(0, 5) : "17:00");
         setSkipWeekends(data.skipWeekends !== false);
@@ -347,7 +374,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
         setHrOutreachCampaignEnabled(!!data.hrOutreachCampaignEnabled);
         setHrOutreachTargetRole(data.hrOutreachTargetRole || "Software Engineer");
         setHrOutreachTemplateId(data.hrOutreachTemplateId || "default-1");
-        setHrOutreachSourceTable(data.hrOutreachSourceTable || "TESTING");
+        setHrOutreachSourceTable(import.meta.env.DEV ? (data.hrOutreachSourceTable || "TESTING") : "MAIN");
 
         if (data.timezone && data.timezone !== "UTC") {
           setTimezone(data.timezone);
@@ -384,7 +411,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
         hrOutreachCampaignEnabled,
         hrOutreachTargetRole,
         hrOutreachTemplateId,
-        hrOutreachSourceTable
+        hrOutreachSourceTable: import.meta.env.DEV ? hrOutreachSourceTable : "MAIN"
       });
       setMessage(res.message || "Outreach settings updated successfully.");
     } catch (err: any) {
@@ -564,6 +591,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
         officialEmail,
         skills,
         jobPreferences: {
+          targetRole,
           locationPreference,
           expectedSalary,
         },
@@ -1164,7 +1192,16 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
             <p className="text-sm text-slate-500 mt-1">Specify preferred location, salary details, and keep your resume up to date.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <Input
+              label="Target Job Role / Position"
+              type="text"
+              value={targetRole}
+              placeholder="e.g. Software Engineer"
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTargetRole(e.target.value)}
+              className="rounded-xl border-slate-200 focus:ring-primary focus:border-transparent px-4 py-2.5"
+            />
+
             <Input
               label="Preferred Job Location"
               type="text"
@@ -1513,28 +1550,37 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
                       <div className="flex items-center gap-3">
                         <div className="flex-1">
                           <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">Min Delay</span>
-                          <input
-                            type="number"
-                            min="1"
-                            max="1440"
+                          <select
                             value={minInterval}
-                            onChange={(e) => setMinInterval(parseInt(e.target.value) || 10)}
-                            className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-primary bg-white"
-                          />
+                            onChange={(e) => handleMinIntervalChange(parseInt(e.target.value, 10))}
+                            className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white shadow-sm cursor-pointer"
+                          >
+                            {minIntervalOptions.map((val) => (
+                              <option key={val} value={val}>
+                                {val} mins
+                              </option>
+                            ))}
+                          </select>
                         </div>
                         <span className="text-slate-400 mt-5 text-xs font-bold">to</span>
                         <div className="flex-1">
                           <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">Max Delay</span>
-                          <input
-                            type="number"
-                            min="1"
-                            max="1440"
+                          <select
                             value={maxInterval}
-                            onChange={(e) => setMaxInterval(parseInt(e.target.value) || 30)}
-                            className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-primary bg-white"
-                          />
+                            onChange={(e) => handleMaxIntervalChange(parseInt(e.target.value, 10))}
+                            className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white shadow-sm cursor-pointer"
+                          >
+                            {maxIntervalOptions.map((val) => (
+                              <option key={val} value={val}>
+                                {val} mins
+                              </option>
+                            ))}
+                          </select>
                         </div>
                       </div>
+                      <p className="text-[11px] text-slate-400 mt-1.5 font-medium">
+                        Select delay between 2 to 30 mins (minimum 10-minute gap required). Default is 10 to 30 mins.
+                      </p>
                     </div>
 
                     <div className="flex items-start gap-2.5 pt-2">
@@ -1715,19 +1761,21 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
                         </label>
                       </div>
 
-                      <div>
-                        <label className="block text-xs font-bold text-slate-600 mb-1.5">
-                          Source HR Contacts Database Table
-                        </label>
-                        <select
-                          value={hrOutreachSourceTable}
-                          onChange={(e) => setHrOutreachSourceTable(e.target.value)}
-                          className="w-full px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-medium"
-                        >
-                          <option value="TESTING">Testing Emails Table (testing_emails)</option>
-                          <option value="MAIN">Main HR Details Table (hr_details)</option>
-                        </select>
-                      </div>
+                      {import.meta.env.DEV && (
+                        <div>
+                          <label className="block text-xs font-bold text-slate-600 mb-1.5">
+                            Source HR Contacts Database Table <span className="text-[10px] text-amber-600 font-semibold">(Dev Mode Only)</span>
+                          </label>
+                          <select
+                            value={hrOutreachSourceTable}
+                            onChange={(e) => setHrOutreachSourceTable(e.target.value)}
+                            className="w-full px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-medium"
+                          >
+                            <option value="TESTING">Testing Emails Table (testing_emails)</option>
+                            <option value="MAIN">Main HR Details Table (hr_details)</option>
+                          </select>
+                        </div>
+                      )}
                     </div>
 
                     <div className="space-y-4">
