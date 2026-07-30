@@ -8,7 +8,10 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "upi_payment_transactions")
+@Table(name = "upi_payment_transactions", indexes = {
+    @Index(name = "idx_upi_user_status", columnList = "user_id, status"),
+    @Index(name = "idx_upi_utr", columnList = "utr_number")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

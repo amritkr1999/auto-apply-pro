@@ -124,17 +124,17 @@ const BillingPortal: React.FC = () => {
     }
   };
 
-  // --- Loading State ---
-  if (loading) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <SpinnerIcon className="w-10 h-10 text-indigo-500 mx-auto" />
-          <p className="text-slate-400 text-lg">Loading billing details...</p>
-        </div>
+  // --- Skeleton Component ---
+  const BillingSkeleton = () => (
+    <div className="animate-pulse space-y-6">
+      <div className="h-32 bg-slate-800/60 rounded-2xl border border-slate-700/40"></div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="h-64 bg-slate-800/60 rounded-2xl border border-slate-700/40"></div>
+        <div className="h-64 bg-slate-800/60 rounded-2xl border border-slate-700/40"></div>
+        <div className="h-64 bg-slate-800/60 rounded-2xl border border-slate-700/40"></div>
       </div>
-    );
-  }
+    </div>
+  );
 
   return (
     <div className="max-w-4xl mx-auto py-10 px-4 sm:px-6">
@@ -143,6 +143,11 @@ const BillingPortal: React.FC = () => {
         <h1 className="text-3xl font-bold text-slate-100 mb-2">Billing & Subscription</h1>
         <p className="text-slate-400">Manage your subscription and view payment history.</p>
       </div>
+
+      {loading ? (
+        <BillingSkeleton />
+      ) : (
+        <>
 
       {/* Error */}
       {error && (
@@ -196,12 +201,11 @@ const BillingPortal: React.FC = () => {
       )}
 
       {/* Available Plans Grid */}
-      {!subscription && !upiStatus?.isPremium && upiStatus?.role !== "PRO" && (
-        <div className="mb-12">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-white mb-2">Choose Your Upgrade Plan</h2>
-            <p className="text-slate-400 text-sm">Select a plan below to unlock automated applications & AI power.</p>
-          </div>
+      <div className="mb-12">
+        <div className="text-center sm:text-left mb-6">
+          <h2 className="text-2xl font-bold text-white mb-1">Available Membership Plans</h2>
+          <p className="text-slate-400 text-xs sm:text-sm">Select or upgrade your plan below to unlock automated applications & AI power.</p>
+        </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
@@ -229,7 +233,7 @@ const BillingPortal: React.FC = () => {
                 description: "For serious job seekers looking to maximize outreach and land interview calls fast.",
                 popular: true,
                 features: [
-                  "40 Submissions per day (1,200/mo)",
+                  "25 Submissions per day (750/mo)",
                   "Unlimited Resume Profiles",
                   "Automated Cover Letters & AI Tailoring",
                   "Automated SMTP Scheduled Dispatch",
@@ -245,7 +249,7 @@ const BillingPortal: React.FC = () => {
                 description: "Maximum speed & priority processing for aggressive job hunting campaigns.",
                 popular: false,
                 features: [
-                  "Unlimited Submissions (100+/day)",
+                  "50 Submissions per day (1,500/mo)",
                   "Priority Instant AI OCR & Parsing",
                   "Full Resume & Cover Letter Suite",
                   "Featured Candidate Recruiter Spotlight",
@@ -305,7 +309,6 @@ const BillingPortal: React.FC = () => {
             ))}
           </div>
         </div>
-      )}
 
       {/* Subscription Card */}
       {subscription && (
@@ -459,6 +462,8 @@ const BillingPortal: React.FC = () => {
           fetchData();
         }}
       />
+        </>
+      )}
     </div>
   );
 };

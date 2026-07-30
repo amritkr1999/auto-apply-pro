@@ -39,7 +39,7 @@ const getPlanFeatures = (planName: string, amount: number): string[] => {
   }
   if (nameLower.includes("pro") || (amount > 70 && amount <= 100)) {
     return [
-      "40 Submissions per day (1,200/mo)",
+      "25 Submissions per day (750/mo)",
       "Unlimited Resume Profiles",
       "Automated Custom Cover Letters & AI Tailoring",
       "Automated SMTP Scheduled Outreach",
@@ -49,7 +49,7 @@ const getPlanFeatures = (planName: string, amount: number): string[] => {
   }
   if (nameLower.includes("elite") || amount > 100) {
     return [
-      "Unlimited Submissions (100+/day)",
+      "50 Submissions per day (1,500/mo)",
       "Priority Instant AI OCR & Parsing",
       "Full Resume & Cover Letter Suite",
       "Featured Candidate Recruiter Spotlight",

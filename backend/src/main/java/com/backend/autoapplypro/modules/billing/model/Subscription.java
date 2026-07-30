@@ -6,7 +6,10 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "subscriptions")
+@Table(name = "subscriptions", indexes = {
+    @Index(name = "idx_sub_user_status", columnList = "user_id, status"),
+    @Index(name = "idx_sub_razorpay_id", columnList = "razorpay_subscription_id")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

@@ -4,8 +4,9 @@ import type { CandidateProfile, ParsedResumeDto } from "../services/profileServi
 import { ResumeSuggestionsModal } from "./ResumeSuggestionsModal";
 import Button from "../../../components/ui/Button";
 import Input from "../../../components/ui/Input";
+import { Link } from "react-router-dom";
 import { outreachService } from "../../outreach/services/outreachService";
-import { getActiveSubscription } from "../../billing/services/billingService";
+import { getActiveSubscription, getMyUpiPaymentStatus } from "../../billing/services/billingService";
 import { useAnalytics } from "../../../context/AnalyticsContext";
 import { validateFile, isValidEmail, isValidPhone, isValidUrl, isValidUsername } from "../../../utils/validation";
 
@@ -72,7 +73,8 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
   const [gmailLoading, setGmailLoading] = useState(true);
 
   // Outreach Scheduling Settings State
-  const [dailyLimit, setDailyLimit] = useState(50);
+  const [userTier, setUserTier] = useState<"Free" | "Starter" | "Pro" | "Autopilot">("Free");
+  const [sentTodayCount, setSentTodayCount] = useState<number>(0);
   const [minInterval, setMinInterval] = useState(10);
   const [maxInterval, setMaxInterval] = useState(30);
   const [slotStart, setSlotStart] = useState("09:00");
@@ -337,12 +339,48 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
   useEffect(() => {
     setSettingsLoading(true);
     
-    // Check subscription status
-    getActiveSubscription()
-      .then((sub) => {
-        setIsPremium(!!sub);
-      })
-      .catch((err) => console.warn("Failed to check subscription status", err));
+    // Detect tier & sent count
+    const detectTierAndCount = async () => {
+      try {
+        const sub = await getActiveSubscription();
+        if (sub && (sub.status === "active" || sub.status === "authenticated")) {
+          setIsPremium(true);
+          const name = (sub.planName || "").toLowerCase();
+          if (name.includes("starter")) setUserTier("Starter");
+          else if (name.includes("autopilot") || name.includes("elite")) setUserTier("Autopilot");
+          else setUserTier("Pro");
+        } else {
+          const upi = await getMyUpiPaymentStatus().catch(() => null);
+          if (upi && (upi.isPremium || upi.role === "PRO" || upi.role === "PREMIUM")) {
+            setIsPremium(true);
+            const amt = upi.latestTransaction?.amount || 99;
+            if (amt <= 70) setUserTier("Starter");
+            else if (amt > 120) setUserTier("Autopilot");
+            else setUserTier("Pro");
+          } else {
+            setIsPremium(false);
+            setUserTier("Free");
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to check subscription status", err);
+      }
+
+      try {
+        const queue = await outreachService.getOutreachQueue(userId);
+        const todayStr = new Date().toDateString();
+        const count = queue.filter((item: any) => {
+          if (item.status !== "SENT") return false;
+          const d = item.sentAt || item.createdAt;
+          return d ? new Date(d).toDateString() === todayStr : false;
+        }).length;
+        setSentTodayCount(count);
+      } catch (err) {
+        console.warn("Failed to fetch sent queue items today", err);
+      }
+    };
+
+    detectTierAndCount();
 
     // Fetch email templates for selection dropdown
     outreachService.getTemplates()
@@ -353,7 +391,6 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
 
     outreachService.getOutreachSettings(userId)
       .then((data) => {
-        setDailyLimit(data.dailyLimit);
         const rawMin = data.minIntervalMinutes ?? 10;
         const rawMax = data.maxIntervalMinutes ?? 30;
         let validMin = Math.max(2, Math.min(20, rawMin));
@@ -387,6 +424,16 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
       .finally(() => setSettingsLoading(false));
   }, [userId]);
 
+  const getTierLimitNumber = (tier: string): number => {
+    switch (tier) {
+      case "Starter": return 15;
+      case "Pro": return 25;
+      case "Autopilot": return 50;
+      case "Free":
+      default: return 5;
+    }
+  };
+
   const handleSaveSettings = async (e?: React.FormEvent | React.MouseEvent) => {
     if (e) e.preventDefault();
     if (minInterval > maxInterval) {
@@ -398,7 +445,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
       setError("");
       setMessage("");
       const res = await outreachService.saveOutreachSettings(userId, {
-        dailyLimit,
+        dailyLimit: getTierLimitNumber(userTier),
         minIntervalMinutes: minInterval,
         maxIntervalMinutes: maxInterval,
         slotStart,
@@ -1530,17 +1577,38 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50/50 p-5 border border-slate-200 rounded-2xl">
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-xs font-bold text-slate-600 mb-1.5">
-                        Daily Send Limit (emails/day)
-                      </label>
-                      <input
-                        type="number"
-                        min="1"
-                        max="500"
-                        value={dailyLimit}
-                        onChange={(e) => setDailyLimit(parseInt(e.target.value) || 50)}
-                        className="w-full px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white"
-                      />
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="block text-xs font-bold text-slate-600">
+                          Daily Send Limit ({userTier} Tier)
+                        </label>
+                        <Link
+                          to="/billing"
+                          className="text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:underline inline-flex items-center gap-1 transition-colors"
+                        >
+                          ⚡ Upgrade Plan to increase limit
+                        </Link>
+                      </div>
+                      <div className="p-3.5 bg-white border border-slate-200 rounded-xl space-y-2 shadow-xs">
+                        <div className="flex items-center justify-between text-sm font-bold text-slate-800">
+                          <span className="flex items-center gap-2">
+                            <span className="px-2 py-0.5 rounded text-[10px] bg-indigo-50 text-indigo-600 border border-indigo-200 uppercase tracking-wider font-extrabold">
+                              {userTier}
+                            </span>
+                            <span>{getTierLimitNumber(userTier)} emails / day limit</span>
+                          </span>
+                          <span className="text-xs font-semibold text-slate-500">
+                            {sentTodayCount} / {getTierLimitNumber(userTier)} sent today
+                          </span>
+                        </div>
+                        <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                          <div
+                            className="bg-indigo-600 h-2 rounded-full transition-all duration-300"
+                            style={{
+                              width: `${Math.min(100, (sentTodayCount / getTierLimitNumber(userTier)) * 100)}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
                     </div>
 
                     <div>

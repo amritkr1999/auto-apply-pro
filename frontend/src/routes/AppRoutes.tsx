@@ -24,7 +24,6 @@ import RoadmapDetailsView from "../features/learning/components/RoadmapDetailsVi
 import { SubmitQuestionForm } from "../features/learning/components/SubmitQuestionForm";
 import { UserSubmissionsList } from "../features/learning/components/UserSubmissionsList";
 import { AdminModerationList } from "../features/learning/components/AdminModerationList";
-import PricingPage from "../features/billing/components/PricingPage";
 import BillingPortal from "../features/billing/components/BillingPortal";
 import { TelemetryDashboard } from "../features/dashboard/components/views/TelemetryDashboard";
 
@@ -73,8 +72,10 @@ export const AppRoutes: React.FC = () => {
         <Route path="/learning/moderation" element={<AdminModerationList />} />
         <Route path="/learning/topic/:topicId" element={<TopicDetailsView />} />
         <Route path="/learning/roadmap/:roadmapId" element={<RoadmapDetailsView />} />
-        <Route path="/billing/pricing" element={<PricingPage />} />
+        <Route path="/billing" element={<BillingPortal />} />
+        <Route path="/billing/pricing" element={<BillingPortal />} />
         <Route path="/billing/portal" element={<BillingPortal />} />
+        <Route path="/pricing" element={<BillingPortal />} />
         <Route path="/admin/telemetry" element={<TelemetryDashboard />} />
       </Route>
     </Routes>

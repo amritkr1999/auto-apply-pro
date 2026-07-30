@@ -1,17 +1,69 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import MobileAppComingSoonModal from "./MobileAppComingSoonModal";
+import { getActiveSubscription, getMyUpiPaymentStatus } from "../features/billing/services/billingService";
 
 interface HeaderProps {
   onMenuClick?: () => void;
 }
 
+export type UserTier = "Free" | "Starter" | "Pro" | "Autopilot";
+
 export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const { toggleTheme, resolvedTheme } = useTheme();
   const [showMobileAppModal, setShowMobileAppModal] = useState(false);
+  const [userTier, setUserTier] = useState<UserTier>("Free");
+
   const userStr = localStorage.getItem("user");
   const user = userStr ? JSON.parse(userStr) : null;
+
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    const fetchTier = async () => {
+      try {
+        const sub = await getActiveSubscription();
+        if (sub && (sub.status === "active" || sub.status === "authenticated")) {
+          const name = (sub.planName || "").toLowerCase();
+          if (name.includes("starter")) {
+            setUserTier("Starter");
+            return;
+          }
+          if (name.includes("autopilot") || name.includes("elite")) {
+            setUserTier("Autopilot");
+            return;
+          }
+          if (name.includes("pro")) {
+            setUserTier("Pro");
+            return;
+          }
+          setUserTier("Pro");
+          return;
+        }
+
+        const upi = await getMyUpiPaymentStatus().catch(() => null);
+        if (upi && (upi.isPremium || upi.role === "PRO" || upi.role === "PREMIUM")) {
+          const amt = upi.latestTransaction?.amount || 99;
+          if (amt <= 70) {
+            setUserTier("Starter");
+          } else if (amt > 120) {
+            setUserTier("Autopilot");
+          } else {
+            setUserTier("Pro");
+          }
+          return;
+        }
+      } catch (err) {
+        console.error("Error detecting user tier:", err);
+      }
+      setUserTier("Free");
+    };
+
+    fetchTier();
+  }, [userStr]);
 
   const getDashboardPath = () => {
     if (!user) return "/";
@@ -22,6 +74,63 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
         return "/company-dashboard";
       default:
         return "/dashboard";
+    }
+  };
+
+  const renderTierBadge = () => {
+    if (user?.role && user.role !== "CANDIDATE") {
+      return (
+        <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full uppercase tracking-wider">
+          {user.role}
+        </span>
+      );
+    }
+
+    switch (userTier) {
+      case "Starter":
+        return (
+          <Link
+            to="/billing"
+            className="inline-flex items-center gap-1 text-[11px] font-extrabold text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 dark:bg-emerald-950/50 border border-emerald-500/30 px-2.5 py-0.5 rounded-full uppercase tracking-wider hover:bg-emerald-500/20 transition-all shadow-xs"
+            title="Starter Plan Active - Click to open Billing Portal"
+          >
+            <span>⚡</span>
+            <span>STARTER</span>
+          </Link>
+        );
+      case "Pro":
+        return (
+          <Link
+            to="/billing"
+            className="inline-flex items-center gap-1 text-[11px] font-extrabold text-indigo-700 dark:text-indigo-300 bg-indigo-500/10 dark:bg-indigo-950/50 border border-indigo-500/30 px-2.5 py-0.5 rounded-full uppercase tracking-wider hover:bg-indigo-500/20 transition-all shadow-xs"
+            title="Candidate Pro Tier - Click to open Billing Portal"
+          >
+            <span>👑</span>
+            <span>PRO</span>
+          </Link>
+        );
+      case "Autopilot":
+        return (
+          <Link
+            to="/billing"
+            className="inline-flex items-center gap-1 text-[11px] font-extrabold text-amber-700 dark:text-amber-300 bg-gradient-to-r from-amber-500/15 to-orange-500/15 dark:from-amber-950/40 dark:to-orange-950/40 border border-amber-500/40 px-2.5 py-0.5 rounded-full uppercase tracking-wider hover:from-amber-500/25 hover:to-orange-500/25 transition-all shadow-xs"
+            title="Elite Autopilot Tier - Click to open Billing Portal"
+          >
+            <span>🚀</span>
+            <span>AUTOPILOT</span>
+          </Link>
+        );
+      case "Free":
+      default:
+        return (
+          <Link
+            to="/billing"
+            className="inline-flex items-center gap-1 text-[11px] font-extrabold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-2.5 py-0.5 rounded-full uppercase tracking-wider hover:bg-slate-200 dark:hover:bg-slate-700 transition-all shadow-xs"
+            title="Free Tier - Click to open Billing Portal"
+          >
+            <span>FREE</span>
+          </Link>
+        );
     }
   };
 
@@ -107,9 +216,8 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                 <span>💡</span>
                 <span className="hidden sm:inline">Guided Tour</span>
               </button>
-              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full uppercase tracking-wider">
-                {user.role}
-              </span>
+
+              {renderTierBadge()}
             </>
           )}
         </div>

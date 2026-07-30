@@ -437,7 +437,7 @@ export const MainLandingPage: React.FC = () => {
             <div className="pricing-divider"></div>
             <ul className="pricing-features">
               <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> 40 Submissions per day (1,200/mo)
+                <span className="pricing-feature-check">✓</span> 25 Submissions per day (750/mo)
               </li>
               <li className="pricing-feature-item">
                 <span className="pricing-feature-check">✓</span> Unlimited Resume Profiles
@@ -468,7 +468,7 @@ export const MainLandingPage: React.FC = () => {
             <div className="pricing-divider"></div>
             <ul className="pricing-features">
               <li className="pricing-feature-item">
-                <span className="pricing-feature-check">✓</span> Unlimited Submissions (100+/day)
+                <span className="pricing-feature-check">✓</span> 50 Submissions per day (1,500/mo)
               </li>
               <li className="pricing-feature-item">
                 <span className="pricing-feature-check">✓</span> Priority Instant AI OCR & Parsing

@@ -62,7 +62,7 @@ public class BillingService {
         if (planRepository.findByRazorpayPlanId("plan_PRM99INR").isEmpty()) {
             Plan proPlan = Plan.builder()
                     .name("Candidate Pro")
-                    .description("For serious job seekers looking to maximize outreach and land interview calls fast (40 applications/day).")
+                    .description("For serious job seekers looking to maximize outreach and land interview calls fast (25 applications/day).")
                     .amount(new BigDecimal("99.00"))
                     .currency("INR")
                     .billingInterval("monthly")
@@ -76,7 +76,7 @@ public class BillingService {
         if (planRepository.findByRazorpayPlanId("plan_ELT199INR").isEmpty()) {
             Plan elitePlan = Plan.builder()
                     .name("Elite Autopilot")
-                    .description("Maximum speed & priority AI processing for aggressive job hunting campaigns (Unlimited applications).")
+                    .description("Maximum speed & priority AI processing for aggressive job hunting campaigns (50 applications/day).")
                     .amount(new BigDecimal("199.00"))
                     .currency("INR")
                     .billingInterval("monthly")
@@ -226,16 +226,10 @@ public class BillingService {
     }
 
     public List<PaymentTransactionDto> getPaymentHistory(Long userId) {
-        List<Subscription> subscriptions = subscriptionRepository.findByUserIdOrderByCreatedAtDesc(userId);
-        List<PaymentTransactionDto> transactions = new ArrayList<>();
-
-        for (Subscription sub : subscriptions) {
-            List<PaymentTransaction> list = paymentTransactionRepository.findBySubscriptionIdOrderByCreatedAtDesc(sub.getId());
-            for (PaymentTransaction tx : list) {
-                transactions.add(mapToPaymentTransactionDto(tx));
-            }
-        }
-        return transactions;
+        List<PaymentTransaction> transactions = paymentTransactionRepository.findBySubscriptionUserIdOrderByCreatedAtDesc(userId);
+        return transactions.stream()
+                .map(this::mapToPaymentTransactionDto)
+                .collect(Collectors.toList());
     }
 
     @Transactional
