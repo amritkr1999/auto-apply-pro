@@ -10,13 +10,13 @@ interface HeaderProps {
 
 export type UserTier = "Free" | "Starter" | "Pro" | "Autopilot";
 
+import { useAuth } from "../context/AuthContext";
+
 export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const { toggleTheme, resolvedTheme } = useTheme();
+  const { user } = useAuth();
   const [showMobileAppModal, setShowMobileAppModal] = useState(false);
   const [userTier, setUserTier] = useState<UserTier>("Free");
-
-  const userStr = localStorage.getItem("user");
-  const user = userStr ? JSON.parse(userStr) : null;
 
   useEffect(() => {
     if (!user) {
@@ -63,7 +63,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
     };
 
     fetchTier();
-  }, [userStr]);
+  }, [user]);
 
   const getDashboardPath = () => {
     if (!user) return "/";

@@ -32,6 +32,8 @@ import PublicPlaqueCardPage from "../pages/PublicPlaqueCardPage";
 import PrivacyPolicy from "../components/pages/PrivacyPolicy";
 import TermsOfService from "../components/pages/TermsOfService";
 
+import ProtectedRoute from "../components/ProtectedRoute";
+
 export const AppRoutes: React.FC = () => {
   return (
     <Routes>
@@ -46,7 +48,7 @@ export const AppRoutes: React.FC = () => {
       <Route path="/terms" element={<TermsOfService />} />
       <Route path="/profile/:username" element={<PublicProfilePage />} />
       <Route path="/card/:username" element={<PublicPlaqueCardPage />} />
-      <Route element={<Layout />}>
+      <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route
           path="/dashboard"
           element={<ProfessionalDashboardView />}

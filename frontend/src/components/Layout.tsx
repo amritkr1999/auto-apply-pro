@@ -7,17 +7,17 @@ import WalkthroughTour from "./WalkthroughTour";
 import FeedbackModal from "../features/profile/components/FeedbackModal";
 import { feedbackService } from "../features/profile/services/feedbackService";
 
+import { useAuth } from "../context/AuthContext";
+
 export const Layout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
-  const userStr = localStorage.getItem("user");
-  const user = userStr ? JSON.parse(userStr) : null;
-
   const performLogout = () => {
-    localStorage.removeItem("user");
+    logout();
     setShowFeedbackModal(false);
     navigate("/");
   };

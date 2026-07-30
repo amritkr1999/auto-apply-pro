@@ -81,18 +81,19 @@ interface DashboardSidebarProps {
   onLogout?: () => void;
 }
 
+import { useAuth } from "../../../context/AuthContext";
+
 export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isMobile = false, onClose, onLogout }) => {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [isMinimized, setIsMinimized] = useState(true);
-  const userStr = localStorage.getItem("user");
-  const user = userStr ? JSON.parse(userStr) : null;
   const role = user?.role || "CANDIDATE";
 
   const handleLogout = () => {
     if (onLogout) {
       onLogout();
     } else {
-      localStorage.removeItem("user");
+      logout();
       if (onClose) onClose();
       navigate("/");
     }
