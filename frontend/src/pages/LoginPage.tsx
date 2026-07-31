@@ -6,6 +6,7 @@ import { API_BASE } from "../config/api";
 import { useTheme } from "../context/ThemeContext";
 import { useAnalytics } from "../context/AnalyticsContext";
 import { isValidEmail, isValidPhone, isValidBasicPassword } from "../utils/validation";
+import { SEOHead } from "../components/SEOHead";
 
 type AuthTab = "login" | "register";
 type UserRole = "candidate" | "recruiter" | "company";
@@ -388,6 +389,11 @@ export const LoginPage: React.FC = () => {
 
   return (
     <div className="auth-page-root">
+      <SEOHead
+        title={tab === "register" ? "Create an Account | EasyNaukri" : "Sign In | EasyNaukri"}
+        description="Sign in or register for EasyNaukri to access automated resume matching, AI job applications, and candidate outreach tools."
+        canonicalUrl="https://easynaukri.online/login"
+      />
       <div style={{ position: "absolute", top: "1.5rem", right: "1.5rem", zIndex: 50 }}>
         <button
           type="button"

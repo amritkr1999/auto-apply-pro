@@ -751,17 +751,17 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
 
       {/* Profile Version Switcher & Creator */}
       {(activeTab === "profile" || activeTab === "preferences") && (
-        <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-5 mb-8">
+        <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 sm:p-5 mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h3 className="text-base font-bold text-slate-800">Active Profile Version</h3>
               <p className="text-xs text-slate-500 mt-0.5">Switch between different target roles (e.g., Java Full Stack, Python Full Stack, AI Engineer).</p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
               <select
                 value={selectedProfileId || ""}
                 onChange={(e) => handleSwitchProfile(Number(e.target.value))}
-                className="rounded-xl border-slate-200 text-sm focus:ring-primary focus:border-transparent px-3 py-2 bg-white text-slate-700 font-medium"
+                className="flex-1 sm:flex-none rounded-xl border-slate-200 text-sm focus:ring-primary focus:border-transparent px-3 py-2 bg-white text-slate-700 font-medium min-w-0"
               >
                 {profiles.map((p) => (
                   <option key={p.id} value={p.id}>
@@ -775,7 +775,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
                   variant="outline"
                   size="sm"
                   onClick={() => handleSelectDefault(selectedProfileId)}
-                  className="text-xs py-1.5 px-3 rounded-lg border-emerald-300 text-emerald-700 hover:bg-emerald-50 font-semibold"
+                  className="text-xs py-1.5 px-3 rounded-lg border-emerald-300 text-emerald-700 hover:bg-emerald-50 font-semibold shrink-0"
                 >
                   Set Default
                 </Button>
@@ -784,7 +784,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
                 <button
                   type="button"
                   onClick={() => handleDeleteProfile(selectedProfileId)}
-                  className="p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors"
+                  className="p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors shrink-0"
                   title="Delete Profile Version"
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -795,19 +795,19 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
             </div>
           </div>
 
-          <form onSubmit={handleCreateProfile} className="mt-4 pt-4 border-t border-slate-200/60 flex items-center gap-3">
+          <form onSubmit={handleCreateProfile} className="mt-4 pt-4 border-t border-slate-200/60 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <input
               type="text"
               placeholder="Create new version (e.g. AI Engineer)"
               value={newProfileName}
               onChange={(e) => setNewProfileName(e.target.value)}
               required
-              className="flex-1 rounded-xl border-slate-200 text-sm focus:ring-primary focus:border-transparent px-3.5 py-2 bg-white"
+              className="flex-1 rounded-xl border-slate-200 text-sm focus:ring-primary focus:border-transparent px-3.5 py-2 bg-white min-w-0"
             />
             <Button
               type="submit"
               disabled={isCreatingProfile}
-              className="text-sm py-2 px-4 rounded-xl shadow-sm"
+              className="text-sm py-2 px-4 rounded-xl shadow-xs w-full sm:w-auto shrink-0"
             >
               {isCreatingProfile ? "Creating..." : "Add Version"}
             </Button>

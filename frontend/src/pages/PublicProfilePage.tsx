@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import { SEOHead } from "../components/SEOHead";
 import { profileService, type PublicProfile } from "../features/profile/services/profileService";
 
 export const PublicProfilePage: React.FC = () => {
@@ -85,26 +85,31 @@ export const PublicProfilePage: React.FC = () => {
   const lName = profile.linkedinName || linkedin.name;
   const lUrl = profile.linkedinProfileUrl || linkedin.profileUrl;
 
+  const profileCanonical = `https://easynaukri.online/p/${profile.username}`;
+  const profileJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    "mainEntity": {
+      "@type": "Person",
+      "name": profile.name,
+      "alternateName": profile.username,
+      "description": profile.summary || `Verified credentials and professional qualifications of ${profile.name}.`,
+      "image": profile.avatar || "https://easynaukri.online/dashboard_mockup.png",
+      "jobTitle": profile.professionalVertical || "Professional",
+      "url": profileCanonical
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50/50 py-12 px-4 sm:px-6 lg:px-8">
-      {/* react-helmet-async Meta-tags injection */}
-      <Helmet>
-        <title>{`${profile.name} (@${profile.username}) | Professional Profile`}</title>
-        <meta name="description" content={profile.summary || `View ${profile.name}'s professional credentials, verified metrics, and qualifications.`} />
-        
-        {/* OpenGraph Tags */}
-        <meta property="og:title" content={`${profile.name} (@${profile.username}) | Professional Passport`} />
-        <meta property="og:description" content={profile.summary || `Verified credentials, work milestones, and professional achievements.`} />
-        <meta property="og:image" content={profile.avatar || "https://images.unsplash.com/photo-1542831371-29b0f74f9713?w=500"} />
-        <meta property="og:type" content="profile" />
-        <meta property="og:url" content={window.location.href} />
-
-        {/* Twitter Card Tags */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={`${profile.name}'s Professional Passport`} />
-        <meta name="twitter:description" content={profile.summary || `Verified credentials and achievements.`} />
-        <meta name="twitter:image" content={profile.avatar || "https://images.unsplash.com/photo-1542831371-29b0f74f9713?w=500"} />
-      </Helmet>
+      <SEOHead
+        title={`${profile.name} (@${profile.username}) | Professional Profile`}
+        description={profile.summary || `View ${profile.name}'s professional credentials, verified metrics, and qualifications on EasyNaukri.`}
+        canonicalUrl={profileCanonical}
+        ogImage={profile.avatar || "https://easynaukri.online/dashboard_mockup.png"}
+        ogType="profile"
+        jsonLd={profileJsonLd}
+      />
 
       <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom duration-300">
         

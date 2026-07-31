@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import { SEOHead } from "../components/SEOHead";
 import { plaqueCardService, type PublicPlaqueCardResponse } from "../features/profile/services/plaqueCardService";
 import { API_BASE } from "../config/api";
 
@@ -134,10 +134,13 @@ export const PublicPlaqueCardPage: React.FC = () => {
       style={{ background: "linear-gradient(135deg, #090d16 0%, #0f172a 100%)", color: "#f8fafc" }}
       className="min-h-screen py-16 px-4 sm:px-6 lg:px-8 transition-colors duration-300 flex items-center justify-center font-sans"
     >
-      <Helmet>
-        <title>{`${displayName} | Professional visiting card`}</title>
-        <meta name="description" content={bio || `View ${displayName}'s professional credentials.`} />
-      </Helmet>
+      <SEOHead
+        title={`${displayName} | Digital Career Card`}
+        description={bio || `View ${displayName}'s professional credentials and contact card on EasyNaukri.`}
+        canonicalUrl={`https://easynaukri.online/plaque/${username}`}
+        ogImage={profile.avatar || "https://easynaukri.online/dashboard_mockup.png"}
+        ogType="profile"
+      />
 
       <div className="w-full max-w-xl space-y-6 animate-in fade-in slide-in-from-bottom duration-300">
         

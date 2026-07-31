@@ -5,6 +5,7 @@ import { feedbackService } from "../features/profile/services/feedbackService";
 import type { FeedbackResponse } from "../features/profile/services/feedbackService";
 import { useTheme } from "../context/ThemeContext";
 import MobileAppComingSoonModal from "../components/MobileAppComingSoonModal";
+import { SEOHead } from "../components/SEOHead";
 
 export const LandingPage: React.FC = () => {
   const { toggleTheme, resolvedTheme } = useTheme();
@@ -80,8 +81,64 @@ export const LandingPage: React.FC = () => {
     }
   };
 
+  const landingPageJsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "EasyNaukri",
+      "alternateName": "EasyNaukri Auto Apply",
+      "url": "https://easynaukri.online/",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "All",
+      "description": "EasyNaukri is an automated job application & resume matching platform. Streamline your job search, optimize your resume, and send recruiter outreach emails effortlessly."
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "EasyNaukri",
+      "url": "https://easynaukri.online/",
+      "logo": "https://easynaukri.online/favicon.svg"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How does EasyNaukri automate job applications?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "EasyNaukri automatically matches your candidate profile and resume with active job postings, creates personalized cover letters, and helps you send recruiter outreach directly."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is my Gmail data safe with EasyNaukri?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, EasyNaukri complies fully with Google OAuth API Services User Data Policy. We only request permissions strictly needed to send candidate outreach emails on your behalf."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I try EasyNaukri for free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes! EasyNaukri offers a Free Starter Tier that lets you experience automated resume matching and outreach immediately."
+          }
+        }
+      ]
+    }
+  ];
+
   return (
     <div className="landing-root">
+      <SEOHead
+        title="EasyNaukri - Automated Job Application & Resume Matching Platform"
+        description="Streamline your job search with EasyNaukri. Automated resume matching, AI-assisted recruiter outreach, and personalized application tracking."
+        canonicalUrl="https://easynaukri.online/"
+        jsonLd={landingPageJsonLd}
+      />
       {/* ==================== Navigation Navbar ==================== */}
       <nav className="landing-nav">
         <div className="nav-container">
