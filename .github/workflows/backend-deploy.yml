@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -43,21 +43,23 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and Push Backend Image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./backend
           file: ./backend/Dockerfile
           push: true
+          provenance: false
           tags: ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Build and Push Frontend Image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: true
+          provenance: false
           tags: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -68,7 +70,7 @@ jobs:
     needs: build-and-push
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
 
       - name: Copy docker-compose.prod.yml to Server
         uses: appleboy/scp-action@v0.1.7
@@ -89,7 +91,6 @@ jobs:
           username: ${{ secrets.OCI_USERNAME }}
           key: ${{ secrets.OCI_PRIVATE_KEY }}
           envs: GITHUB_TOKEN,GITHUB_ACTOR
-          script_stop: true
           request_pty: true
           command_timeout: 15m
           script: |
@@ -98,7 +99,7 @@ jobs:
             cp -f docker-compose.prod.yml docker-compose.yml
             echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
             
-            docker compose pull --quiet backend frontend
+            docker compose pull backend frontend
             docker compose stop backend frontend || true
             docker compose rm -f backend frontend || true
             docker compose up -d --force-recreate --remove-orphans backend frontend
