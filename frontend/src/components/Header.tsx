@@ -169,24 +169,23 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           )}
         </div>
         
-        <div className="flex items-center gap-2 sm:gap-4">
+        <div className="flex items-center gap-1.5 sm:gap-3">
           <button
             type="button"
             onClick={() => setShowMobileAppModal(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60 rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-sm focus:outline-none cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60 rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-xs focus:outline-none cursor-pointer"
             title="Download Mobile App"
           >
             <svg className="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
             </svg>
-            <span className="hidden xs:inline">Download App</span>
-            <span className="xs:hidden">App</span>
+            <span className="hidden md:inline">Download App</span>
           </button>
 
           <button
             type="button"
             onClick={toggleTheme}
-            className="p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors focus:outline-none"
+            className="p-1.5 sm:p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors focus:outline-none"
             aria-label="Toggle dark mode"
             title={`Switch to ${resolvedTheme === "dark" ? "light" : "dark"} mode`}
           >
@@ -210,11 +209,11 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                   localStorage.removeItem(`last_tip_dismissed_date_${user.id}`);
                   window.dispatchEvent(new CustomEvent("start-walkthrough"));
                 }}
-                className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-amber-700 dark:text-amber-300 hover:text-amber-800 border border-amber-200 dark:border-amber-800/60 rounded-full text-xs font-semibold shadow-sm transition-all focus:outline-none cursor-pointer"
+                className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-amber-700 dark:text-amber-300 hover:text-amber-800 border border-amber-200 dark:border-amber-800/60 rounded-full text-xs font-semibold shadow-xs transition-all focus:outline-none cursor-pointer"
                 title="Start Guided Tour"
               >
                 <span>💡</span>
-                <span className="hidden sm:inline">Guided Tour</span>
+                <span className="hidden md:inline">Guided Tour</span>
               </button>
 
               {renderTierBadge()}

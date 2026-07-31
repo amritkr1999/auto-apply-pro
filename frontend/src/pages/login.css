@@ -823,3 +823,55 @@
   vertical-align: middle;
 }
 
+/* ==========================================================================
+   Mobile Responsiveness (Targeting Mobile Devices including Pixel 7 ~ 412px)
+   ========================================================================== */
+@media (max-width: 576px) {
+  .auth-page-root {
+    padding: 1rem 0.75rem;
+  }
+
+  .auth-container {
+    padding: 1.75rem 1.25rem;
+    border-radius: 16px;
+  }
+
+  .auth-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .auth-header p {
+    font-size: 0.875rem;
+  }
+
+  .role-selector {
+    gap: 0.5rem;
+  }
+
+  .role-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .oauth-btn {
+    font-size: 0.875rem;
+    padding: 0.75rem 1rem;
+  }
+}
+
+@media (max-width: 412px) {
+  .auth-container {
+    padding: 1.5rem 1rem;
+  }
+
+  .form-input {
+    padding: 0.65rem 0.85rem;
+    font-size: 0.875rem;
+  }
+
+  .auth-submit-btn {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
