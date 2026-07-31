@@ -191,7 +191,7 @@ public class OutreachOAuthController {
                 log.info("OAuth credentials securely saved for user ID: {}", userId);
 
                 // Redirect back to frontend profile page
-                return new RedirectView(frontendUrl + "/candidate/profile?status=success");
+                return new RedirectView(frontendUrl + "/profile/settings?status=success");
             }
 
         } catch (Exception e) {
@@ -203,7 +203,7 @@ public class OutreachOAuthController {
             if (isLogin) {
                 return new RedirectView(frontendUrl + "/login?status=error&errorMsg=" + errMsg);
             } else {
-                return new RedirectView(frontendUrl + "/candidate/profile?status=error&errorMsg=" + errMsg);
+                return new RedirectView(frontendUrl + "/profile/settings?status=error&errorMsg=" + errMsg);
             }
         }
     }

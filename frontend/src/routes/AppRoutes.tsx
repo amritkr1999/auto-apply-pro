@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import LoginPage from "../pages/LoginPage";
 import LandingPage from "../pages/LandingPage";
@@ -62,6 +62,7 @@ export const AppRoutes: React.FC = () => {
           element={<CompanyDashboardView />}
         />
         <Route path="/profile/settings" element={<ProfessionalProfile />} />
+        <Route path="/candidate/profile" element={<ProfessionalProfile />} />
         <Route path="/opportunities/tracker" element={<JobTrackerPage />} />
         <Route path="/opportunities/import" element={<OpportunityImporter />} />
         <Route path="/outreach/templates" element={<TemplateManager />} />
@@ -80,6 +81,7 @@ export const AppRoutes: React.FC = () => {
         <Route path="/pricing" element={<BillingPortal />} />
         <Route path="/admin/telemetry" element={<TelemetryDashboard />} />
       </Route>
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
 };

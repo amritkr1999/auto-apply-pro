@@ -300,7 +300,7 @@ public class SocialOAuthController {
             if (isLogin) {
                 return new RedirectView(frontendUrl + "/login?status=error&errorMsg=" + errMsg);
             } else {
-                return new RedirectView(frontendUrl + "/candidate/profile?status=error&provider=github&errorMsg=" + errMsg);
+                return new RedirectView(frontendUrl + "/profile/settings?status=error&provider=github&errorMsg=" + errMsg);
             }
         }
     }

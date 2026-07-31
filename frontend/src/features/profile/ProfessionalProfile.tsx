@@ -521,7 +521,7 @@ export const ProfessionalProfile: React.FC = () => {
 
               <div className="mt-4 text-sm text-slate-600 space-y-3">
                 <p>
-                  You are initiating a request to permanently delete your Auto-Apply Pro account.
+                  You are initiating a request to permanently delete your EasyNaukri account.
                 </p>
                 <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs text-slate-500 space-y-1.5">
                   <p className="font-semibold text-slate-700">What will happen to my data?</p>
