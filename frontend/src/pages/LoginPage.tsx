@@ -92,11 +92,18 @@ export const LoginPage: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
 
   // Form Field States
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [name, setName] = useState<string>("");
-  const [mobile, setMobile] = useState<string>("");
-  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [loginFormData, setLoginFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [registerFormData, setRegisterFormData] = useState({
+    fullName: "",
+    mobile: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
   
   // Show/Hide password states
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -150,19 +157,22 @@ export const LoginPage: React.FC = () => {
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
+    if (!loginFormData.email || !loginFormData.password) {
       setError("Please enter both email and password.");
       return;
     }
 
-    if (!isValidEmail(email)) {
+    if (!isValidEmail(loginFormData.email)) {
       setError("Please enter a valid email address.");
       return;
     }
     
     try {
       setError("");
-      const userData = await profileService.login({ email, password });
+      const userData = await profileService.login({
+        email: loginFormData.email,
+        password: loginFormData.password,
+      });
       
       if (userData.isPendingDeletion) {
         setPendingUser(userData);
@@ -218,11 +228,12 @@ export const LoginPage: React.FC = () => {
 
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !mobile || !email || !password || !confirmPassword) {
+    const { fullName, mobile, email, password, confirmPassword } = registerFormData;
+    if (!fullName || !mobile || !email || !password || !confirmPassword) {
       setError("All fields are required.");
       return;
     }
-    if (name.trim().length < 2) {
+    if (fullName.trim().length < 2) {
       setError("Name must be at least 2 characters long.");
       return;
     }
@@ -254,7 +265,7 @@ export const LoginPage: React.FC = () => {
 
     try {
       const userData = await profileService.register({
-        name,
+        name: fullName,
         email,
         mobile,
         password,
@@ -272,7 +283,7 @@ export const LoginPage: React.FC = () => {
           if ((userData as any).devVerificationCode) {
             setVerificationCode((userData as any).devVerificationCode);
           }
-          trackEvent("registration_verification_required", { email });
+          trackEvent("registration_verification_required", { email: registerFormData.email });
         } else {
           authLogin(userData);
           if (userData.token) {
@@ -303,7 +314,7 @@ export const LoginPage: React.FC = () => {
     setResendSuccessMessage("");
 
     try {
-      const userData = await profileService.verifyEmail(email, verificationCode);
+      const userData = await profileService.verifyEmail(registerFormData.email, verificationCode);
       authLogin(userData);
       trackEvent("email_verification_success", { role: userData.role });
 
@@ -318,7 +329,7 @@ export const LoginPage: React.FC = () => {
   };
 
   const handleResendCode = async () => {
-    if (!email) {
+    if (!registerFormData.email) {
       setError("Email address is missing.");
       return;
     }
@@ -327,7 +338,7 @@ export const LoginPage: React.FC = () => {
     setResendSuccessMessage("");
 
     try {
-      const res = await profileService.resendVerification(email);
+      const res = await profileService.resendVerification(registerFormData.email);
       setResendSuccessMessage(res.message || "A new verification code has been sent to your email address.");
     } catch (err: any) {
       setError(err.message || "Failed to resend verification code.");
@@ -597,8 +608,8 @@ export const LoginPage: React.FC = () => {
                   type="email"
                   className="auth-input"
                   placeholder="name@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={loginFormData.email}
+                  onChange={(e) => setLoginFormData((prev) => ({ ...prev, email: e.target.value }))}
                   required
                 />
               </div>
@@ -614,8 +625,8 @@ export const LoginPage: React.FC = () => {
                   type={showPassword ? "text" : "password"}
                   className="auth-input"
                   placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  value={loginFormData.password}
+                  onChange={(e) => setLoginFormData((prev) => ({ ...prev, password: e.target.value }))}
                   required
                 />
                 <button
@@ -740,8 +751,8 @@ export const LoginPage: React.FC = () => {
                       type="text"
                       className="auth-input"
                       placeholder="Jane Doe"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
+                      value={registerFormData.fullName}
+                      onChange={(e) => setRegisterFormData((prev) => ({ ...prev, fullName: e.target.value }))}
                       disabled={isRegisteringSubmit}
                       required
                     />
@@ -758,8 +769,8 @@ export const LoginPage: React.FC = () => {
                       type="tel"
                       className="auth-input"
                       placeholder="+91 9876543210"
-                      value={mobile}
-                      onChange={(e) => setMobile(e.target.value)}
+                      value={registerFormData.mobile}
+                      onChange={(e) => setRegisterFormData((prev) => ({ ...prev, mobile: e.target.value }))}
                       disabled={isRegisteringSubmit}
                       required
                     />
@@ -776,8 +787,8 @@ export const LoginPage: React.FC = () => {
                       type="email"
                       className="auth-input"
                       placeholder="jane.doe@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      value={registerFormData.email}
+                      onChange={(e) => setRegisterFormData((prev) => ({ ...prev, email: e.target.value }))}
                       disabled={isRegisteringSubmit}
                       required
                     />
@@ -794,8 +805,8 @@ export const LoginPage: React.FC = () => {
                       type={showRegPassword ? "text" : "password"}
                       className="auth-input"
                       placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      value={registerFormData.password}
+                      onChange={(e) => setRegisterFormData((prev) => ({ ...prev, password: e.target.value }))}
                       disabled={isRegisteringSubmit}
                       required
                     />
@@ -831,8 +842,8 @@ export const LoginPage: React.FC = () => {
                       type={showRegConfirmPassword ? "text" : "password"}
                       className="auth-input"
                       placeholder="••••••••"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      value={registerFormData.confirmPassword}
+                      onChange={(e) => setRegisterFormData((prev) => ({ ...prev, confirmPassword: e.target.value }))}
                       disabled={isRegisteringSubmit}
                       required
                     />
@@ -888,7 +899,7 @@ export const LoginPage: React.FC = () => {
                     Verify Your Email Address
                   </h3>
                   <p style={{ color: "#94a3b8", fontSize: "0.85rem", lineHeight: "1.5" }}>
-                    We've sent a 6-digit verification code to <strong style={{ color: "#e2e8f0" }}>{email}</strong>.<br />
+                    We've sent a 6-digit verification code to <strong style={{ color: "#e2e8f0" }}>{registerFormData.email}</strong>.<br />
                     Please enter the code below to activate your account. Code expires in 15 minutes.
                   </p>
                 </div>
