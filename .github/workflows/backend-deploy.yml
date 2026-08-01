@@ -72,24 +72,30 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4.2.2
 
-      - name: SSH and Restart Services
-        uses: appleboy/ssh-action@v1.2.1
+      - name: Deploy to OCI Server via Native SSH
         env:
+          OCI_HOST: ${{ secrets.OCI_HOST }}
+          OCI_USERNAME: ${{ secrets.OCI_USERNAME }}
+          OCI_PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
-        with:
-          host: ${{ secrets.OCI_HOST }}
-          username: ${{ secrets.OCI_USERNAME }}
-          key: ${{ secrets.OCI_PRIVATE_KEY }}
-          envs: GITHUB_TOKEN,GITHUB_ACTOR
-          request_pty: true
-          command_timeout: 15m
-          script: |
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          echo "$OCI_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+          ssh -o StrictHostKeyChecking=no \
+              -o UserKnownHostsFile=/dev/null \
+              -o PubkeyAcceptedKeyTypes=+ssh-rsa,rsa-sha2-256,rsa-sha2-512 \
+              -o HostKeyAlgorithms=+ssh-rsa,rsa-sha2-256,rsa-sha2-512 \
+              -o ConnectTimeout=30 \
+              "$OCI_USERNAME@$OCI_HOST" "GITHUB_TOKEN='$GITHUB_TOKEN' GITHUB_ACTOR='$GITHUB_ACTOR' bash -s" << 'EOF'
             set -e
             mkdir -p ~/auto-apply-pro
             cd ~/auto-apply-pro
 
-            cat << 'EOF' > docker-compose.prod.yml
+            cat << 'DOCKER_COMPOSE' > docker-compose.prod.yml
             services:
               db:
                 image: postgres:17-alpine
@@ -194,18 +200,18 @@ jobs:
 
             volumes:
               postgres_data:
-            EOF
+            DOCKER_COMPOSE
 
             cp -f docker-compose.prod.yml docker-compose.yml
             echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
-            
+
             docker compose pull backend frontend
             docker compose stop backend frontend || true
             docker compose rm -f backend frontend || true
             docker compose up -d --force-recreate --remove-orphans backend frontend
-            
-            # Ensure Nginx port 80 HTTP requests redirect 301 to HTTPS instead of returning 404
+
             sudo sed -i 's/return 404;/return 301 https:\/\/$host$request_uri;/g' /etc/nginx/sites-available/* /etc/nginx/sites-enabled/* 2>/dev/null || true
             sudo systemctl reload nginx || true
 
             docker image prune -f
+          EOF
