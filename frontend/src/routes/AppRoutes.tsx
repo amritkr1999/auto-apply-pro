@@ -30,6 +30,8 @@ import PublicProfilePage from "../pages/PublicProfilePage";
 import PublicPlaqueCardPage from "../pages/PublicPlaqueCardPage";
 import PrivacyPolicy from "../components/pages/PrivacyPolicy";
 import TermsOfService from "../components/pages/TermsOfService";
+import AboutUsPage from "../pages/AboutUsPage";
+import CareersPage from "../pages/CareersPage";
 
 import ProtectedRoute from "../components/ProtectedRoute";
 
@@ -45,6 +47,8 @@ export const AppRoutes: React.FC = () => {
       <Route path="/unsubscribe" element={<UnsubscribePage />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<TermsOfService />} />
+      <Route path="/about" element={<AboutUsPage />} />
+      <Route path="/careers" element={<CareersPage />} />
       <Route path="/profile/:username" element={<PublicProfilePage />} />
       <Route path="/card/:username" element={<PublicPlaqueCardPage />} />
       <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>

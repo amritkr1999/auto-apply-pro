@@ -136,13 +136,13 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
 
   return (
     <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 transition-colors">
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-4 sm:gap-8">
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 h-16 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 sm:gap-6 shrink-0 min-w-0">
           {user && onMenuClick && (
             <button
               type="button"
               onClick={onMenuClick}
-              className="lg:hidden p-2 -ml-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors focus:outline-none"
+              className="lg:hidden p-2 -ml-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors focus:outline-none shrink-0"
               aria-label="Open sidebar menu"
             >
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -150,12 +150,12 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
               </svg>
             </button>
           )}
-          <Link to={getDashboardPath()} className="text-xl font-bold text-primary hover:text-primary-hover transition-colors flex items-center gap-2">
+          <Link to={getDashboardPath()} className="text-xl font-bold text-primary hover:text-primary-hover transition-colors flex items-center gap-2 shrink-0">
             <span className="bg-indigo-600 text-white px-2 py-0.5 rounded-lg text-sm font-extrabold">EN</span>
-            <span>EasyNaukri</span>
+            <span className="whitespace-nowrap">EasyNaukri</span>
           </Link>
           {user && (
-            <nav className="hidden lg:flex items-center gap-6">
+            <nav className="hidden lg:flex items-center gap-6 whitespace-nowrap shrink-0">
               <Link to={getDashboardPath()} className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">
                 Dashboard
               </Link>
@@ -169,7 +169,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           )}
         </div>
         
-        <div className="flex items-center gap-1.5 sm:gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0 whitespace-nowrap">
           <button
             type="button"
             onClick={() => setShowMobileAppModal(true)}
