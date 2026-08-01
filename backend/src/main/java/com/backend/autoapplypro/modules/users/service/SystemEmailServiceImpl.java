@@ -13,8 +13,11 @@ public class SystemEmailServiceImpl implements SystemEmailService {
     @Autowired(required = false)
     private JavaMailSender mailSender;
 
-    @org.springframework.beans.factory.annotation.Value("${spring.mail.username:}")
+    @org.springframework.beans.factory.annotation.Value("${app.email.notifications:notifications@easynaukri.online}")
     private String fromEmail;
+
+    @org.springframework.beans.factory.annotation.Value("${app.email.support:support@easynaukri.online}")
+    private String supportEmail;
 
     @Override
     @org.springframework.scheduling.annotation.Async

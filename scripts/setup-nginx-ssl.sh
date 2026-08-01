@@ -67,7 +67,7 @@ fi
 # ------------------------------------------------------------------------------
 echo "[+] Requesting SSL certificate from Let's Encrypt for easynaukri.duckdns.org..."
 # Run Certbot to fetch and install the certificate automatically
-certbot --nginx -d easynaukri.duckdns.org --non-interactive --agree-tos --email doctwo561@gmail.com --redirect
+certbot --nginx -d easynaukri.duckdns.org --non-interactive --agree-tos --email tech@easynaukri.online --redirect
 
 # ------------------------------------------------------------------------------
 # 4. Update Backend CORS and Domain Settings in .env

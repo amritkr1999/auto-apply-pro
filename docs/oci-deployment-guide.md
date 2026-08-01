@@ -108,11 +108,20 @@ GITHUB_CLIENT_SECRET=your-github-client-secret
 LINKEDIN_CLIENT_ID=your-linkedin-client-id
 LINKEDIN_CLIENT_SECRET=your-linkedin-client-secret
 
-# --- SMTP Gmail Configuration ---
-SMTP_HOST=smtp.gmail.com
+# --- Zoho Mail SMTP Configuration ---
+# Main auth login: tech@easynaukri.online (App Password generated under tech@)
+# Outbound sender header: notifications@easynaukri.online
+SMTP_HOST=smtppro.zoho.in
 SMTP_PORT=587
-SMTP_USERNAME=your-gmail-username@gmail.com
-SMTP_PASSWORD=your-gmail-app-password
+SMTP_USERNAME=tech@easynaukri.online
+SMTP_PASSWORD=your-zoho-16-char-app-password
+
+NOTIFICATIONS_EMAIL=notifications@easynaukri.online
+SUPPORT_EMAIL=support@easynaukri.online
+CARE_EMAIL=care@easynaukri.online
+INVOICES_EMAIL=invoices@easynaukri.online
+TECH_EMAIL=tech@easynaukri.online
+ADMIN_EMAIL=amrit@easynaukri.online
 
 # --- Razorpay Configuration ---
 RAZORPAY_KEY_ID=rzp_live_...

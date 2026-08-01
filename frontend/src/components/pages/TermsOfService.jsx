@@ -221,8 +221,15 @@ export const TermsOfService = () => {
               <p>
                 If you have questions or legal inquiries regarding these Terms of Service, please contact our legal and support team:
               </p>
-              <div className="p-4 bg-indigo-50/50 dark:bg-indigo-950/30 rounded-xl border border-indigo-100 dark:border-indigo-900/40 inline-block font-mono text-xs sm:text-sm text-indigo-700 dark:text-indigo-300">
-                Email: support@easynaukri.online
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                <div className="p-4 bg-indigo-50/50 dark:bg-indigo-950/30 rounded-xl border border-indigo-100 dark:border-indigo-900/40 font-mono text-xs sm:text-sm text-indigo-700 dark:text-indigo-300">
+                  <div className="font-semibold text-xs text-slate-500 uppercase tracking-wider mb-1 font-sans">Legal & Support</div>
+                  <a href="mailto:support@easynaukri.online" className="hover:underline">support@easynaukri.online</a>
+                </div>
+                <div className="p-4 bg-indigo-50/50 dark:bg-indigo-950/30 rounded-xl border border-indigo-100 dark:border-indigo-900/40 font-mono text-xs sm:text-sm text-indigo-700 dark:text-indigo-300">
+                  <div className="font-semibold text-xs text-slate-500 uppercase tracking-wider mb-1 font-sans">Billing & Invoices</div>
+                  <a href="mailto:invoices@easynaukri.online" className="hover:underline">invoices@easynaukri.online</a>
+                </div>
               </div>
             </div>
           </section>

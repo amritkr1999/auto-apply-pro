@@ -28,7 +28,7 @@ public class MarketingEmailCampaignServiceImpl implements MarketingEmailCampaign
     @Value("${app.frontend.url:http://localhost:5173}")
     private String frontendUrl;
 
-    @Value("${spring.mail.username:}")
+    @Value("${app.email.notifications:notifications@easynaukri.online}")
     private String fromEmail;
 
     @Override
@@ -289,8 +289,8 @@ public class MarketingEmailCampaignServiceImpl implements MarketingEmailCampaign
                 "      " + bodyContent + "\n" +
                 "    </div>\n" +
                 "    <div class=\"footer\">\n" +
-                "      <p>This email was sent to you because you signed up for EasyNaukri.</p>\n" +
-                "      <p>EasyNaukri Inc., 123 Tech Boulevard, Suite 500, San Francisco, CA 94107</p>\n" +
+                "      <p>This email was sent to you because you registered with EasyNaukri.</p>\n" +
+                "      <p>Need help? Contact Customer Support at <a href=\"mailto:support@easynaukri.online\">support@easynaukri.online</a> or <a href=\"mailto:care@easynaukri.online\">care@easynaukri.online</a></p>\n" +
                 "      <p><a href=\"" + unsubscribeUrl + "\">Unsubscribe</a> | <a href=\"" + unsubscribeUrl.replace("unsubscribe", "profile") + "\">Manage Preferences</a></p>\n" +
                 "    </div>\n" +
                 "  </div>\n" +
