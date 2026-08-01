@@ -72,15 +72,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4.2.2
 
-      - name: Copy docker-compose.prod.yml to Server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.OCI_HOST }}
-          username: ${{ secrets.OCI_USERNAME }}
-          key: ${{ secrets.OCI_PRIVATE_KEY }}
-          source: "docker-compose.prod.yml"
-          target: "~/auto-apply-pro/"
-
       - name: SSH and Restart Services
         uses: appleboy/ssh-action@v1.2.1
         env:
@@ -95,7 +86,116 @@ jobs:
           command_timeout: 15m
           script: |
             set -e
+            mkdir -p ~/auto-apply-pro
             cd ~/auto-apply-pro
+
+            cat << 'EOF' > docker-compose.prod.yml
+            services:
+              db:
+                image: postgres:17-alpine
+                container_name: auto-apply-db
+                environment:
+                  POSTGRES_DB: ${DB_NAME:-autoapplypro}
+                  POSTGRES_USER: ${DB_USER:-amrit}
+                  POSTGRES_PASSWORD: ${DB_PASSWORD:-amrit123}
+                ports:
+                  - "127.0.0.1:5432:5432"
+                volumes:
+                  - postgres_data:/var/lib/postgresql/data
+                networks:
+                  - app-network
+                restart: unless-stopped
+                healthcheck:
+                  test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-amrit} -d ${DB_NAME:-autoapplypro}"]
+                  interval: 5s
+                  timeout: 5s
+                  retries: 5
+
+              backend:
+                image: ghcr.io/amritkr1999/auto-apply-pro-backend:latest
+                container_name: auto-apply-backend
+                ports:
+                  - "8060:8060"
+                environment:
+                  DB_URL: jdbc:postgresql://db:5432/${DB_NAME:-autoapplypro}
+                  DB_USERNAME: ${DB_USER:-amrit}
+                  DB_PASSWORD: ${DB_PASSWORD:-amrit123}
+                  PIPELINE_SERVICE_URL: http://pipeline:8000
+                  GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+                  GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+                  GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-https://api.easynaukri.online/api/v1/outreach/oauth2/callback}
+                  GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+                  GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+                  GITHUB_REDIRECT_URI: ${GITHUB_REDIRECT_URI:-https://api.easynaukri.online/api/v1/auth/callback/github}
+                  LINKEDIN_CLIENT_ID: ${LINKEDIN_CLIENT_ID}
+                  LINKEDIN_CLIENT_SECRET: ${LINKEDIN_CLIENT_SECRET}
+                  LINKEDIN_REDIRECT_URI: ${LINKEDIN_REDIRECT_URI:-https://api.easynaukri.online/api/v1/auth/callback/linkedin}
+                  JWT_SECRET: ${JWT_SECRET}
+                  JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
+                  SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+                  SMTP_PORT: ${SMTP_PORT:-587}
+                  SMTP_USERNAME: ${SMTP_USERNAME:-notifications@easynaukri.online}
+                  SMTP_PASSWORD: ${SMTP_PASSWORD}
+                  SMTP_AUTH: ${SMTP_AUTH:-true}
+                  SMTP_STARTTLS_ENABLE: ${SMTP_STARTTLS_ENABLE:-true}
+                  SMTP_STARTTLS_REQUIRED: ${SMTP_STARTTLS_REQUIRED:-true}
+                  CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-https://easynaukri.online,https://www.easynaukri.online}
+                  FRONTEND_URL: ${FRONTEND_URL:-https://easynaukri.online}
+                  APP_FRONTEND_URL: ${FRONTEND_URL:-https://easynaukri.online}
+                depends_on:
+                  db:
+                    condition: service_healthy
+                networks:
+                  - app-network
+                restart: unless-stopped
+
+              pipeline:
+                image: ghcr.io/amritkr1999/auto-apply-pro-pipeline:latest
+                container_name: auto-apply-pipeline
+                ports:
+                  - "8000:8000"
+                environment:
+                  GEMINI_API_KEY: ${GEMINI_API_KEY}
+                  USE_LOCAL_MODEL: ${USE_LOCAL_MODEL:-false}
+                  OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+                  OLLAMA_DEEPSEEK_MODEL: ${OLLAMA_DEEPSEEK_MODEL:-deepseek-vision:7b}
+                  OLLAMA_LLM_MODEL: ${OLLAMA_LLM_MODEL:-ollama3.1:8b}
+                  DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://${DB_USER:-amrit}:${DB_PASSWORD:-amrit123}@db:5432/${DB_NAME:-autoapplypro}}
+                  BACKEND_API_URL: ${BACKEND_API_URL:-http://backend:8060}
+                extra_hosts:
+                  - "host.docker.internal:host-gateway"
+                networks:
+                  - app-network
+                restart: unless-stopped
+
+              redis:
+                image: redis:7-alpine
+                container_name: auto-apply-redis
+                ports:
+                  - "6379:6379"
+                networks:
+                  - app-network
+                restart: unless-stopped
+
+              frontend:
+                image: ghcr.io/amritkr1999/auto-apply-pro-frontend:latest
+                container_name: auto-apply-frontend
+                ports:
+                  - "3000:80"
+                depends_on:
+                  - backend
+                networks:
+                  - app-network
+                restart: unless-stopped
+
+            networks:
+              app-network:
+                driver: bridge
+
+            volumes:
+              postgres_data:
+            EOF
+
             cp -f docker-compose.prod.yml docker-compose.yml
             echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
             
