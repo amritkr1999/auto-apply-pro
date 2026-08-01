@@ -72,13 +72,13 @@ export const StatsGrid: React.FC<StatsGridProps> = ({
           aria-label={`View details for ${stat.label}, ${stat.value}`}
         >
           <div className="space-y-1.5 min-w-0 flex-1">
-            <h3 className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest truncate">
+            <h3 className="text-[11px] font-extrabold text-slate-600 dark:text-slate-300 uppercase tracking-widest truncate">
               {stat.label}
             </h3>
-            <p className="text-2xl font-black text-slate-800 dark:text-white truncate">
+            <p className="text-2xl font-black text-slate-900 dark:text-white truncate">
               {stat.value}
             </p>
-            <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <div className="text-[10px] font-bold text-slate-600 dark:text-slate-400 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               {stat.cta} <span className="translate-x-0 group-hover:translate-x-0.5 transition-transform duration-200">→</span>
             </div>
           </div>

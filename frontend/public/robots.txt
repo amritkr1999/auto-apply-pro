@@ -1,18 +1,18 @@
 User-agent: *
 Allow: /
+Allow: /dashboard
 Allow: /login
 Allow: /privacy
 Allow: /terms
-Allow: /p/
-Allow: /plaque/
+Allow: /about
+Allow: /careers
+Allow: /learning
+Allow: /profile/
+Allow: /card/
 Allow: /assets/
-Allow: /dashboard_mockup.png
 
-# Disallow private user & dashboard routes
-Disallow: /dashboard
-Disallow: /drafts
-Disallow: /settings
-Disallow: /queue
-Disallow: /api/
+# Disallow internal admin & draft queues from search indexing
+Disallow: /admin/
+Disallow: /outreach/queue
 
 Sitemap: https://easynaukri.online/sitemap.xml

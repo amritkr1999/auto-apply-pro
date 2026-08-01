@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import Button from "../../../../components/ui/Button";
 import Badge from "../../../../components/ui/Badge";
@@ -367,9 +368,16 @@ export const ProfessionalDashboardView: React.FC = () => {
 
   return (
     <>
+      <Helmet>
+        <title>Candidate Dashboard | EasyNaukri</title>
+        <meta name="description" content="Manage your candidate profile, automated recruiter outreach, job match suggestions, and application tracker on EasyNaukri." />
+      </Helmet>
+
+      <h1 className="sr-only">Candidate Dashboard - EasyNaukri</h1>
+
       {/* Universal Career Passport Header */}
       <div data-tour="dashboard-header" className="mb-8 p-6 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 text-white rounded-card shadow-lg border border-slate-800 relative overflow-hidden">
-        <div className="absolute top-0 right-0 p-6 opacity-10">
+        <div className="absolute top-0 right-0 p-6 opacity-10" aria-hidden="true">
           <span className="text-8xl">🛂</span>
         </div>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative">
@@ -382,14 +390,14 @@ export const ProfessionalDashboardView: React.FC = () => {
                 {gmailConnected ? "Verified Channels" : "Channels Offline"}
               </Badge>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight">{user.name || "Candidate User"}</h1>
-            <p className="text-xs sm:text-sm text-slate-400 max-w-xl">
+            <h2 className="text-2xl sm:text-3xl font-black tracking-tight">{user.name || "Candidate User"}</h2>
+            <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
               Target Role:{" "}
               {(candidateProfile?.jobPreferences?.targetRole ||
                 candidateProfile?.jobPreferences?.role ||
                 candidateProfile?.jobPreferences?.desiredRole ||
                 outreachTargetRole) ? (
-                <span className="font-semibold text-indigo-400">
+                <span className="font-semibold text-indigo-300">
                   {candidateProfile?.jobPreferences?.targetRole ||
                     candidateProfile?.jobPreferences?.role ||
                     candidateProfile?.jobPreferences?.desiredRole ||
@@ -399,17 +407,17 @@ export const ProfessionalDashboardView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => navigate("/profile/settings")}
-                  className="font-semibold text-amber-400 hover:text-amber-300 underline inline-flex items-center gap-1 transition-colors"
+                  className="font-semibold text-amber-300 hover:text-amber-200 underline inline-flex items-center gap-1 transition-colors"
                 >
                   <span>Please add job profile</span>
-                  <span className="text-xs">➔</span>
+                  <span className="text-xs" aria-hidden="true">➔</span>
                 </button>
               )}
             </p>
           </div>
           <div className="shrink-0 flex items-center gap-4 bg-slate-900/60 backdrop-blur-md p-4 rounded-card border border-slate-800">
             <div>
-              <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+              <div className="flex justify-between items-center text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-1">
                 <span>Trust Score</span>
                 <span className="text-indigo-400">
                   {candidateProfile?.trustScore !== undefined
@@ -417,7 +425,7 @@ export const ProfessionalDashboardView: React.FC = () => {
                     : (hasResume ? 40 : 0) + (gmailConnected ? 40 : 0) + 20}%
                 </span>
               </div>
-              <div className="w-32 h-2 bg-slate-800 rounded-full overflow-hidden">
+              <div className="w-32 h-2 bg-slate-800 rounded-full overflow-hidden" role="progressbar" aria-valuenow={candidateProfile?.trustScore !== undefined ? candidateProfile.trustScore : (hasResume ? 40 : 0) + (gmailConnected ? 40 : 0) + 20} aria-valuemin={0} aria-valuemax={100} aria-label="Trust Score">
                 <div 
                   className="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 transition-all duration-500" 
                   style={{
@@ -429,29 +437,44 @@ export const ProfessionalDashboardView: React.FC = () => {
                   }}
                 />
               </div>
-              <p className="text-[10px] text-slate-500 mt-1">Calculated via verification checks</p>
+              <p className="text-[10px] text-slate-400 mt-1">Calculated via verification checks</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Tabbed Navigation Menu */}
-      <div className="flex border-b border-slate-200 dark:border-slate-800 mb-8 gap-6 text-sm font-bold">
+      <div role="tablist" aria-label="Dashboard sections" className="flex border-b border-slate-200 dark:border-slate-800 mb-8 gap-6 text-sm font-bold">
         <button
+          type="button"
+          role="tab"
+          id="tab-overview"
+          aria-selected={activeTab === "overview"}
+          aria-controls="panel-overview"
           onClick={() => setActiveTab("overview")}
-          className={`pb-4 transition-all relative ${activeTab === "overview" ? "text-indigo-600 border-b-2 border-indigo-600" : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"}`}
+          className={`pb-4 transition-all relative ${activeTab === "overview" ? "text-indigo-600 border-b-2 border-indigo-600 dark:text-indigo-400" : "text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"}`}
         >
           Passport Hub
         </button>
         <button
+          type="button"
+          role="tab"
+          id="tab-outreach"
+          aria-selected={activeTab === "outreach"}
+          aria-controls="panel-outreach"
           onClick={() => setActiveTab("outreach")}
-          className={`pb-4 transition-all relative ${activeTab === "outreach" ? "text-indigo-600 border-b-2 border-indigo-600" : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"}`}
+          className={`pb-4 transition-all relative ${activeTab === "outreach" ? "text-indigo-600 border-b-2 border-indigo-600 dark:text-indigo-400" : "text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"}`}
         >
-          Outreach Center <span className="bg-slate-100 dark:bg-slate-850 text-slate-700 dark:text-slate-300 text-xs px-2 py-0.5 rounded-full ml-1">{drafts.length + suggestions.length}</span>
+          Outreach Center <span className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs px-2 py-0.5 rounded-full ml-1">{drafts.length + suggestions.length}</span>
         </button>
         <button
+          type="button"
+          role="tab"
+          id="tab-growth"
+          aria-selected={activeTab === "growth"}
+          aria-controls="panel-growth"
           onClick={() => setActiveTab("growth")}
-          className={`pb-4 transition-all relative ${activeTab === "growth" ? "text-indigo-600 border-b-2 border-indigo-600" : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"}`}
+          className={`pb-4 transition-all relative ${activeTab === "growth" ? "text-indigo-600 border-b-2 border-indigo-600 dark:text-indigo-400" : "text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"}`}
         >
           Professional Growth
         </button>
@@ -550,8 +573,10 @@ export const ProfessionalDashboardView: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Overview Metrics</h2>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Timeframe:</span>
+              <label htmlFor="timeframe-select" className="text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Timeframe:</label>
               <select
+                id="timeframe-select"
+                aria-label="Filter overview metrics timeframe"
                 value={timeframe}
                 onChange={(e) => setTimeframe(e.target.value as any)}
                 className="px-3 py-1.5 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-card text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
@@ -798,8 +823,10 @@ export const ProfessionalDashboardView: React.FC = () => {
               </div>
               <div className="flex flex-wrap items-center gap-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status:</span>
+                  <label htmlFor="queue-status-select" className="text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Status:</label>
                   <select
+                    id="queue-status-select"
+                    aria-label="Filter outreach queue by status"
                     value={queueStatusFilter}
                     onChange={(e) => setQueueStatusFilter(e.target.value)}
                     className="px-3 py-1.5 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-card text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
@@ -813,8 +840,10 @@ export const ProfessionalDashboardView: React.FC = () => {
                   </select>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Date:</span>
+                  <label htmlFor="queue-date-select" className="text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Date:</label>
                   <select
+                    id="queue-date-select"
+                    aria-label="Filter outreach queue by date range"
                     value={queueTimeframe}
                     onChange={(e) => setQueueTimeframe(e.target.value as any)}
                     className="px-3 py-1.5 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-card text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"

@@ -52,7 +52,7 @@ export const StreakWidget: React.FC<StreakWidgetProps> = ({
             Everyday Habit
           </span>
           <h2 className="text-xl font-bold text-slate-100 mt-3.5">Daily Login Streak</h2>
-          <p className="text-xs text-slate-400 mt-1 max-w-sm">{motivationMessage}</p>
+          <p className="text-xs text-slate-300 mt-1 max-w-sm">{motivationMessage}</p>
         </div>
 
         <div className="flex items-center gap-4 mt-6 justify-center md:justify-start">
@@ -70,7 +70,7 @@ export const StreakWidget: React.FC<StreakWidgetProps> = ({
           <div>
             <div className="text-3xl font-extrabold text-white tracking-tight flex items-baseline gap-1">
               <span>{loginStreak}</span>
-              <span className="text-sm font-semibold text-slate-400">days</span>
+              <span className="text-sm font-semibold text-slate-300">days</span>
             </div>
             <div className="text-[10px] font-bold text-orange-400 uppercase tracking-widest mt-0.5">
               Active Flame
@@ -82,9 +82,9 @@ export const StreakWidget: React.FC<StreakWidgetProps> = ({
       {/* Gamified Daily Checklist */}
       <div className="w-full md:w-[250px] bg-slate-800/40 border border-slate-800 rounded-xl p-4 flex flex-col justify-between gap-4 relative z-10 shadow-inner">
         <div>
-          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
+          <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3">
             Daily Checklist
-          </h4>
+          </h3>
           
           <div className="space-y-3.5">
             {/* Task 1: Login */}

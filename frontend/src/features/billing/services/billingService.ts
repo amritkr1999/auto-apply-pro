@@ -195,12 +195,16 @@ export const getMyUpiPaymentStatus = async (): Promise<{
     createdAt: string;
   } | null;
 }> => {
-  const res = await fetch(`${API_BASE_V1}/payments/my-status`, {
-    headers: { ...getAuthHeaders() },
-  });
-  if (!res.ok) {
-    throw new Error("Failed to fetch payment status");
+  try {
+    const res = await fetch(`${API_BASE_V1}/payments/my-status`, {
+      headers: { ...getAuthHeaders() },
+    });
+    if (!res.ok) {
+      return { isPremium: false, role: "CANDIDATE", latestTransaction: null };
+    }
+    return await res.json();
+  } catch (e) {
+    return { isPremium: false, role: "CANDIDATE", latestTransaction: null };
   }
-  return res.json();
 };
 
