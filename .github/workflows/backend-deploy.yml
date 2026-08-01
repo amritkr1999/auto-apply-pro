@@ -87,9 +87,15 @@ jobs:
             mkdir -p ~/auto-apply-pro
             cd ~/auto-apply-pro
 
-            # Download latest production docker-compose from repository
-            curl -sSL https://raw.githubusercontent.com/amritkr1999/auto-apply-pro/main/docker-compose.prod.yml -o docker-compose.prod.yml
-            cp -f docker-compose.prod.yml docker-compose.yml
+            # Download latest production docker-compose from repository securely
+            curl -sSL -H "Authorization: token $GITHUB_TOKEN" "https://raw.githubusercontent.com/amritkr1999/auto-apply-pro/main/docker-compose.prod.yml" -o docker-compose.prod.tmp || true
+
+            if [ -f docker-compose.prod.tmp ] && grep -q "services:" docker-compose.prod.tmp; then
+              mv -f docker-compose.prod.tmp docker-compose.prod.yml
+              cp -f docker-compose.prod.yml docker-compose.yml
+            elif [ -f docker-compose.prod.yml ]; then
+              cp -f docker-compose.prod.yml docker-compose.yml
+            fi
 
             # Authenticate with GHCR
             echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
