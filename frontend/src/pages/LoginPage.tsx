@@ -5,6 +5,7 @@ import { profileService } from "../features/profile/services/profileService";
 import { API_BASE } from "../config/api";
 import { useTheme } from "../context/ThemeContext";
 import { useAnalytics } from "../context/AnalyticsContext";
+import { useAuth } from "../context/AuthContext";
 import { isValidEmail, isValidPhone, isValidBasicPassword } from "../utils/validation";
 import { SEOHead } from "../components/SEOHead";
 
@@ -16,6 +17,21 @@ export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { trackEvent } = useAnalytics();
+  const { login: authLogin, isAuthenticated, user } = useAuth();
+
+  const getRedirectTarget = (role?: string) => {
+    const fromPath = (location.state as any)?.from?.pathname || (location.state as any)?.from;
+    if (typeof fromPath === "string" && fromPath && fromPath !== "/login" && fromPath !== "/") {
+      return fromPath;
+    }
+    if (role === "RECRUITER") {
+      return "/recruiter-dashboard";
+    }
+    if (role === "COMPANY") {
+      return "/company-dashboard";
+    }
+    return "/dashboard";
+  };
 
   // Tab State: 'login' or 'register'
   const [tab, setTab] = useState<AuthTab>(() => {
@@ -46,16 +62,17 @@ export const LoginPage: React.FC = () => {
         isPendingDeletion: false
       };
       
-      localStorage.setItem("user", JSON.stringify(userData));
+      authLogin(userData);
       trackEvent("login_success", { method: "oauth", role: userData.role });
       
-      if (userData.role === "RECRUITER") {
-        navigate("/recruiter-dashboard");
-      } else if (userData.role === "COMPANY") {
-        navigate("/company-dashboard");
-      } else {
-        navigate("/dashboard");
-      }
+      const targetPath = getRedirectTarget(userData.role);
+      window.location.replace(targetPath);
+      return;
+    }
+
+    if (isAuthenticated) {
+      const targetPath = getRedirectTarget(user?.role);
+      window.location.replace(targetPath);
       return;
     }
 
@@ -68,7 +85,7 @@ export const LoginPage: React.FC = () => {
     if (tabParam === "register" || tabParam === "login") {
       setTab(tabParam);
     }
-  }, [location.search, navigate]);
+  }, [location.search, navigate, isAuthenticated, user]);
 
   // Registration step state: 1 (role selection) or 2 (details form)
   const [regStep, setRegStep] = useState<number>(1);
@@ -153,16 +170,11 @@ export const LoginPage: React.FC = () => {
         return;
       }
 
-      localStorage.setItem("user", JSON.stringify(userData));
+      authLogin(userData);
       trackEvent("login_success", { method: "credentials", role: userData.role });
       
-      if (userData.role === "RECRUITER") {
-        navigate("/recruiter-dashboard");
-      } else if (userData.role === "COMPANY") {
-        navigate("/company-dashboard");
-      } else {
-        navigate("/dashboard");
-      }
+      const targetPath = getRedirectTarget(userData.role);
+      window.location.replace(targetPath);
     } catch (err: any) {
       setError(err.message || "Invalid credentials. Please try again.");
       trackEvent("login_failed", { method: "credentials", error: err.message || "Unknown error" });
@@ -189,19 +201,14 @@ export const LoginPage: React.FC = () => {
 
       // Success: Save user to localStorage and navigate to dashboard
       const activeUser = { ...pendingUser, isPendingDeletion: false, deletionScheduledAt: null };
-      localStorage.setItem("user", JSON.stringify(activeUser));
+      authLogin(activeUser);
       setShowRecoveryModal(false);
       setPendingUser(null);
       
       alert("Welcome back! Your account deletion has been cancelled successfully.");
       
-      if (activeUser.role === "RECRUITER") {
-        navigate("/recruiter-dashboard");
-      } else if (activeUser.role === "COMPANY") {
-        navigate("/company-dashboard");
-      } else {
-        navigate("/dashboard");
-      }
+      const targetPath = getRedirectTarget(activeUser.role);
+      window.location.replace(targetPath);
     } catch (err: any) {
       setRestoreError(err.message || "Failed to restore account. Please try again.");
     } finally {
@@ -267,19 +274,14 @@ export const LoginPage: React.FC = () => {
           }
           trackEvent("registration_verification_required", { email });
         } else {
-          localStorage.setItem("user", JSON.stringify(userData));
+          authLogin(userData);
           if (userData.token) {
             localStorage.setItem("token", userData.token);
           }
           trackEvent("registration_success", { role: userData.role });
           
-          if (userData.role === "RECRUITER") {
-            navigate("/recruiter-dashboard");
-          } else if (userData.role === "COMPANY") {
-            navigate("/company-dashboard");
-          } else {
-            navigate("/dashboard");
-          }
+          const targetPath = getRedirectTarget(userData.role);
+          window.location.replace(targetPath);
         }
       }, 500);
     } catch (err: any) {
@@ -302,16 +304,11 @@ export const LoginPage: React.FC = () => {
 
     try {
       const userData = await profileService.verifyEmail(email, verificationCode);
-      localStorage.setItem("user", JSON.stringify(userData));
+      authLogin(userData);
       trackEvent("email_verification_success", { role: userData.role });
 
-      if (userData.role === "RECRUITER") {
-        navigate("/recruiter-dashboard");
-      } else if (userData.role === "COMPANY") {
-        navigate("/company-dashboard");
-      } else {
-        navigate("/dashboard");
-      }
+      const targetPath = getRedirectTarget(userData.role);
+      window.location.replace(targetPath);
     } catch (err: any) {
       setError(err.message || "Verification failed. Please check the code and try again.");
       trackEvent("email_verification_failed", { error: err.message });
@@ -379,8 +376,9 @@ export const LoginPage: React.FC = () => {
             throw err;
           }
         }
-        localStorage.setItem("user", JSON.stringify(userData));
-        navigate("/dashboard");
+        authLogin(userData);
+        const targetPath = getRedirectTarget(userData.role);
+        window.location.replace(targetPath);
       } catch (err: any) {
         setError(err.message || "Social login failed.");
       }

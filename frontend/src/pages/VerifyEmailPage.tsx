@@ -41,11 +41,11 @@ export const VerifyEmailPage: React.FC = () => {
       localStorage.setItem("user", JSON.stringify(userData));
       setTimeout(() => {
         if (userData.role === "RECRUITER") {
-          navigate("/recruiter-dashboard");
+          navigate("/recruiter-dashboard", { replace: true });
         } else if (userData.role === "COMPANY") {
-          navigate("/company-dashboard");
+          navigate("/company-dashboard", { replace: true });
         } else {
-          navigate("/dashboard");
+          navigate("/dashboard", { replace: true });
         }
       }, 1500);
     } catch (err: any) {
@@ -72,11 +72,11 @@ export const VerifyEmailPage: React.FC = () => {
       localStorage.setItem("user", JSON.stringify(userData));
       setTimeout(() => {
         if (userData.role === "RECRUITER") {
-          navigate("/recruiter-dashboard");
+          navigate("/recruiter-dashboard", { replace: true });
         } else if (userData.role === "COMPANY") {
-          navigate("/company-dashboard");
+          navigate("/company-dashboard", { replace: true });
         } else {
-          navigate("/dashboard");
+          navigate("/dashboard", { replace: true });
         }
       }, 1500);
     } catch (err: any) {

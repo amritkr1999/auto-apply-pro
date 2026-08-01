@@ -1,5 +1,5 @@
 import React from "react";
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 interface ProtectedRouteProps {
@@ -9,9 +9,10 @@ interface ProtectedRouteProps {
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
-  redirectTo = "/",
+  redirectTo = "/login",
 }) => {
   const { user, isLoading } = useAuth();
+  const location = useLocation();
 
   if (isLoading) {
     return (
@@ -24,8 +25,21 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  if (!user) {
-    return <Navigate replace to={redirectTo} />;
+  let activeUser = user;
+  if (!activeUser) {
+    try {
+      const stored = localStorage.getItem("user");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && typeof parsed === "object" && parsed.id) {
+          activeUser = parsed;
+        }
+      }
+    } catch (e) {}
+  }
+
+  if (!activeUser) {
+    return <Navigate replace to={redirectTo} state={{ from: location }} />;
   }
 
   return children ? <>{children}</> : <Outlet />;

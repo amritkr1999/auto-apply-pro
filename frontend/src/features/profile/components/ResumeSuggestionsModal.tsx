@@ -178,70 +178,103 @@ export const ResumeSuggestionsModal: React.FC<ResumeSuggestionsModalProps> = ({
 
   const newSkillsCount = parsedSkills.filter((s) => !existingSkillSet.has(s.toLowerCase())).length;
 
+  const totalSelectedCount =
+    (includeSummary && parsedData.summary ? 1 : 0) +
+    selectedSkills.size +
+    selectedExpIndexes.size +
+    selectedEduIndexes.size;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-3xl max-h-[90vh] bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col text-slate-100">
-        
+    <div className="fixed inset-0 z-[100000] overflow-y-auto flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div
+        className="relative w-full max-w-3xl max-h-[90vh] bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Background glow accents */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 dark:bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
+
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950/50">
-          <div className="flex items-center space-x-3">
-            <div className="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-xl border border-indigo-500/20">
+        <div className="relative z-10 flex items-center justify-between px-6 py-5 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 backdrop-blur-md">
+          <div className="flex items-center space-x-3.5">
+            <div className="p-2.5 bg-gradient-to-tr from-indigo-500/15 via-indigo-500/25 to-purple-500/15 text-indigo-600 dark:text-indigo-400 rounded-2xl border border-indigo-200/80 dark:border-indigo-800/60 shadow-sm">
               <SparklesIcon className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-white">Review Resume Suggestions</h3>
-              <p className="text-xs text-slate-400">Select which parsed details you want to apply to your profile</p>
+              <div className="flex items-center gap-2">
+                <h3 className="text-xl font-bold font-heading text-slate-900 dark:text-slate-100 tracking-tight">
+                  Review Resume Suggestions
+                </h3>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-50 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60">
+                  AI Extracted
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-normal">
+                Select which parsed details you want to apply to your candidate profile
+              </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+            className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 rounded-full transition-all cursor-pointer focus:outline-none"
+            aria-label="Close modal"
           >
             <XIcon className="w-5 h-5" />
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
-
+        <div className="relative z-10 flex-1 overflow-y-auto p-6 space-y-5">
           {/* Parsed Summary Section */}
           {parsedData.summary && (
-            <div className="p-4 rounded-xl border border-slate-800 bg-slate-950/40 space-y-3">
+            <div className="p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700/60 bg-slate-50/70 dark:bg-slate-800/40 space-y-3.5 shadow-sm backdrop-blur-sm transition-all hover:border-slate-300 dark:hover:border-slate-700">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2 text-indigo-400 font-medium text-sm">
-                  <FileTextIcon className="w-4 h-4" />
-                  <span>Professional Summary</span>
+                <div className="flex items-center space-x-2.5">
+                  <div className="w-7 h-7 rounded-xl bg-indigo-100 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-xs shadow-sm">
+                    <FileTextIcon className="w-4 h-4" />
+                  </div>
+                  <span className="font-bold text-sm font-heading text-slate-900 dark:text-slate-100">
+                    Professional Summary
+                  </span>
                 </div>
-                <label className="flex items-center space-x-2 text-xs cursor-pointer select-none">
+                <label className="flex items-center space-x-2 text-xs font-semibold cursor-pointer select-none px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors shadow-2xs">
                   <input
                     type="checkbox"
                     checked={includeSummary}
                     onChange={(e) => setIncludeSummary(e.target.checked)}
-                    className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-slate-900"
+                    className="w-4 h-4 rounded border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-slate-900"
                   />
-                  <span className="text-slate-300">Use Parsed Summary</span>
+                  <span className="text-slate-700 dark:text-slate-300">Apply Parsed Summary</span>
                 </label>
               </div>
-              <p className="text-sm text-slate-300 bg-slate-900/60 p-3 rounded-lg border border-slate-800/60 italic leading-relaxed">
+              <div className="relative p-4 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700/60 border-l-4 border-l-indigo-500 text-sm text-slate-700 dark:text-slate-300 leading-relaxed italic shadow-inner">
                 "{parsedData.summary}"
-              </p>
+              </div>
             </div>
           )}
 
           {/* Parsed Skills Section */}
           {parsedSkills.length > 0 && (
-            <div className="p-4 rounded-xl border border-slate-800 bg-slate-950/40 space-y-3">
+            <div className="p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700/60 bg-slate-50/70 dark:bg-slate-800/40 space-y-3.5 shadow-sm backdrop-blur-sm transition-all hover:border-slate-300 dark:hover:border-slate-700">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2 text-indigo-400 font-medium text-sm">
-                  <CodeIcon className="w-4 h-4" />
-                  <span>Detected Skills ({parsedSkills.length})</span>
+                <div className="flex items-center space-x-2.5">
+                  <div className="w-7 h-7 rounded-xl bg-indigo-100 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-xs shadow-sm">
+                    <CodeIcon className="w-4 h-4" />
+                  </div>
+                  <span className="font-bold text-sm font-heading text-slate-900 dark:text-slate-100">
+                    Detected Skills
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-100/70 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/60">
+                    {parsedSkills.length}
+                  </span>
                 </div>
                 {newSkillsCount > 0 && (
                   <button
+                    type="button"
                     onClick={toggleAllNewSkills}
-                    className="text-xs text-indigo-400 hover:text-indigo-300 underline font-medium"
+                    className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors flex items-center gap-1 cursor-pointer"
                   >
-                    {selectedSkills.size === newSkillsCount ? "Deselect All New" : "Select All New"}
+                    <span>{selectedSkills.size === newSkillsCount ? "Deselect All New" : "Select All New"}</span>
                   </button>
                 )}
               </div>
@@ -255,12 +288,12 @@ export const ResumeSuggestionsModal: React.FC<ResumeSuggestionsModalProps> = ({
                     return (
                       <span
                         key={skill}
-                        className="px-3 py-1 text-xs rounded-lg bg-slate-800/80 text-slate-400 border border-slate-700/50 flex items-center space-x-1"
+                        className="px-3 py-1.5 text-xs rounded-xl bg-slate-200/50 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 border border-slate-300/50 dark:border-slate-700/50 flex items-center space-x-1.5 cursor-not-allowed font-medium select-none"
                         title="Skill already on your profile"
                       >
-                        <CheckIcon className="w-3 h-3 text-slate-500" />
+                        <CheckIcon className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                         <span>{skill}</span>
-                        <span className="text-[10px] text-slate-500 ml-1">(On profile)</span>
+                        <span className="text-[10px] text-slate-400 dark:text-slate-500 ml-0.5">(On profile)</span>
                       </span>
                     );
                   }
@@ -270,18 +303,20 @@ export const ResumeSuggestionsModal: React.FC<ResumeSuggestionsModalProps> = ({
                       key={skill}
                       type="button"
                       onClick={() => toggleSkill(skill)}
-                      className={`px-3 py-1 text-xs rounded-lg border transition-all flex items-center space-x-1.5 cursor-pointer ${
+                      className={`px-3 py-1.5 text-xs rounded-xl border font-medium transition-all duration-150 flex items-center space-x-2 cursor-pointer ${
                         isSelected
-                          ? "bg-indigo-600/20 text-indigo-300 border-indigo-500/50 shadow-sm"
-                          : "bg-slate-900 text-slate-400 border-slate-800 hover:border-slate-700"
+                          ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border-indigo-300 dark:border-indigo-600/70 shadow-sm ring-2 ring-indigo-500/20 active:scale-95"
+                          : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700/80 hover:border-indigo-300 dark:hover:border-indigo-700 hover:bg-indigo-50/40 dark:hover:bg-indigo-950/30 active:scale-95"
                       }`}
                     >
                       <div
-                        className={`w-3.5 h-3.5 rounded flex items-center justify-center border ${
-                          isSelected ? "bg-indigo-600 border-indigo-500 text-white" : "border-slate-700"
+                        className={`w-4 h-4 rounded-md flex items-center justify-center border transition-all ${
+                          isSelected
+                            ? "bg-indigo-600 border-indigo-600 text-white shadow-xs"
+                            : "border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"
                         }`}
                       >
-                        {isSelected && <CheckIcon className="w-2.5 h-2.5 stroke-[3]" />}
+                        {isSelected && <CheckIcon className="w-3 h-3 stroke-[3]" />}
                       </div>
                       <span>{skill}</span>
                     </button>
@@ -293,10 +328,17 @@ export const ResumeSuggestionsModal: React.FC<ResumeSuggestionsModalProps> = ({
 
           {/* Parsed Work Experience Section */}
           {parsedData.experience && parsedData.experience.length > 0 && (
-            <div className="p-4 rounded-xl border border-slate-800 bg-slate-950/40 space-y-3">
-              <div className="flex items-center space-x-2 text-indigo-400 font-medium text-sm">
-                <BriefcaseIcon className="w-4 h-4" />
-                <span>Work Experience ({parsedData.experience.length})</span>
+            <div className="p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700/60 bg-slate-50/70 dark:bg-slate-800/40 space-y-3.5 shadow-sm backdrop-blur-sm transition-all hover:border-slate-300 dark:hover:border-slate-700">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-7 h-7 rounded-xl bg-indigo-100 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-xs shadow-sm">
+                  <BriefcaseIcon className="w-4 h-4" />
+                </div>
+                <span className="font-bold text-sm font-heading text-slate-900 dark:text-slate-100">
+                  Work Experience
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-100/70 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/60">
+                  {parsedData.experience.length}
+                </span>
               </div>
               <div className="space-y-3 pt-1">
                 {parsedData.experience.map((exp, idx) => {
@@ -305,29 +347,45 @@ export const ResumeSuggestionsModal: React.FC<ResumeSuggestionsModalProps> = ({
                     <div
                       key={idx}
                       onClick={() => toggleExp(idx)}
-                      className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
+                      className={`relative p-4 rounded-2xl border transition-all duration-200 cursor-pointer select-none overflow-hidden ${
                         isChecked
-                          ? "bg-slate-900/90 border-indigo-500/40 shadow-sm"
-                          : "bg-slate-950/30 border-slate-800/80 opacity-60 hover:opacity-100"
+                          ? "bg-white dark:bg-slate-900 border-indigo-400 dark:border-indigo-500/80 shadow-md shadow-indigo-500/5 ring-1 ring-indigo-500/30"
+                          : "bg-white/60 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800/80 opacity-75 hover:opacity-100 hover:border-slate-300 dark:hover:border-slate-700"
                       }`}
                     >
-                      <div className="flex items-start space-x-3">
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() => {}}
-                          className="mt-1 w-4 h-4 rounded border-slate-700 bg-slate-800 text-indigo-600 focus:ring-indigo-500"
-                        />
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <h4 className="text-sm font-semibold text-white">
-                              {exp.title || "Position"}{" "}
-                              <span className="text-indigo-400 font-normal">at {exp.company || "Company"}</span>
-                            </h4>
-                            {exp.duration && <span className="text-xs text-slate-400">{exp.duration}</span>}
+                      {isChecked && (
+                        <div className="absolute top-0 bottom-0 left-0 w-1 bg-indigo-600 dark:bg-indigo-500" />
+                      )}
+                      <div className="flex items-start space-x-3.5 pl-1">
+                        <div
+                          className={`mt-0.5 w-4.5 h-4.5 rounded-md flex items-center justify-center border transition-all ${
+                            isChecked
+                              ? "bg-indigo-600 border-indigo-600 text-white shadow-xs"
+                              : "border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800"
+                          }`}
+                        >
+                          {isChecked && <CheckIcon className="w-3 h-3 stroke-[3]" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2 flex-wrap sm:flex-nowrap">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h4 className="text-sm font-bold font-heading text-slate-900 dark:text-slate-100">
+                                {exp.title || "Position"}
+                              </h4>
+                              {exp.company && (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-semibold text-xs border border-indigo-100 dark:border-indigo-900/40">
+                                  {exp.company}
+                                </span>
+                              )}
+                            </div>
+                            {exp.duration && (
+                              <span className="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-lg border border-slate-200/60 dark:border-slate-700/50 font-medium shrink-0">
+                                {exp.duration}
+                              </span>
+                            )}
                           </div>
                           {exp.description && (
-                            <p className="mt-1 text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                            <p className="mt-2 text-xs text-slate-600 dark:text-slate-400 line-clamp-3 leading-relaxed font-normal">
                               {exp.description}
                             </p>
                           )}
@@ -342,10 +400,17 @@ export const ResumeSuggestionsModal: React.FC<ResumeSuggestionsModalProps> = ({
 
           {/* Parsed Education Section */}
           {parsedData.education && parsedData.education.length > 0 && (
-            <div className="p-4 rounded-xl border border-slate-800 bg-slate-950/40 space-y-3">
-              <div className="flex items-center space-x-2 text-indigo-400 font-medium text-sm">
-                <GraduationCapIcon className="w-4 h-4" />
-                <span>Education ({parsedData.education.length})</span>
+            <div className="p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700/60 bg-slate-50/70 dark:bg-slate-800/40 space-y-3.5 shadow-sm backdrop-blur-sm transition-all hover:border-slate-300 dark:hover:border-slate-700">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-7 h-7 rounded-xl bg-indigo-100 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-xs shadow-sm">
+                  <GraduationCapIcon className="w-4 h-4" />
+                </div>
+                <span className="font-bold text-sm font-heading text-slate-900 dark:text-slate-100">
+                  Education
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-100/70 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/60">
+                  {parsedData.education.length}
+                </span>
               </div>
               <div className="space-y-3 pt-1">
                 {parsedData.education.map((edu, idx) => {
@@ -354,26 +419,36 @@ export const ResumeSuggestionsModal: React.FC<ResumeSuggestionsModalProps> = ({
                     <div
                       key={idx}
                       onClick={() => toggleEdu(idx)}
-                      className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
+                      className={`relative p-4 rounded-2xl border transition-all duration-200 cursor-pointer select-none overflow-hidden ${
                         isChecked
-                          ? "bg-slate-900/90 border-indigo-500/40 shadow-sm"
-                          : "bg-slate-950/30 border-slate-800/80 opacity-60 hover:opacity-100"
+                          ? "bg-white dark:bg-slate-900 border-indigo-400 dark:border-indigo-500/80 shadow-md shadow-indigo-500/5 ring-1 ring-indigo-500/30"
+                          : "bg-white/60 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800/80 opacity-75 hover:opacity-100 hover:border-slate-300 dark:hover:border-slate-700"
                       }`}
                     >
-                      <div className="flex items-start space-x-3">
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() => {}}
-                          className="mt-1 w-4 h-4 rounded border-slate-700 bg-slate-800 text-indigo-600 focus:ring-indigo-500"
-                        />
+                      {isChecked && (
+                        <div className="absolute top-0 bottom-0 left-0 w-1 bg-indigo-600 dark:bg-indigo-500" />
+                      )}
+                      <div className="flex items-start space-x-3.5 pl-1">
+                        <div
+                          className={`mt-0.5 w-4.5 h-4.5 rounded-md flex items-center justify-center border transition-all ${
+                            isChecked
+                              ? "bg-indigo-600 border-indigo-600 text-white shadow-xs"
+                              : "border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800"
+                          }`}
+                        >
+                          {isChecked && <CheckIcon className="w-3 h-3 stroke-[3]" />}
+                        </div>
                         <div className="flex-1">
-                          <h4 className="text-sm font-semibold text-white">
-                            {edu.degree || "Degree"}
-                          </h4>
-                          {edu.graduation_year && (
-                            <p className="text-xs text-slate-400">Graduation Year: {edu.graduation_year}</p>
-                          )}
+                          <div className="flex items-center justify-between gap-2">
+                            <h4 className="text-sm font-bold font-heading text-slate-900 dark:text-slate-100">
+                              {edu.degree || "Degree"}
+                            </h4>
+                            {edu.graduation_year && (
+                              <span className="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-lg border border-slate-200/60 dark:border-slate-700/50 font-medium">
+                                Class of {edu.graduation_year}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -384,38 +459,53 @@ export const ResumeSuggestionsModal: React.FC<ResumeSuggestionsModalProps> = ({
           )}
 
           {/* Empty state fallback */}
-          {!parsedData.summary && parsedSkills.length === 0 && (!parsedData.experience || parsedData.experience.length === 0) && (
-            <div className="p-8 text-center bg-slate-950/40 rounded-xl border border-slate-800">
-              <AlertCircleIcon className="w-8 h-8 text-amber-400 mx-auto mb-2" />
-              <p className="text-sm text-slate-300 font-medium">No structured details could be extracted from this file format.</p>
-              <p className="text-xs text-slate-500 mt-1">Try uploading a clear PDF or Word resume.</p>
-            </div>
-          )}
+          {!parsedData.summary &&
+            parsedSkills.length === 0 &&
+            (!parsedData.experience || parsedData.experience.length === 0) && (
+              <div className="p-8 text-center bg-slate-50/70 dark:bg-slate-950/40 rounded-2xl border border-slate-200 dark:border-slate-800">
+                <AlertCircleIcon className="w-8 h-8 text-amber-500 mx-auto mb-2" />
+                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                  No structured details could be extracted from this file format.
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  Try uploading a clear PDF or Word resume document.
+                </p>
+              </div>
+            )}
         </div>
 
         {/* Modal Footer */}
-        <div className="flex items-center justify-end space-x-3 px-6 py-4 border-t border-slate-800 bg-slate-950/80">
-          <button
-            onClick={onClose}
-            disabled={isApplying}
-            className="px-4 py-2 text-xs font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl transition-colors disabled:opacity-50"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleApply}
-            disabled={isApplying}
-            className="px-5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 rounded-xl shadow-lg shadow-indigo-600/20 transition-all flex items-center space-x-2 disabled:opacity-50"
-          >
-            {isApplying ? (
-              <span>Applying...</span>
-            ) : (
-              <>
-                <CheckIcon className="w-4 h-4" />
-                <span>Apply Selected Suggestions</span>
-              </>
-            )}
-          </button>
+        <div className="relative z-10 flex items-center justify-between px-6 py-4 border-t border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-md">
+          <div className="text-xs text-slate-500 dark:text-slate-400 font-medium flex items-center gap-2">
+            <span>Selected suggestions:</span>
+            <span className="px-2.5 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 font-bold border border-indigo-200 dark:border-indigo-800/60">
+              {totalSelectedCount} items
+            </span>
+          </div>
+
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={onClose}
+              disabled={isApplying}
+              className="px-4.5 py-2.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-200/70 dark:bg-slate-800 hover:bg-slate-300/70 dark:hover:bg-slate-700 rounded-xl transition-all cursor-pointer disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleApply}
+              disabled={isApplying || totalSelectedCount === 0}
+              className="px-5 py-2.5 text-xs font-bold text-white bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 active:scale-[0.98] rounded-xl shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transition-all flex items-center space-x-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isApplying ? (
+                <span>Applying...</span>
+              ) : (
+                <>
+                  <CheckIcon className="w-4 h-4" />
+                  <span>Apply Selected ({totalSelectedCount})</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>
