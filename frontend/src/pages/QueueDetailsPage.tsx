@@ -4,6 +4,7 @@ import Button from "../components/ui/Button";
 import Badge from "../components/ui/Badge";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../components/ui/Table";
 import { outreachService } from "../features/outreach/services/outreachService";
+import { parseUtcDate, formatDateInTimezone } from "../utils/dateUtils";
 
 export const QueueDetailsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -14,13 +15,15 @@ export const QueueDetailsPage: React.FC = () => {
   const [queueItems, setQueueItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [queueTimeframe, setQueueTimeframe] = useState<"today" | "week" | "month" | "all">("today");
+  const [userTimezone, setUserTimezone] = useState<string>("");
 
   const filterQueueByDate = (items: any[]) => {
     const now = new Date();
     return items.filter(item => {
       const dateStr = item.sentAt || item.scheduledAt || item.createdAt;
       if (!dateStr) return false;
-      const itemDate = new Date(dateStr);
+      const itemDate = parseUtcDate(dateStr);
+      if (!itemDate) return false;
 
       if (queueTimeframe === "today") {
         return itemDate.getDate() === now.getDate() &&
@@ -46,8 +49,14 @@ export const QueueDetailsPage: React.FC = () => {
   const loadQueue = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await outreachService.getOutreachQueue(userId);
+      const [data, settings] = await Promise.all([
+        outreachService.getOutreachQueue(userId),
+        outreachService.getOutreachSettings(userId).catch(() => null)
+      ]);
       setQueueItems(data.filter((item: any) => item.status !== "DRAFT"));
+      if (settings?.timezone) {
+        setUserTimezone(settings.timezone);
+      }
     } catch (err) {
       console.error("Failed to load queue items", err);
     } finally {
@@ -141,27 +150,30 @@ export const QueueDetailsPage: React.FC = () => {
 
                 const formatQueueDetails = (eqItem: any) => {
                   if (eqItem.status === "SENT" && eqItem.sentAt) {
-                    return `Dispatched on ${new Date(eqItem.sentAt).toLocaleString()}`;
+                    return `Dispatched on ${formatDateInTimezone(eqItem.sentAt, userTimezone)}`;
                   }
                   
                   if (eqItem.status === "PENDING" && eqItem.scheduledAt) {
-                    const scheduledTime = new Date(eqItem.scheduledAt).getTime();
-                    const now = Date.now();
-                    const diffMs = scheduledTime - now;
-                    const diffMins = Math.round(diffMs / 60000);
-                    
-                    const formattedDate = new Date(eqItem.scheduledAt).toLocaleString();
-                    if (diffMs <= 0) {
-                      return `Processing dispatch... (Scheduled: ${formattedDate})`;
-                    } else if (diffMins < 1) {
-                      return `Sending in less than a minute... (Scheduled: ${formattedDate})`;
-                    } else if (diffMins === 1) {
-                      return `Sending in ~1 minute (Scheduled: ${formattedDate})`;
-                    } else if (diffMins < 60) {
-                      return `Sending in ~${diffMins} minutes (Scheduled: ${formattedDate})`;
-                    } else {
-                      const diffHours = Math.round(diffMins / 60);
-                      return `Sending in ~${diffHours} hours (Scheduled: ${formattedDate})`;
+                    const scheduledDate = parseUtcDate(eqItem.scheduledAt);
+                    if (scheduledDate) {
+                      const scheduledTime = scheduledDate.getTime();
+                      const now = Date.now();
+                      const diffMs = scheduledTime - now;
+                      const diffMins = Math.round(diffMs / 60000);
+                      
+                      const formattedDate = formatDateInTimezone(scheduledDate, userTimezone);
+                      if (diffMs <= 0) {
+                        return `Processing dispatch... (Scheduled: ${formattedDate})`;
+                      } else if (diffMins < 1) {
+                        return `Sending in less than a minute... (Scheduled: ${formattedDate})`;
+                      } else if (diffMins === 1) {
+                        return `Sending in ~1 minute (Scheduled: ${formattedDate})`;
+                      } else if (diffMins < 60) {
+                        return `Sending in ~${diffMins} minutes (Scheduled: ${formattedDate})`;
+                      } else {
+                        const diffHours = Math.round(diffMins / 60);
+                        return `Sending in ~${diffHours} hours (Scheduled: ${formattedDate})`;
+                      }
                     }
                   }
 

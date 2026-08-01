@@ -947,14 +947,22 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
             ) : (
               <div className="flex flex-col gap-4">
                 {experience.map((exp, idx) => (
-                  <div key={idx} className="p-5 border border-slate-150 rounded-2xl bg-slate-50/40 flex flex-col gap-4 relative transition-all hover:bg-slate-50/80">
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveExperience(idx)}
-                      className="absolute top-4 right-4 text-xs font-bold text-rose-500 hover:text-rose-600 cursor-pointer bg-rose-50 hover:bg-rose-100/60 px-2.5 py-1 rounded-lg transition-colors"
-                    >
-                      Remove
-                    </button>
+                  <div key={idx} className="p-5 border border-slate-150 rounded-2xl bg-slate-50/40 flex flex-col gap-4 transition-all hover:bg-slate-50/80">
+                    <div className="flex items-center justify-between gap-3 border-b border-slate-200/60 pb-3">
+                      <span className="text-xs font-bold text-slate-500 uppercase tracking-wider truncate">
+                        Experience #{idx + 1} {exp.title ? `— ${exp.title}` : ""}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveExperience(idx)}
+                        className="text-xs font-bold text-rose-500 hover:text-rose-600 cursor-pointer bg-rose-50 hover:bg-rose-100/80 px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1 shrink-0"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Remove
+                      </button>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <Input
                         label="Job Title"
@@ -1015,14 +1023,22 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
             ) : (
               <div className="flex flex-col gap-4">
                 {education.map((edu, idx) => (
-                  <div key={idx} className="p-5 border border-slate-150 rounded-2xl bg-slate-50/40 flex flex-col gap-4 relative transition-all hover:bg-slate-50/80">
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveEducation(idx)}
-                      className="absolute top-4 right-4 text-xs font-bold text-rose-500 hover:text-rose-600 cursor-pointer bg-rose-50 hover:bg-rose-100/60 px-2.5 py-1 rounded-lg transition-colors"
-                    >
-                      Remove
-                    </button>
+                  <div key={idx} className="p-5 border border-slate-150 rounded-2xl bg-slate-50/40 flex flex-col gap-4 transition-all hover:bg-slate-50/80">
+                    <div className="flex items-center justify-between gap-3 border-b border-slate-200/60 pb-3">
+                      <span className="text-xs font-bold text-slate-500 uppercase tracking-wider truncate">
+                        Education #{idx + 1} {edu.degree ? `— ${edu.degree}` : ""}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveEducation(idx)}
+                        className="text-xs font-bold text-rose-500 hover:text-rose-600 cursor-pointer bg-rose-50 hover:bg-rose-100/80 px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1 shrink-0"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Remove
+                      </button>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                       <Input
                         label="Degree"
@@ -1087,13 +1103,14 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
                 {certifications.map((cert, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center gap-1.5 px-3.5 py-1.5 bg-white border border-slate-200/80 rounded-full text-xs text-slate-700 font-bold shadow-sm"
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 bg-white border border-slate-200/80 rounded-full text-xs text-slate-700 font-bold shadow-sm max-w-full"
                   >
-                    <span>{cert}</span>
+                    <span className="truncate max-w-[250px]">{cert}</span>
                     <button
                       type="button"
                       onClick={() => handleRemoveCert(idx)}
-                      className="text-xs text-slate-400 hover:text-rose-500 font-extrabold cursor-pointer ml-1"
+                      className="text-xs text-slate-400 hover:text-rose-500 font-extrabold cursor-pointer ml-1 shrink-0 p-0.5 rounded-full hover:bg-rose-50 transition-colors"
+                      aria-label={`Remove certification ${cert}`}
                     >
                       ×
                     </button>

@@ -13,6 +13,7 @@ import { ActivityChart } from "../ActivityChart";
 import { dashboardService } from "../../services/dashboardService";
 import { StatsGrid } from "./StatsGrid";
 import { ReviewDrawer } from "./ReviewDrawer";
+import { parseUtcDate, formatDateInTimezone } from "../../../../utils/dateUtils";
 
 export const ProfessionalDashboardView: React.FC = () => {
   const navigate = useNavigate();
@@ -35,6 +36,7 @@ export const ProfessionalDashboardView: React.FC = () => {
   // Campaign State
   const [hrOutreachCampaignEnabled, setHrOutreachCampaignEnabled] = useState(false);
   const [togglingCampaign, setTogglingCampaign] = useState(false);
+  const [userTimezone, setUserTimezone] = useState<string>("");
 
   // Daily learning content state
   const [dailyContent, setDailyContent] = useState<DailyContent | null>(null);
@@ -73,8 +75,9 @@ export const ProfessionalDashboardView: React.FC = () => {
     return items.filter(item => {
       const dateStr = item.sentAt || item.createdAt;
       if (!dateStr) return false;
-      const itemTime = new Date(dateStr).getTime();
-      return (now - itemTime) <= msLimit;
+      const itemDate = parseUtcDate(dateStr);
+      if (!itemDate) return false;
+      return (now - itemDate.getTime()) <= msLimit;
     });
   };
 
@@ -83,7 +86,8 @@ export const ProfessionalDashboardView: React.FC = () => {
     return items.filter(item => {
       const dateStr = item.sentAt || item.scheduledAt || item.createdAt;
       if (!dateStr) return false;
-      const itemDate = new Date(dateStr);
+      const itemDate = parseUtcDate(dateStr);
+      if (!itemDate) return false;
 
       if (queueTimeframe === "today") {
         return itemDate.getDate() === now.getDate() &&
@@ -181,6 +185,9 @@ export const ProfessionalDashboardView: React.FC = () => {
         setHrOutreachCampaignEnabled(!!data.hrOutreachCampaignEnabled);
         if (data.hrOutreachTargetRole) {
           setOutreachTargetRole(data.hrOutreachTargetRole);
+        }
+        if (data.timezone) {
+          setUserTimezone(data.timezone);
         }
       })
       .catch((err) => console.error("Failed to fetch campaign settings", err));
@@ -865,27 +872,30 @@ export const ProfessionalDashboardView: React.FC = () => {
 
                       const formatQueueDetails = (eqItem: any) => {
                         if (eqItem.status === "SENT" && eqItem.sentAt) {
-                          return `Dispatched on ${new Date(eqItem.sentAt).toLocaleString()}`;
+                          return `Dispatched on ${formatDateInTimezone(eqItem.sentAt, userTimezone)}`;
                         }
                         
                         if (eqItem.status === "PENDING" && eqItem.scheduledAt) {
-                          const scheduledTime = new Date(eqItem.scheduledAt).getTime();
-                          const now = Date.now();
-                          const diffMs = scheduledTime - now;
-                          const diffMins = Math.round(diffMs / 60000);
-                          
-                          const formattedDate = new Date(eqItem.scheduledAt).toLocaleString();
-                          if (diffMs <= 0) {
-                            return `Processing dispatch... (Scheduled: ${formattedDate})`;
-                          } else if (diffMins < 1) {
-                            return `Sending in less than a minute... (Scheduled: ${formattedDate})`;
-                          } else if (diffMins === 1) {
-                            return `Sending in ~1 minute (Scheduled: ${formattedDate})`;
-                          } else if (diffMins < 60) {
-                            return `Sending in ~${diffMins} minutes (Scheduled: ${formattedDate})`;
-                          } else {
-                            const diffHours = Math.round(diffMins / 60);
-                            return `Sending in ~${diffHours} hours (Scheduled: ${formattedDate})`;
+                          const scheduledDate = parseUtcDate(eqItem.scheduledAt);
+                          if (scheduledDate) {
+                            const scheduledTime = scheduledDate.getTime();
+                            const now = Date.now();
+                            const diffMs = scheduledTime - now;
+                            const diffMins = Math.round(diffMs / 60000);
+                            
+                            const formattedDate = formatDateInTimezone(scheduledDate, userTimezone);
+                            if (diffMs <= 0) {
+                              return `Processing dispatch... (Scheduled: ${formattedDate})`;
+                            } else if (diffMins < 1) {
+                              return `Sending in less than a minute... (Scheduled: ${formattedDate})`;
+                            } else if (diffMins === 1) {
+                              return `Sending in ~1 minute (Scheduled: ${formattedDate})`;
+                            } else if (diffMins < 60) {
+                              return `Sending in ~${diffMins} minutes (Scheduled: ${formattedDate})`;
+                            } else {
+                              const diffHours = Math.round(diffMins / 60);
+                              return `Sending in ~${diffHours} hours (Scheduled: ${formattedDate})`;
+                            }
                           }
                         }
 
