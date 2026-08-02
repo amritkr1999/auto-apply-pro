@@ -81,6 +81,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
         run: |
+          # Connect via native OpenSSH client to rebooted OCI server
           ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$OCI_USERNAME@$OCI_HOST" "GITHUB_TOKEN='$GITHUB_TOKEN' GITHUB_ACTOR='$GITHUB_ACTOR' bash -s" << 'EOF'
             set -e
             mkdir -p ~/auto-apply-pro
