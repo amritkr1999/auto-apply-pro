@@ -483,7 +483,7 @@ export const ProfessionalDashboardView: React.FC = () => {
       {/* TAB CONTENT */}
 
       {activeTab === "overview" && (
-        <div className="space-y-6">
+        <div id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" className="space-y-6">
           {showStreak ? (
             <div className="relative group">
               <button
@@ -649,7 +649,7 @@ export const ProfessionalDashboardView: React.FC = () => {
       )}
 
       {activeTab === "outreach" && (
-        <div className="space-y-8 animate-in fade-in duration-200">
+        <div id="panel-outreach" role="tabpanel" aria-labelledby="tab-outreach" className="space-y-8 animate-in fade-in duration-200">
           
           {suggestions.length === 0 && drafts.length === 0 && (
             <div className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 border border-slate-200 dark:border-slate-800 rounded-card p-8 text-center shadow-sm max-w-2xl mx-auto my-6">
@@ -978,7 +978,7 @@ export const ProfessionalDashboardView: React.FC = () => {
       )}
 
       {activeTab === "growth" && (
-        <div className="space-y-6 animate-in fade-in duration-200">
+        <div id="panel-growth" role="tabpanel" aria-labelledby="tab-growth" className="space-y-6 animate-in fade-in duration-200">
           
           {/* Daily Learning Preview Widget */}
           {dailyContent && (
