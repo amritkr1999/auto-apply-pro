@@ -449,7 +449,7 @@ export const JobTrackerPage: React.FC = () => {
 
             <form onSubmit={handleSave} className="flex flex-col gap-4">
               <Input
-                label="Job Title *"
+                label="Job Title"
                 name="jobTitle"
                 value={formData.jobTitle}
                 onChange={handleChange}
@@ -458,7 +458,7 @@ export const JobTrackerPage: React.FC = () => {
               />
 
               <Input
-                label="Company Name *"
+                label="Company Name"
                 name="companyName"
                 value={formData.companyName}
                 onChange={handleChange}

@@ -18,7 +18,6 @@ export const CampaignDispatchModal = ({
     return null;
   };
 
-  // Mode selection state: "AUTOMATED", "DRAFTS", "WEB_COMPOSE"
   const [selectedMode, setSelectedMode] = useState(() => {
     const saved = localStorage.getItem("campaign_dispatch_mode");
     return getNormalizedMode(saved) || "AUTOMATED";
@@ -26,12 +25,16 @@ export const CampaignDispatchModal = ({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [gmailConnected, setGmailConnected] = useState(true);
+  const [showConnectPrompt, setShowConnectPrompt] = useState(false);
+  const [connectUrlLoading, setConnectUrlLoading] = useState(false);
   const isInitializedRef = useRef(false);
 
-  // Sync mode ONCE when modal opens, giving priority to explicit user choices
+  // Check Gmail connection status ONCE when modal opens
   useEffect(() => {
     if (!isOpen) {
       isInitializedRef.current = false;
+      setShowConnectPrompt(false);
       return;
     }
 
@@ -45,11 +48,19 @@ export const CampaignDispatchModal = ({
     }
 
     if (userId) {
+      // Check Gmail connection status
+      outreachService.getGmailStatus(userId)
+        .then(res => {
+          if (res && typeof res.connected === "boolean") {
+            setGmailConnected(res.connected);
+          }
+        })
+        .catch(() => setGmailConnected(false));
+
       outreachService.getOutreachSettings(userId)
         .then(settings => {
           if (settings && settings.hrOutreachDispatchMode) {
             const dbModeNormalized = getNormalizedMode(settings.hrOutreachDispatchMode);
-            // If localStorage was empty, use DB setting
             if (!savedLocal && dbModeNormalized) {
               setSelectedMode(dbModeNormalized);
               localStorage.setItem("campaign_dispatch_mode", dbModeNormalized);
@@ -62,7 +73,26 @@ export const CampaignDispatchModal = ({
 
   if (!isOpen) return null;
 
+  const handleConnectGmail = async () => {
+    if (!userId) return;
+    setConnectUrlLoading(true);
+    try {
+      const authUrl = await outreachService.getConnectUrl(userId);
+      window.location.href = authUrl;
+    } catch (err) {
+      console.warn("Failed to get Google OAuth URL:", err);
+      alert("Could not initialize Google OAuth. Please check your backend connection.");
+    } finally {
+      setConnectUrlLoading(false);
+    }
+  };
+
   const handleModeSelect = (modeKey) => {
+    if ((modeKey === "AUTOMATED" || modeKey === "DRAFTS") && !gmailConnected) {
+      setShowConnectPrompt(true);
+    } else {
+      setShowConnectPrompt(false);
+    }
     setSelectedMode(modeKey);
     localStorage.setItem("campaign_dispatch_mode", modeKey);
 
@@ -78,6 +108,13 @@ export const CampaignDispatchModal = ({
 
   const handleStartCampaign = async () => {
     if (isSubmitting) return;
+
+    // Intercept if mode requires Gmail connection but Gmail is not connected
+    if ((selectedMode === "AUTOMATED" || selectedMode === "DRAFTS") && !gmailConnected) {
+      setShowConnectPrompt(true);
+      return;
+    }
+
     setIsSubmitting(true);
 
     let dbMode = "DIRECT_SEND";
@@ -155,6 +192,37 @@ export const CampaignDispatchModal = ({
             </div>
           )}
 
+          {/* Graceful Gmail Connection Prompt Banner */}
+          {showConnectPrompt && !gmailConnected && (
+            <div className="p-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/50 rounded-xl text-amber-900 dark:text-amber-200 space-y-3 animate-in fade-in duration-150">
+              <div className="flex items-center gap-2 font-bold text-sm">
+                <span className="text-base">⚠️</span>
+                <span>Gmail Account Connection Required</span>
+              </div>
+              <p className="text-xs leading-relaxed text-amber-800 dark:text-amber-300">
+                Option 1 (Fully Automated) and Option 2 (Save to Gmail Drafts) require a connected Gmail account to dispatch emails on your behalf or save drafts directly to your inbox.
+              </p>
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={handleConnectGmail}
+                  disabled={connectUrlLoading}
+                  className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-3.5 py-1.5 rounded-lg shadow transition-colors flex items-center gap-1.5 cursor-pointer"
+                >
+                  <span>🔗</span>
+                  <span>{connectUrlLoading ? "Connecting..." : "Connect Gmail Account"}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleModeSelect("WEB_COMPOSE")}
+                  className="bg-white dark:bg-slate-800 border border-amber-300 dark:border-amber-700 hover:bg-amber-100 text-amber-900 dark:text-amber-200 text-xs font-semibold px-3.5 py-1.5 rounded-lg transition-colors cursor-pointer"
+                >
+                  Switch to Option 3 (No Connection Needed)
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* 3-Way Mode Selector Options */}
           <div>
             <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">
@@ -182,11 +250,11 @@ export const CampaignDispatchModal = ({
                   className="mt-1 text-indigo-600 focus:ring-indigo-500 h-4 w-4 cursor-pointer shrink-0"
                 />
                 <div className="flex-1">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="text-xl">🤖</span>
                     <h5 className="text-sm font-bold text-slate-800 dark:text-white">Option 1: Fully Automated (Direct Send)</h5>
                     <span className="text-[10px] font-extrabold text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-900/50 px-2 py-0.5 rounded-full ml-auto">
-                      Background Engine
+                      Requires Gmail Connection
                     </span>
                   </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
@@ -215,11 +283,11 @@ export const CampaignDispatchModal = ({
                   className="mt-1 text-indigo-600 focus:ring-indigo-500 h-4 w-4 cursor-pointer shrink-0"
                 />
                 <div className="flex-1">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="text-xl">📁</span>
                     <h5 className="text-sm font-bold text-slate-800 dark:text-white">Option 2: Save to Gmail Drafts</h5>
                     <span className="text-[10px] font-extrabold text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/50 px-2 py-0.5 rounded-full ml-auto">
-                      Automatic Drafts
+                      Requires Gmail Connection
                     </span>
                   </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
@@ -248,11 +316,11 @@ export const CampaignDispatchModal = ({
                   className="mt-1 text-indigo-600 focus:ring-indigo-500 h-4 w-4 cursor-pointer shrink-0"
                 />
                 <div className="flex-1">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="text-xl">🌐</span>
                     <h5 className="text-sm font-bold text-slate-800 dark:text-white">Option 3: Gmail Web Compose</h5>
                     <span className="text-[10px] font-extrabold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/50 px-2 py-0.5 rounded-full ml-auto">
-                      Manual Queue Launch
+                      No Gmail Connection Required
                     </span>
                   </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">

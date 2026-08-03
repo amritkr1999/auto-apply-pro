@@ -452,13 +452,13 @@ export const TemplateManager: React.FC = () => {
     switch (format.toUpperCase()) {
       case "BADGES":
         return skillsToUse.map(skill => 
-          `<span style="display: inline-block; background-color: #f3f4f6; color: #1f2937; border: 1px solid #e5e7eb; padding: 3px 10px; margin: 2px 4px; border-radius: 9999px; font-size: 12px; font-weight: 600; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${skill}</span>`
+          `<span style="display: inline-block; background-color: rgba(99, 102, 241, 0.12); color: #6366f1; border: 1px solid rgba(99, 102, 241, 0.3); padding: 3px 10px; margin: 2px 4px; border-radius: 9999px; font-size: 12px; font-weight: 600; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${skill}</span>`
         ).join("");
         
       case "CALLOUT":
-        return `<div style="margin: 14px 0; padding: 12px 16px; border-left: 4px solid #4f46e5; background-color: #f9fafb; border-radius: 0 8px 8px 0; font-family: sans-serif;">` +
-               `<strong style="color: #4f46e5; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Core Expertise:</strong>` +
-               `<span style="color: #374151; font-size: 13px; margin-left: 6px;">${skillsToUse.join(" • ")}</span>` +
+        return `<div style="margin: 14px 0; padding: 12px 16px; border-left: 4px solid #6366f1; background-color: rgba(99, 102, 241, 0.08); border-radius: 0 8px 8px 0; font-family: sans-serif;">` +
+               `<strong style="color: #6366f1; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Core Expertise:</strong>` +
+               `<span style="font-size: 13px; margin-left: 6px;">${skillsToUse.join(" • ")}</span>` +
                `</div>`;
                
       case "BULLET":
@@ -792,16 +792,16 @@ export const TemplateManager: React.FC = () => {
       {/* UNIFIED MODAL COMPONENT */}
       {activeTemplate && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className={`bg-white border border-slate-200 rounded-card shadow-2xl ${isEditMode ? "max-w-4xl" : "max-w-2xl"} w-full p-6 space-y-5 max-h-[90vh] overflow-y-auto relative animate-in fade-in zoom-in-95 duration-200`}>
+          <div className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 rounded-card shadow-2xl ${isEditMode ? "max-w-4xl" : "max-w-2xl"} w-full p-6 space-y-5 max-h-[90vh] overflow-y-auto relative animate-in fade-in zoom-in-95 duration-200`}>
             {isEditMode ? (
               // EDIT/CREATE MODE FORM IN MODAL
               <div>
-                <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-                  <h2 className="text-xl font-bold text-slate-800">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
+                  <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
                     {activeTemplate.id ? "Edit Template" : "New Email Template"}
                   </h2>
                   {hasCheckedDraft && (
-                    <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-150 px-2.5 py-0.5 rounded-full flex items-center gap-1.5 font-semibold animate-pulse shadow-sm">
+                    <span className="text-[10px] bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-150 dark:border-emerald-800 px-2.5 py-0.5 rounded-full flex items-center gap-1.5 font-semibold animate-pulse shadow-sm">
                       <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
                       Draft saved locally
                     </span>
@@ -811,19 +811,19 @@ export const TemplateManager: React.FC = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <form onSubmit={handleSave} className="flex flex-col gap-4">
                     <div className="flex flex-col">
-                      <label className="text-xs font-semibold text-slate-500 mb-1.5">Template Name</label>
+                      <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Template Name</label>
                       <input
                         type="text"
                         placeholder="e.g., General Referral Request"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="w-full px-3 py-2 border border-slate-200 rounded-input text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                        className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
                         required
                       />
                     </div>
 
                     <div className="flex flex-col">
-                      <label className="text-xs font-semibold text-slate-500 mb-1.5">Email Subject</label>
+                      <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Email Subject</label>
                       <input
                         id="template-subject-input"
                         type="text"
@@ -831,27 +831,27 @@ export const TemplateManager: React.FC = () => {
                         value={subject}
                         onChange={(e) => setSubject(e.target.value)}
                         onFocus={() => setActiveTextarea("subject")}
-                        className="w-full px-3 py-2 border border-slate-200 rounded-input text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                        className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
                         required
                       />
                     </div>
 
-                    <div className="border border-slate-150 rounded-lg p-3 bg-slate-50/50">
-                      <div className="flex flex-wrap items-center gap-1.5 mb-3 border-b border-slate-150 pb-2">
-                        <span className="text-[10px] text-slate-500 font-semibold">Tags (Focus field, then click to insert):</span>
-                        <button type="button" className="text-[9px] font-bold text-indigo-650 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 px-1.5 py-0.5 rounded transition-colors" onClick={() => insertPlaceholder("{{recruiterName}}")}>{"{{recruiterName}}"}</button>
-                        <button type="button" className="text-[9px] font-bold text-indigo-650 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 px-1.5 py-0.5 rounded transition-colors" onClick={() => insertPlaceholder("{{companyName}}")}>{"{{companyName}}"}</button>
-                        <button type="button" className="text-[9px] font-bold text-indigo-650 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 px-1.5 py-0.5 rounded transition-colors" onClick={() => insertPlaceholder("{{jobRole}}")}>{"{{jobRole}}"}</button>
-                        <button type="button" className="text-[9px] font-bold text-indigo-650 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 px-1.5 py-0.5 rounded transition-colors" onClick={() => insertPlaceholder("{{skills}}")}>{"{{skills}}"}</button>
-                        <button type="button" className="text-[9px] font-bold text-indigo-650 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 px-1.5 py-0.5 rounded transition-colors" onClick={() => insertPlaceholder("{{experienceYears}}")}>{"{{experienceYears}}"}</button>
-                        <button type="button" className="text-[9px] font-bold text-indigo-650 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 px-1.5 py-0.5 rounded transition-colors" onClick={() => insertPlaceholder("{{candidateName}}")}>{"{{candidateName}}"}</button>
-                        <button type="button" className="text-[9px] font-bold text-indigo-650 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 px-1.5 py-0.5 rounded transition-colors" onClick={() => insertPlaceholder("{{candidateMobile}}")}>{"{{candidateMobile}}"}</button>
-                        <button type="button" className="text-[9px] font-bold text-indigo-650 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 px-1.5 py-0.5 rounded transition-colors" onClick={() => insertPlaceholder("{{candidateEmail}}")}>{"{{candidateEmail}}"}</button>
+                    <div className="border border-slate-150 dark:border-slate-750 rounded-lg p-3 bg-slate-50/50 dark:bg-slate-800/50">
+                      <div className="flex flex-wrap items-center gap-1.5 mb-3 border-b border-slate-150 dark:border-slate-700 pb-2">
+                        <span className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold">Tags (Focus field, then click to insert):</span>
+                        <button type="button" className="text-[9px] font-bold text-indigo-650 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/80 px-1.5 py-0.5 rounded transition-colors" onClick={() => insertPlaceholder("{{recruiterName}}")}>{"{{recruiterName}}"}</button>
+                        <button type="button" className="text-[9px] font-bold text-indigo-650 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/80 px-1.5 py-0.5 rounded transition-colors" onClick={() => insertPlaceholder("{{companyName}}")}>{"{{companyName}}"}</button>
+                        <button type="button" className="text-[9px] font-bold text-indigo-650 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/80 px-1.5 py-0.5 rounded transition-colors" onClick={() => insertPlaceholder("{{jobRole}}")}>{"{{jobRole}}"}</button>
+                        <button type="button" className="text-[9px] font-bold text-indigo-650 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/80 px-1.5 py-0.5 rounded transition-colors" onClick={() => insertPlaceholder("{{skills}}")}>{"{{skills}}"}</button>
+                        <button type="button" className="text-[9px] font-bold text-indigo-650 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/80 px-1.5 py-0.5 rounded transition-colors" onClick={() => insertPlaceholder("{{experienceYears}}")}>{"{{experienceYears}}"}</button>
+                        <button type="button" className="text-[9px] font-bold text-indigo-650 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/80 px-1.5 py-0.5 rounded transition-colors" onClick={() => insertPlaceholder("{{candidateName}}")}>{"{{candidateName}}"}</button>
+                        <button type="button" className="text-[9px] font-bold text-indigo-650 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/80 px-1.5 py-0.5 rounded transition-colors" onClick={() => insertPlaceholder("{{candidateMobile}}")}>{"{{candidateMobile}}"}</button>
+                        <button type="button" className="text-[9px] font-bold text-indigo-650 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/80 px-1.5 py-0.5 rounded transition-colors" onClick={() => insertPlaceholder("{{candidateEmail}}")}>{"{{candidateEmail}}"}</button>
                       </div>
 
                       <div className="space-y-3 max-h-[35vh] overflow-y-auto pr-1">
                         <div className="flex flex-col">
-                          <label className={`text-[10px] font-bold mb-1 transition-colors ${activeTextarea === "intro" ? "text-primary" : "text-slate-500"}`}>
+                          <label className={`text-[10px] font-bold mb-1 transition-colors ${activeTextarea === "intro" ? "text-primary" : "text-slate-600 dark:text-slate-400"}`}>
                             1. Introduction Block {activeTextarea === "intro" && "✍️"}
                           </label>
                           <textarea
@@ -861,12 +861,13 @@ export const TemplateManager: React.FC = () => {
                             onChange={(e) => setIntro(e.target.value)}
                             onFocus={() => setActiveTextarea("intro")}
                             rows={2}
-                            className="w-full px-2.5 py-1.5 border border-slate-200 rounded-input text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 font-mono resize-none"
+                            className="w-full px-2.5 py-1.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 font-mono resize-none"
+                            required
                           />
                         </div>
 
                         <div className="flex flex-col gap-1.5">
-                          <label className={`text-[10px] font-bold mb-1 transition-colors ${activeTextarea === "skills" ? "text-primary" : "text-slate-500"}`}>
+                          <label className={`text-[10px] font-bold mb-1 transition-colors ${activeTextarea === "skills" ? "text-primary" : "text-slate-600 dark:text-slate-400"}`}>
                             2. Skills Match Block {activeTextarea === "skills" && "✍️"}
                           </label>
                           <textarea
@@ -876,12 +877,12 @@ export const TemplateManager: React.FC = () => {
                             onChange={(e) => setSkillsTemplate(e.target.value)}
                             onFocus={() => setActiveTextarea("skills")}
                             rows={3}
-                            className="w-full px-2.5 py-1.5 border border-slate-200 rounded-input text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 font-mono resize-none"
+                            className="w-full px-2.5 py-1.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 font-mono resize-none"
                           />
                           
                           {/* Skills Selection from Profile */}
-                          <div className="mt-1 flex flex-col gap-1 bg-slate-50 p-2 rounded-xl border border-slate-150">
-                            <label className="text-[9px] font-bold text-slate-400">Select skills to highlight (from profile):</label>
+                          <div className="mt-1 flex flex-col gap-1 bg-slate-50 dark:bg-slate-800/60 p-2 rounded-xl border border-slate-150 dark:border-slate-700">
+                            <label className="text-[9px] font-bold text-slate-500 dark:text-slate-400">Select skills to highlight (from profile):</label>
                             <div className="flex flex-wrap gap-1">
                               {profileSkills.length === 0 ? (
                                 <span className="text-[9px] text-slate-400 italic">No skills in profile. Please add them on your profile page.</span>
@@ -898,8 +899,8 @@ export const TemplateManager: React.FC = () => {
                                       onClick={() => handleSelectSkillPill(skill)}
                                       className={`px-2 py-0.5 rounded text-[9px] font-semibold border transition-all ${
                                         isSelected
-                                          ? "bg-indigo-50 border-indigo-200 text-indigo-700 shadow-sm font-sans"
-                                          : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50 font-sans"
+                                          ? "bg-indigo-50 dark:bg-indigo-950/60 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 shadow-sm font-sans"
+                                          : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 font-sans"
                                       }`}
                                     >
                                       {skill}
@@ -909,8 +910,8 @@ export const TemplateManager: React.FC = () => {
                               )}
                             </div>
                             
-                            <div className="mt-2 pt-2 border-t border-slate-200/60 flex items-center justify-between gap-2">
-                              <label className="text-[9px] font-bold text-slate-400 select-none">Skills Presentation Style:</label>
+                            <div className="mt-2 pt-2 border-t border-slate-200/60 dark:border-slate-700 flex items-center justify-between gap-2">
+                              <label className="text-[9px] font-bold text-slate-500 dark:text-slate-400 select-none">Skills Presentation Style:</label>
                               <select
                                 value={outreachSkillsFormat}
                                 onChange={async (e) => {
@@ -928,7 +929,7 @@ export const TemplateManager: React.FC = () => {
                                     }
                                   }
                                 }}
-                                className="px-2 py-1 bg-white border border-slate-200 rounded-lg text-[9px] font-semibold text-slate-600 focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer max-w-[150px]"
+                                className="px-2 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-[9px] font-semibold text-slate-600 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer max-w-[150px]"
                               >
                                 <option value="COMMA">Comma Separated</option>
                                 <option value="BADGES">Visual HTML Badges</option>
@@ -938,7 +939,7 @@ export const TemplateManager: React.FC = () => {
                             </div>
                             
                             {!skillsTemplate.toLowerCase().includes("{{skills}}") && (
-                              <div className="mt-1.5 p-2 bg-amber-50 border border-amber-100 rounded-lg text-[9px] text-amber-700 leading-normal font-sans">
+                              <div className="mt-1.5 p-2 bg-amber-50 dark:bg-amber-950/40 border border-amber-100 dark:border-amber-900/50 rounded-lg text-[9px] text-amber-700 dark:text-amber-300 leading-normal font-sans">
                                 💡 <strong>Tip:</strong> Style formats apply to the <code>{"{{skills}}"}</code> placeholder tag. Make sure <code>{"{{skills}}"}</code> is present in your skills template textarea above to render the selected option style in the preview.
                               </div>
                             )}
@@ -946,7 +947,7 @@ export const TemplateManager: React.FC = () => {
                         </div>
 
                         <div className="flex flex-col">
-                          <label className={`text-[10px] font-bold mb-1 transition-colors ${activeTextarea === "body" ? "text-primary" : "text-slate-500"}`}>
+                          <label className={`text-[10px] font-bold mb-1 transition-colors ${activeTextarea === "body" ? "text-primary" : "text-slate-600 dark:text-slate-400"}`}>
                             3. Core Body Block {activeTextarea === "body" && "✍️"}
                           </label>
                           <textarea
@@ -956,13 +957,13 @@ export const TemplateManager: React.FC = () => {
                             onChange={(e) => setBody(e.target.value)}
                             onFocus={() => setActiveTextarea("body")}
                             rows={4}
-                            className="w-full px-2.5 py-1.5 border border-slate-200 rounded-input text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 font-mono"
+                            className="w-full px-2.5 py-1.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 font-mono"
                             required
                           />
                         </div>
 
                         <div className="flex flex-col">
-                          <label className={`text-[10px] font-bold mb-1 transition-colors ${activeTextarea === "signOff" ? "text-primary" : "text-slate-500"}`}>
+                          <label className={`text-[10px] font-bold mb-1 transition-colors ${activeTextarea === "signOff" ? "text-primary" : "text-slate-600 dark:text-slate-400"}`}>
                             4. Sign-off Block {activeTextarea === "signOff" && "✍️"}
                           </label>
                           <textarea
@@ -972,13 +973,13 @@ export const TemplateManager: React.FC = () => {
                             onChange={(e) => setSignOff(e.target.value)}
                             onFocus={() => setActiveTextarea("signOff")}
                             rows={2}
-                            className="w-full px-2.5 py-1.5 border border-slate-200 rounded-input text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 font-mono resize-none"
+                            className="w-full px-2.5 py-1.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 font-mono resize-none"
                           />
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
+                    <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
                       <button
                         type="button"
                         onClick={() => {
@@ -989,7 +990,7 @@ export const TemplateManager: React.FC = () => {
                           }
                           setHasCheckedDraft(false);
                         }}
-                        className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-500 rounded-btn text-xs font-semibold transition-all"
+                        className="px-4 py-2 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-btn text-xs font-semibold transition-all"
                       >
                         Cancel
                       </button>
@@ -1002,15 +1003,15 @@ export const TemplateManager: React.FC = () => {
                     </div>
                   </form>
 
-                  <div className="border border-slate-200 rounded-card p-5 bg-slate-50 flex flex-col h-full min-h-[400px]">
-                    <h3 className="text-xs font-bold text-slate-700 mb-2.5 border-b border-slate-200 pb-2 flex items-center gap-1.5">
+                  <div className="border border-slate-200 dark:border-slate-800 rounded-card p-5 bg-slate-50 dark:bg-slate-850 flex flex-col h-full min-h-[400px]">
+                    <h3 className="text-xs font-bold text-slate-700 dark:text-slate-200 mb-2.5 border-b border-slate-200 dark:border-slate-800 pb-2 flex items-center gap-1.5">
                       <span>👁️</span> Real-time Stack Preview (Mockup Variables)
                     </h3>
-                    <div className="text-[11px] text-slate-500 font-semibold mb-2 break-words">
-                      Subject: <span className="text-slate-700 font-mono">{subject.replace("{{jobRole}}", "Software Architect").replace("{{companyName}}", "ScaleFintech")}</span>
+                    <div className="text-[11px] text-slate-600 dark:text-slate-400 font-semibold mb-2 break-words">
+                      Subject: <span className="text-slate-800 dark:text-slate-200 font-mono">{subject.replace("{{jobRole}}", "Software Architect").replace("{{companyName}}", "ScaleFintech")}</span>
                     </div>
                     <div 
-                      className="flex-1 bg-white border border-slate-200 rounded p-4 font-mono text-[11px] leading-relaxed text-slate-650 overflow-y-auto whitespace-pre-wrap select-none max-h-[50vh]"
+                      className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded p-4 font-mono text-[11px] leading-relaxed text-slate-700 dark:text-slate-200 overflow-y-auto whitespace-pre-wrap select-none max-h-[50vh]"
                       dangerouslySetInnerHTML={{
                         __html: [
                           intro || "Dear {{recruiterName}},",
@@ -1041,26 +1042,26 @@ export const TemplateManager: React.FC = () => {
             ) : (
               // REVIEW/VIEW MODE IN MODAL
               <div className="space-y-4">
-                <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+                <div className="flex items-start justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                   <div>
                     <div className="flex items-center gap-2">
-                      <h2 className="text-xl font-bold text-slate-800">{activeTemplate.name}</h2>
+                      <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">{activeTemplate.name}</h2>
                       {activeTemplate.id.startsWith("default-") && (
-                        <span className="bg-slate-100 text-slate-650 border border-slate-200 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                        <span className="bg-slate-100 dark:bg-slate-800 text-slate-650 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
                           System
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-indigo-650 font-semibold mt-1">
-                      Subject: <span className="text-slate-650 font-normal">{activeTemplate.subject}</span>
+                    <p className="text-xs text-indigo-650 dark:text-indigo-400 font-semibold mt-1">
+                      Subject: <span className="text-slate-650 dark:text-slate-300 font-normal">{activeTemplate.subject}</span>
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
                     {/* Star Bookmarking Toggle inside Modal */}
                     <button
                       onClick={() => handleToggleFavorite(activeTemplate.id)}
-                      className={`transition-colors p-1.5 rounded-full hover:bg-slate-50 ${
-                        activeTemplate.isFavorited ? "text-amber-400 hover:text-amber-500" : "text-slate-300 hover:text-slate-400"
+                      className={`transition-colors p-1.5 rounded-full hover:bg-slate-50 dark:hover:bg-slate-800 ${
+                        activeTemplate.isFavorited ? "text-amber-400 hover:text-amber-500" : "text-slate-300 dark:text-slate-600 hover:text-slate-400"
                       }`}
                       title={activeTemplate.isFavorited ? "Unfavorite" : "Favorite"}
                     >
@@ -1074,7 +1075,7 @@ export const TemplateManager: React.FC = () => {
                     </button>
                     <button
                       onClick={() => setActiveTemplate(null)}
-                      className="text-slate-400 hover:text-slate-650 p-1.5"
+                      className="text-slate-400 dark:text-slate-500 hover:text-slate-650 dark:hover:text-slate-300 p-1.5"
                     >
                       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
@@ -1085,21 +1086,21 @@ export const TemplateManager: React.FC = () => {
 
                 {/* Body html display */}
                 <div
-                  className="text-sm text-slate-700 leading-relaxed font-mono whitespace-pre-line bg-slate-50 p-4 rounded border border-slate-100 max-h-[300px] overflow-y-auto"
+                  className="text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-mono whitespace-pre-line bg-slate-50 dark:bg-slate-800 p-4 rounded border border-slate-100 dark:border-slate-700 max-h-[300px] overflow-y-auto"
                   dangerouslySetInnerHTML={{ __html: activeTemplate.body }}
                 />
 
                 {/* Ratings & Interactive Rate widget */}
-                <div className="bg-slate-50/50 rounded p-4 border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="bg-slate-50/50 dark:bg-slate-800/50 rounded p-4 border border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <span className="text-xs font-semibold text-slate-500 block mb-1">Public Rating</span>
+                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 block mb-1">Public Rating</span>
                     <div className="flex items-center gap-1.5">
                       <div className="flex items-center text-amber-400">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <svg
                             key={star}
                             className={`w-4 h-4 ${
-                              star <= Math.round(activeTemplate.averageRating || 0) ? "fill-current" : "text-slate-200"
+                              star <= Math.round(activeTemplate.averageRating || 0) ? "fill-current" : "text-slate-200 dark:text-slate-700"
                             }`}
                             viewBox="0 0 20 20"
                             fill="currentColor"
@@ -1108,14 +1109,14 @@ export const TemplateManager: React.FC = () => {
                           </svg>
                         ))}
                       </div>
-                      <span className="text-xs font-bold text-slate-650">
+                      <span className="text-xs font-bold text-slate-650 dark:text-slate-300">
                         {(activeTemplate.averageRating || 0).toFixed(1)} / 5.0
                       </span>
                     </div>
                   </div>
 
-                  <div className="border-t sm:border-t-0 sm:border-l border-slate-200 pt-3 sm:pt-0 sm:pl-4 flex flex-col gap-1">
-                    <span className="text-[10px] font-bold text-slate-450 uppercase tracking-wider block">
+                  <div className="border-t sm:border-t-0 sm:border-l border-slate-200 dark:border-slate-700 pt-3 sm:pt-0 sm:pl-4 flex flex-col gap-1">
+                    <span className="text-[10px] font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider block">
                       {activeTemplate.userRating ? "Your Rating" : "Rate this Template"}
                     </span>
                     <div className="flex items-center gap-1">
@@ -1126,7 +1127,7 @@ export const TemplateManager: React.FC = () => {
                           className={`transition-colors p-1 ${
                             star <= (activeTemplate.userRating || 0)
                               ? "text-amber-400 fill-current"
-                              : "text-slate-200 hover:text-amber-400"
+                              : "text-slate-200 dark:text-slate-700 hover:text-amber-400"
                           }`}
                           title={`Rate ${star} star${star > 1 ? "s" : ""}`}
                         >
@@ -1140,11 +1141,11 @@ export const TemplateManager: React.FC = () => {
                 </div>
 
                 {/* Footer Buttons */}
-                <div className="flex justify-between items-center pt-3 border-t border-slate-100">
+                <div className="flex justify-between items-center pt-3 border-t border-slate-100 dark:border-slate-800">
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => setActiveTemplate(null)}
-                      className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-500 rounded-btn text-xs font-semibold transition-all"
+                      className="px-4 py-2 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-btn text-xs font-semibold transition-all"
                     >
                       Close
                     </button>

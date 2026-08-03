@@ -21,13 +21,13 @@ export const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
       <div className="w-full">
         <div className="flex justify-between items-center mb-1">
           {label && (
-            <label htmlFor={textAreaId} className="block text-sm font-medium text-slate-600">
+            <label htmlFor={textAreaId} className="block text-sm font-medium text-slate-600 dark:text-slate-300">
               {label}
               {required && <span className="text-red-500 ml-1" aria-hidden="true">*</span>}
             </label>
           )}
           {maxLength && (
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-slate-400 dark:text-slate-500">
               {currentLength}/{maxLength}
             </span>
           )}
@@ -39,10 +39,10 @@ export const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
           maxLength={maxLength}
           aria-invalid={Boolean(error)}
           aria-describedby={error ? errorId : helperText ? helperId : undefined}
-          className={`w-full px-3 py-2 border rounded-input text-sm text-base-text bg-white placeholder-slate-400 focus:outline-none focus:ring-2 transition-all duration-200 resize-y min-h-[100px] ${
+          className={`w-full px-3 py-2 border rounded-input text-sm text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-800 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 transition-all duration-200 resize-y min-h-[100px] ${
             error
-              ? "border-red-500 focus:ring-red-500 text-red-900"
-              : "border-[#b2bec3] focus:ring-primary focus:border-transparent"
+              ? "border-red-500 focus:ring-red-500 text-red-900 dark:text-red-300"
+              : "border-[#b2bec3] dark:border-slate-700 focus:ring-primary focus:border-transparent"
           } ${className}`}
           {...props}
         />

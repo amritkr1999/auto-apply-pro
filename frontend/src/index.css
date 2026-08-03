@@ -59,6 +59,35 @@ html.dark, html.dark body, html.dark #root {
   color: #f8fafc;
 }
 
+/* Global Dark Mode High-Contrast Input & Placeholder Defaults */
+html.dark input,
+html.dark textarea,
+html.dark select {
+  color: #f8fafc;
+}
+
+html.dark ::placeholder {
+  color: #94a3b8 !important;
+  opacity: 0.9 !important;
+}
+
+/* Fallback: Ensure light container elements in dark mode maintain readable dark text if not explicitly overridden */
+html.dark .bg-white:not([class*="dark:bg-"]),
+html.dark .bg-slate-50:not([class*="dark:bg-"]),
+html.dark .bg-slate-100:not([class*="dark:bg-"]),
+html.dark .bg-slate-200:not([class*="dark:bg-"]) {
+  color: #1e293b !important;
+}
+
+html.dark .bg-white:not([class*="dark:bg-"]) input,
+html.dark .bg-white:not([class*="dark:bg-"]) textarea,
+html.dark .bg-white:not([class*="dark:bg-"]) select,
+html.dark .bg-slate-50:not([class*="dark:bg-"]) input,
+html.dark .bg-slate-50:not([class*="dark:bg-"]) textarea,
+html.dark .bg-slate-50:not([class*="dark:bg-"]) select {
+  color: #0f172a !important;
+}
+
 /* login.css theme overrides */
 .dark {
   --bg-primary: #0f172a;
@@ -91,6 +120,7 @@ html.dark, html.dark body, html.dark #root {
 }
 
 .dark .feature-card,
+.dark .step-card,
 .dark .benefit-card,
 .dark .pricing-card,
 .dark .testimonial-card,

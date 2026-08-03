@@ -590,17 +590,17 @@ html.dark .landing-root,
   border-radius: 16px;
   padding: 2.25rem 2rem;
   position: relative;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.02);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.01), inset 0 1px 0 rgba(255, 255, 255, 0.6);
   display: flex;
   flex-direction: column;
 }
 
 .step-card:hover {
-  transform: translateY(-5px);
-  border-color: rgba(124, 58, 237, 0.15);
-  box-shadow: 0 15px 35px rgba(124, 58, 237, 0.08);
   background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.12);
+  transform: scale(1.01);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
 }
 
 .step-number {
@@ -618,11 +618,31 @@ html.dark .landing-root,
   font-weight: 800;
   color: #ffffff;
   box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+  transition: all 0.3s ease;
+}
+
+.step-card:hover .step-number {
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35);
 }
 
 .step-icon {
-  font-size: 2rem;
+  width: 52px;
+  height: 52px;
+  background: rgba(15, 23, 42, 0.02);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
   margin: 1rem 0 1.25rem 0;
+  transition: all 0.3s ease;
+}
+
+.step-card:hover .step-icon {
+  background: rgba(2, 132, 199, 0.08);
+  border-color: rgba(2, 132, 199, 0.2);
+  color: var(--accent-cyan);
 }
 
 .step-title {

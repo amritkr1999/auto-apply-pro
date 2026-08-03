@@ -130,6 +130,12 @@ export const CompanyProfileView: React.FC<Props> = ({ userId, onProfileUpdate })
             type="email"
             value={officialEmail}
             placeholder="yourname@company.com"
+            helperText={
+              <span className="inline-flex items-center gap-1.5 mt-1 text-xs text-indigo-650 dark:text-indigo-400 font-medium">
+                <span>💡</span>
+                <span>Your official email address with your company domain name (e.g., <code>name@company.com</code>) used for referral and verification purposes.</span>
+              </span>
+            }
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setOfficialEmail(e.target.value)}
             className="rounded-xl border-slate-200 focus:ring-primary focus:border-transparent px-4 py-2.5"
           />

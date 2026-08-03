@@ -28,6 +28,8 @@ export const CampaignDispatchModal: React.FC<CampaignDispatchModalProps> = ({
   const [selectedMode, setSelectedMode] = useState<'AUTOMATED' | 'DRAFTS' | 'WEB_COMPOSE'>('AUTOMATED');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [gmailConnected, setGmailConnected] = useState(true);
+  const [showConnectPrompt, setShowConnectPrompt] = useState(false);
 
   // Normalize mode string
   const getNormalizedMode = (rawMode?: string | null): 'AUTOMATED' | 'DRAFTS' | 'WEB_COMPOSE' => {
@@ -65,6 +67,11 @@ export const CampaignDispatchModal: React.FC<CampaignDispatchModalProps> = ({
   if (!visible) return null;
 
   const handleModeSelect = async (modeKey: 'AUTOMATED' | 'DRAFTS' | 'WEB_COMPOSE') => {
+    if ((modeKey === 'AUTOMATED' || modeKey === 'DRAFTS') && !gmailConnected) {
+      setShowConnectPrompt(true);
+    } else {
+      setShowConnectPrompt(false);
+    }
     setSelectedMode(modeKey);
     await SecureStore.setItemAsync(`campaign_dispatch_mode_${userId}`, modeKey);
 
@@ -77,6 +84,12 @@ export const CampaignDispatchModal: React.FC<CampaignDispatchModalProps> = ({
 
   const handleStartCampaign = async () => {
     if (isSubmitting) return;
+
+    if ((selectedMode === 'AUTOMATED' || selectedMode === 'DRAFTS') && !gmailConnected) {
+      setShowConnectPrompt(true);
+      return;
+    }
+
     setIsSubmitting(true);
 
     let dbMode = 'DIRECT_SEND';
@@ -144,6 +157,29 @@ export const CampaignDispatchModal: React.FC<CampaignDispatchModalProps> = ({
               </View>
             )}
 
+            {/* Graceful Gmail Connection Prompt Banner */}
+            {showConnectPrompt && !gmailConnected && (
+              <View className="bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/50 p-4 rounded-2xl mb-4 space-y-2">
+                <View className="flex-row items-center">
+                  <Ionicons name="warning-outline" size={18} color="#d97706" />
+                  <Text className="text-sm font-bold text-amber-900 dark:text-amber-200 ml-2">
+                    Gmail Account Connection Required
+                  </Text>
+                </View>
+                <Text className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
+                  Option 1 (Fully Automated) and Option 2 (Save to Gmail Drafts) require a connected Gmail account. Please connect Gmail in Profile Settings or switch to Option 3.
+                </Text>
+                <TouchableOpacity
+                  onPress={() => handleModeSelect('WEB_COMPOSE')}
+                  className="bg-white dark:bg-slate-800 border border-amber-300 dark:border-amber-700 p-2.5 rounded-xl items-center mt-2"
+                >
+                  <Text className="text-xs font-bold text-amber-900 dark:text-amber-200">
+                    Switch to Option 3 (No Connection Needed)
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
             <Text className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">
               Choose Campaign Dispatch Mode
             </Text>
@@ -169,6 +205,11 @@ export const CampaignDispatchModal: React.FC<CampaignDispatchModalProps> = ({
                   <Text className="text-sm font-bold text-slate-900 dark:text-white">
                     🤖 Option 1: Fully Automated
                   </Text>
+                  <View className="bg-amber-100 dark:bg-amber-900/50 px-2 py-0.5 rounded-full">
+                    <Text className="text-[10px] font-extrabold text-amber-700 dark:text-amber-300">
+                      Requires Gmail Connection
+                    </Text>
+                  </View>
                 </View>
                 <Text className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                   Emails are sent automatically on your behalf by our background outreach worker according to schedule.
@@ -197,6 +238,11 @@ export const CampaignDispatchModal: React.FC<CampaignDispatchModalProps> = ({
                   <Text className="text-sm font-bold text-slate-900 dark:text-white">
                     📁 Option 2: Save to Gmail Drafts
                   </Text>
+                  <View className="bg-amber-100 dark:bg-amber-900/50 px-2 py-0.5 rounded-full">
+                    <Text className="text-[10px] font-extrabold text-amber-700 dark:text-amber-300">
+                      Requires Gmail Connection
+                    </Text>
+                  </View>
                 </View>
                 <Text className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                   Campaign emails are created and saved directly into your connected Gmail account's Drafts folder automatically.
@@ -225,6 +271,11 @@ export const CampaignDispatchModal: React.FC<CampaignDispatchModalProps> = ({
                   <Text className="text-sm font-bold text-slate-900 dark:text-white">
                     🌐 Option 3: Gmail Web Compose
                   </Text>
+                  <View className="bg-emerald-100 dark:bg-emerald-900/50 px-2 py-0.5 rounded-full">
+                    <Text className="text-[10px] font-extrabold text-emerald-700 dark:text-emerald-300">
+                      No Gmail Connection Required
+                    </Text>
+                  </View>
                 </View>
                 <Text className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                   Campaign emails land in your Outreach Queue for in-app review and 1-tap launch in Gmail Web Compose.

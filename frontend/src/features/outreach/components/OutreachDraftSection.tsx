@@ -117,13 +117,13 @@ export const OutreachDraftSection: React.FC = () => {
     switch (format.toUpperCase()) {
       case "BADGES":
         return skills.map(skill => 
-          `<span style="display: inline-block; background-color: #f3f4f6; color: #1f2937; border: 1px solid #e5e7eb; padding: 3px 10px; margin: 2px 4px; border-radius: 9999px; font-size: 12px; font-weight: 600; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${skill}</span>`
+          `<span style="display: inline-block; background-color: rgba(99, 102, 241, 0.12); color: #6366f1; border: 1px solid rgba(99, 102, 241, 0.3); padding: 3px 10px; margin: 2px 4px; border-radius: 9999px; font-size: 12px; font-weight: 600; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${skill}</span>`
         ).join("");
         
       case "CALLOUT":
-        return `<div style="margin: 14px 0; padding: 12px 16px; border-left: 4px solid #4f46e5; background-color: #f9fafb; border-radius: 0 8px 8px 0; font-family: sans-serif;">` +
-               `<strong style="color: #4f46e5; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Core Expertise:</strong>` +
-               `<span style="color: #374151; font-size: 13px; margin-left: 6px;">${skills.join(" • ")}</span>` +
+        return `<div style="margin: 14px 0; padding: 12px 16px; border-left: 4px solid #6366f1; background-color: rgba(99, 102, 241, 0.08); border-radius: 0 8px 8px 0; font-family: sans-serif;">` +
+               `<strong style="color: #6366f1; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Core Expertise:</strong>` +
+               `<span style="font-size: 13px; margin-left: 6px;">${skills.join(" • ")}</span>` +
                `</div>`;
                
       case "BULLET":
