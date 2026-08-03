@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   RefreshControl,
   SafeAreaView,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
@@ -13,6 +14,9 @@ import * as SecureStore from 'expo-secure-store';
 import { feedbackService } from '../../services/feedbackService';
 import FeedbackModal from '../../components/FeedbackModal';
 import WalkthroughTour from '../../components/WalkthroughTour';
+
+import { outreachService } from '../../services/outreachService';
+import CampaignDispatchModal from '../../components/CampaignDispatchModal';
 
 interface MetricCardProps {
   title: string;
@@ -43,6 +47,36 @@ export default function DashboardScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [showTour, setShowTour] = useState(false);
+
+  // Campaign State
+  const [showCampaignModal, setShowCampaignModal] = useState(false);
+  const [campaignActive, setCampaignActive] = useState(false);
+  const [campaignToggling, setCampaignToggling] = useState(false);
+
+  useEffect(() => {
+    if (user?.id) {
+      outreachService.getOutreachSettings(Number(user.id))
+        .then(settings => setCampaignActive(Boolean(settings?.hrOutreachCampaignEnabled)))
+        .catch(() => {});
+    }
+  }, [user?.id]);
+
+  const handleToggleCampaign = async (enable: boolean) => {
+    setCampaignToggling(true);
+    try {
+      const userIdNum = Number(user?.id || 1);
+      const res = await outreachService.toggleHrCampaign(userIdNum, enable);
+      setCampaignActive(res.enabled);
+    } catch (e) {
+      console.log('Toggle campaign failed:', e);
+    } finally {
+      setCampaignToggling(false);
+    }
+  };
+
+  const handleLaunchAutomated = async (selectedMode: string) => {
+    await handleToggleCampaign(true);
+  };
 
   // Check tour on mount
   useEffect(() => {
@@ -154,6 +188,60 @@ export default function DashboardScreen() {
           </View>
         </View>
 
+        {/* HR Cold Email Campaign Status Widget */}
+        <View className="mx-5 mb-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm">
+          <View className="flex-row items-center justify-between mb-3">
+            <View className="flex-row items-center">
+              <View className="w-10 h-10 bg-indigo-500/10 rounded-2xl items-center justify-center mr-3">
+                <Ionicons name="rocket-outline" size={20} color="#6366f1" />
+              </View>
+              <View>
+                <Text className="text-slate-900 dark:text-white font-bold text-sm">HR Cold Email Campaign</Text>
+                <View className="flex-row items-center mt-0.5">
+                  <View className={`w-2 h-2 rounded-full mr-1.5 ${campaignActive ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+                  <Text className={`text-xs font-bold ${campaignActive ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>
+                    {campaignActive ? 'Active' : 'Inactive'}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            <TouchableOpacity
+              onPress={() => setShowCampaignModal(true)}
+              className="p-2 bg-indigo-50 dark:bg-indigo-950/40 rounded-xl border border-indigo-200 dark:border-indigo-800 flex-row items-center"
+            >
+              <Ionicons name="settings-outline" size={16} color="#6366f1" />
+              <Text className="text-indigo-600 dark:text-indigo-400 text-xs font-bold ml-1">Modes</Text>
+            </TouchableOpacity>
+          </View>
+
+          <Text className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed mb-4">
+            Automatically draft and dispatch cold outreach emails to HR targets according to schedule.
+          </Text>
+
+          <TouchableOpacity
+            onPress={() => {
+              if (!campaignActive) {
+                setShowCampaignModal(true);
+              } else {
+                handleToggleCampaign(false);
+              }
+            }}
+            disabled={campaignToggling}
+            className={`py-3 rounded-2xl items-center justify-center ${
+              campaignActive ? 'bg-rose-600' : 'bg-emerald-600'
+            }`}
+          >
+            {campaignToggling ? (
+              <ActivityIndicator size="small" color="#ffffff" />
+            ) : (
+              <Text className="text-white font-bold text-xs">
+                {campaignActive ? 'Pause Campaign' : '🚀 Start Campaign'}
+              </Text>
+            )}
+          </TouchableOpacity>
+        </View>
+
         {/* Metrics Container */}
         <View className="px-5">
           <Text className="text-slate-900 dark:text-white text-lg font-bold mb-4">Outreach Performance</Text>
@@ -243,6 +331,12 @@ export default function DashboardScreen() {
             userId={String(user.id)}
             visible={showTour}
             onClose={() => setShowTour(false)}
+          />
+          <CampaignDispatchModal
+            visible={showCampaignModal}
+            onClose={() => setShowCampaignModal(false)}
+            onLaunchAutomated={handleLaunchAutomated}
+            userId={Number(user.id)}
           />
         </>
       )}

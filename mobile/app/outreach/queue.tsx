@@ -14,6 +14,8 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
 import { templateService, QueueDeliveryItem } from '../../services/templateService';
 
+import { Linking } from 'react-native';
+
 export default function QueueScreen() {
   const router = useRouter();
   const { user } = useAuth();
@@ -59,7 +61,14 @@ export default function QueueScreen() {
     }
   };
 
-  const getStatusBadge = (status: QueueDeliveryItem['status']) => {
+  const handleOpenGmailCompose = (recipient: string, subject: string) => {
+    const url = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(recipient || '')}&su=${encodeURIComponent(subject || '')}`;
+    Linking.openURL(url).catch(err => {
+      Alert.alert('Error', 'Could not launch web browser for Gmail compose.');
+    });
+  };
+
+  const getStatusBadge = (status: QueueDeliveryItem['status'] | string) => {
     switch (status) {
       case 'SENT':
         return {
@@ -67,6 +76,13 @@ export default function QueueScreen() {
           text: 'text-emerald-600 dark:text-emerald-400',
           icon: 'checkmark-circle' as const,
           label: 'SENT',
+        };
+      case 'DRAFT':
+        return {
+          bg: 'bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/20',
+          text: 'text-indigo-600 dark:text-indigo-400',
+          icon: 'create-outline' as const,
+          label: 'DRAFT',
         };
       case 'PENDING':
         return {
@@ -76,6 +92,7 @@ export default function QueueScreen() {
           label: 'QUEUED',
         };
       case 'FAILED':
+      default:
         return {
           bg: 'bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/20',
           text: 'text-rose-600 dark:text-rose-400',
@@ -154,22 +171,33 @@ export default function QueueScreen() {
 
                 <View className="flex-row justify-between items-center mt-1">
                   <Text className="text-slate-400 text-[11px]">Created: {item.createdAt}</Text>
-                  {item.status === 'FAILED' && (
+                  
+                  <View className="flex-row items-center space-x-2">
                     <TouchableOpacity
-                      onPress={() => handleRetry(item.id)}
-                      disabled={retryingId === item.id}
-                      className="bg-rose-500/10 border border-rose-500/20 px-3 py-1 rounded-xl flex-row items-center"
+                      onPress={() => handleOpenGmailCompose(item.recipientEmail, item.subject)}
+                      className="bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-xl flex-row items-center"
                     >
-                      {retryingId === item.id ? (
-                        <ActivityIndicator size="small" color="#f43f5e" />
-                      ) : (
-                        <>
-                          <Ionicons name="refresh" size={12} color="#f43f5e" />
-                          <Text className="text-rose-500 text-xs font-bold ml-1">Retry Send</Text>
-                        </>
-                      )}
+                      <Ionicons name="open-outline" size={12} color="#10b981" />
+                      <Text className="text-emerald-600 dark:text-emerald-400 text-xs font-bold ml-1">Open in Gmail</Text>
                     </TouchableOpacity>
-                  )}
+
+                    {item.status === 'FAILED' && (
+                      <TouchableOpacity
+                        onPress={() => handleRetry(item.id)}
+                        disabled={retryingId === item.id}
+                        className="bg-rose-500/10 border border-rose-500/20 px-3 py-1.5 rounded-xl flex-row items-center ml-2"
+                      >
+                        {retryingId === item.id ? (
+                          <ActivityIndicator size="small" color="#f43f5e" />
+                        ) : (
+                          <>
+                            <Ionicons name="refresh" size={12} color="#f43f5e" />
+                            <Text className="text-rose-500 text-xs font-bold ml-1">Retry Send</Text>
+                          </>
+                        )}
+                      </TouchableOpacity>
+                    )}
+                  </View>
                 </View>
               </View>
             );
