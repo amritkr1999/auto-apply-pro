@@ -34,6 +34,7 @@ public class HrOutreachCampaignService {
     private final OutreachSchedulerService schedulerService;
     private final ProfessionalProfileRepository professionalProfileRepository;
     private final SubscriptionGatingService subscriptionGatingService;
+    private final GmailEmailSender gmailEmailSender;
 
     @Transactional
     public void toggleCampaign(User user, boolean enable, String targetRole, String templateId, String sourceTable) {
@@ -164,18 +165,34 @@ public class HrOutreachCampaignService {
         // Compute next schedule time
         java.time.LocalDateTime scheduledAt = schedulerService.calculateNextScheduleTime(user);
 
+        String dispatchMode = user.getHrOutreachDispatchMode() != null ? user.getHrOutreachDispatchMode() : "DIRECT_SEND";
+        OutreachStatus status = OutreachStatus.PENDING;
+
+        if ("GMAIL_DRAFTS".equalsIgnoreCase(dispatchMode) || "DRAFTS".equalsIgnoreCase(dispatchMode)) {
+            status = OutreachStatus.DRAFT;
+            try {
+                gmailEmailSender.createDraft(user.getId(), recipient.email, null, subject, body);
+                log.info("Automatically created Gmail draft for campaign recipient: {}", recipient.email);
+            } catch (Exception e) {
+                log.warn("Automatic Gmail draft creation failed for user ID: {}. Storing as local draft queue item fallback.", user.getId(), e);
+            }
+        } else if ("GMAIL_COMPOSE".equalsIgnoreCase(dispatchMode) || "WEB_COMPOSE".equalsIgnoreCase(dispatchMode)) {
+            status = OutreachStatus.DRAFT;
+        }
+
         EmailQueue queueItem = EmailQueue.builder()
                 .user(user)
                 .recipientEmail(recipient.email)
                 .subject(subject)
                 .body(body)
-                .status(OutreachStatus.PENDING)
+                .status(status)
                 .isCampaign(true)
                 .scheduledAt(scheduledAt)
                 .build();
 
         queueRepository.save(queueItem);
-        log.info("Successfully queued single campaign email ID: {} to: {} for user ID: {}", queueItem.getId(), recipient.email, user.getId());
+        log.info("Successfully queued campaign email ID: {} (Status: {}, Mode: {}) to: {} for user ID: {}", 
+                queueItem.getId(), status, dispatchMode, recipient.email, user.getId());
     }
 
     private String substitutePlaceholders(String text, RecipientInfo recipient, String targetRole) {

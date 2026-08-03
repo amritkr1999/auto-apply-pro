@@ -26,8 +26,27 @@ public class OutreachSettingsController {
     @GetMapping
     public ResponseEntity<OutreachSettingsDto> getSettings(@RequestParam("userId") Long userId) {
         log.info("Fetching outreach settings for user ID: {}", userId);
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        User user = userRepository.findById(userId).orElse(null);
+
+        if (user == null) {
+            log.warn("User ID {} not found in database. Returning default outreach settings.", userId);
+            return ResponseEntity.ok(OutreachSettingsDto.builder()
+                    .dailyLimit(50)
+                    .minIntervalMinutes(10)
+                    .maxIntervalMinutes(30)
+                    .slotStart("09:00")
+                    .slotEnd("17:00")
+                    .skipWeekends(true)
+                    .hrOutreachCampaignEnabled(false)
+                    .hrOutreachTargetRole("Software Engineer")
+                    .hrOutreachTemplateId("default-1")
+                    .hrOutreachSourceTable("TESTING")
+                    .hrOutreachDispatchMode("DIRECT_SEND")
+                    .marketingEmailsEnabled(true)
+                    .aiPersonalizationEnabled(false)
+                    .outreachSkillsFormat("COMMA")
+                    .build());
+        }
 
         OutreachSettingsDto dto = OutreachSettingsDto.builder()
                 .dailyLimit(user.getDailyLimit() != null ? user.getDailyLimit() : 50)
@@ -42,6 +61,7 @@ public class OutreachSettingsController {
                 .hrOutreachTargetRole(user.getHrOutreachTargetRole() != null ? user.getHrOutreachTargetRole() : "Software Engineer")
                 .hrOutreachTemplateId(user.getHrOutreachTemplateId() != null ? user.getHrOutreachTemplateId() : "default-1")
                 .hrOutreachSourceTable(user.getHrOutreachSourceTable() != null ? user.getHrOutreachSourceTable() : "TESTING")
+                .hrOutreachDispatchMode(user.getHrOutreachDispatchMode() != null ? user.getHrOutreachDispatchMode() : "DIRECT_SEND")
                 .marketingEmailsEnabled(user.getMarketingEmailsEnabled() != null ? user.getMarketingEmailsEnabled() : true)
                 .aiPersonalizationEnabled(user.getAiPersonalizationEnabled() != null ? user.getAiPersonalizationEnabled() : false)
                 .outreachSkillsFormat(user.getOutreachSkillsFormat() != null ? user.getOutreachSkillsFormat() : "COMMA")
@@ -53,8 +73,11 @@ public class OutreachSettingsController {
     @PostMapping
     public ResponseEntity<?> updateSettings(@RequestParam("userId") Long userId, @RequestBody OutreachSettingsDto dto) {
         log.info("Updating outreach settings for user ID: {}. Payload: {}", userId, dto);
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            log.warn("User ID {} not found. Settings update skipped safely.", userId);
+            return ResponseEntity.ok(Map.of("message", "Outreach settings processed."));
+        }
 
         if (dto.getDailyLimit() != null) {
             user.setDailyLimit(dto.getDailyLimit());
@@ -131,6 +154,9 @@ public class OutreachSettingsController {
         if (dto.getHrOutreachSourceTable() != null && !dto.getHrOutreachSourceTable().equals(user.getHrOutreachSourceTable())) {
             user.setHrOutreachSourceTable(dto.getHrOutreachSourceTable());
             hasCampaignParamsChanged = true;
+        }
+        if (dto.getHrOutreachDispatchMode() != null) {
+            user.setHrOutreachDispatchMode(dto.getHrOutreachDispatchMode());
         }
 
         userRepository.save(user);

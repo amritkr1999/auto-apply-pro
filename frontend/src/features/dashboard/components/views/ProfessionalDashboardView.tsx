@@ -14,6 +14,7 @@ import { ActivityChart } from "../ActivityChart";
 import { dashboardService } from "../../services/dashboardService";
 import { StatsGrid } from "./StatsGrid";
 import { ReviewDrawer } from "./ReviewDrawer";
+import CampaignDispatchModal from "../../../outreach/components/CampaignDispatchModal";
 import { parseUtcDate, formatDateInTimezone } from "../../../../utils/dateUtils";
 
 export const ProfessionalDashboardView: React.FC = () => {
@@ -37,6 +38,8 @@ export const ProfessionalDashboardView: React.FC = () => {
   // Campaign State
   const [hrOutreachCampaignEnabled, setHrOutreachCampaignEnabled] = useState(false);
   const [togglingCampaign, setTogglingCampaign] = useState(false);
+  const [isCampaignModalOpen, setIsCampaignModalOpen] = useState(false);
+  const [campaignNotification, setCampaignNotification] = useState<string>("");
   const [userTimezone, setUserTimezone] = useState<string>("");
 
   // Daily learning content state
@@ -330,6 +333,32 @@ export const ProfessionalDashboardView: React.FC = () => {
     }
   };
 
+  const handleStartCampaignWithMode = async (modeKey?: string) => {
+    try {
+      setTogglingCampaign(true);
+      // Explicitly enable campaign in backend
+      const res = await outreachService.toggleHrCampaign(userId, true);
+      setHrOutreachCampaignEnabled(res.enabled);
+
+      // Re-fetch email queue to reflect newly generated campaign items immediately
+      const updatedQueue = await outreachService.getOutreachQueue(userId);
+      setQueueItems(updatedQueue.filter((item: any) => item.status !== "DRAFT" && item.status !== "SUGGESTION"));
+      setDrafts(updatedQueue.filter((item: any) => item.status === "DRAFT"));
+      setSuggestions(updatedQueue.filter((item: any) => item.status === "SUGGESTION"));
+
+      let modeTitle = "Fully Automated";
+      if (modeKey === "DRAFTS" || modeKey === "GMAIL_DRAFTS") modeTitle = "Save to Gmail Drafts";
+      if (modeKey === "WEB_COMPOSE" || modeKey === "GMAIL_COMPOSE") modeTitle = "Gmail Web Compose";
+
+      setCampaignNotification(`🚀 HR Cold Email Campaign started in [${modeTitle}] mode! Generated emails have been processed into your queue.`);
+      setTimeout(() => setCampaignNotification(""), 6000);
+    } catch (err) {
+      console.error("Failed to start campaign", err);
+    } finally {
+      setTogglingCampaign(false);
+    }
+  };
+
   useEffect(() => {
     if (!dailyContent?.tip) return;
 
@@ -603,6 +632,22 @@ export const ProfessionalDashboardView: React.FC = () => {
             <ActivityChart data={metrics?.dailyActivity || []} loading={metricsLoading} />
           </div>
 
+          {/* Notification Banner */}
+          {campaignNotification && (
+            <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 text-emerald-800 dark:text-emerald-200 rounded-card text-xs font-bold flex items-center justify-between shadow-sm animate-in fade-in duration-200">
+              <div className="flex items-center gap-2">
+                <span>✅</span>
+                <span>{campaignNotification}</span>
+              </div>
+              <button 
+                onClick={() => setCampaignNotification("")} 
+                className="text-emerald-600 hover:text-emerald-800 dark:hover:text-emerald-100 font-bold text-sm p-1"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
           {/* HR Cold Email Campaign Status Widget */}
           <div data-tour="campaign-widget" className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-card shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 hover:shadow-md transition-shadow duration-200">
             <div className="flex gap-4">
@@ -626,6 +671,13 @@ export const ProfessionalDashboardView: React.FC = () => {
             </div>
             <div className="flex items-center gap-3 self-end md:self-center shrink-0">
               <button
+                onClick={() => setIsCampaignModalOpen(true)}
+                className="px-3.5 py-1.5 text-xs font-semibold text-indigo-700 dark:text-indigo-300 hover:text-indigo-900 dark:hover:text-indigo-100 transition-colors border border-indigo-200 dark:border-indigo-800 rounded-card hover:bg-indigo-50 dark:hover:bg-indigo-950/40 flex items-center gap-1.5"
+              >
+                <span>⚙️</span>
+                <span>Dispatch Modes</span>
+              </button>
+              <button
                 onClick={() => navigate("/profile/settings")}
                 className="px-3.5 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-350 hover:text-slate-800 dark:hover:text-slate-100 transition-colors border border-slate-200 dark:border-slate-800 rounded-card hover:bg-slate-50 dark:hover:bg-slate-800"
               >
@@ -634,17 +686,31 @@ export const ProfessionalDashboardView: React.FC = () => {
               <Button
                 size="sm"
                 disabled={togglingCampaign}
-                onClick={handleToggleCampaign}
+                onClick={() => {
+                  if (!hrOutreachCampaignEnabled) {
+                    setIsCampaignModalOpen(true);
+                  } else {
+                    handleToggleCampaign();
+                  }
+                }}
                 className={`text-xs font-semibold px-4 py-1.5 shadow-sm ${
                   hrOutreachCampaignEnabled
                     ? "bg-rose-600 hover:bg-rose-700 text-white"
                     : "bg-emerald-600 hover:bg-emerald-700 text-white"
                 }`}
               >
-                {togglingCampaign ? "Toggling..." : hrOutreachCampaignEnabled ? "Pause Campaign" : "Activate Campaign"}
+                {togglingCampaign ? "Updating..." : hrOutreachCampaignEnabled ? "Pause Campaign" : "Start Campaign"}
               </Button>
             </div>
           </div>
+          <CampaignDispatchModal
+            isOpen={isCampaignModalOpen}
+            onClose={() => setIsCampaignModalOpen(false)}
+            onLaunchAutomated={handleStartCampaignWithMode}
+            userId={userId}
+            userProfile={candidateProfile}
+            targetRole={outreachTargetRole}
+          />
         </div>
       )}
 
@@ -875,6 +941,7 @@ export const ProfessionalDashboardView: React.FC = () => {
                       <TableHead>Subject</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Details / Error</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -897,7 +964,15 @@ export const ProfessionalDashboardView: React.FC = () => {
                       } else if (item.status === "PENDING") {
                         statusText = "In Queue";
                         variant = "info";
+                      } else if (item.status === "DRAFT") {
+                        statusText = "Draft / Pending Review";
+                        variant = "warning";
                       }
+
+                      const handleOpenGmailComposeItem = (eqItem: any) => {
+                        const composeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(eqItem.recipientEmail || "")}&su=${encodeURIComponent(eqItem.subject || "")}&body=${encodeURIComponent(eqItem.body || "")}`;
+                        window.open(composeUrl, "_blank");
+                      };
 
                       const formatQueueDetails = (eqItem: any) => {
                         if (eqItem.status === "SENT" && eqItem.sentAt) {
@@ -939,6 +1014,10 @@ export const ProfessionalDashboardView: React.FC = () => {
                         if (eqItem.status === "BLACKLISTED") {
                           return "Excluded: Recipient matches your excluded companies list.";
                         }
+
+                        if (eqItem.status === "DRAFT") {
+                          return "Pending manual review. Open in Gmail Compose to send.";
+                        }
                         
                         return eqItem.errorMessage || "Awaiting dispatch (cron scheduled)";
                       };
@@ -952,6 +1031,27 @@ export const ProfessionalDashboardView: React.FC = () => {
                           </TableCell>
                           <TableCell className="text-xs text-slate-400">
                             {formatQueueDetails(item)}
+                          </TableCell>
+                          <TableCell className="text-right space-x-2">
+                            <button
+                              type="button"
+                              onClick={() => handleOpenGmailComposeItem(item)}
+                              className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[11px] font-bold transition-colors inline-flex items-center gap-1"
+                              title="Open in Gmail Web Compose"
+                            >
+                              <span>Gmail</span>
+                              <span className="text-[10px]">↗</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setDrawerItem(item);
+                                setIsDrawerOpen(true);
+                              }}
+                              className="px-2.5 py-1 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 rounded text-[11px] font-semibold transition-colors"
+                            >
+                              Review
+                            </button>
                           </TableCell>
                         </TableRow>
                       );

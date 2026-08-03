@@ -123,6 +123,10 @@ public class User {
     private String hrOutreachSourceTable = "TESTING";
 
     @Builder.Default
+    @Column(name = "hr_outreach_dispatch_mode")
+    private String hrOutreachDispatchMode = "DIRECT_SEND";
+
+    @Builder.Default
     @Column(name = "outreach_skills_format")
     private String outreachSkillsFormat = "COMMA";
 
@@ -220,6 +224,9 @@ public class User {
         }
         if (hrOutreachSourceTable == null) {
             hrOutreachSourceTable = "TESTING";
+        }
+        if (hrOutreachDispatchMode == null) {
+            hrOutreachDispatchMode = "DIRECT_SEND";
         }
         if (outreachSkillsFormat == null) {
             outreachSkillsFormat = "COMMA";

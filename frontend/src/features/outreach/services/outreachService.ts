@@ -395,6 +395,7 @@ export const outreachService = {
     hrOutreachTargetRole: string;
     hrOutreachTemplateId: string;
     hrOutreachSourceTable: string;
+    hrOutreachDispatchMode?: string;
     marketingEmailsEnabled: boolean;
     aiPersonalizationEnabled: boolean;
     outreachSkillsFormat: string;
@@ -427,6 +428,7 @@ export const outreachService = {
       hrOutreachTargetRole: "Software Engineer",
       hrOutreachTemplateId: "default-1",
       hrOutreachSourceTable: "TESTING",
+      hrOutreachDispatchMode: localStorage.getItem("campaign_dispatch_mode") || "DIRECT_SEND",
       marketingEmailsEnabled: true,
       aiPersonalizationEnabled: false,
       outreachSkillsFormat: "COMMA"
@@ -446,6 +448,7 @@ export const outreachService = {
     hrOutreachTargetRole?: string;
     hrOutreachTemplateId?: string;
     hrOutreachSourceTable?: string;
+    hrOutreachDispatchMode?: string;
     marketingEmailsEnabled?: boolean;
     aiPersonalizationEnabled?: boolean;
     outreachSkillsFormat?: string;
@@ -558,6 +561,57 @@ export const outreachService = {
       throw new Error("Failed to delete screenshot upload log.");
     }
     return response.json();
+  },
+
+  // Create a draft directly via Gmail API POST https://gmail.googleapis.com/gmail/v1/users/me/drafts
+  async createGmailDraftApi(to: string, subject: string, body: string): Promise<boolean> {
+    const rawMessage = [
+      `To: ${to}`,
+      `Subject: ${subject}`,
+      `Content-Type: text/html; charset=utf-8`,
+      ``,
+      body.replace(/\n/g, "<br/>")
+    ].join("\r\n");
+
+    const encodedMessage = btoa(unescape(encodeURIComponent(rawMessage)))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+
+    const userStr = localStorage.getItem("user");
+    const user = userStr ? JSON.parse(userStr) : null;
+    const token = user?.accessToken || user?.token;
+
+    try {
+      if (token && token.length > 20 && !token.startsWith("eyJ")) {
+        const res = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/drafts", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            message: { raw: encodedMessage }
+          })
+        });
+        if (res.ok) return true;
+      }
+    } catch (e) {
+      console.warn("Direct Gmail API call failed, falling back to local queue persistence.", e);
+    }
+
+    try {
+      await this.saveDraft({
+        recipientEmail: to,
+        subject,
+        body,
+        status: "DRAFT"
+      });
+      return true;
+    } catch (err) {
+      console.error("Failed to save draft fallback", err);
+      return false;
+    }
   }
 };
 

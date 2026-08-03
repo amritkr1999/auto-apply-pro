@@ -1427,12 +1427,12 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
             {gmailLoading ? (
               <div className="text-xs text-slate-400 italic py-3 bg-slate-50 rounded-xl border border-slate-100 text-center animate-pulse">Checking connection status...</div>
             ) : gmailConnected ? (
-              <div className="flex items-center justify-between p-5 bg-emerald-50 border border-emerald-100 rounded-2xl shadow-xs">
-                <div className="flex items-center gap-4">
-                  <span className="text-2xl bg-white p-2.5 rounded-xl shadow-xs border border-emerald-100">📧</span>
-                  <div>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 bg-emerald-50 border border-emerald-100 rounded-2xl shadow-xs">
+                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                  <span className="text-2xl bg-white p-2.5 rounded-xl shadow-xs border border-emerald-100 shrink-0">📧</span>
+                  <div className="min-w-0">
                     <p className="text-sm font-bold text-emerald-800">Gmail Connected</p>
-                    <p className="text-xs text-emerald-600 font-semibold mt-0.5">{connectedEmail}</p>
+                    <p className="text-xs text-emerald-600 font-semibold mt-0.5 truncate">{connectedEmail}</p>
                   </div>
                 </div>
                 <Button
@@ -1440,16 +1440,16 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
                   variant="outline"
                   size="sm"
                   onClick={handleDisconnectGmail}
-                  className="text-rose-600 border-rose-200 hover:bg-rose-50 hover:text-rose-700 font-bold rounded-xl"
+                  className="text-rose-600 border-rose-200 hover:bg-rose-50 hover:text-rose-700 font-bold rounded-xl shrink-0 w-full sm:w-auto"
                 >
                   Disconnect
                 </Button>
               </div>
             ) : (
-              <div className="flex items-center justify-between p-5 bg-slate-50/50 border border-slate-200 rounded-2xl">
-                <div className="flex items-center gap-4">
-                  <span className="text-2xl bg-white p-2.5 rounded-xl shadow-xs border border-slate-150">📧</span>
-                  <div>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 bg-slate-50/50 border border-slate-200 rounded-2xl">
+                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                  <span className="text-2xl bg-white p-2.5 rounded-xl shadow-xs border border-slate-150 shrink-0">📧</span>
+                  <div className="min-w-0">
                     <p className="text-sm font-bold text-slate-700">Gmail Disconnected</p>
                     <p className="text-xs text-slate-400 mt-0.5">No account connected yet</p>
                   </div>
@@ -1458,7 +1458,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
                   type="button"
                   size="sm"
                   onClick={handleConnectGmail}
-                  className="rounded-xl shadow-sm"
+                  className="rounded-xl shadow-sm shrink-0 w-full sm:w-auto"
                 >
                   Connect Gmail
                 </Button>
@@ -1477,9 +1477,9 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
               {/* GitHub Card */}
               {professionalVertical === "DEVELOPER" && (
                 githubUsername ? (
-                  <div className="flex items-center justify-between p-4 bg-slate-50/50 border border-slate-200 rounded-2xl transition-all hover:bg-slate-50">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-white p-2 rounded-xl border border-slate-150 shadow-xs">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-slate-50/50 border border-slate-200 rounded-2xl transition-all hover:bg-slate-50">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="bg-white p-2 rounded-xl border border-slate-150 shadow-xs shrink-0">
                         <GithubIcon />
                       </div>
                       <div className="min-w-0">
@@ -1499,18 +1499,18 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
                       variant="outline"
                       size="sm"
                       onClick={handleDisconnectGithub}
-                      className="text-rose-600 border-rose-200 hover:bg-rose-55 font-bold rounded-xl"
+                      className="text-rose-600 border-rose-200 hover:bg-rose-50 font-bold rounded-xl shrink-0 w-full sm:w-auto"
                     >
                       Disconnect
                     </Button>
                   </div>
                 ) : (
-                  <div className="flex items-center justify-between p-4 bg-slate-50/50 border border-slate-200 rounded-2xl">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-white p-2 rounded-xl border border-slate-150 shadow-xs text-slate-400">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-slate-50/50 border border-slate-200 rounded-2xl">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="bg-white p-2 rounded-xl border border-slate-150 shadow-xs text-slate-400 shrink-0">
                         <GithubIcon />
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-xs font-bold text-slate-700">GitHub</p>
                         <p className="text-xs text-slate-400">Not connected</p>
                       </div>
@@ -1519,7 +1519,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
                       type="button"
                       size="sm"
                       onClick={handleConnectGithub}
-                      className="rounded-xl"
+                      className="rounded-xl shrink-0 w-full sm:w-auto"
                     >
                       Connect
                     </Button>
@@ -1529,9 +1529,9 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
 
               {/* LinkedIn Card */}
               {linkedinName ? (
-                <div className="flex items-center justify-between p-4 bg-slate-50/50 border border-slate-200 rounded-2xl transition-all hover:bg-slate-50">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-white p-2 rounded-xl border border-slate-150 shadow-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-slate-50/50 border border-slate-200 rounded-2xl transition-all hover:bg-slate-50">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="bg-white p-2 rounded-xl border border-slate-150 shadow-xs shrink-0">
                       <LinkedinIcon />
                     </div>
                     <div className="min-w-0">
@@ -1551,18 +1551,18 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
                     variant="outline"
                     size="sm"
                     onClick={handleDisconnectLinkedin}
-                    className="text-rose-600 border-rose-200 hover:bg-rose-50 font-bold rounded-xl"
+                    className="text-rose-600 border-rose-200 hover:bg-rose-50 font-bold rounded-xl shrink-0 w-full sm:w-auto"
                   >
                     Disconnect
                   </Button>
                 </div>
               ) : (
-                <div className="flex items-center justify-between p-4 bg-slate-50/50 border border-slate-200 rounded-2xl">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-white p-2 rounded-xl border border-slate-150 shadow-xs text-slate-400">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-slate-50/50 border border-slate-200 rounded-2xl">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="bg-white p-2 rounded-xl border border-slate-150 shadow-xs text-slate-400 shrink-0">
                       <LinkedinIcon />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <p className="text-xs font-bold text-slate-700">LinkedIn</p>
                       <p className="text-xs text-slate-400">Not connected</p>
                     </div>
@@ -1571,7 +1571,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
                     type="button"
                     size="sm"
                     onClick={handleConnectLinkedin}
-                    className="rounded-xl"
+                    className="rounded-xl shrink-0 w-full sm:w-auto"
                   >
                     Connect
                   </Button>
@@ -1594,7 +1594,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50/50 p-5 border border-slate-200 rounded-2xl">
                   <div className="space-y-4">
                     <div>
-                      <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1.5">
                         <label className="block text-xs font-bold text-slate-600">
                           Daily Send Limit ({userTier} Tier)
                         </label>
@@ -1606,14 +1606,14 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
                         </Link>
                       </div>
                       <div className="p-3.5 bg-white border border-slate-200 rounded-xl space-y-2 shadow-xs">
-                        <div className="flex items-center justify-between text-sm font-bold text-slate-800">
-                          <span className="flex items-center gap-2">
-                            <span className="px-2 py-0.5 rounded text-[10px] bg-indigo-50 text-indigo-600 border border-indigo-200 uppercase tracking-wider font-extrabold">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs sm:text-sm font-bold text-slate-800">
+                          <span className="flex items-center gap-2 min-w-0">
+                            <span className="px-2 py-0.5 rounded text-[10px] bg-indigo-50 text-indigo-600 border border-indigo-200 uppercase tracking-wider font-extrabold shrink-0">
                               {userTier}
                             </span>
-                            <span>{getTierLimitNumber(userTier)} emails / day limit</span>
+                            <span className="truncate">{getTierLimitNumber(userTier)} emails / day limit</span>
                           </span>
-                          <span className="text-xs font-semibold text-slate-500">
+                          <span className="text-xs font-semibold text-slate-500 shrink-0">
                             {sentTodayCount} / {getTierLimitNumber(userTier)} sent today
                           </span>
                         </div>
@@ -1632,13 +1632,13 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
                       <label className="block text-xs font-bold text-slate-600 mb-1.5">
                         Randomized Interval Range (minutes between emails)
                       </label>
-                      <div className="flex items-center gap-3">
-                        <div className="flex-1">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="flex-1 min-w-0">
                           <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">Min Delay</span>
                           <select
                             value={minInterval}
                             onChange={(e) => handleMinIntervalChange(parseInt(e.target.value, 10))}
-                            className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white shadow-sm cursor-pointer"
+                            className="w-full px-2 sm:px-3 py-2 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white shadow-sm cursor-pointer min-w-0 truncate"
                           >
                             {minIntervalOptions.map((val) => (
                               <option key={val} value={val}>
@@ -1647,13 +1647,13 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
                             ))}
                           </select>
                         </div>
-                        <span className="text-slate-400 mt-5 text-xs font-bold">to</span>
-                        <div className="flex-1">
+                        <span className="text-slate-400 mt-5 text-xs font-bold shrink-0">to</span>
+                        <div className="flex-1 min-w-0">
                           <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">Max Delay</span>
                           <select
                             value={maxInterval}
                             onChange={(e) => handleMaxIntervalChange(parseInt(e.target.value, 10))}
-                            className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white shadow-sm cursor-pointer"
+                            className="w-full px-2 sm:px-3 py-2 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white shadow-sm cursor-pointer min-w-0 truncate"
                           >
                             {maxIntervalOptions.map((val) => (
                               <option key={val} value={val}>
@@ -1737,7 +1737,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
                       <select
                         value={outreachSkillsFormat}
                         onChange={(e) => setOutreachSkillsFormat(e.target.value)}
-                        className="w-full px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white cursor-pointer"
+                        className="w-full px-3 sm:px-4 py-2 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white cursor-pointer truncate"
                       >
                         <option value="COMMA">Comma Separated List (e.g., React, Java)</option>
                         <option value="BADGES">Visual Tag Pills (Modern HTML Badges)</option>
@@ -1752,7 +1752,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
 
                   <div className="space-y-4">
                     <div>
-                      <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1.5">
                         <label className="block text-xs font-bold text-slate-600">
                           Local Timezone
                         </label>
@@ -1762,7 +1762,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
                             const localTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
                             if (localTz) setTimezone(localTz);
                           }}
-                          className="text-[10px] text-primary hover:underline font-bold bg-primary/5 px-2 py-0.5 rounded-full"
+                          className="text-[10px] text-primary hover:underline font-bold bg-primary/5 px-2 py-0.5 rounded-full self-start sm:self-auto"
                         >
                           Detect timezone
                         </button>
@@ -1770,7 +1770,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
                       <select
                         value={timezone}
                         onChange={(e) => setTimezone(e.target.value)}
-                        className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-medium"
+                        className="w-full px-3 sm:px-4 py-2.5 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-medium truncate"
                       >
                         <option value="UTC">UTC (Coordinated Universal Time)</option>
                         <option value="America/New_York">America/New_York (US Eastern Time)</option>
@@ -1793,24 +1793,24 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
                       <label className="block text-xs font-bold text-slate-600 mb-1.5">
                         Active Sending Slot (local user hours)
                       </label>
-                      <div className="flex items-center gap-3">
-                        <div className="flex-1">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="flex-1 min-w-0">
                           <span className="text-[10px] text-slate-400 font-bold uppercase block mb-1">Start Time</span>
                           <input
                             type="time"
                             value={slotStart}
                             onChange={(e) => setSlotStart(e.target.value)}
-                            className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-primary bg-white font-medium"
+                            className="w-full px-2 sm:px-3 py-1.5 border border-slate-200 rounded-lg text-xs sm:text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-primary bg-white font-medium min-w-0"
                           />
                         </div>
-                        <span className="text-slate-400 mt-5 text-xs font-bold">to</span>
-                        <div className="flex-1">
+                        <span className="text-slate-400 mt-5 text-xs font-bold shrink-0">to</span>
+                        <div className="flex-1 min-w-0">
                           <span className="text-[10px] text-slate-400 font-bold uppercase block mb-1">End Time</span>
                           <input
                             type="time"
                             value={slotEnd}
                             onChange={(e) => setSlotEnd(e.target.value)}
-                            className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-primary bg-white font-medium"
+                            className="w-full px-2 sm:px-3 py-1.5 border border-slate-200 rounded-lg text-xs sm:text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-primary bg-white font-medium min-w-0"
                           />
                         </div>
                       </div>

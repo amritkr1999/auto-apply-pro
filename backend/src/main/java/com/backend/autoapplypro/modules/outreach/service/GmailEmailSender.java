@@ -112,35 +112,66 @@ public class GmailEmailSender implements EmailSender {
 
         } catch (GoogleJsonResponseException e) {
             int statusCode = e.getStatusCode();
-            log.error("GoogleJsonResponseException during delegated send. Code: {}, Message: {}", statusCode, e.getDetails().getMessage());
+            log.error("GoogleJsonResponseException during delegated send. Code: {}, Details: {}", 
+                    statusCode, e.getDetails() != null ? e.getDetails().toPrettyString() : e.getMessage(), e);
             
-            if (statusCode == 400 || statusCode == 422 || (e.getDetails() != null && e.getDetails().getMessage().contains("Recipient address"))) {
-                // Address rejection (analogous to 550)
+            if (statusCode == 400 || statusCode == 422 || (e.getDetails() != null && e.getDetails().getMessage() != null && e.getDetails().getMessage().contains("Recipient address"))) {
                 throw new OutreachSendException(OutreachErrorType.INVALID_RECIPIENT, "Invalid recipient address: " + to, e);
             } else if (statusCode == 429) {
-                // Rate limits
                 throw new OutreachSendException(OutreachErrorType.RATE_LIMITED, "Gmail API rate limit hit", e);
             } else if (statusCode == 401 || statusCode == 403) {
-                // Unauthorized / connection revoked / API disabled
                 String msg = "Gmail OAuth credential revoked or expired";
                 if (e.getDetails() != null && e.getDetails().getMessage() != null) {
-                    String googleMsg = e.getDetails().getMessage();
-                    if (googleMsg.contains("Gmail API has not been used") || googleMsg.contains("disabled")) {
-                        msg = "Gmail API is disabled on the Google Developer Console project. Enable it by visiting the console link in the details: " + googleMsg;
-                    } else {
-                        msg = "Gmail API access denied: " + googleMsg;
-                    }
+                    msg += ": " + e.getDetails().getMessage();
                 }
                 throw new OutreachSendException(OutreachErrorType.UNAUTHORIZED, msg, e);
             } else {
-                throw new OutreachSendException(OutreachErrorType.GENERIC, "Gmail API sending failed: " + e.getMessage(), e);
+                throw new OutreachSendException(OutreachErrorType.PROVIDER_ERROR, 
+                        "Gmail API Error: " + (e.getDetails() != null ? e.getDetails().getMessage() : e.getMessage()), e);
             }
-        } catch (jakarta.mail.internet.AddressException e) {
-            log.error("Invalid email address format: {}", to, e);
-            throw new OutreachSendException(OutreachErrorType.INVALID_RECIPIENT, "Invalid email address format: " + to, e);
+        } catch (OutreachSendException e) {
+            throw e;
         } catch (Exception e) {
-            log.error("Unexpected exception during delegated Gmail sending", e);
-            throw new OutreachSendException(OutreachErrorType.GENERIC, "Unexpected sending failure: " + e.getMessage(), e);
+            log.error("Unexpected error sending email via Gmail for user ID: {}", userId, e);
+            throw new OutreachSendException(OutreachErrorType.SYSTEM_ERROR, 
+                    "Failed to send email via Gmail: " + e.getMessage(), e);
+        }
+    }
+
+    public void createDraft(Long userId, String to, String cc, String subject, String body) {
+        GmailCredential credential = credentialRepository.findByUserId(userId)
+                .orElseThrow(() -> new OutreachSendException(OutreachErrorType.UNAUTHORIZED, 
+                        "Gmail account not connected for user ID: " + userId));
+
+        try {
+            GoogleCredential googleCredential = new GoogleCredential.Builder()
+                    .setTransport(new NetHttpTransport())
+                    .setJsonFactory(GsonFactory.getDefaultInstance())
+                    .setClientSecrets(clientId, clientSecret)
+                    .build()
+                    .setAccessToken(credential.getAccessToken())
+                    .setRefreshToken(credential.getRefreshToken());
+
+            Gmail gmailService = new Gmail.Builder(new NetHttpTransport(), GsonFactory.getDefaultInstance(), googleCredential)
+                    .setApplicationName("AutoApplyPro")
+                    .build();
+
+            MimeMessage mimeMessage = createMimeMessage(credential.getConnectedEmail(), to, cc, subject, body, null, null, null);
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            mimeMessage.writeTo(buffer);
+            String encodedEmail = Base64.getUrlEncoder().encodeToString(buffer.toByteArray());
+
+            Message message = new Message();
+            message.setRaw(encodedEmail);
+
+            com.google.api.services.gmail.model.Draft draft = new com.google.api.services.gmail.model.Draft();
+            draft.setMessage(message);
+
+            gmailService.users().drafts().create("me", draft).execute();
+            log.info("Successfully created Gmail draft for user: {} to: {}", credential.getConnectedEmail(), to);
+        } catch (Exception e) {
+            log.error("Failed to create Gmail draft for user ID: {}", userId, e);
+            throw new RuntimeException("Failed to create Gmail draft: " + e.getMessage(), e);
         }
     }
 
