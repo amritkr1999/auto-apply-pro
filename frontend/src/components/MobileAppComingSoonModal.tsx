@@ -46,8 +46,11 @@ export const MobileAppComingSoonModal: React.FC<MobileAppComingSoonModalProps> =
           </div>
 
           {/* Heading */}
-          <h3 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight mb-2">
-            EasyNaukri On The Go!
+          <h3 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight mb-2 flex items-center justify-center gap-2">
+            <span className="bg-slate-900 border border-slate-800/80 px-2 py-0.5 rounded-lg shadow-xs inline-flex items-center justify-center shrink-0">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-300 to-purple-400 font-black text-sm select-none">EN</span>
+            </span>
+            <span>EasyNaukri On The Go!</span>
           </h3>
 
           {/* Description */}

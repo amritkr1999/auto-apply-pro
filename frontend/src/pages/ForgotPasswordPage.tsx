@@ -41,7 +41,12 @@ export const ForgotPasswordPage: React.FC = () => {
       <div className="auth-container">
         {/* Logo Header */}
         <header className="auth-header">
-          <h1 className="auth-logo">EasyNaukri</h1>
+          <div className="flex items-center justify-center gap-2.5 mb-2">
+            <span className="bg-slate-900 border border-slate-800/80 px-2.5 py-1 rounded-xl shadow-xs inline-flex items-center justify-center shrink-0">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-300 to-purple-400 font-black text-base select-none">EN</span>
+            </span>
+            <h1 className="auth-logo !mb-0">EasyNaukri</h1>
+          </div>
           <p className="auth-subtitle">Recover your account password</p>
         </header>
 

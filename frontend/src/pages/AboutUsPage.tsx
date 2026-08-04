@@ -14,7 +14,9 @@ export const AboutUsPage: React.FC = () => {
             to="/"
             className="flex items-center gap-2 text-xl font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
           >
-            <span className="bg-indigo-600 text-white px-2 py-0.5 rounded-lg text-sm font-extrabold">EN</span>
+            <span className="bg-slate-900 border border-slate-800/80 px-2 py-0.5 rounded-lg shadow-xs inline-flex items-center justify-center shrink-0">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-300 to-purple-400 font-black text-sm select-none">EN</span>
+            </span>
             <span>EasyNaukri</span>
           </Link>
           <div className="flex items-center gap-4">

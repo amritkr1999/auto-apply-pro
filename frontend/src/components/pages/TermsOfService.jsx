@@ -8,7 +8,9 @@ export const TermsOfService = () => {
       <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 text-xl font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors">
-            <span className="bg-indigo-600 text-white p-1.5 rounded-lg flex items-center justify-center text-sm font-extrabold">EN</span>
+            <span className="bg-slate-900 border border-slate-800/80 p-1.5 rounded-lg inline-flex items-center justify-center shadow-xs shrink-0">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-300 to-purple-400 font-black text-sm select-none">EN</span>
+            </span>
             <span>EasyNaukri</span>
           </Link>
           <div className="flex items-center gap-4">

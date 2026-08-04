@@ -6,6 +6,9 @@ export const Footer: React.FC = () => {
     <footer className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-6 transition-colors">
       <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
         <div className="flex flex-col sm:flex-row items-center gap-2">
+          <span className="bg-slate-900 border border-slate-800/80 px-1.5 py-0.5 rounded-md shadow-xs inline-flex items-center justify-center shrink-0">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-300 to-purple-400 font-black text-xs select-none">EN</span>
+          </span>
           <span>© {new Date().getFullYear()} EasyNaukri. All rights reserved.</span>
           <span className="font-semibold text-indigo-600 dark:text-indigo-400">Made with ❤️ by an Indian for India 🇮🇳</span>
         </div>

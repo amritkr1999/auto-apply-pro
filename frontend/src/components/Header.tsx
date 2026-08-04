@@ -151,7 +151,9 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
             </button>
           )}
           <Link to={getDashboardPath()} className="text-xl font-bold text-primary hover:text-primary-hover transition-colors flex items-center gap-2 shrink-0">
-            <span className="bg-indigo-600 text-white px-2 py-0.5 rounded-lg text-sm font-extrabold">EN</span>
+            <span className="bg-slate-900 border border-slate-800/80 px-2 py-0.5 rounded-lg shadow-xs inline-flex items-center justify-center shrink-0">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-300 to-purple-400 font-black text-sm select-none">EN</span>
+            </span>
             <span className="whitespace-nowrap">EasyNaukri</span>
           </Link>
           {user && (
