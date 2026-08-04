@@ -351,7 +351,7 @@ export const LoginPage: React.FC = () => {
     console.log(`Authenticating with ${provider}...`);
     trackEvent("social_auth_initiated", { provider });
     const providerLower = provider.toLowerCase();
-    if (providerLower === "google" || providerLower === "github") {
+    if (providerLower === "google" || providerLower === "github" || providerLower === "linkedin") {
       try {
         setError("");
         const API_BASE_V1 = `${API_BASE}/v1`;
