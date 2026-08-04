@@ -3,6 +3,7 @@ import { outreachService, type EmailTemplate } from "../services/outreachService
 import { getActiveSubscription } from "../../billing/services/billingService";
 import { Link } from "react-router-dom";
 import { profileService } from "../../profile/services/profileService";
+import { SendTrialEmailModal } from "./SendTrialEmailModal";
 import "../outreach.css";
 
 export const TemplateManager: React.FC = () => {
@@ -24,6 +25,16 @@ export const TemplateManager: React.FC = () => {
   const [sortBy, setSortBy] = useState("");
   const [pageDraft, setPageDraft] = useState<any | null>(null);
   const [hasCheckedDraft, setHasCheckedDraft] = useState(false);
+
+  const [isTrialModalOpen, setIsTrialModalOpen] = useState(false);
+  const [trialModalData, setTrialModalData] = useState<{
+    template?: EmailTemplate | null;
+    subject?: string;
+    intro?: string;
+    skillsTemplate?: string;
+    body?: string;
+    signOff?: string;
+  } | null>(null);
 
   const [profileSkills, setProfileSkills] = useState<string[]>([]);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
@@ -480,7 +491,7 @@ export const TemplateManager: React.FC = () => {
     return true;
   });
 
-  const systemTemplates = filteredTemplates.filter(tpl => tpl.isSystemTemplate);
+  const systemTemplates = filteredTemplates.filter(tpl => Boolean(tpl.isSystemTemplate) || (tpl.id && tpl.id.startsWith("default-")));
   const userTemplates = filteredTemplates.filter(tpl => tpl.creatorId === currentUserId && !tpl.isSystemTemplate);
   const publicTemplates = filteredTemplates.filter(tpl => tpl.isPublic && tpl.creatorId !== currentUserId && !tpl.isSystemTemplate);
 
@@ -983,7 +994,7 @@ export const TemplateManager: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => {
-                          if (activeTemplate.id) {
+                          if (activeTemplate?.id) {
                             setIsEditMode(false);
                           } else {
                             setActiveTemplate(null);
@@ -993,6 +1004,26 @@ export const TemplateManager: React.FC = () => {
                         className="px-4 py-2 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-btn text-xs font-semibold transition-all"
                       >
                         Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setTrialModalData({
+                            template: activeTemplate,
+                            subject,
+                            intro,
+                            skillsTemplate,
+                            body,
+                            signOff
+                          });
+                          setIsTrialModalOpen(true);
+                        }}
+                        className="px-4 py-2 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900 rounded-btn text-xs font-semibold transition-all flex items-center gap-1.5"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 002-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        Send Trial Email
                       </button>
                       <button
                         type="submit"
@@ -1149,21 +1180,43 @@ export const TemplateManager: React.FC = () => {
                     >
                       Close
                     </button>
-                    {activeTemplate.id === activeTemplateId ? (
-                      <span className="px-3 py-1.5 bg-emerald-50 border border-emerald-250 text-emerald-700 rounded-btn text-xs font-semibold flex items-center gap-1">
-                        <svg className="w-3.5 h-3.5 fill-current text-emerald-600" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                        Currently Active
-                      </span>
-                    ) : (
+                    <div className="flex gap-2 items-center">
                       <button
-                        onClick={() => handleActivateTemplate(activeTemplate.id)}
-                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-btn text-xs font-semibold transition-all shadow-sm flex items-center gap-1"
+                        type="button"
+                        onClick={() => {
+                          setTrialModalData({
+                            template: activeTemplate,
+                            subject: activeTemplate.subject,
+                            intro: activeTemplate.intro,
+                            skillsTemplate: activeTemplate.skillsTemplate,
+                            body: activeTemplate.body,
+                            signOff: activeTemplate.signOff
+                          });
+                          setIsTrialModalOpen(true);
+                        }}
+                        className="px-3 py-1.5 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-950/60 dark:border-indigo-800 dark:text-indigo-300 dark:hover:bg-indigo-900 rounded-btn text-xs font-semibold transition-all flex items-center gap-1.5"
                       >
-                        Activate Template
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 002-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        Send Trial Email
                       </button>
-                    )}
+                      {activeTemplateId === activeTemplate.id ? (
+                        <span className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-btn text-xs font-bold flex items-center gap-1">
+                          <svg className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                          Currently Active
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => handleActivateTemplate(activeTemplate.id)}
+                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-btn text-xs font-semibold transition-all shadow-sm flex items-center gap-1"
+                        >
+                          Activate Template
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   {/* Edit/Delete Actions */}
@@ -1202,6 +1255,17 @@ export const TemplateManager: React.FC = () => {
           </div>
         </div>
       )}
+
+      <SendTrialEmailModal
+        isOpen={isTrialModalOpen}
+        onClose={() => setIsTrialModalOpen(false)}
+        template={trialModalData?.template}
+        subject={trialModalData?.subject}
+        intro={trialModalData?.intro}
+        skillsTemplate={trialModalData?.skillsTemplate}
+        body={trialModalData?.body}
+        signOff={trialModalData?.signOff}
+      />
     </div>
   );
 };

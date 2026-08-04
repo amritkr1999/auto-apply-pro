@@ -52,6 +52,25 @@ export interface OutreachDraft {
   jobTitle?: string;
 }
 
+export interface TrialEmailRequest {
+  templateId?: string;
+  subject?: string;
+  intro?: string;
+  skillsTemplate?: string;
+  body?: string;
+  signOff?: string;
+  targetEmail?: string;
+  sampleData?: Record<string, string>;
+}
+
+export interface TrialEmailResponse {
+  success: boolean;
+  message: string;
+  recipientEmail?: string;
+  renderedSubject?: string;
+  sentAt?: string;
+}
+
 const DEFAULT_TEMPLATES: EmailTemplate[] = [
   {
     id: "default-1",
@@ -61,6 +80,8 @@ const DEFAULT_TEMPLATES: EmailTemplate[] = [
     skillsTemplate: "I am writing to apply for the {{jobRole}} position. I noticed your team is looking for a developer experienced in {{skills}}, which maps closely to my skillset.",
     body: "I have over {{experienceYears}} years of software development experience, focusing on building high-performance systems and user-centric features.",
     signOff: "Regards,\n{{candidateName}}\n{{candidateMobile}}\n{{candidateEmail}}",
+    isSystemTemplate: true,
+    isPublic: true
   },
   {
     id: "default-2",
@@ -70,6 +91,8 @@ const DEFAULT_TEMPLATES: EmailTemplate[] = [
     skillsTemplate: "I wanted to follow up on my application for the {{jobRole}} role. My hands-on skills in {{skills}} make me excited about joining {{companyName}}.",
     body: "I have {{experienceYears}} years of experience building scalable products and would love to connect to share more.",
     signOff: "Regards,\n{{candidateName}}\n{{candidateMobile}}\n{{candidateEmail}}",
+    isSystemTemplate: true,
+    isPublic: true
   },
   {
     id: "default-3",
@@ -79,6 +102,8 @@ const DEFAULT_TEMPLATES: EmailTemplate[] = [
     skillsTemplate: "I noticed that {{companyName}} is expanding and looking for developers skilled in {{skills}}. I wanted to connect to see if my background might be a fit.",
     body: "I have {{experienceYears}} years of software engineering experience building highly scalable applications and products. I would be grateful for a referral or any advice you might have on applying.",
     signOff: "Best regards,\n{{candidateName}}\n{{candidateMobile}}\n{{candidateEmail}}",
+    isSystemTemplate: true,
+    isPublic: true
   },
   {
     id: "default-4",
@@ -88,6 +113,8 @@ const DEFAULT_TEMPLATES: EmailTemplate[] = [
     skillsTemplate: "I've been following {{companyName}}'s growth and was particularly interested in your work requiring {{skills}}.",
     body: "With {{experienceYears}} years of software development experience, I’m keen to learn more about the team culture, recent challenges, and future direction. Would you be open to a brief 10-minute informational chat sometime next week?",
     signOff: "Sincerely,\n{{candidateName}}\n{{candidateMobile}}\n{{candidateEmail}}",
+    isSystemTemplate: true,
+    isPublic: true
   },
   {
     id: "default-5",
@@ -97,17 +124,30 @@ const DEFAULT_TEMPLATES: EmailTemplate[] = [
     skillsTemplate: "I am a software engineer specializing in {{skills}} with a deep passion for building high-quality products that users love.",
     body: "Throughout my {{experienceYears}} years of experience, I have focused on shipping user-centric features, optimizing performance, and collaborating closely with design and product teams.",
     signOff: "Best,\n{{candidateName}}\n{{candidateMobile}}\n{{candidateEmail}}",
+    isSystemTemplate: true,
+    isPublic: true
   }
 ];
 
 // In-memory/LocalStorage fallback cache for offline development mode
 const getLocalTemplates = (): EmailTemplate[] => {
   const local = localStorage.getItem("email_templates");
+  let list: EmailTemplate[] = [];
   if (!local) {
-    localStorage.setItem("email_templates", JSON.stringify(DEFAULT_TEMPLATES));
-    return DEFAULT_TEMPLATES;
+    list = DEFAULT_TEMPLATES;
+  } else {
+    try {
+      list = JSON.parse(local);
+    } catch {
+      list = DEFAULT_TEMPLATES;
+    }
   }
-  return JSON.parse(local);
+
+  // Ensure system templates are marked as isSystemTemplate: true
+  return list.map(t => ({
+    ...t,
+    isSystemTemplate: t.isSystemTemplate || t.id.startsWith("default-")
+  }));
 };
 
 const saveLocalTemplates = (templates: EmailTemplate[]) => {
@@ -612,6 +652,24 @@ export const outreachService = {
       console.error("Failed to save draft fallback", err);
       return false;
     }
+  },
+
+  // Send a trial email for template/outreach verification
+  async sendTrialEmail(request: TrialEmailRequest): Promise<TrialEmailResponse> {
+    const response = await fetch(`${API_BASE_V1}/outreach/trial-email`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthHeaders()
+      },
+      body: JSON.stringify(request)
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to send trial email");
+    }
+    return data;
   }
 };
 

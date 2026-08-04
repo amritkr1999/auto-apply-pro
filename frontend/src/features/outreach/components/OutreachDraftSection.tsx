@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { outreachService, type EmailTemplate } from "../services/outreachService";
 import { GmailComposeModal } from "./GmailComposeModal";
+import { SendTrialEmailModal } from "./SendTrialEmailModal";
 import Button from "../../../components/ui/Button";
 import Input from "../../../components/ui/Input";
 import { profileService } from "../../profile/services/profileService";
@@ -31,6 +32,7 @@ export const OutreachDraftSection: React.FC = () => {
 
   // Preview / Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isTrialModalOpen, setIsTrialModalOpen] = useState(false);
   const [parsedSubject, setParsedSubject] = useState("");
   const [parsedBody, setParsedBody] = useState("");
 
@@ -235,9 +237,20 @@ export const OutreachDraftSection: React.FC = () => {
 
   return (
     <div className="max-w-[1400px] mx-auto w-full px-2 sm:px-4">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-800">Draft Email Outreach</h1>
-        <p className="text-sm text-slate-500 mt-1">Personalize templates and queue outbound recruitment cold emails</p>
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-800 dark:text-white">Draft Email Outreach</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Personalize templates and queue outbound recruitment cold emails</p>
+        </div>
+        <button
+          onClick={() => setIsTrialModalOpen(true)}
+          className="px-4 py-2 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-950/60 dark:border-indigo-800 dark:text-indigo-300 dark:hover:bg-indigo-900 rounded-xl text-xs font-semibold transition-all shadow-sm flex items-center gap-2 self-start sm:self-auto"
+        >
+          <svg className="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 002-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          <span>Send Trial Email</span>
+        </button>
       </div>
 
       {statusMessage && (
@@ -491,7 +504,7 @@ export const OutreachDraftSection: React.FC = () => {
 
       </div>
 
-      {/* Gmail High-Fidelity Preview Modal */}
+      {/* High-Fidelity Preview Modal */}
       <GmailComposeModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -499,6 +512,14 @@ export const OutreachDraftSection: React.FC = () => {
         subject={parsedSubject}
         body={parsedBody}
         onSend={handleSendDraft}
+      />
+
+      {/* Trial Verification Email Modal */}
+      <SendTrialEmailModal
+        isOpen={isTrialModalOpen}
+        onClose={() => setIsTrialModalOpen(false)}
+        subject={rawSubject}
+        body={rawBody}
       />
     </div>
   );
