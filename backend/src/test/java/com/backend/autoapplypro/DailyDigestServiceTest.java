@@ -131,7 +131,7 @@ public class DailyDigestServiceTest {
         String html = dailyDigestService.buildDailyDigestHtml(dto);
 
         assertNotNull(html);
-        assertTrue(html.contains("AutoApplyPro"));
+        assertTrue(html.contains("EasyNaukri"));
         assertTrue(html.contains("EOD Synopsis"));
         assertTrue(html.contains("Alex Johnson"));
         assertTrue(html.contains("How was your application outreach today?"));

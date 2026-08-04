@@ -162,7 +162,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
         setProfileData(toSelect);
       }
     } catch (err: any) {
-      setError("Failed to load profiles list.");
+      setError(err.message || "Failed to load profiles list.");
     } finally {
       setLoading(false);
     }

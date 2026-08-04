@@ -5,7 +5,6 @@ import { outreachService } from "../features/outreach/services/outreachService";
 import { profileService } from "../features/profile/services/profileService";
 import type { CandidateProfile } from "../features/profile/services/profileService";
 import { useAnalytics } from "../context/AnalyticsContext";
-import FeedbackModal from "../components/FeedbackModal";
 
 export const DraftsReviewPage: React.FC = () => {
   const navigate = useNavigate();
@@ -23,25 +22,12 @@ export const DraftsReviewPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isApprovingAll, setIsApprovingAll] = useState(false);
 
-  // EOD Digest & Feedback modal state
-  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
-  const [initialRating, setInitialRating] = useState(5);
+  // EOD Digest preferences state
   const [digestEnabled, setDigestEnabled] = useState(true);
   const [digestTime, setDigestTime] = useState("20:00");
   const [sendingTestDigest, setSendingTestDigest] = useState(false);
 
   useEffect(() => {
-    // Check URL parameters for feedback rating
-    const params = new URLSearchParams(window.location.search);
-    const ratingParam = params.get("rating");
-    if (ratingParam) {
-      const r = parseInt(ratingParam, 10);
-      if (r >= 1 && r <= 5) {
-        setInitialRating(r);
-        setIsFeedbackOpen(true);
-      }
-    }
-
     // Fetch EOD digest preferences
     const fetchDigestPrefs = async () => {
       try {
@@ -246,18 +232,10 @@ export const DraftsReviewPage: React.FC = () => {
             ← Back to Dashboard
           </button>
           <h1 className="text-3xl font-bold text-slate-800">Email Drafts & EOD Daily Digest</h1>
-          <p className="text-sm text-slate-500 mt-1">Review cold outreach drafts, configure daily EOD summaries, and submit feedback</p>
+          <p className="text-sm text-slate-500 mt-1">Review cold outreach drafts and configure daily EOD summaries</p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsFeedbackOpen(true)}
-            className="text-xs font-bold px-3.5 py-2 border-amber-300 text-amber-700 bg-amber-50 hover:bg-amber-100"
-          >
-            ⭐️ Leave Review / Suggestion
-          </Button>
-          {drafts.length > 0 && (
+        {drafts.length > 0 && (
+          <div className="flex items-center gap-3">
             <Button 
               variant="success" 
               size="sm" 
@@ -267,8 +245,8 @@ export const DraftsReviewPage: React.FC = () => {
             >
               {isApprovingAll ? "Approving All..." : `Approve All (${drafts.length})`}
             </Button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Daily EOD Synopsis Settings Card */}
@@ -575,13 +553,6 @@ export const DraftsReviewPage: React.FC = () => {
           })}
         </div>
       )}
-
-      {/* Interactive Review & Feedback Modal */}
-      <FeedbackModal
-        isOpen={isFeedbackOpen}
-        onClose={() => setIsFeedbackOpen(false)}
-        initialRating={initialRating}
-      />
     </div>
   );
 };

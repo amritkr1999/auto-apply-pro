@@ -412,7 +412,13 @@ export const profileService = {
       headers: getAuthHeaders(),
     });
     if (!response.ok) {
-      throw new Error("Failed to load candidate profiles");
+      const errorText = await response.text().catch(() => "");
+      let errorMsg = "Failed to load candidate profiles";
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMsg = errorJson.message || errorJson.error || errorMsg;
+      } catch (e) {}
+      throw new Error(errorMsg);
     }
     return response.json();
   },

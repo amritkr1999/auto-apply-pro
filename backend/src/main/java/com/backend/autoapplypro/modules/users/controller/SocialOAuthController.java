@@ -255,7 +255,7 @@ public class SocialOAuthController {
                             .build();
                     professionalProfileRepository.save(candidate);
                 } else {
-                    if (user.getRole() == UserRole.CANDIDATE) {
+                    if (user.getRole() != UserRole.RECRUITER && user.getRole() != UserRole.COMPANY) {
                         ProfessionalProfile candidate = professionalProfileRepository.findByUserId(user.getId()).orElse(null);
                         if (candidate != null) {
                             if (candidate.getGithubUsername() == null) {
@@ -447,7 +447,7 @@ public class SocialOAuthController {
                             .build();
                     professionalProfileRepository.save(candidate);
                 } else {
-                    if (user.getRole() == UserRole.CANDIDATE) {
+                    if (user.getRole() != UserRole.RECRUITER && user.getRole() != UserRole.COMPANY) {
                         ProfessionalProfile candidate = professionalProfileRepository.findByUserId(user.getId()).orElse(null);
                         if (candidate != null) {
                             if (candidate.getLinkedinName() == null) {

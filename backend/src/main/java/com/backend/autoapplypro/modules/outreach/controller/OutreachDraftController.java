@@ -89,7 +89,7 @@ public class OutreachDraftController {
         if (user == null) {
             log.info("No user ID found. Bypassing auth check for test/dev fallback.");
             user = userRepository.findAll().stream()
-                    .filter(u -> u.getRole() == UserRole.CANDIDATE)
+                    .filter(u -> u.getRole() != UserRole.RECRUITER && u.getRole() != UserRole.COMPANY)
                     .findFirst()
                     .orElseGet(() -> {
                         log.info("No candidate user found in database. Creating default candidate user.");
