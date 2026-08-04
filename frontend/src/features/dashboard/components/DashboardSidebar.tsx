@@ -143,9 +143,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isMobile = f
         <div className={`flex items-center ${minimizedState ? "justify-center" : "justify-between"} mb-6`}>
           {!minimizedState && (
             <div className="flex items-center gap-2">
-              <span className="bg-slate-900 border border-slate-800/80 px-1.5 py-0.5 rounded-md shadow-xs inline-flex items-center justify-center shrink-0">
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-300 to-purple-400 font-black text-xs select-none">EN</span>
-              </span>
+              <img src="/branding/easynaukri_logo.png" alt="EasyNaukri Logo" className="w-6 h-6 rounded-md object-contain shadow-xs select-none shrink-0" />
               <h3 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                 Menu ({role.toLowerCase()})
               </h3>

@@ -342,9 +342,7 @@ export const PlaqueCardEditor: React.FC<PlaqueCardEditorProps> = ({ userId }) =>
         <div className="lg:col-span-6 sticky top-6 space-y-4">
           <div className="flex items-center justify-between bg-slate-100 p-2.5 rounded-2xl border border-slate-200">
             <div className="flex items-center gap-2 pl-2">
-              <span className="bg-slate-900 border border-slate-800/80 px-1.5 py-0.5 rounded-md shadow-xs inline-flex items-center justify-center shrink-0">
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-300 to-purple-400 font-black text-[10px] select-none">EN</span>
-              </span>
+              <img src="/branding/easynaukri_logo.png" alt="EasyNaukri Logo" className="w-5 h-5 rounded-md object-contain shadow-xs select-none shrink-0" />
               <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">EasyNaukri Preview</span>
             </div>
             <div className="flex rounded-lg bg-white border border-slate-200 p-0.5 shadow-xs">
