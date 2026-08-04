@@ -523,8 +523,14 @@ export const LandingPage: React.FC = () => {
                 <tr>
                   <td><span className="oauth-scope-tag">https://www.googleapis.com/auth/gmail.send</span></td>
                   <td><span className="oauth-badge-restricted">Restricted</span></td>
-                  <td>Ability to compose & send outbound emails</td>
+                  <td>Ability to send user-initiated outbound outreach emails</td>
                   <td>To send user-authorized job applications and recruiter outreach emails directly from your connected Gmail address.</td>
+                </tr>
+                <tr>
+                  <td><span className="oauth-scope-tag">https://www.googleapis.com/auth/gmail.compose</span></td>
+                  <td><span className="oauth-badge-restricted">Restricted</span></td>
+                  <td>Create & save email drafts in user's Gmail inbox</td>
+                  <td>To export AI-generated recruiter outreach messages as native drafts into your Gmail account so you can review, edit, and send them directly from Gmail.</td>
                 </tr>
               </tbody>
             </table>

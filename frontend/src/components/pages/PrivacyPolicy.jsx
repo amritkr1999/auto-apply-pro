@@ -146,6 +146,49 @@ export const PrivacyPolicy = () => {
             </div>
           </section>
 
+          {/* Section 4: Google API Services User Data & Limited Use Disclosure */}
+          <section className="bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-8 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2.5 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 rounded-xl">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">4. Google API Services User Data & Limited Use Disclosure</h2>
+            </div>
+            <div className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed space-y-3">
+              <p>
+                EasyNaukri's use and transfer to any other app of information received from Google APIs will adhere to the <a href="https://developers.google.com/terms/api-services-user-data-policy#additional_requirements_for_specific_api_scopes" target="_blank" rel="noopener noreferrer" className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">Google API Services User Data Policy</a>, including the <strong>Limited Use</strong> requirements.
+              </p>
+              <div className="bg-slate-50 dark:bg-slate-800/60 rounded-xl p-4 border border-slate-200 dark:border-slate-700/60 my-4 space-y-2">
+                <div className="flex items-start gap-2.5">
+                  <span className="text-indigo-600 dark:text-indigo-400 font-bold">•</span>
+                  <div>
+                    <strong className="text-slate-900 dark:text-slate-100">Requested Scopes:</strong> We request <code className="font-mono text-xs bg-slate-200 dark:bg-slate-700 px-1 py-0.5 rounded text-indigo-700 dark:text-indigo-300">https://www.googleapis.com/auth/gmail.send</code> and <code className="font-mono text-xs bg-slate-200 dark:bg-slate-700 px-1 py-0.5 rounded text-indigo-700 dark:text-indigo-300">https://www.googleapis.com/auth/gmail.compose</code>.
+                  </div>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <span className="text-indigo-600 dark:text-indigo-400 font-bold">•</span>
+                  <div>
+                    <strong className="text-slate-900 dark:text-slate-100">Purpose & Usage:</strong> These permissions are used exclusively to allow candidates to create email drafts in their Gmail account (<code className="font-mono text-xs">gmail.compose</code>) and send candidate-approved outreach emails (<code className="font-mono text-xs">gmail.send</code>) directly from their connected Gmail account upon explicit user action.
+                  </div>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <span className="text-indigo-600 dark:text-indigo-400 font-bold">•</span>
+                  <div>
+                    <strong className="text-slate-900 dark:text-slate-100">No Reading / Inbox Access:</strong> EasyNaukri does NOT request read or search access (<code className="font-mono text-xs bg-slate-200 dark:bg-slate-700 px-1 py-0.5 rounded text-slate-700 dark:text-slate-300">gmail.readonly</code> is not requested). We never read, view, scan, store, or analyze your personal emails or inbox content.
+                  </div>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <span className="text-indigo-600 dark:text-indigo-400 font-bold">•</span>
+                  <div>
+                    <strong className="text-slate-900 dark:text-slate-100">No Data Transfer or AI Training:</strong> Google user data is not transferred to third parties (except as necessary to provide service features), nor is it used for serving advertisements or training Generalized AI/ML models.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
           {/* Section 4: Data Security & Storage */}
           <section className="bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-8 border border-slate-200/80 dark:border-slate-800 shadow-sm">
             <div className="flex items-center gap-3 mb-4">
