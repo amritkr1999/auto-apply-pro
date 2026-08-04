@@ -113,7 +113,7 @@ public class GmailEmailSender implements EmailSender {
         } catch (GoogleJsonResponseException e) {
             int statusCode = e.getStatusCode();
             log.error("GoogleJsonResponseException during delegated send. Code: {}, Details: {}", 
-                    statusCode, e.getDetails() != null ? e.getDetails().toPrettyString() : e.getMessage(), e);
+                    statusCode, e.getDetails() != null ? e.getDetails().toString() : e.getMessage(), e);
             
             if (statusCode == 400 || statusCode == 422 || (e.getDetails() != null && e.getDetails().getMessage() != null && e.getDetails().getMessage().contains("Recipient address"))) {
                 throw new OutreachSendException(OutreachErrorType.INVALID_RECIPIENT, "Invalid recipient address: " + to, e);
