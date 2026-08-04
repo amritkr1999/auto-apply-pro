@@ -306,6 +306,25 @@ public class SocialOAuthController {
     }
 
     /**
+     * LinkedIn Login
+     */
+    @GetMapping("/login/linkedin")
+    public ResponseEntity<String> loginLinkedin() {
+        log.info("Generating LinkedIn OAuth login URL");
+        if (linkedinClientId.startsWith("dev-")) {
+            log.info("Using mock LinkedIn connection URL for development");
+            String mockUrl = linkedinRedirectUri + "?code=mock_linkedin_code&state=login";
+            return ResponseEntity.ok(mockUrl);
+        }
+        String authUrl = "https://www.linkedin.com/oauth/v2/authorization?response_type=code"
+                + "&client_id=" + linkedinClientId
+                + "&redirect_uri=" + linkedinRedirectUri
+                + "&state=login"
+                + "&scope=openid%20profile%20email";
+        return ResponseEntity.ok(authUrl);
+    }
+
+    /**
      * Connect LinkedIn
      */
     @GetMapping("/connect/linkedin")
@@ -332,16 +351,24 @@ public class SocialOAuthController {
     public RedirectView linkedinCallback(
             @RequestParam("code") String code,
             @RequestParam("state") String state) {
-        Long userId = Long.parseLong(state);
-        log.info("Received LinkedIn callback for user: {}", userId);
+        boolean isLogin = false;
+        Long userId = null;
+        try {
+            userId = Long.parseLong(state);
+        } catch (NumberFormatException e) {
+            isLogin = true;
+        }
+        log.info("Received LinkedIn callback. state: {}, isLogin: {}", state, isLogin);
 
         try {
             String linkedinName;
             String linkedinProfileUrl;
+            String email = null;
 
             if ("mock_linkedin_code".equals(code)) {
                 linkedinName = "Mock Candidate";
                 linkedinProfileUrl = "https://www.linkedin.com/in/mock-candidate";
+                email = "social.linkedin@example.com";
             } else {
                 // Exchange code for token
                 HttpHeaders headers = new HttpHeaders();
@@ -384,29 +411,88 @@ public class SocialOAuthController {
                     throw new IllegalStateException("Failed to retrieve user profile from LinkedIn");
                 }
                 linkedinName = (String) userBody.get("name");
+                email = (String) userBody.get("email");
                 
-                // OpenID Connect does not guarantee returning direct profile URL
-                // We fallback to constructing a placeholder link or using user ID
                 String sub = (String) userBody.get("sub");
                 linkedinProfileUrl = "https://www.linkedin.com/in/" + sub;
             }
 
-            // Save to database
-            ProfessionalProfile candidate = professionalProfileRepository.findByUserId(userId)
-                    .orElseThrow(() -> new IllegalArgumentException("Professional profile not found"));
-            candidate.setLinkedinName(linkedinName);
-            candidate.setLinkedinProfileUrl(linkedinProfileUrl);
-            professionalProfileRepository.save(candidate);
+            if (isLogin) {
+                if (email == null || email.isEmpty()) {
+                    email = (linkedinName != null ? linkedinName.replaceAll("\\s+", ".").toLowerCase() : "linkedin.user") + "@linkedin.com";
+                }
+                User user = userRepository.findByEmail(email).orElse(null);
+                if (user == null) {
+                    String randomPassword = java.util.UUID.randomUUID().toString();
+                    user = User.builder()
+                            .email(email)
+                            .passwordHash(passwordEncoder.encode(randomPassword))
+                            .role(UserRole.CANDIDATE)
+                            .name(linkedinName != null ? linkedinName : "LinkedIn User")
+                            .mobile("1234567890")
+                            .loginStreak(1)
+                            .lastLoginDate(java.time.LocalDate.now())
+                            .isEmailVerified(true)
+                            .build();
+                    user = userRepository.save(user);
+                    marketingCampaignService.sendWelcomeEmail(user);
 
-            return new RedirectView(frontendUrl + "/profile/settings?status=success&provider=linkedin");
+                    ProfessionalProfile candidate = ProfessionalProfile.builder()
+                            .user(user)
+                            .linkedinName(linkedinName)
+                            .linkedinProfileUrl(linkedinProfileUrl)
+                            .isVerified(true)
+                            .skills(new java.util.HashSet<>())
+                            .jobPreferences(new java.util.HashMap<>())
+                            .build();
+                    professionalProfileRepository.save(candidate);
+                } else {
+                    if (user.getRole() == UserRole.CANDIDATE) {
+                        ProfessionalProfile candidate = professionalProfileRepository.findByUserId(user.getId()).orElse(null);
+                        if (candidate != null) {
+                            if (candidate.getLinkedinName() == null) {
+                                candidate.setLinkedinName(linkedinName);
+                                candidate.setLinkedinProfileUrl(linkedinProfileUrl);
+                                candidate.setIsVerified(true);
+                                professionalProfileRepository.save(candidate);
+                            }
+                        }
+                    }
+                }
+
+                String jwtToken = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getRole().name());
+                String targetUrl = String.format("%s/login?token=%s&id=%d&email=%s&name=%s&role=%s&loginStreak=%d&mobile=%s",
+                        frontendUrl,
+                        jwtToken,
+                        user.getId(),
+                        java.net.URLEncoder.encode(user.getEmail(), "UTF-8"),
+                        java.net.URLEncoder.encode(user.getName(), "UTF-8"),
+                        user.getRole().name(),
+                        user.getLoginStreak(),
+                        user.getMobile() != null ? java.net.URLEncoder.encode(user.getMobile(), "UTF-8") : ""
+                );
+                return new RedirectView(targetUrl);
+            } else {
+                ProfessionalProfile candidate = professionalProfileRepository.findByUserId(userId)
+                        .orElseThrow(() -> new IllegalArgumentException("Professional profile not found"));
+                candidate.setLinkedinName(linkedinName);
+                candidate.setLinkedinProfileUrl(linkedinProfileUrl);
+                professionalProfileRepository.save(candidate);
+
+                return new RedirectView(frontendUrl + "/profile/settings?status=success&provider=linkedin");
+            }
 
         } catch (Exception e) {
-            log.error("LinkedIn OAuth Error for user {}", userId, e);
+            log.error("LinkedIn OAuth Error for state {}", state, e);
             String errMsg = e.getMessage() != null ? e.getMessage() : "Unknown Error";
             try {
                 errMsg = java.net.URLEncoder.encode(errMsg, "UTF-8");
             } catch (Exception ex) {}
-            return new RedirectView(frontendUrl + "/profile/settings?status=error&provider=linkedin&errorMsg=" + errMsg);
+            if (isLogin) {
+                return new RedirectView(frontendUrl + "/login?status=error&errorMsg=" + errMsg);
+            } else {
+                return new RedirectView(frontendUrl + "/profile/settings?status=error&provider=linkedin&errorMsg=" + errMsg);
+            }
         }
     }
 

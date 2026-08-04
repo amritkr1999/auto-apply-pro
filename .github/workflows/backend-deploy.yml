@@ -81,8 +81,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
         run: |
-          # Connect via native OpenSSH client to rebooted OCI server
-          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$OCI_USERNAME@$OCI_HOST" "GITHUB_TOKEN='$GITHUB_TOKEN' GITHUB_ACTOR='$GITHUB_ACTOR' bash -s" << 'EOF'
+          ssh -o StrictHostKeyChecking=no \
+              -o UserKnownHostsFile=/dev/null \
+              -o BatchMode=yes \
+              -o ConnectTimeout=30 \
+              -o ServerAliveInterval=15 \
+              -o ServerAliveCountMax=3 \
+              "$OCI_USERNAME@$OCI_HOST" "GITHUB_TOKEN='$GITHUB_TOKEN' GITHUB_ACTOR='$GITHUB_ACTOR' bash -s" << 'EOF'
             set -e
             mkdir -p ~/auto-apply-pro
             cd ~/auto-apply-pro
@@ -95,10 +100,6 @@ jobs:
             docker compose stop backend frontend || true
             docker compose rm -f backend frontend || true
             docker compose up -d --force-recreate --remove-orphans backend frontend
-
-            # Reload Nginx configuration
-            sudo sed -i 's/return 404;/return 301 https:\/\/$host$request_uri;/g' /etc/nginx/sites-available/* /etc/nginx/sites-enabled/* 2>/dev/null || true
-            sudo systemctl reload nginx || true
 
             docker image prune -f
           EOF

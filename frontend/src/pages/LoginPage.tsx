@@ -351,7 +351,7 @@ export const LoginPage: React.FC = () => {
     console.log(`Authenticating with ${provider}...`);
     trackEvent("social_auth_initiated", { provider });
     const providerLower = provider.toLowerCase();
-    if (providerLower === "google" || providerLower === "github") {
+    if (providerLower === "google" || providerLower === "github" || providerLower === "linkedin") {
       try {
         setError("");
         const API_BASE_V1 = `${API_BASE}/v1`;
@@ -526,11 +526,8 @@ export const LoginPage: React.FC = () => {
 
         {/* Logo Header */}
         <header className="auth-header">
-          <div className="flex items-center justify-center gap-2.5 mb-2">
-            <span className="bg-slate-900 border border-slate-800/80 px-2.5 py-1 rounded-xl shadow-xs inline-flex items-center justify-center shrink-0">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-300 to-purple-400 font-black text-base select-none">EN</span>
-            </span>
-            <h1 className="auth-logo !mb-0">EasyNaukri</h1>
+          <div className="flex items-center justify-center mb-3">
+            <img src="/branding/easynaukri_logo.png" alt="EasyNaukri Logo" className="w-16 h-16 rounded-2xl object-contain shadow-md select-none" />
           </div>
           <p className="auth-subtitle">
             {tab === "login"
