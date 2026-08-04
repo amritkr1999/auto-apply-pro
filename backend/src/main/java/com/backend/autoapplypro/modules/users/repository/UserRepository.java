@@ -35,4 +35,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByResetToken(String resetToken);
     Optional<User> findByUnsubscribeToken(String unsubscribeToken);
     List<User> findByStatusAndDeletionScheduledAtBefore(UserStatus status, LocalDateTime dateTime);
+    List<User> findByDailyDigestEnabledTrueAndStatus(UserStatus status);
 }

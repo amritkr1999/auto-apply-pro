@@ -169,6 +169,17 @@ public class User {
     private LocalDateTime lastMarketingEmailSentAt;
 
     @Builder.Default
+    @Column(name = "daily_digest_enabled", nullable = false)
+    private Boolean dailyDigestEnabled = true;
+
+    @Builder.Default
+    @Column(name = "daily_digest_time")
+    private java.time.LocalTime dailyDigestTime = java.time.LocalTime.of(20, 0);
+
+    @Column(name = "last_digest_sent_date")
+    private java.time.LocalDate lastDigestSentDate;
+
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 25)
     private UserStatus status = UserStatus.ACTIVE;
@@ -261,6 +272,12 @@ public class User {
         }
         if (isPremium == null) {
             isPremium = false;
+        }
+        if (dailyDigestEnabled == null) {
+            dailyDigestEnabled = true;
+        }
+        if (dailyDigestTime == null) {
+            dailyDigestTime = java.time.LocalTime.of(20, 0);
         }
     }
 

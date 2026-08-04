@@ -32,4 +32,8 @@ public interface EmailQueueRepository extends JpaRepository<EmailQueue, Long> {
     boolean existsByUserIdAndStatusAndSentAtAfter(Long userId, OutreachStatus status, LocalDateTime dateTime);
 
     List<EmailQueue> findByUserIdAndStatus(Long userId, OutreachStatus status);
+
+    List<EmailQueue> findByUserIdAndCreatedAtBetween(Long userId, LocalDateTime start, LocalDateTime end);
+
+    List<EmailQueue> findByUserIdAndSentAtBetween(Long userId, LocalDateTime start, LocalDateTime end);
 }

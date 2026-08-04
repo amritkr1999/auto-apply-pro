@@ -5,6 +5,7 @@ import { outreachService } from "../features/outreach/services/outreachService";
 import { profileService } from "../features/profile/services/profileService";
 import type { CandidateProfile } from "../features/profile/services/profileService";
 import { useAnalytics } from "../context/AnalyticsContext";
+import FeedbackModal from "../components/FeedbackModal";
 
 export const DraftsReviewPage: React.FC = () => {
   const navigate = useNavigate();
@@ -21,6 +22,44 @@ export const DraftsReviewPage: React.FC = () => {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isApprovingAll, setIsApprovingAll] = useState(false);
+
+  // EOD Digest & Feedback modal state
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const [initialRating, setInitialRating] = useState(5);
+  const [digestEnabled, setDigestEnabled] = useState(true);
+  const [digestTime, setDigestTime] = useState("20:00");
+  const [sendingTestDigest, setSendingTestDigest] = useState(false);
+
+  useEffect(() => {
+    // Check URL parameters for feedback rating
+    const params = new URLSearchParams(window.location.search);
+    const ratingParam = params.get("rating");
+    if (ratingParam) {
+      const r = parseInt(ratingParam, 10);
+      if (r >= 1 && r <= 5) {
+        setInitialRating(r);
+        setIsFeedbackOpen(true);
+      }
+    }
+
+    // Fetch EOD digest preferences
+    const fetchDigestPrefs = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch("/api/v1/outreach/digest/preferences", {
+          headers: { Authorization: token ? `Bearer ${token}` : "" },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setDigestEnabled(data.dailyDigestEnabled ?? true);
+          setDigestTime(data.dailyDigestTime || "20:00");
+        }
+      } catch (err) {
+        console.error("Failed to load digest preferences", err);
+      }
+    };
+    fetchDigestPrefs();
+  }, []);
 
   const loadDrafts = useCallback(async () => {
     setLoading(true);
@@ -150,10 +189,55 @@ export const DraftsReviewPage: React.FC = () => {
     }
   };
 
+  const handleUpdateDigestPrefs = async (enabled: boolean, timeStr: string) => {
+    try {
+      setDigestEnabled(enabled);
+      setDigestTime(timeStr);
+      const token = localStorage.getItem("token");
+      await fetch("/api/v1/outreach/digest/preferences", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token ? `Bearer ${token}` : "",
+        },
+        body: JSON.stringify({
+          dailyDigestEnabled: enabled,
+          dailyDigestTime: timeStr,
+        }),
+      });
+      setMessage("Daily EOD Digest preferences updated!");
+      setTimeout(() => setMessage(null), 3000);
+    } catch (err) {
+      console.error("Failed to update digest preferences", err);
+    }
+  };
+
+  const handleSendTestDigest = async () => {
+    setSendingTestDigest(true);
+    setError(null);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("/api/v1/outreach/digest/test", {
+        method: "POST",
+        headers: { Authorization: token ? `Bearer ${token}` : "" },
+      });
+      if (res.ok) {
+        setMessage("Daily EOD Digest test email dispatched to your inbox!");
+      } else {
+        setError("Failed to dispatch test digest email.");
+      }
+    } catch (err) {
+      setError("Network error while sending test digest email.");
+    } finally {
+      setSendingTestDigest(false);
+      setTimeout(() => setMessage(null), 4000);
+    }
+  };
+
   return (
     <div className="max-w-[900px] mx-auto w-full px-4 py-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 border-b border-slate-200 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-slate-200 pb-5">
         <div>
           <button
             onClick={() => navigate("/dashboard")}
@@ -161,11 +245,19 @@ export const DraftsReviewPage: React.FC = () => {
           >
             ← Back to Dashboard
           </button>
-          <h1 className="text-3xl font-bold text-slate-800">Email Drafts Awaiting Approval</h1>
-          <p className="text-sm text-slate-500 mt-1">Review, personalize, and approve generated cold outreach drafts</p>
+          <h1 className="text-3xl font-bold text-slate-800">Email Drafts & EOD Daily Digest</h1>
+          <p className="text-sm text-slate-500 mt-1">Review cold outreach drafts, configure daily EOD summaries, and submit feedback</p>
         </div>
-        {drafts.length > 0 && (
-          <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsFeedbackOpen(true)}
+            className="text-xs font-bold px-3.5 py-2 border-amber-300 text-amber-700 bg-amber-50 hover:bg-amber-100"
+          >
+            ⭐️ Leave Review / Suggestion
+          </Button>
+          {drafts.length > 0 && (
             <Button 
               variant="success" 
               size="sm" 
@@ -175,8 +267,68 @@ export const DraftsReviewPage: React.FC = () => {
             >
               {isApprovingAll ? "Approving All..." : `Approve All (${drafts.length})`}
             </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Daily EOD Synopsis Settings Card */}
+      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-5 rounded-2xl shadow-lg mb-8 border border-slate-800">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-600/30 border border-indigo-400/30 flex items-center justify-center text-xl shrink-0">
+              📧
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <span>Daily End-Of-Day (EOD) Synopsis Email</span>
+                <span className="text-[10px] uppercase tracking-wider font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  Active
+                </span>
+              </h3>
+              <p className="text-xs text-slate-300 mt-0.5">
+                Receive an everyday EOD email with complete activity details (sent emails, recipient list, pending drafts, & quota statistics).
+              </p>
+            </div>
           </div>
-        )}
+
+          <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
+            {/* Toggle switch */}
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={digestEnabled}
+                onChange={(e) => handleUpdateDigestPrefs(e.target.checked, digestTime)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500 relative"></div>
+              <span className="text-xs font-semibold text-slate-300">Enabled</span>
+            </label>
+
+            {/* Digest Time Selector */}
+            <select
+              value={digestTime}
+              onChange={(e) => handleUpdateDigestPrefs(digestEnabled, e.target.value)}
+              className="bg-slate-800 text-slate-200 border border-slate-700 text-xs font-semibold rounded-lg px-2.5 py-1.5 focus:ring-1 focus:ring-indigo-400"
+            >
+              <option value="18:00">06:00 PM</option>
+              <option value="19:00">07:00 PM</option>
+              <option value="20:00">08:00 PM (Default)</option>
+              <option value="21:00">09:00 PM</option>
+              <option value="22:00">10:00 PM</option>
+            </select>
+
+            {/* Send Test Email Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={sendingTestDigest}
+              onClick={handleSendTestDigest}
+              className="text-xs font-semibold px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white border-white/20"
+            >
+              {sendingTestDigest ? "Sending..." : "Send Test Summary"}
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* Alerts */}
@@ -423,6 +575,13 @@ export const DraftsReviewPage: React.FC = () => {
           })}
         </div>
       )}
+
+      {/* Interactive Review & Feedback Modal */}
+      <FeedbackModal
+        isOpen={isFeedbackOpen}
+        onClose={() => setIsFeedbackOpen(false)}
+        initialRating={initialRating}
+      />
     </div>
   );
 };

@@ -29,8 +29,9 @@ public class FeedbackServiceImpl implements FeedbackService {
         if (requestDto.getRating() == null || requestDto.getRating() < 1 || requestDto.getRating() > 5) {
             throw new IllegalArgumentException("Rating must be between 1 and 5");
         }
-        if (requestDto.getComment() == null || requestDto.getComment().trim().isEmpty()) {
-            throw new IllegalArgumentException("Comment cannot be empty");
+        String commentToSave = requestDto.getComment();
+        if (commentToSave == null || commentToSave.trim().isEmpty()) {
+            commentToSave = "Rated " + requestDto.getRating() + " stars via EOD Digest email summary.";
         }
 
         User user = userRepository.findById(userId)
@@ -47,12 +48,12 @@ public class FeedbackServiceImpl implements FeedbackService {
 
         if (feedback != null) {
             feedback.setRating(requestDto.getRating());
-            feedback.setComment(requestDto.getComment().trim());
+            feedback.setComment(commentToSave.trim());
         } else {
             feedback = Feedback.builder()
                     .user(user)
                     .rating(requestDto.getRating())
-                    .comment(requestDto.getComment().trim())
+                    .comment(commentToSave.trim())
                     .build();
         }
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import MobileAppComingSoonModal from "./MobileAppComingSoonModal";
+import FeedbackModal from "./FeedbackModal";
 import { getActiveSubscription, getMyUpiPaymentStatus } from "../features/billing/services/billingService";
 
 interface HeaderProps {
@@ -16,6 +17,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const { toggleTheme, resolvedTheme } = useTheme();
   const { user } = useAuth();
   const [showMobileAppModal, setShowMobileAppModal] = useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [userTier, setUserTier] = useState<UserTier>("Free");
 
   useEffect(() => {
@@ -218,6 +220,16 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                 <span className="hidden md:inline">Guided Tour</span>
               </button>
 
+              <button
+                type="button"
+                onClick={() => setShowFeedbackModal(true)}
+                className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 rounded-full text-xs font-semibold shadow-xs transition-all focus:outline-none cursor-pointer"
+                title="Leave Review / Suggestion"
+              >
+                <span>⭐️</span>
+                <span className="hidden md:inline">Feedback</span>
+              </button>
+
               {renderTierBadge()}
             </>
           )}
@@ -225,6 +237,9 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
       </div>
       {showMobileAppModal && (
         <MobileAppComingSoonModal onClose={() => setShowMobileAppModal(false)} />
+      )}
+      {showFeedbackModal && (
+        <FeedbackModal isOpen={showFeedbackModal} onClose={() => setShowFeedbackModal(false)} />
       )}
     </header>
   );

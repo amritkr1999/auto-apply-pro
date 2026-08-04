@@ -10,4 +10,5 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication, 
     List<JobApplication> findByUserIdOrderByCreatedAtDesc(Long userId);
     List<JobApplication> findByUserId(Long userId);
     long countByUserId(Long userId);
+    List<JobApplication> findByUserIdAndCreatedAtBetween(Long userId, java.time.LocalDateTime start, java.time.LocalDateTime end);
 }

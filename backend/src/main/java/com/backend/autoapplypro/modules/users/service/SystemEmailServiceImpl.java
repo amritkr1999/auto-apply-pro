@@ -140,4 +140,34 @@ public class SystemEmailServiceImpl implements SystemEmailService {
             }
         }
     }
+
+    @Override
+    @org.springframework.scheduling.annotation.Async
+    public void sendDailyDigestEmail(String recipientEmail, String subject, String htmlContent) {
+        log.info("\n==================================================\n"
+                + "[SYSTEM EMAIL OUTBOX - DAILY EOD DIGEST]\n"
+                + "To: {}\n"
+                + "Subject: {}\n"
+                + "Content Length: {} chars\n"
+                + "==================================================",
+                recipientEmail, subject, htmlContent != null ? htmlContent.length() : 0);
+
+        if (mailSender != null) {
+            try {
+                jakarta.mail.internet.MimeMessage mimeMessage = mailSender.createMimeMessage();
+                org.springframework.mail.javamail.MimeMessageHelper helper = 
+                        new org.springframework.mail.javamail.MimeMessageHelper(mimeMessage, true, "UTF-8");
+                helper.setTo(recipientEmail);
+                if (fromEmail != null && !fromEmail.trim().isEmpty()) {
+                    helper.setFrom(fromEmail);
+                }
+                helper.setSubject(subject);
+                helper.setText(htmlContent, true); // true = isHtml
+                mailSender.send(mimeMessage);
+                log.info("Successfully sent Daily EOD Digest email to: {}", recipientEmail);
+            } catch (Exception e) {
+                log.error("Failed to send Daily EOD Digest email via SMTP, fell back to log: {}", e.getMessage(), e);
+            }
+        }
+    }
 }
