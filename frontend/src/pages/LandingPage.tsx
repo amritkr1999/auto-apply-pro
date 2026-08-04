@@ -142,8 +142,9 @@ export const LandingPage: React.FC = () => {
       {/* ==================== Navigation Navbar ==================== */}
       <nav className="landing-nav">
         <div className="nav-container">
-          <a href="#" className="nav-logo">
-            <span>⚡</span> EasyNaukri
+          <a href="#" className="nav-logo flex items-center gap-2.5" aria-label="EasyNaukri Home">
+            <img src="/branding/easynaukri_logo.png" alt="EasyNaukri Logo" className="h-9 w-9 rounded-xl object-contain shadow-xs select-none" />
+            <span className="hidden sm:inline-block font-extrabold text-xl tracking-tight text-slate-900 dark:text-white select-none whitespace-nowrap">EasyNaukri</span>
           </a>
 
           <div className="nav-ctas">
@@ -844,7 +845,10 @@ export const LandingPage: React.FC = () => {
       <footer id="footer" className="landing-footer">
         <div className="footer-container">
           <div className="footer-brand">
-            <h3>EasyNaukri</h3>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.75rem" }}>
+              <img src="/branding/easynaukri_logo.png" alt="EasyNaukri Logo" className="h-8 w-8 rounded-xl object-contain shadow-xs select-none" />
+              <h3 style={{ margin: 0 }}>EasyNaukri</h3>
+            </div>
             <p>EasyNaukri is an automated job application & resume matching platform. Streamline your job search, optimize your resume, and track applications effortlessly.</p>
             <div className="footer-socials">
               <a

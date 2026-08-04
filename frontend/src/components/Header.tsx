@@ -150,8 +150,9 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
               </svg>
             </button>
           )}
-          <Link to={getDashboardPath()} className="hover:opacity-90 transition-opacity flex items-center shrink-0" aria-label="EasyNaukri Home">
+          <Link to={getDashboardPath()} className="hover:opacity-90 transition-opacity flex items-center gap-2.5 shrink-0" aria-label="EasyNaukri Home">
             <img src="/branding/easynaukri_logo.png" alt="EasyNaukri Logo" className="h-9 w-9 rounded-xl object-contain shadow-xs select-none" />
+            <span className="hidden sm:inline-block font-extrabold text-xl tracking-tight text-slate-900 dark:text-white select-none whitespace-nowrap">EasyNaukri</span>
           </Link>
           {user && (
             <nav className="hidden lg:flex items-center gap-6 whitespace-nowrap shrink-0">
