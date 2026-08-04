@@ -7,6 +7,8 @@ import {
   ScrollView,
   ActivityIndicator,
   SafeAreaView,
+  Switch,
+  TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
@@ -30,6 +32,12 @@ export const CampaignDispatchModal: React.FC<CampaignDispatchModalProps> = ({
   const [toastMessage, setToastMessage] = useState('');
   const [gmailConnected, setGmailConnected] = useState(true);
   const [showConnectPrompt, setShowConnectPrompt] = useState(false);
+
+  // Daily Digest States
+  const [digestEnabled, setDigestEnabled] = useState(true);
+  const [digestTime, setDigestTime] = useState('20:00');
+  const [isTestingDigest, setIsTestingDigest] = useState(false);
+  const [digestStatusMsg, setDigestStatusMsg] = useState('');
 
   // Normalize mode string
   const getNormalizedMode = (rawMode?: string | null): 'AUTOMATED' | 'DRAFTS' | 'WEB_COMPOSE' => {
@@ -61,8 +69,53 @@ export const CampaignDispatchModal: React.FC<CampaignDispatchModalProps> = ({
       }
     };
 
+    const loadDigestPref = async () => {
+      try {
+        const pref = await outreachService.getDigestPreferences();
+        if (pref) {
+          setDigestEnabled(pref.dailyDigestEnabled);
+          if (pref.dailyDigestTime) setDigestTime(pref.dailyDigestTime);
+        }
+      } catch (err) {
+        console.log('[CampaignDispatchModal] Load digest pref warning:', err);
+      }
+    };
+
     loadModeSettings();
+    loadDigestPref();
   }, [visible, userId]);
+
+  const handleToggleDigest = async (val: boolean) => {
+    setDigestEnabled(val);
+    try {
+      await outreachService.updateDigestPreferences({ dailyDigestEnabled: val, dailyDigestTime: digestTime });
+      setDigestStatusMsg(val ? 'Daily EOD Digest enabled' : 'Daily EOD Digest disabled');
+    } catch (err) {
+      console.log('Failed to update digest pref:', err);
+    }
+  };
+
+  const handleSaveDigestTime = async (timeVal: string) => {
+    setDigestTime(timeVal);
+    try {
+      await outreachService.updateDigestPreferences({ dailyDigestEnabled: digestEnabled, dailyDigestTime: timeVal });
+    } catch (err) {
+      console.log('Failed to save digest time:', err);
+    }
+  };
+
+  const handleSendTestDigest = async () => {
+    setIsTestingDigest(true);
+    setDigestStatusMsg('');
+    try {
+      const res = await outreachService.sendTestDigest();
+      setDigestStatusMsg(res.message || 'Test digest email sent successfully!');
+    } catch (err: any) {
+      setDigestStatusMsg(err.message || 'Failed to send test digest email.');
+    } finally {
+      setIsTestingDigest(false);
+    }
+  };
 
   if (!visible) return null;
 
@@ -282,6 +335,72 @@ export const CampaignDispatchModal: React.FC<CampaignDispatchModalProps> = ({
                 </Text>
               </View>
             </TouchableOpacity>
+
+            {/* Daily EOD Digest Settings Section */}
+            <View className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+              <Text className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">
+                Daily EOD Digest Preferences
+              </Text>
+
+              <View className="bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 space-y-3">
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-1 pr-3">
+                    <Text className="text-sm font-bold text-slate-900 dark:text-white">
+                      📧 Daily Summary Email
+                    </Text>
+                    <Text className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                      Receive an automated daily EOD report summarizing emails sent & candidate stats.
+                    </Text>
+                  </View>
+                  <Switch
+                    value={digestEnabled}
+                    onValueChange={handleToggleDigest}
+                    trackColor={{ false: '#64748b', true: '#10b981' }}
+                    thumbColor="#ffffff"
+                  />
+                </View>
+
+                {digestEnabled && (
+                  <View className="pt-2 border-t border-slate-200/60 dark:border-slate-800/60 space-y-3">
+                    <View className="flex-row items-center justify-between">
+                      <Text className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                        Digest Schedule Time (24h)
+                      </Text>
+                      <TextInput
+                        value={digestTime}
+                        onChangeText={handleSaveDigestTime}
+                        placeholder="20:00"
+                        placeholderTextColor="#64748b"
+                        className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-900 dark:text-white font-mono text-center w-20"
+                      />
+                    </View>
+
+                    <TouchableOpacity
+                      onPress={handleSendTestDigest}
+                      disabled={isTestingDigest}
+                      className="bg-emerald-500/10 border border-emerald-500/30 p-2.5 rounded-xl items-center flex-row justify-center active:opacity-80"
+                    >
+                      {isTestingDigest ? (
+                        <ActivityIndicator size="small" color="#10b981" />
+                      ) : (
+                        <>
+                          <Ionicons name="paper-plane-outline" size={14} color="#10b981" />
+                          <Text className="text-emerald-600 dark:text-emerald-400 text-xs font-bold ml-1.5">
+                            Send Test Digest Email
+                          </Text>
+                        </>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                )}
+
+                {digestStatusMsg !== '' && (
+                  <Text className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 text-center mt-1">
+                    {digestStatusMsg}
+                  </Text>
+                )}
+              </View>
+            </View>
 
           </ScrollView>
 

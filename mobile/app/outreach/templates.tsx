@@ -14,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
 import { templateService, EmailTemplate } from '../../services/templateService';
+import SendTrialEmailModal from '../../components/SendTrialEmailModal';
 
 export default function TemplatesScreen() {
   const router = useRouter();
@@ -28,6 +29,10 @@ export default function TemplatesScreen() {
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
   const [saving, setSaving] = useState(false);
+
+  // Trial Email Modal State
+  const [trialModalVisible, setTrialModalVisible] = useState(false);
+  const [selectedTrialTemplate, setSelectedTrialTemplate] = useState<EmailTemplate | null>(null);
 
   useEffect(() => {
     fetchTemplates();
@@ -176,10 +181,35 @@ export default function TemplatesScreen() {
                   {template.body}
                 </Text>
               </View>
+
+              <View className="flex-row justify-end mt-3 pt-2 border-t border-slate-100 dark:border-slate-800/60">
+                <TouchableOpacity
+                  onPress={() => {
+                    setSelectedTrialTemplate(template);
+                    setTrialModalVisible(true);
+                  }}
+                  className="bg-indigo-500/10 border border-indigo-500/20 px-3 py-1.5 rounded-xl flex-row items-center active:opacity-80"
+                >
+                  <Ionicons name="paper-plane-outline" size={14} color="#6366f1" />
+                  <Text className="text-indigo-600 dark:text-indigo-400 text-xs font-bold ml-1.5">
+                    Send Trial Email
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           ))}
         </ScrollView>
       )}
+
+      {/* Trial Email Modal */}
+      <SendTrialEmailModal
+        visible={trialModalVisible}
+        onClose={() => {
+          setTrialModalVisible(false);
+          setSelectedTrialTemplate(null);
+        }}
+        template={selectedTrialTemplate}
+      />
 
       {/* Template Edit / Create Modal */}
       <Modal visible={modalVisible} animationType="slide" transparent onRequestClose={() => setModalVisible(false)}>

@@ -11,6 +11,7 @@ import {
   SafeAreaView,
   Alert,
   Linking,
+  Image,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -94,7 +95,7 @@ export default function LoginScreen() {
     }
   };
 
-  const handleSocialLogin = async (provider: 'google' | 'github') => {
+  const handleSocialLogin = async (provider: 'google' | 'github' | 'linkedin') => {
     setLoading(true);
     try {
       const response = await api.get(`/auth/login/${provider}`);
@@ -130,7 +131,8 @@ export default function LoginScreen() {
           };
           
           await loginWithSession(params.token, userInfo);
-          Alert.alert('Success', `Logged in via ${provider === 'google' ? 'Google' : 'GitHub'} successfully.`);
+          const providerName = provider === 'google' ? 'Google' : provider === 'linkedin' ? 'LinkedIn' : 'GitHub';
+          Alert.alert('Success', `Logged in via ${providerName} successfully.`);
         } else {
           throw new Error('Authentication failed - no token returned.');
         }
@@ -198,8 +200,12 @@ export default function LoginScreen() {
               
               {/* Header Title */}
               <View className="items-center mb-8">
-                <View className="w-16 h-16 bg-emerald-500 rounded-2xl items-center justify-center mb-4 shadow-lg shadow-emerald-500/30">
-                  <Ionicons name="rocket-outline" size={32} color="#fff" />
+                <View className="w-16 h-16 bg-slate-900 border border-slate-800 rounded-2xl items-center justify-center mb-4 shadow-lg shadow-emerald-500/10 overflow-hidden">
+                  <Image
+                    source={require('../../assets/images/easynaukri_logo.png')}
+                    style={{ width: 52, height: 52, borderRadius: 12 }}
+                    resizeMode="contain"
+                  />
                 </View>
                 <Text className="text-3xl font-bold text-white tracking-wide">EasyNaukri</Text>
                 <Text className="text-slate-400 text-sm mt-1 text-center">
@@ -362,21 +368,29 @@ export default function LoginScreen() {
                     <View className="flex-1 h-[1px] bg-slate-800" />
                   </View>
 
-                  <View className="flex-row space-x-3 gap-3">
+                  <View className="flex-row space-x-2 gap-2">
                     <TouchableOpacity
                       onPress={() => handleSocialLogin('google')}
                       className="flex-1 flex-row items-center justify-center bg-slate-950 border border-slate-800 rounded-2xl py-3 active:opacity-80"
                     >
-                      <FontAwesome name="google" size={18} color="#fff" />
-                      <Text className="text-white font-semibold text-sm ml-2">Google</Text>
+                      <FontAwesome name="google" size={16} color="#fff" />
+                      <Text className="text-white font-semibold text-xs ml-1.5">Google</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
                       onPress={() => handleSocialLogin('github')}
                       className="flex-1 flex-row items-center justify-center bg-slate-950 border border-slate-800 rounded-2xl py-3 active:opacity-80"
                     >
-                      <FontAwesome name="github" size={18} color="#fff" />
-                      <Text className="text-white font-semibold text-sm ml-2">GitHub</Text>
+                      <FontAwesome name="github" size={16} color="#fff" />
+                      <Text className="text-white font-semibold text-xs ml-1.5">GitHub</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      onPress={() => handleSocialLogin('linkedin')}
+                      className="flex-1 flex-row items-center justify-center bg-slate-950 border border-slate-800 rounded-2xl py-3 active:opacity-80"
+                    >
+                      <FontAwesome name="linkedin" size={16} color="#0077b5" />
+                      <Text className="text-white font-semibold text-xs ml-1.5">LinkedIn</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
