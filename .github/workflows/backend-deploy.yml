@@ -81,7 +81,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
         run: |
-          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=30 -o ServerAliveInterval=15 "$OCI_USERNAME@$OCI_HOST" "bash -s" << EOF
+          ssh -o StrictHostKeyChecking=no \
+              -o UserKnownHostsFile=/dev/null \
+              -o BatchMode=yes \
+              -o ConnectTimeout=30 \
+              -o ServerAliveInterval=15 \
+              -o ServerAliveCountMax=3 \
+              "$OCI_USERNAME@$OCI_HOST" "GITHUB_TOKEN='$GITHUB_TOKEN' GITHUB_ACTOR='$GITHUB_ACTOR' bash -s" << 'EOF'
             set -e
             mkdir -p ~/auto-apply-pro
             cd ~/auto-apply-pro
@@ -95,6 +101,5 @@ jobs:
             docker compose rm -f backend frontend || true
             docker compose up -d --force-recreate --remove-orphans backend frontend
 
-            # Cleanup unused docker images
             docker image prune -f
           EOF
