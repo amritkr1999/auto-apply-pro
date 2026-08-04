@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="400" viewBox="0 0 1200 400" fill="none">
+  <defs>
+    <linearGradient id="full-text-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22d3ee" />
+      <stop offset="50%" stop-color="#818cf8" />
+      <stop offset="100%" stop-color="#c084fc" />
+    </linearGradient>
+    <linearGradient id="full-bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e1b4b" />
+    </linearGradient>
+  </defs>
+
+  <!-- Canvas Background -->
+  <rect width="1200" height="400" rx="32" fill="#090d16" />
+
+  <!-- EN Badge Container -->
+  <g transform="translate(100, 75)">
+    <rect width="250" height="250" rx="64" fill="url(#full-bg-grad)" stroke="#334155" stroke-width="6" stroke-opacity="0.6" />
+    <text x="125" y="172" font-family="-apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', 'Outfit', sans-serif" font-weight="900" font-size="130" fill="url(#full-text-grad)" text-anchor="middle" letter-spacing="-5">EN</text>
+  </g>
+
+  <!-- EasyNaukri Brand Name -->
+  <text x="400" y="245" font-family="-apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', 'Outfit', sans-serif" font-weight="800" font-size="140" fill="#ffffff" letter-spacing="-3">Easy<tspan fill="url(#full-text-grad)">Naukri</tspan></text>
+</svg>
