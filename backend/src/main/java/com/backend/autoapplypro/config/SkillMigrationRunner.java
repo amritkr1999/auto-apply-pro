@@ -27,6 +27,17 @@ public class SkillMigrationRunner implements CommandLineRunner {
                 log.warn("Could not check/update user statuses. The column might not exist yet.", ex);
             }
 
+            // Ensure daily digest columns exist on users table for existing databases
+            try {
+                jdbcTemplate.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS daily_digest_enabled BOOLEAN DEFAULT TRUE");
+                jdbcTemplate.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS daily_digest_time TIME WITHOUT TIME ZONE DEFAULT '20:00:00'");
+                jdbcTemplate.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_digest_sent_date DATE");
+                jdbcTemplate.execute("UPDATE users SET daily_digest_enabled = TRUE WHERE daily_digest_enabled IS NULL");
+                log.info("Successfully checked and initialized daily_digest columns on users table.");
+            } catch (Exception ex) {
+                log.warn("Could not check/update daily_digest columns on users table", ex);
+            }
+
             // Check if professional_profiles table has skills column and does not have legacy_skills column
             Boolean hasSkillsColumn = jdbcTemplate.queryForObject(
                 "SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='professional_profiles' AND column_name='skills')",

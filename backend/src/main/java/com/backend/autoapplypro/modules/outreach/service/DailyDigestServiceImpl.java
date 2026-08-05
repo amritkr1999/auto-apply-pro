@@ -196,7 +196,7 @@ public class DailyDigestServiceImpl implements DailyDigestService {
                 <!-- Header -->
                 <div style="background: linear-gradient(135deg, #1e1b4b 0%%, #312e81 100%%); padding: 24px 32px; color: #ffffff;">
                   <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h1 style="margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.5px;">AutoApplyPro</h1>
+                    <h1 style="margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.5px;">EasyNaukri</h1>
                     <span style="background: rgba(255,255,255,0.15); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500;">EOD Synopsis</span>
                   </div>
                   <p style="margin: 8px 0 0 0; color: #cbd5e1; font-size: 14px;">Daily Activity Summary for <strong>%s</strong> &bull; %s</p>
@@ -259,7 +259,7 @@ public class DailyDigestServiceImpl implements DailyDigestService {
                   <!-- Interactive Feedback & Suggestions Section -->
                   <div style="margin-top: 36px; padding: 20px; background: linear-gradient(135deg, #f8fafc 0%%, #f1f5f9 100%%); border-radius: 10px; border: 1px solid #cbd5e1; text-align: center;">
                     <h3 style="margin: 0 0 6px 0; font-size: 16px; color: #0f172a;">How was your application outreach today?</h3>
-                    <p style="margin: 0 0 16px 0; font-size: 13px; color: #64748b;">Rate your experience & help us improve AutoApplyPro for you:</p>
+                    <p style="margin: 0 0 16px 0; font-size: 13px; color: #64748b;">Rate your experience & help us improve EasyNaukri for you:</p>
                     
                     <!-- 1-Click Star Rating Buttons -->
                     <div style="display: inline-flex; gap: 8px; margin-bottom: 16px;">
@@ -279,8 +279,8 @@ public class DailyDigestServiceImpl implements DailyDigestService {
 
                 <!-- Footer -->
                 <div style="background: #f8fafc; padding: 16px 32px; border-top: 1px solid #e2e8f0; text-align: center; font-size: 12px; color: #94a3b8;">
-                  <p style="margin: 0 0 4px 0;">AutoApplyPro EOD Digest &bull; Sent automatically every day at 8:00 PM</p>
-                  <p style="margin: 0;"><a href="%s/settings" style="color: #64748b; text-decoration: underline;">Configure Digest Preferences</a> &bull; <a href="%s/unsubscribe" style="color: #64748b; text-decoration: underline;">Unsubscribe</a></p>
+                  <p style="margin: 0 0 4px 0;">EasyNaukri EOD Digest &bull; Sent automatically every day at 8:00 PM</p>
+                  <p style="margin: 0;"><a href="%s/outreach/drafts/review" style="color: #64748b; text-decoration: underline;">Configure Digest Preferences</a> &bull; <a href="%s/unsubscribe" style="color: #64748b; text-decoration: underline;">Unsubscribe</a></p>
                 </div>
 
               </div>
@@ -330,7 +330,7 @@ public class DailyDigestServiceImpl implements DailyDigestService {
             log.info("Generating Daily EOD Digest for user: {} ({}) for date: {}", user.getName(), user.getEmail(), date);
             DailyDigestDto digest = generateDailyDigest(user, date);
             String htmlContent = buildDailyDigestHtml(digest);
-            String subject = "AutoApplyPro EOD Digest — " + digest.getTotalEmailsSentToday() + " Emails Sent Today (" + date.format(DATE_FORMATTER) + ")";
+            String subject = "EasyNaukri EOD Digest — " + digest.getTotalEmailsSentToday() + " Emails Sent Today (" + date.format(DATE_FORMATTER) + ")";
 
             systemEmailService.sendDailyDigestEmail(user.getEmail(), subject, htmlContent);
 

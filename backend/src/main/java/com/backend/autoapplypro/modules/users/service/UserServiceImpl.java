@@ -266,10 +266,15 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
+    private boolean isCandidateRole(UserRole role) {
+        if (role == null) return false;
+        return role != UserRole.RECRUITER && role != UserRole.COMPANY;
+    }
+
     private ProfessionalProfile getOrCreateCandidate(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        if (user.getRole() != UserRole.CANDIDATE) {
+        if (!isCandidateRole(user.getRole())) {
             throw new IllegalArgumentException("User is not a candidate");
         }
         return professionalProfileRepository.findByUserId(userId)
@@ -292,7 +297,7 @@ public class UserServiceImpl implements UserService {
         }
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        if (user.getRole() != UserRole.CANDIDATE) {
+        if (!isCandidateRole(user.getRole())) {
             throw new IllegalArgumentException("User is not a candidate");
         }
         ProfessionalProfile profile = professionalProfileRepository.findById(profileId)
@@ -717,7 +722,7 @@ public class UserServiceImpl implements UserService {
     public CandidateProfileDto createCandidateProfile(Long userId, String profileName) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        if (user.getRole() != UserRole.CANDIDATE) {
+        if (!isCandidateRole(user.getRole())) {
             throw new IllegalArgumentException("User is not a candidate");
         }
         

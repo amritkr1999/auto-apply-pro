@@ -81,7 +81,6 @@ public class OutreachOAuthController {
      * decrypts/extracts the user's email, and saves the credentials encrypted in database.
      */
     @GetMapping("/oauth2/callback")
-    @Transactional
     public RedirectView oauthCallback(
             @RequestParam("code") String code,
             @RequestParam("state") String state) {
@@ -141,7 +140,12 @@ public class OutreachOAuthController {
                             .isEmailVerified(true)
                             .build();
                     user = userRepository.save(user);
-                    marketingCampaignService.sendWelcomeEmail(user);
+                    
+                    try {
+                        marketingCampaignService.sendWelcomeEmail(user);
+                    } catch (Exception ex) {
+                        log.error("Failed to send welcome email during OAuth registration for email: {}", email, ex);
+                    }
 
                     ProfessionalProfile candidate = ProfessionalProfile.builder()
                             .user(user)
@@ -151,16 +155,21 @@ public class OutreachOAuthController {
                     professionalProfileRepository.save(candidate);
                 }
 
-                String jwtToken = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getRole().name());
+                String roleName = user.getRole() != null ? user.getRole().name() : "CANDIDATE";
+                String jwtToken = jwtUtil.generateToken(user.getId(), user.getEmail(), roleName);
+                String nameStr = user.getName() != null ? user.getName() : "User";
+                int streak = user.getLoginStreak() != null ? user.getLoginStreak() : 1;
+                String mobileStr = user.getMobile() != null ? user.getMobile() : "";
+
                 String targetUrl = String.format("%s/login?token=%s&id=%d&email=%s&name=%s&role=%s&loginStreak=%d&mobile=%s",
                         frontendUrl,
                         jwtToken,
                         user.getId(),
                         java.net.URLEncoder.encode(user.getEmail(), "UTF-8"),
-                        java.net.URLEncoder.encode(user.getName(), "UTF-8"),
-                        user.getRole().name(),
-                        user.getLoginStreak(),
-                        user.getMobile() != null ? java.net.URLEncoder.encode(user.getMobile(), "UTF-8") : ""
+                        java.net.URLEncoder.encode(nameStr, "UTF-8"),
+                        roleName,
+                        streak,
+                        java.net.URLEncoder.encode(mobileStr, "UTF-8")
                 );
                 return new RedirectView(targetUrl);
 

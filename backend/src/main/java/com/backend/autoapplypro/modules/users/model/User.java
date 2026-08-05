@@ -169,7 +169,8 @@ public class User {
     private LocalDateTime lastMarketingEmailSentAt;
 
     @Builder.Default
-    @Column(name = "daily_digest_enabled", nullable = false)
+    @Column(name = "daily_digest_enabled")
+    @ColumnDefault("true")
     private Boolean dailyDigestEnabled = true;
 
     @Builder.Default

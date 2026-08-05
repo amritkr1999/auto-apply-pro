@@ -28,6 +28,7 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Enable configured CORS support
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/feedback/public").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/feedback/status").authenticated()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/feedback").hasRole("ADMIN")
                 .requestMatchers(
                     "/api/v1/auth/**",
