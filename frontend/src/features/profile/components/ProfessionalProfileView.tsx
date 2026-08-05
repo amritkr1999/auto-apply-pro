@@ -162,7 +162,11 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
         setProfileData(toSelect);
       }
     } catch (err: any) {
-      setError("Failed to load profiles list.");
+      if (err.message && (err.message.includes("403") || err.message.includes("Forbidden"))) {
+        setError("Your authentication session has expired. Please sign out and log in again to refresh your access token.");
+      } else {
+        setError(err.message || "Failed to load profiles list.");
+      }
     } finally {
       setLoading(false);
     }
