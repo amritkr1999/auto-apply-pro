@@ -77,13 +77,16 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.OCI_PRIVATE_KEY }}
 
-      - name: Copy Production Compose File to OCI Server
+      - name: Sync Compose Config to Server
         env:
           OCI_HOST: ${{ secrets.OCI_HOST }}
           OCI_USERNAME: ${{ secrets.OCI_USERNAME }}
         run: |
-          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$OCI_USERNAME@$OCI_HOST" "mkdir -p ~/auto-apply-pro"
-          scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null docker-compose.prod.yml "$OCI_USERNAME@$OCI_HOST:~/auto-apply-pro/docker-compose.yml"
+          ssh -o StrictHostKeyChecking=no \
+              -o UserKnownHostsFile=/dev/null \
+              -o BatchMode=yes \
+              -o ConnectTimeout=30 \
+              "$OCI_USERNAME@$OCI_HOST" "mkdir -p ~/auto-apply-pro && cat > ~/auto-apply-pro/docker-compose.yml" < docker-compose.prod.yml
 
       - name: SSH and Restart Services
         env:
@@ -105,7 +108,7 @@ jobs:
             # Authenticate with GHCR
             echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
 
-            # Prune dangling builder cache/images to free disk space
+            # Free up disk space before pull
             docker image prune -f
 
             # Pull latest containers with logs enabled
@@ -114,7 +117,7 @@ jobs:
             # Recreate containers
             docker compose stop backend frontend || true
             docker compose rm -f backend frontend || true
-            docker compose up -d --force-recreate --remove-orphans backend frontend
+            docker compose up -d --force-recreate backend frontend
 
             # Final cleanup
             docker image prune -f
