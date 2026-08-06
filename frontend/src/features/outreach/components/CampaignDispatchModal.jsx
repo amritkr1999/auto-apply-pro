@@ -12,7 +12,7 @@ export const CampaignDispatchModal = ({
   // Helper to resolve normalized mode string
   const getNormalizedMode = (rawMode) => {
     if (!rawMode) return null;
-    if (rawMode === "DRAFTS" || rawMode === "GMAIL_DRAFTS" || rawMode === "mode2") return "DRAFTS";
+    if (rawMode === "DRAFTS" || rawMode === "GMAIL_DRAFTS" || rawMode === "mode2") return "AUTOMATED";
     if (rawMode === "WEB_COMPOSE" || rawMode === "GMAIL_COMPOSE" || rawMode === "mode3") return "WEB_COMPOSE";
     if (rawMode === "AUTOMATED" || rawMode === "DIRECT_SEND" || rawMode === "mode1") return "AUTOMATED";
     return null;
@@ -88,7 +88,8 @@ export const CampaignDispatchModal = ({
   };
 
   const handleModeSelect = (modeKey) => {
-    if ((modeKey === "AUTOMATED" || modeKey === "DRAFTS") && !gmailConnected) {
+    if (modeKey === "DRAFTS") return; // Option 2 is disabled / Coming Soon
+    if (modeKey === "AUTOMATED" && !gmailConnected) {
       setShowConnectPrompt(true);
     } else {
       setShowConnectPrompt(false);
@@ -97,7 +98,6 @@ export const CampaignDispatchModal = ({
     localStorage.setItem("campaign_dispatch_mode", modeKey);
 
     let dbMode = "DIRECT_SEND";
-    if (modeKey === "DRAFTS") dbMode = "GMAIL_DRAFTS";
     if (modeKey === "WEB_COMPOSE") dbMode = "GMAIL_COMPOSE";
 
     if (userId) {
@@ -110,7 +110,7 @@ export const CampaignDispatchModal = ({
     if (isSubmitting) return;
 
     // Intercept if mode requires Gmail connection but Gmail is not connected
-    if ((selectedMode === "AUTOMATED" || selectedMode === "DRAFTS") && !gmailConnected) {
+    if (selectedMode === "AUTOMATED" && !gmailConnected) {
       setShowConnectPrompt(true);
       return;
     }
@@ -120,10 +120,7 @@ export const CampaignDispatchModal = ({
     let dbMode = "DIRECT_SEND";
     let confirmationText = "Campaign started! Emails will be sent automatically according to schedule.";
 
-    if (selectedMode === "DRAFTS") {
-      dbMode = "GMAIL_DRAFTS";
-      confirmationText = "Campaign started! Generated emails will automatically save directly to your Gmail Drafts.";
-    } else if (selectedMode === "WEB_COMPOSE") {
+    if (selectedMode === "WEB_COMPOSE") {
       dbMode = "GMAIL_COMPOSE";
       confirmationText = "Campaign started! Generated emails are added to your Outreach Queue for manual review & Web Compose.";
     }
@@ -200,7 +197,7 @@ export const CampaignDispatchModal = ({
                 <span>Gmail Account Connection Required</span>
               </div>
               <p className="text-xs leading-relaxed text-amber-800 dark:text-amber-300">
-                Option 1 (Fully Automated) and Option 2 (Save to Gmail Drafts) require a connected Gmail account to dispatch emails on your behalf or save drafts directly to your inbox.
+                Option 1 (Fully Automated) requires a connected Gmail account to dispatch emails on your behalf.
               </p>
               <div className="flex flex-wrap items-center gap-2 pt-1">
                 <button
@@ -265,33 +262,26 @@ export const CampaignDispatchModal = ({
 
               {/* Option 2 */}
               <div
-                onClick={() => handleModeSelect("DRAFTS")}
-                className={`p-4 rounded-xl border cursor-pointer transition-all duration-150 relative flex items-start gap-4 select-none ${
-                  selectedMode === "DRAFTS"
-                    ? "bg-indigo-50/50 dark:bg-indigo-950/30 border-indigo-600 ring-2 ring-indigo-600/20"
-                    : "bg-white dark:bg-slate-850 border-slate-200 dark:border-slate-800 hover:border-indigo-300"
-                }`}
+                className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100/60 dark:bg-slate-900/60 opacity-60 cursor-not-allowed relative flex items-start gap-4 select-none"
               >
                 <input
                   type="radio"
                   name="dispatchMode"
-                  checked={selectedMode === "DRAFTS"}
-                  onChange={(e) => {
-                    e.stopPropagation();
-                    handleModeSelect("DRAFTS");
-                  }}
-                  className="mt-1 text-indigo-600 focus:ring-indigo-500 h-4 w-4 cursor-pointer shrink-0"
+                  checked={false}
+                  disabled
+                  readOnly
+                  className="mt-1 text-slate-400 h-4 w-4 cursor-not-allowed shrink-0 opacity-50"
                 />
                 <div className="flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xl">📁</span>
-                    <h5 className="text-sm font-bold text-slate-800 dark:text-white">Option 2: Save to Gmail Drafts</h5>
-                    <span className="text-[10px] font-extrabold text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/50 px-2 py-0.5 rounded-full ml-auto">
-                      Requires Gmail Connection
+                    <span className="text-xl opacity-70">📁</span>
+                    <h5 className="text-sm font-bold text-slate-500 dark:text-slate-400">Option 2: Save to Gmail Drafts</h5>
+                    <span className="text-[10px] font-extrabold text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/80 border border-amber-300 dark:border-amber-700/50 px-2.5 py-0.5 rounded-full ml-auto">
+                      Coming Soon ⏳
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                    Campaign emails are automatically created and saved directly into your connected Gmail account’s Drafts folder. You review and send them from your Gmail inbox.
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 leading-relaxed">
+                    Campaign emails will automatically save directly into your connected Gmail account’s Drafts folder. (This feature is coming soon).
                   </p>
                 </div>
               </div>

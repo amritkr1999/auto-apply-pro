@@ -271,6 +271,60 @@ export const ContactUsPage: React.FC = () => {
           </div>
         </div>
 
+        {/* Official Social & Community Channels */}
+        <div className="mb-12 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm">
+          <div className="mb-6 text-center sm:text-left">
+            <h3 className="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-1">
+              Connect With Our Official Communities
+            </h3>
+            <p className="text-slate-600 dark:text-slate-400 text-sm">
+              Follow our official channels for real-time job market tips, product releases, roadmap updates, and community discussions.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <a
+              href="https://www.linkedin.com/company/easynaukri/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col items-center justify-center p-4.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 hover:border-indigo-500 dark:hover:border-indigo-500 hover:shadow-md transition-all group text-center"
+            >
+              <span className="text-2xl mb-1.5 group-hover:scale-110 transition-transform">💼</span>
+              <span className="text-xs font-bold text-slate-900 dark:text-white">LinkedIn</span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">@easynaukri</span>
+            </a>
+            <a
+              href="https://www.instagram.com/easynaukri.online"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col items-center justify-center p-4.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 hover:border-pink-500 dark:hover:border-pink-500 hover:shadow-md transition-all group text-center"
+            >
+              <span className="text-2xl mb-1.5 group-hover:scale-110 transition-transform">📷</span>
+              <span className="text-xs font-bold text-slate-900 dark:text-white">Instagram</span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">@easynaukri.online</span>
+            </a>
+            <a
+              href="https://x.com/EasyNaukrii"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col items-center justify-center p-4.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 hover:border-slate-900 dark:hover:border-white hover:shadow-md transition-all group text-center"
+            >
+              <span className="text-2xl mb-1.5 group-hover:scale-110 transition-transform">𝕏</span>
+              <span className="text-xs font-bold text-slate-900 dark:text-white">X (Twitter)</span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">@EasyNaukrii</span>
+            </a>
+            <a
+              href="https://www.reddit.com/r/EasyNaukri/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col items-center justify-center p-4.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 hover:border-orange-500 dark:hover:border-orange-500 hover:shadow-md transition-all group text-center"
+            >
+              <span className="text-2xl mb-1.5 group-hover:scale-110 transition-transform">🤖</span>
+              <span className="text-xs font-bold text-slate-900 dark:text-white">Reddit Hub</span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">r/EasyNaukri</span>
+            </a>
+          </div>
+        </div>
+
         {/* Contact Form Section */}
         <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-10 shadow-sm">
           <div className="mb-8">
@@ -429,6 +483,10 @@ export const ContactUsPage: React.FC = () => {
             <Link to="/about" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium">About Us</Link>
             <Link to="/careers" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium">Careers</Link>
             <Link to="/contact" className="text-indigo-600 dark:text-indigo-400 font-bold">Contact Us</Link>
+            <a href="https://www.linkedin.com/company/easynaukri/" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium inline-flex items-center gap-1"><span>💼</span> LinkedIn</a>
+            <a href="https://www.instagram.com/easynaukri.online" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium inline-flex items-center gap-1"><span>📷</span> Instagram</a>
+            <a href="https://x.com/EasyNaukrii" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium inline-flex items-center gap-1"><span>𝕏</span> X</a>
+            <a href="https://www.reddit.com/r/EasyNaukri/" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium inline-flex items-center gap-1"><span>🤖</span> Reddit</a>
             <Link to="/privacy" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium">Privacy Policy</Link>
             <Link to="/terms" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium">Terms of Service</Link>
           </div>
