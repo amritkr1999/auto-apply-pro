@@ -105,20 +105,45 @@ jobs:
             set -e
             cd ~/auto-apply-pro
 
+            # Detect docker command (with sudo if needed)
+            DOCKER_CMD="docker"
+            if ! docker ps >/dev/null 2>&1; then
+              if sudo docker ps >/dev/null 2>&1; then
+                DOCKER_CMD="sudo docker"
+              fi
+            fi
+
+            # Detect docker compose command
+            if $DOCKER_CMD compose version >/dev/null 2>&1; then
+              COMPOSE_CMD="$DOCKER_CMD compose"
+            elif command -v docker-compose >/dev/null 2>&1; then
+              COMPOSE_CMD="docker-compose"
+            elif sudo command -v docker-compose >/dev/null 2>&1; then
+              COMPOSE_CMD="sudo docker-compose"
+            else
+              echo "ERROR: Neither 'docker compose' nor 'docker-compose' found on target server."
+              exit 1
+            fi
+
+            echo "Using Docker command: $DOCKER_CMD"
+            echo "Using Compose command: $COMPOSE_CMD"
+
             # Authenticate with GHCR
-            echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+            echo "$GITHUB_TOKEN" | $DOCKER_CMD login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
 
             # Free up disk space before pull
-            docker image prune -f
+            $DOCKER_CMD image prune -f
 
-            # Pull latest containers with logs enabled
-            docker compose pull backend frontend
+            # Ensure .env file exists so compose doesn't fail on missing env file
+            touch .env
 
-            # Recreate containers
-            docker compose stop backend frontend || true
-            docker compose rm -f backend frontend || true
-            docker compose up -d --force-recreate backend frontend
+            # Pull images for services
+            $COMPOSE_CMD pull db redis backend frontend || true
+
+            # Bring up all core services (db, redis, backend, frontend)
+            $COMPOSE_CMD up -d db redis backend frontend
 
             # Final cleanup
-            docker image prune -f
+            $DOCKER_CMD image prune -f
+            echo "SUCCESS: Services deployed and started successfully!"
           EOF
