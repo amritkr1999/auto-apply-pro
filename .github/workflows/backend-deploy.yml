@@ -69,10 +69,21 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-and-push
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4.2.2
+
       - name: Start SSH Agent & Load Key
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.OCI_PRIVATE_KEY }}
+
+      - name: Copy Production Compose File to OCI Server
+        env:
+          OCI_HOST: ${{ secrets.OCI_HOST }}
+          OCI_USERNAME: ${{ secrets.OCI_USERNAME }}
+        run: |
+          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$OCI_USERNAME@$OCI_HOST" "mkdir -p ~/auto-apply-pro"
+          scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null docker-compose.prod.yml "$OCI_USERNAME@$OCI_HOST:~/auto-apply-pro/docker-compose.yml"
 
       - name: SSH and Restart Services
         env:
@@ -89,17 +100,22 @@ jobs:
               -o ServerAliveCountMax=3 \
               "$OCI_USERNAME@$OCI_HOST" "GITHUB_TOKEN='$GITHUB_TOKEN' GITHUB_ACTOR='$GITHUB_ACTOR' bash -s" << 'EOF'
             set -e
-            mkdir -p ~/auto-apply-pro
             cd ~/auto-apply-pro
 
             # Authenticate with GHCR
             echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
 
-            # Pull latest containers and recreate
-            docker compose pull --quiet backend frontend || docker compose pull backend frontend
+            # Prune dangling builder cache/images to free disk space
+            docker image prune -f
+
+            # Pull latest containers with logs enabled
+            docker compose pull backend frontend
+
+            # Recreate containers
             docker compose stop backend frontend || true
             docker compose rm -f backend frontend || true
             docker compose up -d --force-recreate --remove-orphans backend frontend
 
+            # Final cleanup
             docker image prune -f
           EOF
