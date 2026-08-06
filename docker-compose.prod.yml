@@ -26,6 +26,7 @@ services:
     ports:
       - "8060:8060"
     environment:
+      JAVA_TOOL_OPTIONS: "-Xmx384m -Xms128m"
       DB_URL: jdbc:postgresql://db:5432/${DB_NAME:-autoapplypro}
       DB_USERNAME: ${DB_USER:-amrit}
       DB_PASSWORD: ${DB_PASSWORD:-amrit123}

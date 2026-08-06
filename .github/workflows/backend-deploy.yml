@@ -99,6 +99,17 @@ jobs:
             # Write production compose config cleanly from base64
             echo "$COMPOSE_B64" | base64 -d > docker-compose.yml
 
+            # Ensure swap space is configured on the server to prevent RAM thrashing
+            if [ ! -f /swapfile ]; then
+              echo "Creating 2GB swap file..."
+              sudo fallocate -l 2G /swapfile || sudo dd if=/dev/zero of=/swapfile bs=1M count=2048 || true
+              sudo chmod 600 /swapfile || true
+              sudo mkswap /swapfile || true
+              sudo swapon /swapfile || true
+            elif ! sudo swapon --show | grep -q /swapfile; then
+              sudo swapon /swapfile || true
+            fi
+
             # Detect docker command (with sudo if needed)
             DOCKER_CMD="docker"
             if ! docker ps >/dev/null 2>&1; then
