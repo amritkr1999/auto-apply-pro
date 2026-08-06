@@ -24,6 +24,15 @@ public class BillingController {
         return ResponseEntity.ok(billingService.getActivePlans());
     }
 
+    @GetMapping("/status")
+    public ResponseEntity<Map<String, Object>> getDeploymentStatus() {
+        return ResponseEntity.ok(Map.of(
+            "status", "UP",
+            "deploymentCheck", "Auto-deployment confirmed working!",
+            "timestamp", System.currentTimeMillis()
+        ));
+    }
+
     @PostMapping("/subscribe")
     public ResponseEntity<?> createSubscription(Authentication authentication, @RequestBody CreateSubscriptionRequest request) {
         try {

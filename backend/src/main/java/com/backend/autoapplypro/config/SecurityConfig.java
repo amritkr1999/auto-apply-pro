@@ -36,6 +36,7 @@ public class SecurityConfig {
                     "/api/v1/marketing/**",
                     "/api/v1/outreach/oauth2/callback",
                     "/api/v1/billing/plans",
+                    "/api/v1/billing/status",
                     "/api/v1/billing/webhook",
                     "/api/v1/payments/telegram-webhook",
                     "/v3/api-docs/**",
