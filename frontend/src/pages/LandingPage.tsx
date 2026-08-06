@@ -922,7 +922,8 @@ export const LandingPage: React.FC = () => {
               </li>
               <li className="footer-link-item"><Link to="/about">About Us</Link></li>
               <li className="footer-link-item"><Link to="/careers">Careers</Link></li>
-              <li className="footer-link-item"><a href="#">Contact Us</a></li>
+              <li className="footer-link-item"><Link to="/contact">Contact Us</Link></li>
+
             </ul>
           </div>
         </div>

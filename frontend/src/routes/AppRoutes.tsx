@@ -34,6 +34,7 @@ const PrivacyPolicy = lazy(() => import("../components/pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("../components/pages/TermsOfService"));
 const AboutUsPage = lazy(() => import("../pages/AboutUsPage"));
 const CareersPage = lazy(() => import("../pages/CareersPage"));
+const ContactUsPage = lazy(() => import("../pages/ContactUsPage"));
 
 const RouteFallback: React.FC = () => (
   <div className="flex items-center justify-center min-h-[400px]" aria-label="Loading page content">
@@ -56,8 +57,10 @@ export const AppRoutes: React.FC = () => {
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/about" element={<AboutUsPage />} />
         <Route path="/careers" element={<CareersPage />} />
+        <Route path="/contact" element={<ContactUsPage />} />
         <Route path="/profile/:username" element={<PublicProfilePage />} />
         <Route path="/card/:username" element={<PublicPlaqueCardPage />} />
+
         <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
           <Route
             path="/dashboard"

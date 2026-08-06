@@ -272,9 +272,13 @@ export const PrivacyPolicy = () => {
             <Link to="/terms" className="hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
               Terms of Service
             </Link>
+            <Link to="/contact" className="hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
+              Contact Us
+            </Link>
             <Link to="/" className="hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
               Home
             </Link>
+
           </div>
         </div>
       </footer>

@@ -170,4 +170,55 @@ public class SystemEmailServiceImpl implements SystemEmailService {
             }
         }
     }
+
+    @Override
+    @org.springframework.scheduling.annotation.Async
+    public void sendGeneralContactEmail(com.backend.autoapplypro.modules.users.dto.ContactRequestDto request) {
+        String targetSupportEmail = (supportEmail != null && !supportEmail.trim().isEmpty()) ? supportEmail : "support@easynaukri.online";
+        String categoryStr = request.getCategory() != null ? "[" + request.getCategory().toUpperCase() + "] " : "[GENERAL] ";
+        String subject = "EasyNaukri Contact Us Inquiry: " + categoryStr + (request.getSubject() != null ? request.getSubject() : "No Subject");
+        
+        String body = "Hello EasyNaukri Team,\n\n"
+                + "A user has submitted a new inquiry via the Contact Us form:\n\n"
+                + "--------------------------------------------------\n"
+                + "Name: " + (request.getName() != null ? request.getName() : "Anonymous") + "\n"
+                + "Email: " + (request.getEmail() != null ? request.getEmail() : "Not Provided") + "\n"
+                + "Phone/WhatsApp: " + (request.getPhone() != null && !request.getPhone().trim().isEmpty() ? request.getPhone() : "Not Provided") + "\n"
+                + "Category: " + (request.getCategory() != null ? request.getCategory() : "General Inquiry") + "\n"
+                + "Subject: " + (request.getSubject() != null ? request.getSubject() : "N/A") + "\n\n"
+                + "Message:\n" + (request.getMessage() != null ? request.getMessage() : "") + "\n"
+                + "--------------------------------------------------\n\n"
+                + "You can reply directly to this email to respond to the user (" + request.getEmail() + ").\n\n"
+                + "Best regards,\n"
+                + "EasyNaukri Automated Contact Desk";
+
+        log.info("\n==================================================\n"
+                + "[SYSTEM EMAIL OUTBOX - GENERAL CONTACT FORM]\n"
+                + "Target Support Inbox: {}\n"
+                + "From User: {} <{}>\n"
+                + "Subject: {}\n"
+                + "Body:\n{}\n"
+                + "==================================================",
+                targetSupportEmail, request.getName(), request.getEmail(), subject, body);
+
+        if (mailSender != null) {
+            try {
+                SimpleMailMessage mailMessage = new SimpleMailMessage();
+                mailMessage.setTo(targetSupportEmail);
+                if (fromEmail != null && !fromEmail.trim().isEmpty()) {
+                    mailMessage.setFrom(fromEmail);
+                }
+                if (request.getEmail() != null && !request.getEmail().trim().isEmpty()) {
+                    mailMessage.setReplyTo(request.getEmail());
+                }
+                mailMessage.setSubject(subject);
+                mailMessage.setText(body);
+                mailSender.send(mailMessage);
+                log.info("Successfully sent contact form email to support inbox: {}", targetSupportEmail);
+            } catch (Exception e) {
+                log.error("Failed to send contact form email via SMTP, fell back to console log: {}", e.getMessage(), e);
+            }
+        }
+    }
 }
+

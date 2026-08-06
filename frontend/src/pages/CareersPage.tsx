@@ -163,6 +163,10 @@ export const CareersPage: React.FC = () => {
             <Link to="/careers" className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">
               Careers
             </Link>
+            <Link to="/contact" className="hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
+              Contact Us
+            </Link>
+
             <a
               href="https://www.linkedin.com/company/easynaukri/"
               target="_blank"

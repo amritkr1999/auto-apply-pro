@@ -249,9 +249,13 @@ export const TermsOfService = () => {
             <Link to="/terms" className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">
               Terms of Service
             </Link>
+            <Link to="/contact" className="hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
+              Contact Us
+            </Link>
             <Link to="/" className="hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
               Home
             </Link>
+
           </div>
         </div>
       </footer>

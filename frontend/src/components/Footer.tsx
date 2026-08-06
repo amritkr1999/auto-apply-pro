@@ -23,6 +23,12 @@ export const Footer: React.FC = () => {
           >
             Careers
           </Link>
+          <Link
+            to="/contact"
+            className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium"
+          >
+            Contact Us
+          </Link>
           <a
             href="https://www.linkedin.com/company/easynaukri/"
             target="_blank"

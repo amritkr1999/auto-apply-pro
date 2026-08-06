@@ -198,6 +198,9 @@ export const AboutUsPage: React.FC = () => {
             <Link to="/careers" className="hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
               Careers
             </Link>
+            <Link to="/contact" className="hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
+              Contact Us
+            </Link>
             <a
               href="https://www.linkedin.com/company/easynaukri/"
               target="_blank"
