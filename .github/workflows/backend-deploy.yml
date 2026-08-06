@@ -77,35 +77,27 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.OCI_PRIVATE_KEY }}
 
-      - name: Sync Compose Config to Server
-        env:
-          OCI_HOST: ${{ secrets.OCI_HOST }}
-          OCI_USERNAME: ${{ secrets.OCI_USERNAME }}
-        run: |
-          ssh -o StrictHostKeyChecking=no \
-              -o UserKnownHostsFile=/dev/null \
-              -o BatchMode=yes \
-              -o ConnectTimeout=60 \
-              -o ServerAliveInterval=60 \
-              -o ServerAliveCountMax=10 \
-              "$OCI_USERNAME@$OCI_HOST" "mkdir -p ~/auto-apply-pro && cat > ~/auto-apply-pro/docker-compose.yml" < docker-compose.prod.yml
-
-      - name: SSH and Restart Services
+      - name: SSH and Deploy Services
         env:
           OCI_HOST: ${{ secrets.OCI_HOST }}
           OCI_USERNAME: ${{ secrets.OCI_USERNAME }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
         run: |
+          COMPOSE_B64=$(base64 -w0 docker-compose.prod.yml 2>/dev/null || base64 docker-compose.prod.yml | tr -d '\r\n')
           ssh -o StrictHostKeyChecking=no \
               -o UserKnownHostsFile=/dev/null \
               -o BatchMode=yes \
               -o ConnectTimeout=60 \
               -o ServerAliveInterval=60 \
               -o ServerAliveCountMax=10 \
-              "$OCI_USERNAME@$OCI_HOST" "GITHUB_TOKEN='$GITHUB_TOKEN' GITHUB_ACTOR='$GITHUB_ACTOR' bash -s" << 'EOF'
+              "$OCI_USERNAME@$OCI_HOST" "COMPOSE_B64='$COMPOSE_B64' GITHUB_TOKEN='$GITHUB_TOKEN' GITHUB_ACTOR='$GITHUB_ACTOR' bash -s" << 'EOF'
             set -e
+            mkdir -p ~/auto-apply-pro
             cd ~/auto-apply-pro
+
+            # Write production compose config cleanly from base64
+            echo "$COMPOSE_B64" | base64 -d > docker-compose.yml
 
             # Detect docker command (with sudo if needed)
             DOCKER_CMD="docker"
