@@ -148,8 +148,8 @@ jobs:
             # Bring up database & cache first
             $COMPOSE_CMD up -d db redis
 
-            # Bring up application services
-            $COMPOSE_CMD up -d backend frontend
+            # Bring up application services with newly pulled images
+            $COMPOSE_CMD up -d --force-recreate backend frontend
 
             # Final cleanup
             $DOCKER_CMD image prune -f
