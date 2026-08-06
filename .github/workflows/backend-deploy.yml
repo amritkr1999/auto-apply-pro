@@ -85,7 +85,9 @@ jobs:
           ssh -o StrictHostKeyChecking=no \
               -o UserKnownHostsFile=/dev/null \
               -o BatchMode=yes \
-              -o ConnectTimeout=30 \
+              -o ConnectTimeout=60 \
+              -o ServerAliveInterval=60 \
+              -o ServerAliveCountMax=10 \
               "$OCI_USERNAME@$OCI_HOST" "mkdir -p ~/auto-apply-pro && cat > ~/auto-apply-pro/docker-compose.yml" < docker-compose.prod.yml
 
       - name: SSH and Restart Services
@@ -98,9 +100,9 @@ jobs:
           ssh -o StrictHostKeyChecking=no \
               -o UserKnownHostsFile=/dev/null \
               -o BatchMode=yes \
-              -o ConnectTimeout=30 \
-              -o ServerAliveInterval=15 \
-              -o ServerAliveCountMax=3 \
+              -o ConnectTimeout=60 \
+              -o ServerAliveInterval=60 \
+              -o ServerAliveCountMax=10 \
               "$OCI_USERNAME@$OCI_HOST" "GITHUB_TOKEN='$GITHUB_TOKEN' GITHUB_ACTOR='$GITHUB_ACTOR' bash -s" << 'EOF'
             set -e
             cd ~/auto-apply-pro
@@ -134,14 +136,20 @@ jobs:
             # Free up disk space before pull
             $DOCKER_CMD image prune -f
 
-            # Ensure .env file exists so compose doesn't fail on missing env file
+            # Ensure .env file exists
             touch .env
 
-            # Pull images for services
-            $COMPOSE_CMD pull db redis backend frontend || true
+            # Pull images sequentially to avoid heavy I/O spikes
+            $COMPOSE_CMD pull db || true
+            $COMPOSE_CMD pull redis || true
+            $COMPOSE_CMD pull backend || true
+            $COMPOSE_CMD pull frontend || true
 
-            # Bring up all core services (db, redis, backend, frontend)
-            $COMPOSE_CMD up -d db redis backend frontend
+            # Bring up database & cache first
+            $COMPOSE_CMD up -d db redis
+
+            # Bring up application services
+            $COMPOSE_CMD up -d backend frontend
 
             # Final cleanup
             $DOCKER_CMD image prune -f
