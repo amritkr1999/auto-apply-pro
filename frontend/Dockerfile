@@ -16,5 +16,8 @@ COPY --from=build /app/dist /usr/share/nginx/html
 # is now inside the build image at /app/nginx.conf
 COPY --from=build /app/nginx.conf /etc/nginx/conf.d/default.conf
 
+# Label image source for automatic GitHub Package repository linking
+LABEL org.opencontainers.image.source="https://github.com/amritkr1999/auto-apply-pro"
+
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

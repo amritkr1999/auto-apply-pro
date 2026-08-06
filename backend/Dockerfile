@@ -34,5 +34,8 @@ EXPOSE 8060
 # Use the secure non-root user
 USER spring:spring
 
+# Label image source for automatic GitHub Package repository linking
+LABEL org.opencontainers.image.source="https://github.com/amritkr1999/auto-apply-pro"
+
 # Run the jar file
 ENTRYPOINT ["java", "-jar", "app.jar"]
