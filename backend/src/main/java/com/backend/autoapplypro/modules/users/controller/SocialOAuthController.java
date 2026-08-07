@@ -37,6 +37,7 @@ public class SocialOAuthController {
     private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
     private final com.backend.autoapplypro.config.JwtUtil jwtUtil;
     private final com.backend.autoapplypro.modules.users.service.MarketingEmailCampaignService marketingCampaignService;
+    private final com.backend.autoapplypro.modules.users.service.SocialOAuthService socialOAuthService;
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Value("${github.client.id:dev-github-client-id}")
@@ -257,51 +258,7 @@ public class SocialOAuthController {
             }
 
             if (isLogin) {
-                if (email == null || email.isEmpty()) {
-                    email = (githubUsername != null ? githubUsername : "github-user") + "@github.com";
-                }
-                User user = userRepository.findByEmail(email).orElse(null);
-                if (user == null) {
-                    String randomPassword = java.util.UUID.randomUUID().toString();
-                    user = User.builder()
-                            .email(email)
-                            .passwordHash(passwordEncoder.encode(randomPassword))
-                            .role(UserRole.CANDIDATE)
-                            .name(githubUsername != null ? githubUsername : "GitHub User")
-                            .mobile("1234567890")
-                            .loginStreak(1)
-                            .lastLoginDate(java.time.LocalDate.now())
-                            .isEmailVerified(true)
-                            .build();
-                    user = userRepository.save(user);
-                    try {
-                        marketingCampaignService.sendWelcomeEmail(user);
-                    } catch (Exception ex) {
-                        log.error("Failed to send welcome email during GitHub OAuth registration for email: {}", email, ex);
-                    }
-
-                    ProfessionalProfile candidate = ProfessionalProfile.builder()
-                            .user(user)
-                            .githubUsername(githubUsername)
-                            .githubProfileUrl(githubProfileUrl)
-                            .isVerified(true)
-                            .skills(new java.util.HashSet<>())
-                            .jobPreferences(new java.util.HashMap<>())
-                            .build();
-                    professionalProfileRepository.save(candidate);
-                } else {
-                    if (user.getRole() != UserRole.RECRUITER && user.getRole() != UserRole.COMPANY) {
-                        ProfessionalProfile candidate = professionalProfileRepository.findByUserId(user.getId()).orElse(null);
-                        if (candidate != null) {
-                            if (candidate.getGithubUsername() == null) {
-                                candidate.setGithubUsername(githubUsername);
-                                candidate.setGithubProfileUrl(githubProfileUrl);
-                                candidate.setIsVerified(true);
-                                professionalProfileRepository.save(candidate);
-                            }
-                        }
-                    }
-                }
+                User user = socialOAuthService.processGithubLogin(email, githubUsername, githubProfileUrl);
 
                 String roleName = user.getRole() != null ? user.getRole().name() : "CANDIDATE";
                 String jwtToken = jwtUtil.generateToken(user.getId(), user.getEmail(), roleName);
@@ -360,14 +317,22 @@ public class SocialOAuthController {
     @GetMapping("/login/linkedin")
     public ResponseEntity<String> loginLinkedin() {
         log.info("Generating LinkedIn OAuth login URL");
-        if (linkedinClientId.startsWith("dev-")) {
+        String cleanClientId = linkedinClientId != null ? linkedinClientId.trim() : "";
+        String cleanRedirectUri = linkedinRedirectUri != null ? linkedinRedirectUri.trim() : "";
+        if (cleanClientId.startsWith("dev-")) {
             log.info("Using mock LinkedIn connection URL for development");
-            String mockUrl = linkedinRedirectUri + "?code=mock_linkedin_code&state=login";
+            String mockUrl = cleanRedirectUri + "?code=mock_linkedin_code&state=login";
             return ResponseEntity.ok(mockUrl);
         }
+        String encodedRedirectUri;
+        try {
+            encodedRedirectUri = java.net.URLEncoder.encode(cleanRedirectUri, "UTF-8");
+        } catch (Exception e) {
+            encodedRedirectUri = cleanRedirectUri;
+        }
         String authUrl = "https://www.linkedin.com/oauth/v2/authorization?response_type=code"
-                + "&client_id=" + linkedinClientId
-                + "&redirect_uri=" + linkedinRedirectUri
+                + "&client_id=" + cleanClientId
+                + "&redirect_uri=" + encodedRedirectUri
                 + "&state=login"
                 + "&scope=openid%20profile%20email";
         return ResponseEntity.ok(authUrl);
@@ -379,14 +344,22 @@ public class SocialOAuthController {
     @GetMapping("/connect/linkedin")
     public ResponseEntity<String> connectLinkedin(@RequestParam("userId") Long userId) {
         log.info("Connecting LinkedIn for user: {}", userId);
-        if (linkedinClientId.startsWith("dev-")) {
+        String cleanClientId = linkedinClientId != null ? linkedinClientId.trim() : "";
+        String cleanRedirectUri = linkedinRedirectUri != null ? linkedinRedirectUri.trim() : "";
+        if (cleanClientId.startsWith("dev-")) {
             log.info("Using mock LinkedIn connection URL for development");
-            String mockUrl = linkedinRedirectUri + "?code=mock_linkedin_code&state=" + userId;
+            String mockUrl = cleanRedirectUri + "?code=mock_linkedin_code&state=" + userId;
             return ResponseEntity.ok(mockUrl);
         }
+        String encodedRedirectUri;
+        try {
+            encodedRedirectUri = java.net.URLEncoder.encode(cleanRedirectUri, "UTF-8");
+        } catch (Exception e) {
+            encodedRedirectUri = cleanRedirectUri;
+        }
         String authUrl = "https://www.linkedin.com/oauth/v2/authorization?response_type=code"
-                + "&client_id=" + linkedinClientId
-                + "&redirect_uri=" + linkedinRedirectUri
+                + "&client_id=" + cleanClientId
+                + "&redirect_uri=" + encodedRedirectUri
                 + "&state=" + userId
                 + "&scope=openid%20profile%20email";
         return ResponseEntity.ok(authUrl);
@@ -396,7 +369,6 @@ public class SocialOAuthController {
      * LinkedIn Callback
      */
     @GetMapping("/callback/linkedin")
-    @Transactional
     public RedirectView linkedinCallback(
             @RequestParam(value = "code", required = false) String code,
             @RequestParam(value = "state", required = false) String state,
@@ -439,26 +411,33 @@ public class SocialOAuthController {
             }
         }
 
-        try {
             String linkedinName;
             String linkedinProfileUrl;
             String email = null;
 
-            if ("mock_linkedin_code".equals(code)) {
+            String cleanCode = code.trim();
+            String cleanClientId = linkedinClientId != null ? linkedinClientId.trim() : "";
+            String cleanClientSecret = linkedinClientSecret != null ? linkedinClientSecret.trim() : "";
+            String cleanRedirectUri = linkedinRedirectUri != null ? linkedinRedirectUri.trim() : "";
+
+            if ("mock_linkedin_code".equals(cleanCode)) {
                 linkedinName = "Mock Candidate";
                 linkedinProfileUrl = "https://www.linkedin.com/in/mock-candidate";
                 email = "social.linkedin@example.com";
             } else {
+                log.info("Exchanging code with LinkedIn. client_id: {}, redirect_uri: {}, secretLength: {}",
+                        cleanClientId, cleanRedirectUri, cleanClientSecret.length());
+
                 // Exchange code for token
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
                 MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
                 map.add("grant_type", "authorization_code");
-                map.add("code", code);
-                map.add("redirect_uri", linkedinRedirectUri);
-                map.add("client_id", linkedinClientId);
-                map.add("client_secret", linkedinClientSecret);
+                map.add("code", cleanCode);
+                map.add("redirect_uri", cleanRedirectUri);
+                map.add("client_id", cleanClientId);
+                map.add("client_secret", cleanClientSecret);
 
                 HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(map, headers);
                 ResponseEntity<Map> response = restTemplate.postForEntity(
@@ -584,10 +563,21 @@ public class SocialOAuthController {
 
                 return new RedirectView(frontendUrl + "/profile/settings?status=success&provider=linkedin");
             }
-
-        } catch (Exception e) {
-            log.error("LinkedIn OAuth Error for state {}", state, e);
-            String errMsg = e.getMessage() != null ? e.getMessage() : "Unknown Error";
+        } catch (org.springframework.web.client.HttpStatusCodeException e) {
+            log.error("LinkedIn OAuth Token Exchange Failed! Status: {}, ResponseBody: {}, client_id: {}, redirect_uri: {}", 
+                    e.getStatusCode(), e.getResponseBodyAsString(), linkedinClientId, linkedinRedirectUri, e);
+            String errMsg = "LinkedIn OAuth Token Failed (" + e.getStatusCode() + "): " + e.getResponseBodyAsString();
+            try {
+                errMsg = java.net.URLEncoder.encode(errMsg, "UTF-8");
+            } catch (Exception ex) {}
+            if (isLogin) {
+                return new RedirectView(frontendUrl + "/login?status=error&errorMsg=" + errMsg);
+            } else {
+                return new RedirectView(frontendUrl + "/profile/settings?status=error&provider=linkedin&errorMsg=" + errMsg);
+            }
+        } catch (Throwable t) {
+            log.error("CRITICAL LINKEDIN OAUTH CALLBACK ERROR for state {}", state, t);
+            String errMsg = t.getMessage() != null ? t.getMessage() : t.getClass().getSimpleName();
             try {
                 errMsg = java.net.URLEncoder.encode(errMsg, "UTF-8");
             } catch (Exception ex) {}
