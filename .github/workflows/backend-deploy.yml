@@ -91,7 +91,7 @@ jobs:
               -o ConnectTimeout=60 \
               -o ServerAliveInterval=60 \
               -o ServerAliveCountMax=10 \
-              "$OCI_USERNAME@$OCI_HOST" "bash -s" << EOF
+              "$OCI_USERNAME@$OCI_HOST" "COMPOSE_B64='$COMPOSE_B64' GITHUB_TOKEN='$GITHUB_TOKEN' GITHUB_ACTOR='$GITHUB_ACTOR' bash -s" << 'EOF'
             set -e
             mkdir -p ~/auto-apply-pro
             cd ~/auto-apply-pro
@@ -119,8 +119,8 @@ jobs:
             fi
 
             # Detect docker compose command
-            if \$DOCKER_CMD compose version >/dev/null 2>&1; then
-              COMPOSE_CMD="\$DOCKER_CMD compose"
+            if $DOCKER_CMD compose version >/dev/null 2>&1; then
+              COMPOSE_CMD="$DOCKER_CMD compose"
             elif command -v docker-compose >/dev/null 2>&1; then
               COMPOSE_CMD="docker-compose"
             elif sudo command -v docker-compose >/dev/null 2>&1; then
@@ -130,31 +130,31 @@ jobs:
               exit 1
             fi
 
-            echo "Using Docker command: \$DOCKER_CMD"
-            echo "Using Compose command: \$COMPOSE_CMD"
+            echo "Using Docker command: $DOCKER_CMD"
+            echo "Using Compose command: $COMPOSE_CMD"
 
             # Authenticate with GHCR
-            echo "${{ secrets.GITHUB_TOKEN }}" | \$DOCKER_CMD login ghcr.io -u "${{ github.actor }}" --password-stdin
+            echo "$GITHUB_TOKEN" | $DOCKER_CMD login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
 
             # Free up disk space before pull
-            \$DOCKER_CMD image prune -f
+            $DOCKER_CMD image prune -f
 
             # Ensure .env file exists
             touch .env
 
             # Pull images sequentially to avoid heavy I/O spikes
-            \$COMPOSE_CMD pull db || true
-            \$COMPOSE_CMD pull redis || true
-            \$COMPOSE_CMD pull backend || true
-            \$COMPOSE_CMD pull frontend || true
+            $COMPOSE_CMD pull db || true
+            $COMPOSE_CMD pull redis || true
+            $COMPOSE_CMD pull backend || true
+            $COMPOSE_CMD pull frontend || true
 
             # Bring up database & cache first
-            \$COMPOSE_CMD up -d db redis
+            $COMPOSE_CMD up -d db redis
 
             # Bring up application services with newly pulled images
-            \$COMPOSE_CMD up -d --force-recreate backend frontend
+            $COMPOSE_CMD up -d --force-recreate backend frontend
 
             # Final cleanup
-            \$DOCKER_CMD image prune -f
+            $DOCKER_CMD image prune -f
             echo "SUCCESS: Services deployed and started successfully!"
-EOF
+          EOF
