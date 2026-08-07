@@ -10,7 +10,7 @@ COPY mvnw pom.xml ./
 RUN tr -d '\r' < mvnw > mvnw.tmp && mv mvnw.tmp mvnw && chmod +x mvnw
 
 # Download dependencies to cache them in the Docker layer
-RUN ./mvnw dependency:go-offline -B
+RUN ./mvnw dependency:resolve -B || true
 
 # Copy application source code
 COPY src ./src
