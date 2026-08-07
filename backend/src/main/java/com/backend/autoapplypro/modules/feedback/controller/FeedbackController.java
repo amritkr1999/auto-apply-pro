@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -21,7 +22,7 @@ public class FeedbackController {
     @PostMapping
     public ResponseEntity<FeedbackResponseDto> submitFeedback(
             Authentication authentication,
-            @RequestBody FeedbackRequestDto requestDto) {
+            @Valid @RequestBody FeedbackRequestDto requestDto) {
         if (authentication == null) {
             return ResponseEntity.status(401).build();
         }

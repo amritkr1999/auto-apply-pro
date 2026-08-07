@@ -483,10 +483,6 @@ export const ContactUsPage: React.FC = () => {
             <Link to="/about" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium">About Us</Link>
             <Link to="/careers" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium">Careers</Link>
             <Link to="/contact" className="text-indigo-600 dark:text-indigo-400 font-bold">Contact Us</Link>
-            <a href="https://www.linkedin.com/company/easynaukri/" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium inline-flex items-center gap-1"><span>💼</span> LinkedIn</a>
-            <a href="https://www.instagram.com/easynaukri.online" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium inline-flex items-center gap-1"><span>📷</span> Instagram</a>
-            <a href="https://x.com/EasyNaukrii" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium inline-flex items-center gap-1"><span>𝕏</span> X</a>
-            <a href="https://www.reddit.com/r/EasyNaukri/" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium inline-flex items-center gap-1"><span>🤖</span> Reddit</a>
             <Link to="/privacy" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium">Privacy Policy</Link>
             <Link to="/terms" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium">Terms of Service</Link>
           </div>

@@ -7,9 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import org.springframework.security.core.Authentication;
-import com.backend.autoapplypro.modules.jobs.repository.JobApplicationRepository;
 import java.util.List;
 
 @RestController
@@ -19,7 +17,6 @@ import java.util.List;
 public class JobApplicationController {
 
     private final JobApplicationService service;
-    private final JobApplicationRepository repository;
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getApplications(Authentication authentication, @PathVariable Long userId) {
@@ -79,7 +76,7 @@ public class JobApplicationController {
         boolean isAdmin = authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
-        return repository.findById(id).map(existing -> {
+        return service.getApplicationById(id).map(existing -> {
             if (!existing.getUser().getId().equals(callerUserId) && !isAdmin) {
                 return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
             }
@@ -100,7 +97,7 @@ public class JobApplicationController {
         boolean isAdmin = authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
-        return repository.findById(id).map(existing -> {
+        return service.getApplicationById(id).map(existing -> {
             if (!existing.getUser().getId().equals(callerUserId) && !isAdmin) {
                 return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
             }
@@ -121,7 +118,7 @@ public class JobApplicationController {
         boolean isAdmin = authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
-        return repository.findById(id).map(existing -> {
+        return service.getApplicationById(id).map(existing -> {
             if (!existing.getUser().getId().equals(callerUserId) && !isAdmin) {
                 return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
             }

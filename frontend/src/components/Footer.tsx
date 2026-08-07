@@ -29,38 +29,6 @@ export const Footer: React.FC = () => {
           >
             Contact Us
           </Link>
-          <a
-            href="https://www.linkedin.com/company/easynaukri/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium inline-flex items-center gap-1"
-          >
-            <span>💼</span> LinkedIn
-          </a>
-          <a
-            href="https://www.instagram.com/easynaukri.online"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium inline-flex items-center gap-1"
-          >
-            <span>📷</span> Instagram
-          </a>
-          <a
-            href="https://x.com/EasyNaukrii"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium inline-flex items-center gap-1"
-          >
-            <span>𝕏</span> X (Twitter)
-          </a>
-          <a
-            href="https://www.reddit.com/r/EasyNaukri/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium inline-flex items-center gap-1"
-          >
-            <span>🤖</span> Reddit
-          </a>
           <Link
             to="/privacy"
             className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium"

@@ -53,9 +53,9 @@ public class ProfessionalProfile {
     @Column(name = "resume_filename")
     private String resumeFilename;
 
-    @Lob
+    @JdbcTypeCode(SqlTypes.BINARY)
     @Basic(fetch = FetchType.LAZY)
-    @Column(name = "resume_bytes")
+    @Column(name = "resume_bytes", columnDefinition = "BYTEA")
     private byte[] resumeBytes;
 
     @Column(name = "resume_content_type")

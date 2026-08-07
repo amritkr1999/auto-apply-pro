@@ -81,6 +81,7 @@ public class OutreachOAuthController {
      * decrypts/extracts the user's email, and saves the credentials encrypted in database.
      */
     @GetMapping("/oauth2/callback")
+    @Transactional
     public RedirectView oauthCallback(
             @RequestParam("code") String code,
             @RequestParam("state") String state) {
