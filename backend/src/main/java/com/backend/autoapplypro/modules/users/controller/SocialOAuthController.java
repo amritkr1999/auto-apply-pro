@@ -133,16 +133,46 @@ public class SocialOAuthController {
     @GetMapping("/callback/github")
     @Transactional
     public RedirectView githubCallback(
-            @RequestParam("code") String code,
-            @RequestParam("state") String state) {
+            @RequestParam(value = "code", required = false) String code,
+            @RequestParam(value = "state", required = false) String state,
+            @RequestParam(value = "error", required = false) String error,
+            @RequestParam(value = "error_description", required = false) String errorDescription) {
         boolean isLogin = false;
         Long userId = null;
-        try {
-            userId = Long.parseLong(state);
-        } catch (NumberFormatException e) {
+        if (state != null) {
+            try {
+                userId = Long.parseLong(state);
+            } catch (NumberFormatException e) {
+                isLogin = true;
+            }
+        } else {
             isLogin = true;
         }
-        log.info("Received GitHub callback. state: {}, isLogin: {}", state, isLogin);
+        log.info("Received GitHub callback. state: {}, isLogin: {}, codePresent: {}, error: {}", state, isLogin, code != null, error);
+
+        if (error != null) {
+            String errMsg = errorDescription != null ? errorDescription : error;
+            try {
+                errMsg = java.net.URLEncoder.encode(errMsg, "UTF-8");
+            } catch (Exception ex) {}
+            if (isLogin) {
+                return new RedirectView(frontendUrl + "/login?status=error&errorMsg=" + errMsg);
+            } else {
+                return new RedirectView(frontendUrl + "/profile/settings?status=error&provider=github&errorMsg=" + errMsg);
+            }
+        }
+
+        if (code == null || code.isEmpty()) {
+            String errMsg = "Missing authorization code from GitHub";
+            try {
+                errMsg = java.net.URLEncoder.encode(errMsg, "UTF-8");
+            } catch (Exception ex) {}
+            if (isLogin) {
+                return new RedirectView(frontendUrl + "/login?status=error&errorMsg=" + errMsg);
+            } else {
+                return new RedirectView(frontendUrl + "/profile/settings?status=error&provider=github&errorMsg=" + errMsg);
+            }
+        }
 
         try {
             String githubUsername;
@@ -291,8 +321,17 @@ public class SocialOAuthController {
                 );
                 return new RedirectView(targetUrl);
             } else {
-                ProfessionalProfile candidate = professionalProfileRepository.findByUserId(userId)
-                        .orElseThrow(() -> new IllegalArgumentException("Professional profile not found"));
+                Long targetUserId = userId;
+                ProfessionalProfile candidate = professionalProfileRepository.findByUserId(targetUserId)
+                        .orElseGet(() -> {
+                            User user = userRepository.findById(targetUserId)
+                                    .orElseThrow(() -> new IllegalArgumentException("User not found: " + targetUserId));
+                            return ProfessionalProfile.builder()
+                                    .user(user)
+                                    .skills(new java.util.HashSet<>())
+                                    .jobPreferences(new java.util.HashMap<>())
+                                    .build();
+                        });
                 candidate.setGithubUsername(githubUsername);
                 candidate.setGithubProfileUrl(githubProfileUrl);
                 candidate.setIsVerified(true);
@@ -359,16 +398,46 @@ public class SocialOAuthController {
     @GetMapping("/callback/linkedin")
     @Transactional
     public RedirectView linkedinCallback(
-            @RequestParam("code") String code,
-            @RequestParam("state") String state) {
+            @RequestParam(value = "code", required = false) String code,
+            @RequestParam(value = "state", required = false) String state,
+            @RequestParam(value = "error", required = false) String error,
+            @RequestParam(value = "error_description", required = false) String errorDescription) {
         boolean isLogin = false;
         Long userId = null;
-        try {
-            userId = Long.parseLong(state);
-        } catch (NumberFormatException e) {
+        if (state != null) {
+            try {
+                userId = Long.parseLong(state);
+            } catch (NumberFormatException e) {
+                isLogin = true;
+            }
+        } else {
             isLogin = true;
         }
-        log.info("Received LinkedIn callback. state: {}, isLogin: {}", state, isLogin);
+        log.info("Received LinkedIn callback. state: {}, isLogin: {}, codePresent: {}, error: {}", state, isLogin, code != null, error);
+
+        if (error != null) {
+            String errMsg = errorDescription != null ? errorDescription : error;
+            try {
+                errMsg = java.net.URLEncoder.encode(errMsg, "UTF-8");
+            } catch (Exception ex) {}
+            if (isLogin) {
+                return new RedirectView(frontendUrl + "/login?status=error&errorMsg=" + errMsg);
+            } else {
+                return new RedirectView(frontendUrl + "/profile/settings?status=error&provider=linkedin&errorMsg=" + errMsg);
+            }
+        }
+
+        if (code == null || code.isEmpty()) {
+            String errMsg = "Missing authorization code from LinkedIn";
+            try {
+                errMsg = java.net.URLEncoder.encode(errMsg, "UTF-8");
+            } catch (Exception ex) {}
+            if (isLogin) {
+                return new RedirectView(frontendUrl + "/login?status=error&errorMsg=" + errMsg);
+            } else {
+                return new RedirectView(frontendUrl + "/profile/settings?status=error&provider=linkedin&errorMsg=" + errMsg);
+            }
+        }
 
         try {
             String linkedinName;
@@ -421,15 +490,21 @@ public class SocialOAuthController {
                     throw new IllegalStateException("Failed to retrieve user profile from LinkedIn");
                 }
                 linkedinName = (String) userBody.get("name");
+                if (linkedinName == null || linkedinName.trim().isEmpty()) {
+                    String given = (String) userBody.get("given_name");
+                    String family = (String) userBody.get("family_name");
+                    linkedinName = (given != null ? given : "") + " " + (family != null ? family : "");
+                    linkedinName = linkedinName.trim();
+                }
                 email = (String) userBody.get("email");
                 
                 String sub = (String) userBody.get("sub");
-                linkedinProfileUrl = "https://www.linkedin.com/in/" + sub;
+                linkedinProfileUrl = (sub != null && !sub.isEmpty()) ? "https://www.linkedin.com/in/" + sub : "https://www.linkedin.com";
             }
 
             if (isLogin) {
                 if (email == null || email.isEmpty()) {
-                    email = (linkedinName != null ? linkedinName.replaceAll("\\s+", ".").toLowerCase() : "linkedin.user") + "@linkedin.com";
+                    email = (linkedinName != null && !linkedinName.isEmpty() ? linkedinName.replaceAll("\\s+", ".").toLowerCase() : "linkedin.user") + "@linkedin.com";
                 }
                 User user = userRepository.findByEmail(email).orElse(null);
                 if (user == null) {
@@ -438,7 +513,7 @@ public class SocialOAuthController {
                             .email(email)
                             .passwordHash(passwordEncoder.encode(randomPassword))
                             .role(UserRole.CANDIDATE)
-                            .name(linkedinName != null ? linkedinName : "LinkedIn User")
+                            .name(linkedinName != null && !linkedinName.isEmpty() ? linkedinName : "LinkedIn User")
                             .mobile("1234567890")
                             .loginStreak(1)
                             .lastLoginDate(java.time.LocalDate.now())
@@ -492,8 +567,17 @@ public class SocialOAuthController {
                 );
                 return new RedirectView(targetUrl);
             } else {
-                ProfessionalProfile candidate = professionalProfileRepository.findByUserId(userId)
-                        .orElseThrow(() -> new IllegalArgumentException("Professional profile not found"));
+                Long targetUserId = userId;
+                ProfessionalProfile candidate = professionalProfileRepository.findByUserId(targetUserId)
+                        .orElseGet(() -> {
+                            User user = userRepository.findById(targetUserId)
+                                    .orElseThrow(() -> new IllegalArgumentException("User not found: " + targetUserId));
+                            return ProfessionalProfile.builder()
+                                    .user(user)
+                                    .skills(new java.util.HashSet<>())
+                                    .jobPreferences(new java.util.HashMap<>())
+                                    .build();
+                        });
                 candidate.setLinkedinName(linkedinName);
                 candidate.setLinkedinProfileUrl(linkedinProfileUrl);
                 professionalProfileRepository.save(candidate);
