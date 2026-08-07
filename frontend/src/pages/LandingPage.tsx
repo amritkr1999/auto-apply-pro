@@ -850,52 +850,6 @@ export const LandingPage: React.FC = () => {
               <h3 style={{ margin: 0 }}>EasyNaukri</h3>
             </div>
             <p>EasyNaukri is an automated job application & resume matching platform. Streamline your job search, optimize your resume, and track applications effortlessly.</p>
-            <div className="footer-socials">
-              <a
-                href="https://www.instagram.com/easynaukri.online"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="footer-social-link"
-                aria-label="Instagram"
-                title="Follow EasyNaukri on Instagram (@easynaukri.online)"
-              >
-                <svg viewBox="0 0 24 24" fill="currentColor" style={{ width: "17px", height: "17px" }}>
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                </svg>
-              </a>
-              <a
-                href="https://www.reddit.com/r/EasyNaukri/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="footer-social-link"
-                aria-label="Reddit"
-                title="Join EasyNaukri Reddit Community (r/EasyNaukri)"
-              >
-                <svg viewBox="0 0 24 24" fill="currentColor" style={{ width: "17px", height: "17px" }}>
-                  <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.188-.491a1.69 1.69 0 0 1 1.692 1.692c0 .656-.37 1.226-.914 1.511.034.261.056.526.056.796 0 4.02-4.526 7.279-10.108 7.279-5.581 0-10.107-3.259-10.107-7.279 0-.27.022-.535.056-.796A1.69 1.69 0 0 1 1.5 12.19c0-.936.757-1.692 1.692-1.692.459 0 .88.182 1.188.49 1.194-.856 2.85-1.417 4.673-1.488l.942-4.411a.422.422 0 0 1 .503-.324l3.19.672c.11-.47.535-.823 1.042-.823zM8.5 13.5A1.5 1.5 0 1 0 10 15a1.5 1.5 0 0 0-1.5-1.5zm7 0A1.5 1.5 0 1 0 17 15a1.5 1.5 0 0 0-1.5-1.5zm-6.148 4.382a.422.422 0 0 0-.583.136.422.422 0 0 0 .136.583c.966.643 2.27.997 3.604.997 1.333 0 2.637-.354 3.603-.997a.422.422 0 0 0 .136-.583.422.422 0 0 0-.583-.136c-.787.524-1.92.836-3.156.836-1.237 0-2.37-.312-3.157-.836z"/>
-                </svg>
-              </a>
-              <a
-                href="https://x.com/EasyNaukrii"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="footer-social-link"
-                aria-label="X (Twitter)"
-                title="Follow EasyNaukri on X (@EasyNaukrii)"
-              >
-                𝕏
-              </a>
-              <a
-                href="https://www.linkedin.com/company/easynaukri/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="footer-social-link"
-                aria-label="LinkedIn"
-                title="Follow EasyNaukri on LinkedIn"
-              >
-                in
-              </a>
-            </div>
           </div>
 
           <div className="footer-column">
@@ -918,52 +872,11 @@ export const LandingPage: React.FC = () => {
           </div>
 
           <div className="footer-column">
-            <h4>Company & Social</h4>
+            <h4>Company</h4>
             <ul className="footer-links">
-              <li className="footer-link-item">
-                <a
-                  href="https://www.linkedin.com/company/easynaukri/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem" }}
-                >
-                  <span>💼</span> LinkedIn
-                </a>
-              </li>
-              <li className="footer-link-item">
-                <a
-                  href="https://www.instagram.com/easynaukri.online"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem" }}
-                >
-                  <span>📷</span> Instagram
-                </a>
-              </li>
-              <li className="footer-link-item">
-                <a
-                  href="https://x.com/EasyNaukrii"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem" }}
-                >
-                  <span>𝕏</span> X (Twitter)
-                </a>
-              </li>
-              <li className="footer-link-item">
-                <a
-                  href="https://www.reddit.com/r/EasyNaukri/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem" }}
-                >
-                  <span>🤖</span> Reddit Community
-                </a>
-              </li>
               <li className="footer-link-item"><Link to="/about">About Us</Link></li>
               <li className="footer-link-item"><Link to="/careers">Careers</Link></li>
               <li className="footer-link-item"><Link to="/contact">Contact Us</Link></li>
-
             </ul>
           </div>
         </div>

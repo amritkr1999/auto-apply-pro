@@ -32,6 +32,8 @@ export const CampaignDispatchModal = ({
 
   // Check Gmail connection status ONCE when modal opens
   useEffect(() => {
+    let isMounted = true;
+
     if (!isOpen) {
       isInitializedRef.current = false;
       setShowConnectPrompt(false);
@@ -43,7 +45,7 @@ export const CampaignDispatchModal = ({
 
     // Check localStorage first
     const savedLocal = getNormalizedMode(localStorage.getItem("campaign_dispatch_mode"));
-    if (savedLocal) {
+    if (savedLocal && isMounted) {
       setSelectedMode(savedLocal);
     }
 
@@ -51,15 +53,17 @@ export const CampaignDispatchModal = ({
       // Check Gmail connection status
       outreachService.getGmailStatus(userId)
         .then(res => {
-          if (res && typeof res.connected === "boolean") {
+          if (isMounted && res && typeof res.connected === "boolean") {
             setGmailConnected(res.connected);
           }
         })
-        .catch(() => setGmailConnected(false));
+        .catch(() => {
+          if (isMounted) setGmailConnected(false);
+        });
 
       outreachService.getOutreachSettings(userId)
         .then(settings => {
-          if (settings && settings.hrOutreachDispatchMode) {
+          if (isMounted && settings && settings.hrOutreachDispatchMode) {
             const dbModeNormalized = getNormalizedMode(settings.hrOutreachDispatchMode);
             if (!savedLocal && dbModeNormalized) {
               setSelectedMode(dbModeNormalized);
@@ -69,6 +73,10 @@ export const CampaignDispatchModal = ({
         })
         .catch(err => console.warn("Failed to load dispatch mode from settings:", err));
     }
+
+    return () => {
+      isMounted = false;
+    };
   }, [isOpen, userId]);
 
   if (!isOpen) return null;

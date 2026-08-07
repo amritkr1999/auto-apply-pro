@@ -131,6 +131,7 @@ public class SocialOAuthController {
      * GitHub Callback
      */
     @GetMapping("/callback/github")
+    @Transactional
     public RedirectView githubCallback(
             @RequestParam("code") String code,
             @RequestParam("state") String state) {
@@ -356,6 +357,7 @@ public class SocialOAuthController {
      * LinkedIn Callback
      */
     @GetMapping("/callback/linkedin")
+    @Transactional
     public RedirectView linkedinCallback(
             @RequestParam("code") String code,
             @RequestParam("state") String state) {

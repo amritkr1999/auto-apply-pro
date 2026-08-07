@@ -26,6 +26,10 @@ public class JobApplicationService {
         return repository.findByUserIdOrderByCreatedAtDesc(userId);
     }
 
+    public Optional<JobApplication> getApplicationById(Long id) {
+        return repository.findById(id);
+    }
+
     @Transactional
     public JobApplication createApplication(Long userId, JobApplication application) {
         log.info("Creating new job application for user ID: {} - {} at {}", userId, application.getJobTitle(), application.getCompanyName());

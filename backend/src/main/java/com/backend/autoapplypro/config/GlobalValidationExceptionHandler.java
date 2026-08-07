@@ -2,6 +2,7 @@ package com.backend.autoapplypro.config;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -24,10 +25,7 @@ public class GlobalValidationExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
 
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.BAD_REQUEST.value());
-        body.put("error", "Validation Failed");
+        Map<String, Object> body = createErrorBody(HttpStatus.BAD_REQUEST, "Validation Failed");
         body.put("fieldErrors", errors);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
@@ -35,21 +33,33 @@ public class GlobalValidationExceptionHandler {
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<Map<String, Object>> handleMaxSizeException(MaxUploadSizeExceededException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.PAYLOAD_TOO_LARGE.value());
-        body.put("error", "File upload size limit exceeded. Maximum allowed size is 5 MB.");
-
+        Map<String, Object> body = createErrorBody(HttpStatus.PAYLOAD_TOO_LARGE, "File upload size limit exceeded. Maximum allowed size is 5 MB.");
         return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(body);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(IllegalArgumentException ex) {
+        Map<String, Object> body = createErrorBody(HttpStatus.BAD_REQUEST, ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleAccessDeniedException(AccessDeniedException ex) {
+        Map<String, Object> body = createErrorBody(HttpStatus.FORBIDDEN, "Access denied: You do not have permission to access this resource.");
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, Object>> handleAllUncaughtException(Exception ex) {
+        Map<String, Object> body = createErrorBody(HttpStatus.INTERNAL_SERVER_ERROR, "An internal server error occurred. Please try again later.");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
+    }
+
+    private Map<String, Object> createErrorBody(HttpStatus status, String message) {
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.BAD_REQUEST.value());
-        body.put("error", ex.getMessage());
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+        body.put("status", status.value());
+        body.put("error", message);
+        return body;
     }
 }

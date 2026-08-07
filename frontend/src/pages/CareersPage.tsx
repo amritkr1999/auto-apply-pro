@@ -166,23 +166,6 @@ export const CareersPage: React.FC = () => {
             <Link to="/contact" className="hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
               Contact Us
             </Link>
-
-            <a
-              href="https://www.linkedin.com/company/easynaukri/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-            >
-              LinkedIn
-            </a>
-            <a
-              href="https://www.instagram.com/easynaukri.online"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-            >
-              Instagram
-            </a>
             <Link to="/privacy" className="hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
               Privacy Policy
             </Link>
