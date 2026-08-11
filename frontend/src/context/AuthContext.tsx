@@ -9,6 +9,11 @@ export interface User {
   avatar?: string;
   mobile?: string;
   loginStreak?: number;
+  isTrialActive?: boolean;
+  trialDaysRemaining?: number;
+  trialEndAt?: string;
+  trialTier?: string;
+  trialUsed?: boolean;
   [key: string]: any;
 }
 

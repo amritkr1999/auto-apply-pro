@@ -21,14 +21,14 @@ async def get_test_assets(db_url: str):
     try:
         # Fetch the latest screenshot
         screenshot_row = await conn.fetchrow(
-            "SELECT file_name, lo_get(file_bytes) as content FROM screenshot_uploads WHERE file_bytes IS NOT NULL ORDER BY id DESC LIMIT 1"
+            "SELECT file_name, file_bytes as content FROM screenshot_uploads WHERE file_bytes IS NOT NULL ORDER BY id DESC LIMIT 1"
         )
         if not screenshot_row:
             raise RuntimeError("No screenshot found in database.")
         
         # Fetch a resume
         resume_row = await conn.fetchrow(
-            "SELECT resume_filename, lo_get(resume_bytes) as content FROM candidates WHERE resume_bytes IS NOT NULL ORDER BY id DESC LIMIT 1"
+            "SELECT resume_filename, resume_bytes as content FROM professional_profiles WHERE resume_bytes IS NOT NULL ORDER BY id DESC LIMIT 1"
         )
         if not resume_row:
             raise RuntimeError("No resume found in database.")

@@ -29,7 +29,7 @@ public class SubscriptionGatingService {
             return false;
         }
         boolean hasDirectPremium = userRepository.findById(userId)
-                .map(u -> Boolean.TRUE.equals(u.getIsPremium()) || u.getRole() == UserRole.PRO || u.getRole() == UserRole.PREMIUM)
+                .map(u -> Boolean.TRUE.equals(u.getIsPremium()) || u.getRole() == UserRole.PRO || u.getRole() == UserRole.PREMIUM || u.isTrialActive())
                 .orElse(false);
         if (hasDirectPremium) {
             return true;

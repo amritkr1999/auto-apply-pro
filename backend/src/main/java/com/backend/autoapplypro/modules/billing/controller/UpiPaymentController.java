@@ -76,17 +76,21 @@ public class UpiPaymentController {
 
         Optional<UpiPaymentTransaction> latestTx = upiPaymentService.getLatestUserTransaction(userId);
 
-        Map<String, Object> body = Map.of(
-                "isPremium", Boolean.TRUE.equals(user.getIsPremium()),
-                "role", user.getRole().name(),
-                "latestTransaction", latestTx.map(tx -> Map.of(
-                        "id", tx.getId(),
-                        "utrNumber", tx.getUtrNumber(),
-                        "amount", tx.getAmount(),
-                        "status", tx.getStatus().name(),
-                        "createdAt", tx.getCreatedAt()
-                )).orElse(null)
-        );
+        Map<String, Object> body = new java.util.HashMap<>();
+        body.put("isPremium", Boolean.TRUE.equals(user.getIsPremium()));
+        body.put("role", user.getRole() != null ? user.getRole().name() : "CANDIDATE");
+        if (latestTx.isPresent()) {
+            UpiPaymentTransaction tx = latestTx.get();
+            Map<String, Object> txMap = new java.util.HashMap<>();
+            txMap.put("id", tx.getId());
+            txMap.put("utrNumber", tx.getUtrNumber());
+            txMap.put("amount", tx.getAmount());
+            txMap.put("status", tx.getStatus() != null ? tx.getStatus().name() : "PENDING");
+            txMap.put("createdAt", tx.getCreatedAt());
+            body.put("latestTransaction", txMap);
+        } else {
+            body.put("latestTransaction", null);
+        }
 
         return ResponseEntity.ok(body);
     }

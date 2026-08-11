@@ -110,7 +110,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
   const [hrOutreachCampaignEnabled, setHrOutreachCampaignEnabled] = useState(false);
   const [hrOutreachTargetRole, setHrOutreachTargetRole] = useState("Software Engineer");
   const [hrOutreachTemplateId, setHrOutreachTemplateId] = useState("default-1");
-  const [hrOutreachSourceTable, setHrOutreachSourceTable] = useState("TESTING");
+  const [hrOutreachSourceTable, setHrOutreachSourceTable] = useState("MAIN");
   const [templatesList, setTemplatesList] = useState<any[]>([]);
   
   const [loading, setLoading] = useState(true);
@@ -415,7 +415,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
         setHrOutreachCampaignEnabled(!!data.hrOutreachCampaignEnabled);
         setHrOutreachTargetRole(data.hrOutreachTargetRole || "Software Engineer");
         setHrOutreachTemplateId(data.hrOutreachTemplateId || "default-1");
-        setHrOutreachSourceTable(import.meta.env.DEV ? (data.hrOutreachSourceTable || "TESTING") : "MAIN");
+        setHrOutreachSourceTable(data.hrOutreachSourceTable || "MAIN");
 
         if (data.timezone && data.timezone !== "UTC") {
           setTimezone(data.timezone);
@@ -462,7 +462,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
         hrOutreachCampaignEnabled,
         hrOutreachTargetRole,
         hrOutreachTemplateId,
-        hrOutreachSourceTable: import.meta.env.DEV ? hrOutreachSourceTable : "MAIN"
+        hrOutreachSourceTable: hrOutreachSourceTable || "MAIN"
       });
       setMessage(res.message || "Outreach settings updated successfully.");
     } catch (err: any) {

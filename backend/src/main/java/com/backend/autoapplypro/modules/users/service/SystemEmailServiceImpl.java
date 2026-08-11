@@ -45,9 +45,8 @@ public class SystemEmailServiceImpl implements SystemEmailService {
             try {
                 SimpleMailMessage message = new SimpleMailMessage();
                 message.setTo(recipientEmail);
-                if (fromEmail != null && !fromEmail.trim().isEmpty()) {
-                    message.setFrom(fromEmail);
-                }
+                String senderAddr = (fromEmail != null && !fromEmail.trim().isEmpty()) ? fromEmail : "notifications@easynaukri.online";
+                message.setFrom("EasyNaukri Team <" + senderAddr + ">");
                 message.setSubject(subject);
                 message.setText(body);
                 mailSender.send(message);
@@ -86,9 +85,8 @@ public class SystemEmailServiceImpl implements SystemEmailService {
             try {
                 SimpleMailMessage mailMessage = new SimpleMailMessage();
                 mailMessage.setTo(recipientEmail);
-                if (fromEmail != null && !fromEmail.trim().isEmpty()) {
-                    mailMessage.setFrom(fromEmail);
-                }
+                String senderAddr = (fromEmail != null && !fromEmail.trim().isEmpty()) ? fromEmail : "notifications@easynaukri.online";
+                mailMessage.setFrom("EasyNaukri Team <" + senderAddr + ">");
                 mailMessage.setReplyTo(senderEmail);
                 mailMessage.setSubject(subject);
                 mailMessage.setText(body);
@@ -128,9 +126,8 @@ public class SystemEmailServiceImpl implements SystemEmailService {
             try {
                 SimpleMailMessage message = new SimpleMailMessage();
                 message.setTo(recipientEmail);
-                if (fromEmail != null && !fromEmail.trim().isEmpty()) {
-                    message.setFrom(fromEmail);
-                }
+                String senderAddr = (fromEmail != null && !fromEmail.trim().isEmpty()) ? fromEmail : "notifications@easynaukri.online";
+                message.setFrom("EasyNaukri Team <" + senderAddr + ">");
                 message.setSubject(subject);
                 message.setText(body);
                 mailSender.send(message);
@@ -158,9 +155,8 @@ public class SystemEmailServiceImpl implements SystemEmailService {
                 org.springframework.mail.javamail.MimeMessageHelper helper = 
                         new org.springframework.mail.javamail.MimeMessageHelper(mimeMessage, true, "UTF-8");
                 helper.setTo(recipientEmail);
-                if (fromEmail != null && !fromEmail.trim().isEmpty()) {
-                    helper.setFrom(fromEmail);
-                }
+                String senderAddr = (fromEmail != null && !fromEmail.trim().isEmpty()) ? fromEmail : "notifications@easynaukri.online";
+                helper.setFrom(new jakarta.mail.internet.InternetAddress(senderAddr, "EasyNaukri Team"));
                 helper.setSubject(subject);
                 helper.setText(htmlContent, true); // true = isHtml
                 mailSender.send(mimeMessage);
@@ -205,9 +201,8 @@ public class SystemEmailServiceImpl implements SystemEmailService {
             try {
                 SimpleMailMessage mailMessage = new SimpleMailMessage();
                 mailMessage.setTo(targetSupportEmail);
-                if (fromEmail != null && !fromEmail.trim().isEmpty()) {
-                    mailMessage.setFrom(fromEmail);
-                }
+                String senderAddr = (fromEmail != null && !fromEmail.trim().isEmpty()) ? fromEmail : "notifications@easynaukri.online";
+                mailMessage.setFrom("EasyNaukri Team <" + senderAddr + ">");
                 if (request.getEmail() != null && !request.getEmail().trim().isEmpty()) {
                     mailMessage.setReplyTo(request.getEmail());
                 }
@@ -217,6 +212,63 @@ public class SystemEmailServiceImpl implements SystemEmailService {
                 log.info("Successfully sent contact form email to support inbox: {}", targetSupportEmail);
             } catch (Exception e) {
                 log.error("Failed to send contact form email via SMTP, fell back to console log: {}", e.getMessage(), e);
+            }
+        }
+    }
+
+    @Override
+    @org.springframework.scheduling.annotation.Async
+    public void sendTrialWarningEmail(String recipientEmail, String userName, long daysRemaining) {
+        String subject = "⏳ EasyNaukri - Your Elite Autopilot Free Trial Ends in " + daysRemaining + " Days!";
+        String body = "Hi " + (userName != null ? userName : "there") + ",\n\n"
+                + "Just a quick heads-up: your 15-day free trial of EasyNaukri Elite Autopilot will expire in " + daysRemaining + " days.\n\n"
+                + "During your trial, you get:\n"
+                + "  • 50 Daily AI-Automated Applications\n"
+                + "  • Priority DeepSeek AI Processing\n"
+                + "  • Multi-Template Job Profiles\n\n"
+                + "To keep your 50 daily application volume and priority AI features active without interruption, upgrade your subscription today from your Billing Portal:\n"
+                + "https://easynaukri.online/pricing\n\n"
+                + "Happy job hunting!\n"
+                + "The EasyNaukri Team";
+
+        log.info("[SYSTEM EMAIL OUTBOX - TRIAL WARNING] To: {}, Days: {}", recipientEmail, daysRemaining);
+        if (mailSender != null) {
+            try {
+                SimpleMailMessage msg = new SimpleMailMessage();
+                msg.setTo(recipientEmail);
+                msg.setFrom("EasyNaukri Team <" + (fromEmail != null ? fromEmail : "notifications@easynaukri.online") + ">");
+                msg.setSubject(subject);
+                msg.setText(body);
+                mailSender.send(msg);
+            } catch (Exception e) {
+                log.error("Failed sending trial warning email: {}", e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    @org.springframework.scheduling.annotation.Async
+    public void sendTrialExpiredEmail(String recipientEmail, String userName) {
+        String subject = "📢 EasyNaukri - Your 15-Day Free Trial Has Ended";
+        String body = "Hi " + (userName != null ? userName : "there") + ",\n\n"
+                + "Your 15-day free trial of EasyNaukri Elite Autopilot has concluded.\n\n"
+                + "Your account has automatically transitioned to the Free Tier (15 daily applications).\n"
+                + "Don't lose momentum in your job search! You can re-unlock 50 daily applications and priority AI generation anytime by subscribing to Candidate Pro or Elite Autopilot:\n\n"
+                + "👉 Upgrade Now: https://easynaukri.online/pricing\n\n"
+                + "Thank you for using EasyNaukri!\n"
+                + "The EasyNaukri Team";
+
+        log.info("[SYSTEM EMAIL OUTBOX - TRIAL EXPIRED] To: {}", recipientEmail);
+        if (mailSender != null) {
+            try {
+                SimpleMailMessage msg = new SimpleMailMessage();
+                msg.setTo(recipientEmail);
+                msg.setFrom("EasyNaukri Team <" + (fromEmail != null ? fromEmail : "notifications@easynaukri.online") + ">");
+                msg.setSubject(subject);
+                msg.setText(body);
+                mailSender.send(msg);
+            } catch (Exception e) {
+                log.error("Failed sending trial expired email: {}", e.getMessage());
             }
         }
     }

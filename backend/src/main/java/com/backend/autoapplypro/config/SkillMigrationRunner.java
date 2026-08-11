@@ -38,6 +38,21 @@ public class SkillMigrationRunner implements CommandLineRunner {
                 log.warn("Could not check/update daily_digest columns on users table", ex);
             }
 
+            // Migrate professional_profiles.resume_bytes column from OID (LOB stream) to BYTEA if needed
+            try {
+                String dataType = jdbcTemplate.queryForObject(
+                    "SELECT data_type FROM information_schema.columns WHERE table_name='professional_profiles' AND column_name='resume_bytes'",
+                    String.class
+                );
+                if ("oid".equalsIgnoreCase(dataType)) {
+                    log.info("Converting professional_profiles.resume_bytes column from OID (LOB stream) to BYTEA...");
+                    jdbcTemplate.execute("ALTER TABLE professional_profiles ALTER COLUMN resume_bytes TYPE bytea USING (CASE WHEN resume_bytes IS NOT NULL THEN lo_get(resume_bytes) ELSE NULL END)");
+                    log.info("Successfully converted professional_profiles.resume_bytes column to BYTEA.");
+                }
+            } catch (Exception ex) {
+                log.warn("Could not check/migrate resume_bytes column to BYTEA", ex);
+            }
+
             // Check if professional_profiles table has skills column and does not have legacy_skills column
             Boolean hasSkillsColumn = jdbcTemplate.queryForObject(
                 "SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='professional_profiles' AND column_name='skills')",

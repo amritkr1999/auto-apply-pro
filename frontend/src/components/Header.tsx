@@ -78,6 +78,19 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   };
 
   const renderTierBadge = () => {
+    if (user?.isTrialActive) {
+      return (
+        <Link
+          to="/billing"
+          className="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-amber-800 dark:text-amber-300 bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/20 dark:from-amber-950/60 dark:to-orange-950/60 border border-amber-500/50 px-2.5 py-0.5 rounded-full uppercase tracking-wider hover:scale-105 transition-all shadow-xs"
+          title="15-Day Elite Autopilot Trial Active - Click to view details"
+        >
+          <span>🚀</span>
+          <span>TRIAL ({user.trialDaysRemaining ?? 15}D LEFT)</span>
+        </Link>
+      );
+    }
+
     if (user?.role && user.role !== "CANDIDATE") {
       return (
         <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full uppercase tracking-wider">

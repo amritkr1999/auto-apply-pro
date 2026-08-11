@@ -302,10 +302,14 @@ export const LandingPage: React.FC = () => {
       {/* ==================== Hero Section ==================== */}
       <header id="intro" className="hero-section">
         <div className="hero-content">
-          <span className="hero-tagline">EasyNaukri</span>
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/20 border border-amber-500/40 text-amber-600 dark:text-amber-300 text-xs font-extrabold tracking-wide mb-3 shadow-xs">
+            <span>🎁 15-Day Elite Trial</span>
+            <span>•</span>
+            <span>Zero Payment Details Required</span>
+          </div>
           <h1 className="hero-title">Welcome to EasyNaukri</h1>
           <p className="hero-subtitle">
-            EasyNaukri is an automated job search and resume management platform designed to help job seekers discover matching opportunities, optimize resumes, and track applications effortlessly.
+            EasyNaukri is an automated job search and resume management platform. Every new account gets <strong className="text-amber-500 dark:text-amber-400 font-bold">15 Days of Elite Autopilot FREE</strong> — enjoy 50 daily automated applications & priority AI outreach.
           </p>
           <div className="hero-ctas">
             {user ? (
@@ -314,8 +318,8 @@ export const LandingPage: React.FC = () => {
               </Link>
             ) : (
               <>
-                <Link to="/login?tab=register" className="landing-btn btn-primary">
-                  Get Started Free
+                <Link to="/login?tab=register" className="landing-btn btn-primary shadow-lg shadow-indigo-500/25">
+                  Start 15-Day Free Trial
                 </Link>
                 <a href="#what-we-do" className="landing-btn btn-outline">
                   How it works
@@ -324,7 +328,7 @@ export const LandingPage: React.FC = () => {
             )}
           </div>
           <p className="hero-auth-note" style={{ marginTop: "1.25rem", fontSize: "0.875rem", color: "var(--text-secondary)", fontWeight: 500 }}>
-            Sign in with Google to securely create your EasyNaukri profile, track your job applications, and save your resume preferences.
+            ⚡ No credit card required. Register in seconds and unlock 50 daily applications immediately.
           </p>
         </div>
 
@@ -337,7 +341,7 @@ export const LandingPage: React.FC = () => {
                 <span className="mockup-dot"></span>
                 <span className="mockup-dot"></span>
               </div>
-              <span className="mockup-status">AI Autopilot Running</span>
+              <span className="mockup-status">15-Day Elite Trial Active</span>
             </div>
 
             <div className="mockup-row">
@@ -346,7 +350,7 @@ export const LandingPage: React.FC = () => {
             </div>
             <div className="mockup-row">
               <span className="mockup-label">Daily Submission Limit</span>
-              <span className="mockup-val">15 / day</span>
+              <span className="mockup-val text-amber-500 font-bold">50 / day (Elite Trial)</span>
             </div>
 
             <div className="mockup-row" style={{ marginTop: "1rem" }}>

@@ -119,7 +119,7 @@ public class User {
 
     @Builder.Default
     @Column(name = "hr_outreach_source_table")
-    private String hrOutreachSourceTable = "TESTING";
+    private String hrOutreachSourceTable = "MAIN";
 
     @Builder.Default
     @Column(name = "hr_outreach_dispatch_mode")
@@ -184,6 +184,28 @@ public class User {
     @Column(name = "status", nullable = false, length = 25)
     private UserStatus status = UserStatus.ACTIVE;
 
+    @Column(name = "trial_start_at")
+    private LocalDateTime trialStartAt;
+
+    @Column(name = "trial_end_at")
+    private LocalDateTime trialEndAt;
+
+    @Builder.Default
+    @Column(name = "trial_tier")
+    private String trialTier = "ELITE_AUTOPILOT";
+
+    @Builder.Default
+    @Column(name = "trial_used")
+    private Boolean trialUsed = false;
+
+    @Builder.Default
+    @Column(name = "trial_warning_sent")
+    private Boolean trialWarningSent = false;
+
+    @Builder.Default
+    @Column(name = "trial_expired_sent")
+    private Boolean trialExpiredSent = false;
+
     @Column(name = "deletion_scheduled_at")
     private LocalDateTime deletionScheduledAt;
 
@@ -192,6 +214,18 @@ public class User {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    public boolean isTrialActive() {
+        return trialEndAt != null && LocalDateTime.now().isBefore(trialEndAt);
+    }
+
+    public long getTrialDaysRemaining() {
+        if (!isTrialActive()) {
+            return 0;
+        }
+        long days = java.time.Duration.between(LocalDateTime.now(), trialEndAt).toDays() + 1;
+        return Math.max(0, days);
+    }
 
     @PrePersist
     protected void onCreate() {
@@ -234,7 +268,7 @@ public class User {
             hrOutreachTemplateId = "default-1";
         }
         if (hrOutreachSourceTable == null) {
-            hrOutreachSourceTable = "TESTING";
+            hrOutreachSourceTable = "MAIN";
         }
         if (hrOutreachDispatchMode == null) {
             hrOutreachDispatchMode = "DIRECT_SEND";
@@ -278,6 +312,18 @@ public class User {
         }
         if (dailyDigestTime == null) {
             dailyDigestTime = java.time.LocalTime.of(20, 0);
+        }
+        if (trialTier == null) {
+            trialTier = "ELITE_AUTOPILOT";
+        }
+        if (trialUsed == null) {
+            trialUsed = false;
+        }
+        if (trialWarningSent == null) {
+            trialWarningSent = false;
+        }
+        if (trialExpiredSent == null) {
+            trialExpiredSent = false;
         }
     }
 

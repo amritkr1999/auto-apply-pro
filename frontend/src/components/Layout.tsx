@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
+import TrialCountdownBanner from "./TrialCountdownBanner";
 import DashboardSidebar from "../features/dashboard/components/DashboardSidebar";
 import WalkthroughTour from "./WalkthroughTour";
 import FeedbackModal from "../features/profile/components/FeedbackModal";
@@ -69,6 +70,7 @@ export const Layout: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen bg-bg-color dark:bg-slate-950 text-base-text dark:text-slate-100 font-sans transition-colors">
       <Header onMenuClick={() => setMobileMenuOpen(true)} />
+      <TrialCountdownBanner />
       {user && <WalkthroughTour />}
       {showFeedbackModal && (
         <FeedbackModal

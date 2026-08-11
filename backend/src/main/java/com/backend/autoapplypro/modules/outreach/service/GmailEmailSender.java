@@ -51,6 +51,13 @@ public class GmailEmailSender implements EmailSender {
                 .orElseThrow(() -> new OutreachSendException(OutreachErrorType.UNAUTHORIZED, 
                         "Gmail account not connected for user ID: " + userId));
 
+        // If in development mode or using placeholder/mock credentials, bypass external Google API network call
+        if (isDevOrPlaceholderClientId(clientId) ||
+            (credential.getAccessToken() != null && credential.getAccessToken().startsWith("mock_"))) {
+            log.info("[DEV/PLACEHOLDER MODE] Simulated Gmail dispatch for user ID: {} to: {}. Subject: {}", userId, to, subject);
+            return;
+        }
+
         try {
             // Build Google credentials with auto-refresh capability
             GoogleCredential googleCredential = new GoogleCredential.Builder()
@@ -143,6 +150,12 @@ public class GmailEmailSender implements EmailSender {
                 .orElseThrow(() -> new OutreachSendException(OutreachErrorType.UNAUTHORIZED, 
                         "Gmail account not connected for user ID: " + userId));
 
+        if (isDevOrPlaceholderClientId(clientId) ||
+            (credential.getAccessToken() != null && credential.getAccessToken().startsWith("mock_"))) {
+            log.info("[DEV/PLACEHOLDER MODE] Simulated Gmail draft creation for user ID: {} to: {}. Subject: {}", userId, to, subject);
+            return;
+        }
+
         try {
             GoogleCredential googleCredential = new GoogleCredential.Builder()
                     .setTransport(new NetHttpTransport())
@@ -173,6 +186,12 @@ public class GmailEmailSender implements EmailSender {
             log.error("Failed to create Gmail draft for user ID: {}", userId, e);
             throw new RuntimeException("Failed to create Gmail draft: " + e.getMessage(), e);
         }
+    }
+
+    private boolean isDevOrPlaceholderClientId(String clientId) {
+        if (clientId == null || clientId.trim().isEmpty()) return true;
+        String id = clientId.trim().toLowerCase();
+        return id.startsWith("dev-") || id.startsWith("your-") || !id.contains(".apps.googleusercontent.com");
     }
 
     private MimeMessage createMimeMessage(String from, String to, String cc, String subject, String body, 

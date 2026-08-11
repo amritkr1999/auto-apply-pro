@@ -26,4 +26,9 @@ public class AuthResponse {
     private Boolean isEmailVerified;
     private Boolean requiresVerification;
     private String devVerificationCode;
+    private Boolean isTrialActive;
+    private Long trialDaysRemaining;
+    private String trialEndAt;
+    private String trialTier;
+    private Boolean trialUsed;
 }

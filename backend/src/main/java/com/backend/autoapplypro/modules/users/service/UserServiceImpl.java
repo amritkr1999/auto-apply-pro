@@ -48,10 +48,11 @@ public class UserServiceImpl implements UserService {
         }
 
         java.time.LocalDate today = java.time.LocalDate.now();
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        java.time.LocalDateTime trialEnd = now.plusDays(15);
         String otpCode = String.valueOf(100000 + new java.security.SecureRandom().nextInt(900000));
-        java.time.LocalDateTime expiry = java.time.LocalDateTime.now().plusMinutes(15);
 
-        // Create User (isEmailVerified = true by default until paid SMTP is configured)
+        // Create User with 15-Day Elite Autopilot Free Trial
         User user = User.builder()
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
@@ -61,6 +62,11 @@ public class UserServiceImpl implements UserService {
                 .loginStreak(0)
                 .lastLoginDate(today)
                 .isEmailVerified(true)
+                .dailyLimit(50)
+                .trialStartAt(now)
+                .trialEndAt(trialEnd)
+                .trialTier("ELITE_AUTOPILOT")
+                .trialUsed(true)
                 .build();
 
         user = userRepository.save(user);
@@ -91,28 +97,9 @@ public class UserServiceImpl implements UserService {
             companyRepository.save(company);
         }
 
-        // Email OTP Verification commented out until paid SMTP account is configured
-        /*
-        try {
-            String verificationLink = "http://localhost:5173/verify-email?token=" + otpCode + "&email=" + user.getEmail();
-            systemEmailService.sendEmailVerificationEmail(user.getEmail(), verificationLink, otpCode);
-        } catch (Exception e) {
-            org.slf4j.LoggerFactory.getLogger(UserServiceImpl.class).error("Failed to send verification email: {}", e.getMessage(), e);
-        }
-        */
-
         String token = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getRole().name());
 
-        return AuthResponse.builder()
-                .token(token)
-                .id(user.getId())
-                .email(user.getEmail())
-                .name(user.getName())
-                .mobile(user.getMobile())
-                .role(user.getRole().name())
-                .isEmailVerified(true)
-                .requiresVerification(false)
-                .build();
+        return mapToAuthResponse(user, token);
     }
 
     @Override
@@ -249,6 +236,10 @@ public class UserServiceImpl implements UserService {
                 .build());
 
         String token = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getRole().name());
+        return mapToAuthResponse(user, token);
+    }
+
+    private AuthResponse mapToAuthResponse(User user, String token) {
         return AuthResponse.builder()
                 .token(token)
                 .id(user.getId())
@@ -261,8 +252,13 @@ public class UserServiceImpl implements UserService {
                 .isPendingDeletion(user.getStatus() == UserStatus.PENDING_DELETION)
                 .deletionScheduledAt(user.getDeletionScheduledAt() != null ? user.getDeletionScheduledAt().toString() : null)
                 .avatar(user.getAvatar())
-                .isEmailVerified(true)
-                .requiresVerification(false)
+                .isEmailVerified(Boolean.TRUE.equals(user.getIsEmailVerified()))
+                .requiresVerification(!Boolean.TRUE.equals(user.getIsEmailVerified()))
+                .isTrialActive(user.isTrialActive())
+                .trialDaysRemaining(user.getTrialDaysRemaining())
+                .trialEndAt(user.getTrialEndAt() != null ? user.getTrialEndAt().toString() : null)
+                .trialTier(user.getTrialTier())
+                .trialUsed(user.getTrialUsed())
                 .build();
     }
 
@@ -683,23 +679,13 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public ProfessionalProfile getCandidateResume(Long userId) {
-        ProfessionalProfile candidate = getOrCreateCandidate(userId);
-        // Force eager initialization of lazy @Lob resumeBytes while the transaction is active
-        if (candidate.getResumeBytes() != null) {
-            int length = candidate.getResumeBytes().length;
-        }
-        return candidate;
+        return getOrCreateCandidate(userId);
     }
 
     @Override
     @Transactional
     public ProfessionalProfile getCandidateResume(Long userId, Long profileId) {
-        ProfessionalProfile candidate = getOrCreateCandidateProfile(userId, profileId);
-        // Force eager initialization of lazy @Lob resumeBytes while the transaction is active
-        if (candidate.getResumeBytes() != null) {
-            int length = candidate.getResumeBytes().length;
-        }
-        return candidate;
+        return getOrCreateCandidateProfile(userId, profileId);
     }
 
     @Override

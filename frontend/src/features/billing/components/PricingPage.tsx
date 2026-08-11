@@ -255,6 +255,21 @@ const PricingPage: React.FC = () => {
         </p>
       </div>
 
+      {/* 15-Day Free Trial Promo Banner */}
+      <div className="max-w-4xl mx-auto mb-12 bg-gradient-to-r from-amber-500/15 via-orange-500/15 to-amber-500/15 border border-amber-500/40 rounded-2xl p-5 sm:p-6 text-center shadow-lg backdrop-blur-xs">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-amber-500/20 text-amber-300 rounded-full text-xs font-extrabold uppercase tracking-wide mb-3 border border-amber-500/30">
+          <span>🎁 15-Day Free Trial</span>
+          <span>•</span>
+          <span>Zero Payment Details Required</span>
+        </div>
+        <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">
+          Every Account Comes With 15 Days of <span className="text-amber-400 underline decoration-amber-500/50 underline-offset-4">Elite Autopilot</span> Free!
+        </h3>
+        <p className="text-slate-300 text-sm sm:text-base max-w-2xl mx-auto">
+          Experience 50 daily automated applications, priority DeepSeek AI processing, and multi-template job profiles free for 15 days upon signup.
+        </p>
+      </div>
+
       {/* Error */}
       {error && (
         <div className="max-w-2xl mx-auto mb-8">

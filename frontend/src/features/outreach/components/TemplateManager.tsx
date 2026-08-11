@@ -88,7 +88,7 @@ export const TemplateManager: React.FC = () => {
           hrOutreachCampaignEnabled: false,
           hrOutreachTargetRole: "Software Engineer",
           hrOutreachTemplateId: "default-1",
-          hrOutreachSourceTable: "TESTING",
+          hrOutreachSourceTable: "MAIN",
           marketingEmailsEnabled: true
         };
       }

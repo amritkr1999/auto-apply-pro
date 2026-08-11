@@ -46,7 +46,7 @@ public class HrOutreachCampaignService {
         // Always update user configuration fields
         user.setHrOutreachTargetRole(targetRole != null ? targetRole : "Software Engineer");
         user.setHrOutreachTemplateId(templateId != null ? templateId : "default-1");
-        user.setHrOutreachSourceTable(sourceTable != null ? sourceTable : "TESTING");
+        user.setHrOutreachSourceTable(sourceTable != null ? sourceTable : "MAIN");
 
         boolean oldStatus = Boolean.TRUE.equals(user.getHrOutreachCampaignEnabled());
         user.setHrOutreachCampaignEnabled(enable);
@@ -87,7 +87,7 @@ public class HrOutreachCampaignService {
     public void queueNextCampaignEmail(User user) {
         log.info("Attempting to queue next campaign email for user ID: {}", user.getId());
         
-        String sourceTable = user.getHrOutreachSourceTable() != null ? user.getHrOutreachSourceTable() : "TESTING";
+        String sourceTable = user.getHrOutreachSourceTable() != null ? user.getHrOutreachSourceTable() : "MAIN";
         String templateId = user.getHrOutreachTemplateId() != null ? user.getHrOutreachTemplateId() : "default-1";
         String targetRole = user.getHrOutreachTargetRole() != null ? user.getHrOutreachTargetRole() : "Software Engineer";
 
@@ -106,19 +106,19 @@ public class HrOutreachCampaignService {
 
         // 1. Gather all potential targets from the selected table
         List<RecipientInfo> recipients = new ArrayList<>();
-        if ("MAIN".equalsIgnoreCase(sourceTable)) {
-            List<HrDetails> hrList = hrRepository.findAll();
-            for (HrDetails hr : hrList) {
-                if (hr.getEmail() != null && !hr.getEmail().trim().isEmpty()) {
-                    recipients.add(new RecipientInfo(hr.getName(), hr.getEmail(), hr.getCompanyName()));
-                }
-            }
-        } else {
-            // Default to TESTING table
+        if ("TESTING".equalsIgnoreCase(sourceTable)) {
             List<TestingEmail> testList = testingEmailRepository.findAll();
             for (TestingEmail t : testList) {
                 if (t.getEmail() != null && !t.getEmail().trim().isEmpty()) {
                     recipients.add(new RecipientInfo(t.getName(), t.getEmail(), t.getCompanyName()));
+                }
+            }
+        } else {
+            // Default to MAIN (hr_details) table
+            List<HrDetails> hrList = hrRepository.findAll();
+            for (HrDetails hr : hrList) {
+                if (hr.getEmail() != null && !hr.getEmail().trim().isEmpty()) {
+                    recipients.add(new RecipientInfo(hr.getName(), hr.getEmail(), hr.getCompanyName()));
                 }
             }
         }
