@@ -1,16 +1,52 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
+import { buildApiUrl } from "../config/api";
 
 export const CareersPage: React.FC = () => {
   const { toggleTheme, resolvedTheme } = useTheme();
   const [emailSubmitted, setEmailSubmitted] = useState(false);
   const [applicantEmail, setApplicantEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
 
-  const handleInterestSubmit = (e: React.FormEvent) => {
+  const handleInterestSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (applicantEmail.trim()) {
-      setEmailSubmitted(true);
+    const emailToSubmit = applicantEmail.trim();
+
+    if (!emailToSubmit || !emailToSubmit.includes("@")) {
+      setErrorMsg("Please enter a valid email address.");
+      return;
+    }
+
+    setSubmitting(true);
+    setErrorMsg("");
+    setSuccessMsg("");
+
+    try {
+      const response = await fetch(buildApiUrl("/v1/public/careers/subscribe"), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: emailToSubmit }),
+      });
+
+      const data = await response.json();
+      if (response.ok && data.success) {
+        setEmailSubmitted(true);
+        setSuccessMsg(
+          data.message ||
+            "✨ Thank you! We have received your email. An acknowledgement mail has been sent, and you will be updated with all job opening updates."
+        );
+      } else {
+        setErrorMsg(data.message || "Something went wrong. Please try again.");
+      }
+    } catch (err) {
+      setErrorMsg("Unable to connect to the server. Please try again later.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -84,25 +120,47 @@ export const CareersPage: React.FC = () => {
 
           {/* Early Interest Form */}
           {!emailSubmitted ? (
-            <form onSubmit={handleInterestSubmit} className="max-w-md mx-auto flex flex-col sm:flex-row gap-3">
-              <input
-                type="email"
-                required
-                value={applicantEmail}
-                onChange={(e) => setApplicantEmail(e.target.value)}
-                placeholder="Enter your email for early opening alerts..."
-                className="flex-1 px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-              <button
-                type="submit"
-                className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md shrink-0 cursor-pointer"
-              >
-                Notify Me
-              </button>
-            </form>
+            <div className="max-w-md mx-auto">
+              <form onSubmit={handleInterestSubmit} className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="email"
+                  required
+                  disabled={submitting}
+                  value={applicantEmail}
+                  onChange={(e) => setApplicantEmail(e.target.value)}
+                  placeholder="Enter your email for early opening alerts..."
+                  className="flex-1 px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-60"
+                />
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md shrink-0 cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2"
+                >
+                  {submitting ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Sending...
+                    </>
+                  ) : (
+                    "Notify Me"
+                  )}
+                </button>
+              </form>
+              {errorMsg && (
+                <p className="mt-3 text-xs font-semibold text-rose-600 dark:text-rose-400">
+                  {errorMsg}
+                </p>
+              )}
+            </div>
           ) : (
-            <div className="p-4 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 rounded-2xl max-w-md mx-auto text-sm font-semibold">
-              ✨ Thank you! We have logged your interest and will reach out as soon as positions open.
+            <div className="p-5 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 rounded-2xl max-w-md mx-auto text-sm font-semibold leading-relaxed shadow-sm">
+              {successMsg}
+              <p className="mt-2 text-xs text-emerald-600 dark:text-emerald-400 font-normal">
+                An instant acknowledgement email has been sent to <strong>{applicantEmail}</strong>.
+              </p>
             </div>
           )}
         </div>

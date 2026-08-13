@@ -141,14 +141,18 @@ export const LoginPage: React.FC = () => {
   };
 
   const handleRoleSelect = (role: UserRole) => {
-    setSelectedRole(role);
+    if (role !== "candidate") {
+      setError("Registration for Recruiter and Company profiles is currently disabled. Please select Candidate.");
+      return;
+    }
+    setSelectedRole("candidate");
     setRegStep(2);
     setError("");
   };
 
   const handleRoleContinue = () => {
-    if (!selectedRole) {
-      setError("Please select a role to continue.");
+    if (!selectedRole || selectedRole !== "candidate") {
+      setError("Only Candidate profile registration is currently available.");
       return;
     }
     setRegStep(2);
@@ -688,7 +692,9 @@ export const LoginPage: React.FC = () => {
                       🎓
                     </div>
                     <div className="role-meta">
-                      <h3 className="role-name">Candidate</h3>
+                      <div className="role-name-header">
+                        <h3 className="role-name">Candidate</h3>
+                      </div>
                       <p className="role-description">
                         Apply to roles, build resume profiles, and schedule automation.
                       </p>
@@ -697,35 +703,47 @@ export const LoginPage: React.FC = () => {
                   </div>
 
                   <div
-                    className={`role-card ${selectedRole === "recruiter" ? "selected recruiter" : ""}`}
-                    onClick={() => !isRegisteringSubmit && handleRoleSelect("recruiter")}
+                    className="role-card disabled recruiter"
+                    onClick={() =>
+                      setError("Recruiter registration is currently disabled. Please register as a Candidate.")
+                    }
+                    title="Recruiter registration is currently disabled"
                   >
-                    <div className="role-icon-wrapper" style={{ color: "var(--recruiter-color)" }}>
+                    <div className="role-icon-wrapper" style={{ color: "#94a3b8" }}>
                       💼
                     </div>
                     <div className="role-meta">
-                      <h3 className="role-name">Recruiter</h3>
+                      <div className="role-name-header">
+                        <h3 className="role-name" style={{ color: "#64748b" }}>Recruiter</h3>
+                        <span className="coming-soon-badge">Coming Soon</span>
+                      </div>
                       <p className="role-description">
                         Discover matching candidates and manage application outreach.
                       </p>
                     </div>
-                    <div className="role-radio-indicator" style={{ color: "var(--recruiter-color)" }}></div>
+                    <div className="role-radio-indicator disabled"></div>
                   </div>
 
                   <div
-                    className={`role-card ${selectedRole === "company" ? "selected company" : ""}`}
-                    onClick={() => !isRegisteringSubmit && handleRoleSelect("company")}
+                    className="role-card disabled company"
+                    onClick={() =>
+                      setError("Company registration is currently disabled. Please register as a Candidate.")
+                    }
+                    title="Company registration is currently disabled"
                   >
-                    <div className="role-icon-wrapper" style={{ color: "var(--company-color)" }}>
+                    <div className="role-icon-wrapper" style={{ color: "#94a3b8" }}>
                       🏢
                     </div>
                     <div className="role-meta">
-                      <h3 className="role-name">Company</h3>
+                      <div className="role-name-header">
+                        <h3 className="role-name" style={{ color: "#64748b" }}>Company</h3>
+                        <span className="coming-soon-badge">Coming Soon</span>
+                      </div>
                       <p className="role-description">
                         Manage corporate postings and scale recruitment pipelines.
                       </p>
                     </div>
-                    <div className="role-radio-indicator" style={{ color: "var(--company-color)" }}></div>
+                    <div className="role-radio-indicator disabled"></div>
                   </div>
                 </div>
 

@@ -218,6 +218,42 @@ public class SystemEmailServiceImpl implements SystemEmailService {
 
     @Override
     @org.springframework.scheduling.annotation.Async
+    public void sendCareersInterestAcknowledgementEmail(String recipientEmail) {
+        String subject = "EasyNaukri - We've Received Your Interest for Job Opening Updates!";
+        String body = "Hello,\n\n"
+                + "Thank you for subscribing to job opening updates at EasyNaukri!\n\n"
+                + "We have received your email (" + recipientEmail + "). From now on, you will be among the first to be updated whenever new job positions, engineering roles, and team expansions open up at EasyNaukri.\n\n"
+                + "We are excited to have you in our talent network!\n\n"
+                + "Best regards,\n"
+                + "The EasyNaukri Careers Team\n"
+                + "https://easynaukri.online";
+
+        log.info("\n==================================================\n"
+                + "[SYSTEM EMAIL OUTBOX - CAREERS INTEREST ACKNOWLEDGEMENT]\n"
+                + "To: {}\n"
+                + "Subject: {}\n"
+                + "Body:\n{}\n"
+                + "==================================================",
+                recipientEmail, subject, body);
+
+        if (mailSender != null) {
+            try {
+                SimpleMailMessage mailMessage = new SimpleMailMessage();
+                mailMessage.setTo(recipientEmail);
+                String senderAddr = (fromEmail != null && !fromEmail.trim().isEmpty()) ? fromEmail : "notifications@easynaukri.online";
+                mailMessage.setFrom("EasyNaukri Careers <" + senderAddr + ">");
+                mailMessage.setSubject(subject);
+                mailMessage.setText(body);
+                mailSender.send(mailMessage);
+                log.info("Successfully sent careers interest acknowledgement email to: {}", recipientEmail);
+            } catch (Exception e) {
+                log.error("Failed to send careers interest acknowledgement email via SMTP, fell back to console log: {}", e.getMessage(), e);
+            }
+        }
+    }
+
+    @Override
+    @org.springframework.scheduling.annotation.Async
     public void sendTrialWarningEmail(String recipientEmail, String userName, long daysRemaining) {
         String subject = "⏳ EasyNaukri - Your Elite Autopilot Free Trial Ends in " + daysRemaining + " Days!";
         String body = "Hi " + (userName != null ? userName : "there") + ",\n\n"

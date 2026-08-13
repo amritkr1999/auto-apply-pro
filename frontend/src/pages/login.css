@@ -358,6 +358,19 @@
   transform: translateX(4px);
 }
 
+.role-card.disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.role-card.disabled:hover {
+  transform: none;
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
 /* Selected states for specific roles */
 .role-card.selected.candidate {
   border-color: var(--candidate-color);
@@ -414,11 +427,31 @@
   flex-grow: 1;
 }
 
+.role-name-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 2px;
+}
+
 .role-name {
   font-size: 0.95rem;
   font-weight: 700;
   margin-bottom: 2px;
   color: var(--text-primary);
+}
+
+.coming-soon-badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #64748b;
+  background: #e2e8f0;
+  border: 1px solid #cbd5e1;
+  padding: 0.1rem 0.45rem;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
 }
 
 .role-description {
@@ -438,6 +471,11 @@
   justify-content: center;
   flex-shrink: 0;
   transition: all 0.2s ease;
+}
+
+.role-radio-indicator.disabled {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
 }
 
 .role-card.selected .role-radio-indicator {

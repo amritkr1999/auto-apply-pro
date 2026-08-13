@@ -47,6 +47,10 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Invalid role: " + request.getRole());
         }
 
+        if (role == UserRole.RECRUITER || role == UserRole.COMPANY) {
+            throw new IllegalArgumentException("Registration for Recruiter and Company profiles is currently disabled. Please register as a Candidate.");
+        }
+
         java.time.LocalDate today = java.time.LocalDate.now();
         java.time.LocalDateTime now = java.time.LocalDateTime.now();
         java.time.LocalDateTime trialEnd = now.plusDays(15);
