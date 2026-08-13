@@ -15,4 +15,7 @@ public interface EmailTemplateRepository extends JpaRepository<EmailTemplate, St
 
     @Query("SELECT t FROM EmailTemplate t WHERE t.isSystemTemplate = true OR t.isPublic = true OR t.creatorId = :userId")
     List<EmailTemplate> findAllVisibleTemplates(@Param("userId") Long userId, Sort sort);
+
+    @Query("SELECT t FROM EmailTemplate t WHERE (t.templateType = :templateType OR (:templateType = 'EMAIL' AND (t.templateType IS NULL OR t.templateType = ''))) AND (t.isSystemTemplate = true OR t.isPublic = true OR t.creatorId = :userId)")
+    List<EmailTemplate> findVisibleTemplatesByType(@Param("userId") Long userId, @Param("templateType") String templateType, Sort sort);
 }

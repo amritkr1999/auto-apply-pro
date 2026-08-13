@@ -11,4 +11,5 @@ public interface EmailSender {
      */
     void sendEmail(Long userId, String to, String subject, String body);
     void sendEmail(Long userId, String to, String cc, String subject, String body);
+    void sendEmail(Long userId, String to, String cc, String subject, String body, byte[] coverLetterBytes, String coverLetterContentType, String coverLetterFilename);
 }

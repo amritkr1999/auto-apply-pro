@@ -43,6 +43,10 @@ public class EmailTemplate {
     @Column(name = "is_public")
     private Boolean isPublic = true;
 
+    @Builder.Default
+    @Column(name = "template_type")
+    private String templateType = "EMAIL"; // EMAIL or COVER_LETTER
+
     @org.hibernate.annotations.Formula("(select coalesce(avg(r.rating), 0.0) from template_ratings r where r.template_id = id)")
     private Double averageRating;
 

@@ -43,6 +43,12 @@ export interface CandidateProfile {
   skills: string[];
   jobPreferences: Record<string, any>;
   resumeFilename?: string;
+  coverLetterFilename?: string;
+  coverLetterContentType?: string;
+  hasCoverLetter?: boolean;
+  defaultCoverLetterMode?: "TEMPLATE" | "UPLOADED" | "AI_GENERATED" | "NONE";
+  defaultCoverLetterDeliveryType?: "ATTACHMENT" | "INLINE";
+  defaultCoverLetterTemplateId?: string;
   summary?: string;
   education?: any[];
   experience?: any[];
@@ -495,5 +501,35 @@ export const profileService = {
       throw new Error(errorText || "Failed to sync candidate profile from resume");
     }
     return response.json();
+  },
+
+  async uploadCoverLetter(file: File): Promise<string> {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await fetch(`${API_BASE}/users/profile/cover-letter`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: formData,
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || "Failed to upload cover letter");
+    }
+    return response.text();
+  },
+
+  async deleteCoverLetter(): Promise<string> {
+    const response = await fetch(`${API_BASE}/users/profile/cover-letter`, {
+      method: "DELETE",
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to delete cover letter");
+    }
+    return response.text();
+  },
+
+  getCoverLetterUrl(): string {
+    return `${API_BASE}/users/profile/cover-letter`;
   },
 };

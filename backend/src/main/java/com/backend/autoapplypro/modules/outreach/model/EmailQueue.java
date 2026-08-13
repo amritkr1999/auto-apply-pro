@@ -46,6 +46,22 @@ public class EmailQueue {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String body;
 
+    @Column(name = "cover_letter_filename")
+    private String coverLetterFilename;
+
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.BINARY)
+    @Column(name = "cover_letter_bytes", columnDefinition = "bytea")
+    private byte[] coverLetterBytes;
+
+    @Column(name = "cover_letter_content_type")
+    private String coverLetterContentType;
+
+    @Column(name = "cover_letter_body", columnDefinition = "TEXT")
+    private String coverLetterBody;
+
+    @Column(name = "cover_letter_delivery_type")
+    private String coverLetterDeliveryType; // ATTACHMENT or INLINE
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OutreachStatus status;

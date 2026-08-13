@@ -66,6 +66,10 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
   const [skillSearchQuery, setSkillSearchQuery] = useState("");
   const [uploadingResume, setUploadingResume] = useState(false);
   const [syncingProfile, setSyncingProfile] = useState(false);
+  const [uploadingCoverLetter, setUploadingCoverLetter] = useState(false);
+  const [coverLetterFilename, setCoverLetterFilename] = useState<string | null>(null);
+  const [defaultCoverLetterMode, setDefaultCoverLetterMode] = useState<"TEMPLATE" | "UPLOADED" | "AI_GENERATED" | "NONE">("TEMPLATE");
+  const [defaultCoverLetterDeliveryType, setDefaultCoverLetterDeliveryType] = useState<"ATTACHMENT" | "INLINE">("ATTACHMENT");
   const [suggestionsModalOpen, setSuggestionsModalOpen] = useState(false);
   const [parsedSuggestions, setParsedSuggestions] = useState<ParsedResumeDto | null>(null);
   const [gmailConnected, setGmailConnected] = useState(false);
@@ -143,8 +147,42 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
     setLeetcodeUsername(data.leetcodeUsername || "");
     setIsVerified(data.isVerified || false);
     setProfessionalVertical(data.professionalVertical || "DEVELOPER");
+    setCoverLetterFilename(data.coverLetterFilename || null);
+    setDefaultCoverLetterMode(data.defaultCoverLetterMode || "TEMPLATE");
+    setDefaultCoverLetterDeliveryType(data.defaultCoverLetterDeliveryType || "ATTACHMENT");
 
     onProfileUpdate(data.name, data.avatar || "");
+  };
+
+  const handleCoverLetterUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingCoverLetter(true);
+    try {
+      await profileService.uploadCoverLetter(file);
+      setCoverLetterFilename(file.name);
+      setDefaultCoverLetterMode("UPLOADED");
+      setMessage("Cover letter uploaded successfully!");
+      setTimeout(() => setMessage(""), 3000);
+      loadProfiles();
+    } catch (err: any) {
+      setError(err.message || "Failed to upload cover letter");
+    } finally {
+      setUploadingCoverLetter(false);
+    }
+  };
+
+  const handleCoverLetterDelete = async () => {
+    try {
+      await profileService.deleteCoverLetter();
+      setCoverLetterFilename(null);
+      setDefaultCoverLetterMode("TEMPLATE");
+      setMessage("Cover letter deleted successfully");
+      setTimeout(() => setMessage(""), 3000);
+      loadProfiles();
+    } catch (err: any) {
+      setError(err.message || "Failed to delete cover letter");
+    }
   };
 
   const loadProfiles = async (selectId?: number) => {
@@ -1409,6 +1447,91 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
               ) : (
                 <span className="text-xs text-slate-400 italic">No resume uploaded yet</span>
               )}
+            </div>
+          </div>
+
+          {/* Cover Letter Document & Options Card */}
+          <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 space-y-4">
+            <div>
+              <h3 className="text-base font-bold text-slate-800">Cover Letter Management</h3>
+              <p className="text-xs text-slate-500 mt-1">Upload a custom cover letter file or configure your outreach campaign cover letter options.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* File Upload Box */}
+              <div className="p-5 bg-white rounded-xl border border-dashed border-slate-250 flex flex-col items-center justify-center text-center space-y-3">
+                <input
+                  type="file"
+                  accept=".pdf,.docx,.doc"
+                  onChange={handleCoverLetterUpload}
+                  className="hidden"
+                  id="cover-letter-upload-input"
+                />
+                
+                <div className="p-3 bg-indigo-50 text-indigo-600 rounded-full shadow-xs">
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                
+                <label
+                  htmlFor="cover-letter-upload-input"
+                  className="px-5 py-2 bg-indigo-600 text-white hover:bg-indigo-700 text-xs font-semibold rounded-xl cursor-pointer transition-all inline-block shadow-sm hover:shadow active:scale-95"
+                >
+                  {uploadingCoverLetter ? "Uploading..." : "Upload Cover Letter (PDF/Doc)"}
+                </label>
+
+                {coverLetterFilename ? (
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-lg border border-slate-200">
+                    <span className="text-xs font-semibold text-slate-700 truncate max-w-[180px]">📝 {coverLetterFilename}</span>
+                    <a
+                      href={profileService.getCoverLetterUrl()}
+                      download
+                      className="text-[11px] text-indigo-600 hover:underline font-bold border-l border-slate-200 pl-2"
+                    >
+                      Download
+                    </a>
+                    <button
+                      type="button"
+                      onClick={handleCoverLetterDelete}
+                      className="text-[11px] text-rose-600 hover:underline font-bold border-l border-slate-200 pl-2"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                ) : (
+                  <span className="text-xs text-slate-400 italic">No custom cover letter uploaded</span>
+                )}
+              </div>
+
+              {/* Cover Letter Default Settings */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Default Cover Letter Mode</label>
+                  <select
+                    value={defaultCoverLetterMode}
+                    onChange={(e) => setDefaultCoverLetterMode(e.target.value as any)}
+                    className="w-full text-xs p-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  >
+                    <option value="TEMPLATE">📄 Use Non-AI Cover Letter Template</option>
+                    <option value="UPLOADED" disabled={!coverLetterFilename}>📎 Use Uploaded Cover Letter File</option>
+                    <option value="AI_GENERATED" disabled>⚡ AI Cover Letter (Coming Soon)</option>
+                    <option value="NONE">🚫 Do Not Include Cover Letter</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Default Delivery Method</label>
+                  <select
+                    value={defaultCoverLetterDeliveryType}
+                    onChange={(e) => setDefaultCoverLetterDeliveryType(e.target.value as any)}
+                    className="w-full text-xs p-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  >
+                    <option value="ATTACHMENT">📎 Attach as PDF (Cover_Letter.pdf)</option>
+                    <option value="INLINE">📝 Embed Inline inside Email Body</option>
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
 

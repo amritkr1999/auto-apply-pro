@@ -60,6 +60,27 @@ public class ProfessionalProfile {
     @Column(name = "resume_content_type")
     private String resumeContentType;
 
+    @Column(name = "cover_letter_filename")
+    private String coverLetterFilename;
+
+    @JdbcTypeCode(SqlTypes.BINARY)
+    @Column(name = "cover_letter_bytes", columnDefinition = "bytea")
+    private byte[] coverLetterBytes;
+
+    @Column(name = "cover_letter_content_type")
+    private String coverLetterContentType;
+
+    @Column(name = "default_cover_letter_mode")
+    @Builder.Default
+    private String defaultCoverLetterMode = "TEMPLATE"; // TEMPLATE, UPLOADED, AI_GENERATED, NONE
+
+    @Column(name = "default_cover_letter_delivery_type")
+    @Builder.Default
+    private String defaultCoverLetterDeliveryType = "ATTACHMENT"; // ATTACHMENT, INLINE
+
+    @Column(name = "default_cover_letter_template_id")
+    private String defaultCoverLetterTemplateId;
+
     @Column(name = "summary", columnDefinition = "TEXT")
     private String summary;
 

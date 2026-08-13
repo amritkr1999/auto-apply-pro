@@ -165,7 +165,8 @@ public class OutreachOrchestrator {
 
             // 4. Dispatch
             try {
-                emailSender.sendEmail(user.getId(), item.getRecipientEmail(), item.getCcEmails(), item.getSubject(), item.getBody());
+                emailSender.sendEmail(user.getId(), item.getRecipientEmail(), item.getCcEmails(), item.getSubject(), item.getBody(),
+                        item.getCoverLetterBytes(), item.getCoverLetterContentType(), item.getCoverLetterFilename());
                 
                 // Success updates
                 item.setStatus(OutreachStatus.SENT);

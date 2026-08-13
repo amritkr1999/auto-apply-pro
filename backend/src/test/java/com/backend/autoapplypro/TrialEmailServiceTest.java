@@ -41,6 +41,9 @@ class TrialEmailServiceTest {
     @Mock
     private EmailSender emailSender;
 
+    @Mock
+    private com.backend.autoapplypro.modules.users.service.SystemEmailService systemEmailService;
+
     @InjectMocks
     private TrialEmailService trialEmailService;
 
@@ -61,7 +64,7 @@ class TrialEmailServiceTest {
     }
 
     @Test
-    void testSendTrialEmail_MissingGmailCredentials_ReturnsError() {
+    void testSendTrialEmail_MissingGmailCredentials_FallbackToSystemMailer() {
         when(gmailCredentialRepository.findByUserId(100L)).thenReturn(Optional.empty());
 
         TrialEmailRequestDto request = TrialEmailRequestDto.builder()
@@ -71,9 +74,10 @@ class TrialEmailServiceTest {
 
         TrialEmailResponseDto response = trialEmailService.sendTrialEmail(100L, request);
 
-        assertFalse(response.isSuccess());
-        assertTrue(response.getMessage().contains("Gmail account not connected"));
+        assertTrue(response.isSuccess());
+        assertTrue(response.getMessage().contains("System Mailer"));
         verify(emailSender, never()).sendEmail(anyLong(), anyString(), anyString(), anyString());
+        verify(systemEmailService).sendDailyDigestEmail(eq("alex.dev@example.com"), anyString(), anyString());
     }
 
     @Test

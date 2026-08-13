@@ -47,6 +47,12 @@ public class GmailEmailSender implements EmailSender {
 
     @Override
     public void sendEmail(Long userId, String to, String cc, String subject, String body) {
+        sendEmail(userId, to, cc, subject, body, null, null, null);
+    }
+
+    @Override
+    public void sendEmail(Long userId, String to, String cc, String subject, String body, 
+                          byte[] coverLetterBytes, String coverLetterContentType, String coverLetterFilename) {
         GmailCredential credential = credentialRepository.findByUserId(userId)
                 .orElseThrow(() -> new OutreachSendException(OutreachErrorType.UNAUTHORIZED, 
                         "Gmail account not connected for user ID: " + userId));
@@ -54,7 +60,8 @@ public class GmailEmailSender implements EmailSender {
         // If in development mode or using placeholder/mock credentials, bypass external Google API network call
         if (isDevOrPlaceholderClientId(clientId) ||
             (credential.getAccessToken() != null && credential.getAccessToken().startsWith("mock_"))) {
-            log.info("[DEV/PLACEHOLDER MODE] Simulated Gmail dispatch for user ID: {} to: {}. Subject: {}", userId, to, subject);
+            log.info("[DEV/PLACEHOLDER MODE] Simulated Gmail dispatch for user ID: {} to: {}. Subject: {}, Has Cover Letter Attachment: {}", 
+                    userId, to, subject, coverLetterBytes != null && coverLetterBytes.length > 0);
             return;
         }
 
@@ -87,12 +94,13 @@ public class GmailEmailSender implements EmailSender {
                             userId, resumeFilename, resumeBytes.length);
                 }
             } catch (Exception e) {
-                log.warn("Failed to retrieve candidate resume for user ID: {}. Sending without attachment. Error: {}", userId, e.getMessage());
+                log.warn("Failed to retrieve candidate resume for user ID: {}. Error: {}", userId, e.getMessage());
             }
 
             // Construct MIME message
             MimeMessage mimeMessage = createMimeMessage(credential.getConnectedEmail(), to, cc, subject, body, 
-                    resumeBytes, resumeContentType, resumeFilename);
+                    resumeBytes, resumeContentType, resumeFilename,
+                    coverLetterBytes, coverLetterContentType, coverLetterFilename);
             
             // Serialize and Base64-encode
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -169,7 +177,7 @@ public class GmailEmailSender implements EmailSender {
                     .setApplicationName("AutoApplyPro")
                     .build();
 
-            MimeMessage mimeMessage = createMimeMessage(credential.getConnectedEmail(), to, cc, subject, body, null, null, null);
+            MimeMessage mimeMessage = createMimeMessage(credential.getConnectedEmail(), to, cc, subject, body, null, null, null, null, null, null);
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
             mimeMessage.writeTo(buffer);
             String encodedEmail = Base64.getUrlEncoder().encodeToString(buffer.toByteArray());
@@ -195,7 +203,8 @@ public class GmailEmailSender implements EmailSender {
     }
 
     private MimeMessage createMimeMessage(String from, String to, String cc, String subject, String body, 
-                                           byte[] attachmentBytes, String contentType, String filename) throws Exception {
+                                           byte[] resumeBytes, String resumeContentType, String resumeFilename,
+                                           byte[] coverLetterBytes, String coverLetterContentType, String coverLetterFilename) throws Exception {
         MimeMessage mimeMessage = new MimeMessage(Session.getDefaultInstance(new Properties()));
         mimeMessage.setFrom(new InternetAddress(from));
         mimeMessage.addRecipient(MimeMessage.RecipientType.TO, new InternetAddress(to));
@@ -204,7 +213,10 @@ public class GmailEmailSender implements EmailSender {
         }
         mimeMessage.setSubject(subject, "UTF-8");
 
-        if (attachmentBytes != null && attachmentBytes.length > 0) {
+        boolean hasResume = resumeBytes != null && resumeBytes.length > 0;
+        boolean hasCoverLetter = coverLetterBytes != null && coverLetterBytes.length > 0;
+
+        if (hasResume || hasCoverLetter) {
             MimeMultipart multipart = new MimeMultipart();
 
             // 1. HTML body part
@@ -212,13 +224,25 @@ public class GmailEmailSender implements EmailSender {
             bodyPart.setContent(body, "text/html; charset=UTF-8");
             multipart.addBodyPart(bodyPart);
 
-            // 2. Attachment part
-            MimeBodyPart attachmentPart = new MimeBodyPart();
-            ByteArrayDataSource source = new ByteArrayDataSource(attachmentBytes, 
-                    contentType != null ? contentType : "application/octet-stream");
-            attachmentPart.setDataHandler(new DataHandler(source));
-            attachmentPart.setFileName(filename != null ? filename : "resume.pdf");
-            multipart.addBodyPart(attachmentPart);
+            // 2. Resume attachment part
+            if (hasResume) {
+                MimeBodyPart resumePart = new MimeBodyPart();
+                ByteArrayDataSource source = new ByteArrayDataSource(resumeBytes, 
+                        resumeContentType != null ? resumeContentType : "application/octet-stream");
+                resumePart.setDataHandler(new DataHandler(source));
+                resumePart.setFileName(resumeFilename != null ? resumeFilename : "resume.pdf");
+                multipart.addBodyPart(resumePart);
+            }
+
+            // 3. Cover Letter attachment part
+            if (hasCoverLetter) {
+                MimeBodyPart coverLetterPart = new MimeBodyPart();
+                ByteArrayDataSource source = new ByteArrayDataSource(coverLetterBytes, 
+                        coverLetterContentType != null ? coverLetterContentType : "application/pdf");
+                coverLetterPart.setDataHandler(new DataHandler(source));
+                coverLetterPart.setFileName(coverLetterFilename != null ? coverLetterFilename : "Cover_Letter.pdf");
+                multipart.addBodyPart(coverLetterPart);
+            }
 
             mimeMessage.setContent(multipart);
         } else {

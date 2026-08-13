@@ -23,4 +23,10 @@ public class OutreachDraftDto {
     private String profileName;
     private String companyName;
     private String jobTitle;
+    private String coverLetterFilename;
+    private String coverLetterContentType;
+    private String coverLetterBody;
+    private String coverLetterDeliveryType;
+    private String coverLetterMode;
+    private String coverLetterTemplateId;
 }

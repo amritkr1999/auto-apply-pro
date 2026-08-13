@@ -202,13 +202,64 @@ public class EmailTemplateController {
                 }
             });
         }
+        if (!templateRepository.existsById("cover-letter-default-1")) {
+            EmailTemplate cl1 = EmailTemplate.builder()
+                    .id("cover-letter-default-1")
+                    .name("Standard Professional Cover Letter")
+                    .subject("Cover Letter - {{candidateName}} - {{jobRole}}")
+                    .intro("Dear Hiring Manager,")
+                    .skillsTemplate("I am writing to express my strong enthusiasm for the {{jobRole}} position at {{companyName}}. With over {{experienceYears}} years of software engineering experience specializing in {{skills}}, I have continuously delivered scalable solutions and high-performing applications.")
+                    .body("In my previous roles, I led development initiatives, collaborated across cross-functional teams, and engineered core features that directly improved performance and user engagement. My expertise in {{skills}} aligns directly with your team's current technical requirements and growth goals.")
+                    .signOff("Thank you for your time and consideration. I welcome the opportunity to discuss how my background and skills can contribute to {{companyName}}.\n\nSincerely,\n{{candidateName}}\n{{candidateEmail}}\n{{candidateMobile}}")
+                    .templateType("COVER_LETTER")
+                    .isSystemTemplate(true)
+                    .isPublic(true)
+                    .build();
+            templateRepository.save(cl1);
+            log.info("Seeded cover-letter-default-1 template.");
+        }
+
+        if (!templateRepository.existsById("cover-letter-default-2")) {
+            EmailTemplate cl2 = EmailTemplate.builder()
+                    .id("cover-letter-default-2")
+                    .name("Skill-Centric Technical Cover Letter")
+                    .subject("Cover Letter (Technical) - {{candidateName}}")
+                    .intro("Dear {{recruiterName}},")
+                    .skillsTemplate("As a technical specialist proficient in {{skills}}, I am excited to apply for the {{jobRole}} role at {{companyName}}.")
+                    .body("Throughout my {{experienceYears}} years in software development, I have focused on writing clean, maintainable code, solving complex technical bottlenecks, and shipping reliable products. I am particularly impressed by {{companyName}}'s engineering standards and would love to bring my technical expertise to your team.")
+                    .signOff("Warm regards,\n{{candidateName}}\n{{candidateEmail}}\n{{candidateMobile}}")
+                    .templateType("COVER_LETTER")
+                    .isSystemTemplate(true)
+                    .isPublic(true)
+                    .build();
+            templateRepository.save(cl2);
+            log.info("Seeded cover-letter-default-2 template.");
+        }
+
+        if (!templateRepository.existsById("cover-letter-default-3")) {
+            EmailTemplate cl3 = EmailTemplate.builder()
+                    .id("cover-letter-default-3")
+                    .name("Executive Impact Cover Letter")
+                    .subject("Cover Letter (Executive) - {{candidateName}}")
+                    .intro("Dear {{hrName}},")
+                    .skillsTemplate("I am reaching out to submit my candidate profile for the {{jobRole}} opportunity at {{companyName}}.")
+                    .body("Having spent {{experienceYears}} years driving technical product development and architectural decisions with tools like {{skills}}, I bring a strategic mindset coupled with hands-on execution capability. I excel at bridging business objectives with software architecture to deliver measurable outcomes.")
+                    .signOff("Respectfully,\n{{candidateName}}\n{{candidateEmail}}\n{{candidateMobile}}")
+                    .templateType("COVER_LETTER")
+                    .isSystemTemplate(true)
+                    .isPublic(true)
+                    .build();
+            templateRepository.save(cl3);
+            log.info("Seeded cover-letter-default-3 template.");
+        }
     }
 
     @GetMapping
     public ResponseEntity<List<EmailTemplate>> getAllTemplates(
             @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String type,
             Authentication authentication) {
-        log.info("Fetching templates (sortBy={})...", sortBy);
+        log.info("Fetching templates (sortBy={}, type={})...", sortBy, type);
 
         Long userId = -1L;
         boolean isAdmin = false;
@@ -226,9 +277,20 @@ public class EmailTemplateController {
 
         List<EmailTemplate> templates;
         if (isAdmin) {
-            templates = templateRepository.findAll(sort);
+            if (type != null && !type.trim().isEmpty()) {
+                final String targetType = type.trim().toUpperCase();
+                templates = templateRepository.findAll(sort).stream()
+                        .filter(t -> targetType.equals(t.getTemplateType()) || ("EMAIL".equals(targetType) && (t.getTemplateType() == null || t.getTemplateType().isEmpty())))
+                        .collect(java.util.stream.Collectors.toList());
+            } else {
+                templates = templateRepository.findAll(sort);
+            }
         } else {
-            templates = templateRepository.findAllVisibleTemplates(userId, sort);
+            if (type != null && !type.trim().isEmpty()) {
+                templates = templateRepository.findVisibleTemplatesByType(userId, type.trim().toUpperCase(), sort);
+            } else {
+                templates = templateRepository.findAllVisibleTemplates(userId, sort);
+            }
         }
 
         // Populate rating/favorite transient fields for current authenticated user

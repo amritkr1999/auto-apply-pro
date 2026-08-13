@@ -61,6 +61,21 @@ public class GlobalValidationExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleAllUncaughtException(Exception ex) {
+        org.springframework.web.bind.annotation.ResponseStatus responseStatus = 
+            org.springframework.core.annotation.AnnotationUtils.findAnnotation(ex.getClass(), org.springframework.web.bind.annotation.ResponseStatus.class);
+        if (responseStatus != null) {
+            HttpStatus status = responseStatus.value() != HttpStatus.INTERNAL_SERVER_ERROR ? responseStatus.value() : responseStatus.code();
+            String msg = !responseStatus.reason().isEmpty() ? responseStatus.reason() : ex.getMessage();
+            Map<String, Object> body = createErrorBody(status, msg);
+            return ResponseEntity.status(status).body(body);
+        }
+
+        if (ex instanceof org.springframework.web.server.ResponseStatusException rse) {
+            HttpStatus status = HttpStatus.valueOf(rse.getStatusCode().value());
+            Map<String, Object> body = createErrorBody(status, rse.getReason() != null ? rse.getReason() : ex.getMessage());
+            return ResponseEntity.status(status).body(body);
+        }
+
         log.error("Uncaught exception occurred in request processing: ", ex);
         Map<String, Object> body = createErrorBody(HttpStatus.INTERNAL_SERVER_ERROR, "An internal server error occurred. Please try again later.");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);

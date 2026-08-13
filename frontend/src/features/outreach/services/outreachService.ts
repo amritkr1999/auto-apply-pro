@@ -27,6 +27,7 @@ export interface EmailTemplate {
   skillsTemplate?: string;
   body: string;
   signOff?: string;
+  templateType?: "EMAIL" | "COVER_LETTER";
   isSystemTemplate?: boolean;
   isPublic?: boolean;
   creatorId?: number;
@@ -50,6 +51,38 @@ export interface OutreachDraft {
   profileName?: string;
   companyName?: string;
   jobTitle?: string;
+  coverLetterFilename?: string;
+  coverLetterContentType?: string;
+  coverLetterBody?: string;
+  coverLetterDeliveryType?: "ATTACHMENT" | "INLINE";
+  coverLetterMode?: "TEMPLATE" | "UPLOADED" | "AI_GENERATED" | "NONE";
+  coverLetterTemplateId?: string;
+}
+
+export interface CoverLetterRequest {
+  userId?: number;
+  profileId?: number;
+  jobDetails?: {
+    title?: string;
+    company?: string;
+    description?: string;
+    skills?: string[];
+  };
+  templateId?: string;
+  mode?: "TEMPLATE" | "UPLOADED" | "AI_GENERATED" | "NONE";
+  deliveryType?: "ATTACHMENT" | "INLINE";
+  candidateName?: string;
+}
+
+export interface CoverLetterResponse {
+  mode: string;
+  deliveryType: string;
+  content: string;
+  filename?: string;
+  contentType?: string;
+  isAiAvailable?: boolean;
+  message?: string;
+  pdfBytes?: string;
 }
 
 export interface TrialEmailRequest {
@@ -156,9 +189,15 @@ const saveLocalTemplates = (templates: EmailTemplate[]) => {
 
 export const outreachService = {
   // Get all email templates
-  async getTemplates(sortBy?: string): Promise<EmailTemplate[]> {
+  // Get all email/cover letter templates
+  async getTemplates(sortBy?: string, type?: string): Promise<EmailTemplate[]> {
     try {
-      const url = sortBy ? `${API_BASE}/templates?sortBy=${sortBy}` : `${API_BASE}/templates`;
+      const params = new URLSearchParams();
+      if (sortBy) params.append("sortBy", sortBy);
+      if (type) params.append("type", type);
+
+      const queryString = params.toString();
+      const url = queryString ? `${API_BASE}/templates?${queryString}` : `${API_BASE}/templates`;
       const response = await fetch(url, {
         headers: getAuthHeaders(),
       });
@@ -170,11 +209,29 @@ export const outreachService = {
     }
     const tpls = getLocalTemplates();
     const favorites = JSON.parse(localStorage.getItem("email_template_favorites") || "[]");
-    return tpls.map(t => ({
-      ...t,
-      isFavorited: favorites.includes(t.id),
-      averageRating: t.averageRating || 0.0
-    }));
+    return tpls
+      .filter(t => !type || (type.toUpperCase() === (t.templateType || "EMAIL").toUpperCase()))
+      .map(t => ({
+        ...t,
+        isFavorited: favorites.includes(t.id),
+        averageRating: t.averageRating || 0.0
+      }));
+  },
+
+  async generateCoverLetter(request: CoverLetterRequest): Promise<CoverLetterResponse> {
+    const response = await fetch(`${API_BASE}/outreach/cover-letter/generate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthHeaders()
+      },
+      body: JSON.stringify(request)
+    });
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(text || "Failed to generate cover letter");
+    }
+    return response.json();
   },
 
   // Save/Create a new template

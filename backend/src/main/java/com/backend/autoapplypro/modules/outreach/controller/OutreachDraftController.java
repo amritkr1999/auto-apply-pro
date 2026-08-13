@@ -135,6 +135,10 @@ public class OutreachDraftController {
                 .parsedEmails(dto.getParsedEmails())
                 .subject(dto.getSubject())
                 .body(dto.getBody())
+                .coverLetterFilename(dto.getCoverLetterFilename())
+                .coverLetterContentType(dto.getCoverLetterContentType())
+                .coverLetterBody(dto.getCoverLetterBody())
+                .coverLetterDeliveryType(dto.getCoverLetterDeliveryType())
                 .status(status)
                 .scheduledAt(scheduledAt)
                 .build();
@@ -152,6 +156,10 @@ public class OutreachDraftController {
         dto.setProfileName(saved.getProfessionalProfile() != null ? saved.getProfessionalProfile().getProfileName() : null);
         dto.setCompanyName(saved.getJobPosting() != null ? saved.getJobPosting().getCompany() : null);
         dto.setJobTitle(saved.getJobPosting() != null ? saved.getJobPosting().getTitle() : null);
+        dto.setCoverLetterFilename(saved.getCoverLetterFilename());
+        dto.setCoverLetterContentType(saved.getCoverLetterContentType());
+        dto.setCoverLetterBody(saved.getCoverLetterBody());
+        dto.setCoverLetterDeliveryType(saved.getCoverLetterDeliveryType());
         return ResponseEntity.ok(dto);
     }
 
@@ -396,6 +404,10 @@ public class OutreachDraftController {
                 dto.setProfileName(item.getProfessionalProfile() != null ? item.getProfessionalProfile().getProfileName() : null);
                 dto.setCompanyName(item.getJobPosting() != null ? item.getJobPosting().getCompany() : null);
                 dto.setJobTitle(item.getJobPosting() != null ? item.getJobPosting().getTitle() : null);
+                dto.setCoverLetterFilename(item.getCoverLetterFilename());
+                dto.setCoverLetterContentType(item.getCoverLetterContentType());
+                dto.setCoverLetterBody(item.getCoverLetterBody());
+                dto.setCoverLetterDeliveryType(item.getCoverLetterDeliveryType());
                 dtos.add(dto);
             }
             return ResponseEntity.ok(dtos);

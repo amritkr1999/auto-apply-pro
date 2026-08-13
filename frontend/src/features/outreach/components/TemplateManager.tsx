@@ -23,6 +23,7 @@ export const TemplateManager: React.FC = () => {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [sortBy, setSortBy] = useState("");
+  const [templateCategoryTab, setTemplateCategoryTab] = useState<"EMAIL" | "COVER_LETTER">("EMAIL");
   const [pageDraft, setPageDraft] = useState<any | null>(null);
   const [hasCheckedDraft, setHasCheckedDraft] = useState(false);
 
@@ -109,11 +110,12 @@ export const TemplateManager: React.FC = () => {
     }
   };
 
-  const fetchTemplates = async (sortVal?: string) => {
+  const fetchTemplates = async (sortVal?: string, catType?: string) => {
     setLoading(true);
     try {
       const activeSort = sortVal !== undefined ? sortVal : sortBy;
-      const data = await outreachService.getTemplates(activeSort);
+      const activeCat = catType !== undefined ? catType : templateCategoryTab;
+      const data = await outreachService.getTemplates(activeSort, activeCat);
       setTemplates(data);
       if (activeTemplate) {
         const updated = data.find(t => t.id === activeTemplate.id);
@@ -569,6 +571,38 @@ export const TemplateManager: React.FC = () => {
         </div>
         {!activeTemplate && (
           <div className="flex items-center gap-3 shrink-0 flex-wrap sm:flex-nowrap">
+            {/* Category Switcher Tabs */}
+            <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+              <button
+                type="button"
+                onClick={() => {
+                  setTemplateCategoryTab("EMAIL");
+                  fetchTemplates(sortBy, "EMAIL");
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  templateCategoryTab === "EMAIL"
+                    ? "bg-white text-indigo-600 shadow-xs"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                📧 Email Templates
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setTemplateCategoryTab("COVER_LETTER");
+                  fetchTemplates(sortBy, "COVER_LETTER");
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  templateCategoryTab === "COVER_LETTER"
+                    ? "bg-white text-indigo-600 shadow-xs"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                📄 Cover Letter Templates
+              </button>
+            </div>
+
             {/* Starred Filter Button */}
             <button
               onClick={() => setShowStarredOnly(!showStarredOnly)}
