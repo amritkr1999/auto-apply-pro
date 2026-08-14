@@ -65,7 +65,7 @@ public class OutreachOAuthController {
                 GOOGLE_AUTH_URL,
                 clientId,
                 callbackUrl,
-                Arrays.asList("https://www.googleapis.com/auth/gmail.send", "https://www.googleapis.com/auth/gmail.compose", "email", "openid")
+                Arrays.asList("https://www.googleapis.com/auth/gmail.send", "email", "openid")
         )
         .setAccessType("offline")
         .setApprovalPrompt("force") // Forces Google to output refresh_token

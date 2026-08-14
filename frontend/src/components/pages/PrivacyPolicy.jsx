@@ -162,13 +162,13 @@ export const PrivacyPolicy = () => {
                 <div className="flex items-start gap-2.5">
                   <span className="text-indigo-600 dark:text-indigo-400 font-bold">•</span>
                   <div>
-                    <strong className="text-slate-900 dark:text-slate-100">Requested Scopes:</strong> We request <code className="font-mono text-xs bg-slate-200 dark:bg-slate-700 px-1 py-0.5 rounded text-indigo-700 dark:text-indigo-300">https://www.googleapis.com/auth/gmail.send</code> and <code className="font-mono text-xs bg-slate-200 dark:bg-slate-700 px-1 py-0.5 rounded text-indigo-700 dark:text-indigo-300">https://www.googleapis.com/auth/gmail.compose</code>.
+                    <strong className="text-slate-900 dark:text-slate-100">Requested Scopes:</strong> We request <code className="font-mono text-xs bg-slate-200 dark:bg-slate-700 px-1 py-0.5 rounded text-indigo-700 dark:text-indigo-300">https://www.googleapis.com/auth/gmail.send</code>.
                   </div>
                 </div>
                 <div className="flex items-start gap-2.5">
                   <span className="text-indigo-600 dark:text-indigo-400 font-bold">•</span>
                   <div>
-                    <strong className="text-slate-900 dark:text-slate-100">Purpose & Usage:</strong> These permissions are used exclusively to allow candidates to create email drafts in their Gmail account (<code className="font-mono text-xs">gmail.compose</code>) and send candidate-approved outreach emails (<code className="font-mono text-xs">gmail.send</code>) directly from their connected Gmail account upon explicit user action.
+                    <strong className="text-slate-900 dark:text-slate-100">Purpose & Usage:</strong> These permissions are used exclusively to allow candidates to send candidate-approved outreach emails (<code className="font-mono text-xs">gmail.send</code>) directly from their connected Gmail account upon explicit user action.
                   </div>
                 </div>
                 <div className="flex items-start gap-2.5">
