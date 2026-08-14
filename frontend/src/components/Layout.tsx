@@ -11,6 +11,7 @@ import { feedbackService } from "../features/profile/services/feedbackService";
 import { useAuth } from "../context/AuthContext";
 
 import NetworkStatusNotifier from "./NetworkStatusNotifier";
+import UserManualModal from "./UserManualModal";
 
 export const Layout: React.FC = () => {
   const navigate = useNavigate();
@@ -75,6 +76,7 @@ export const Layout: React.FC = () => {
       <TrialCountdownBanner />
       <NetworkStatusNotifier />
       {user && <WalkthroughTour />}
+      {user && <UserManualModal />}
       {showFeedbackModal && (
         <FeedbackModal
           onClose={() => setShowFeedbackModal(false)}

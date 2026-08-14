@@ -16,6 +16,7 @@ import { StatsGrid } from "./StatsGrid";
 import { ReviewDrawer } from "./ReviewDrawer";
 import CampaignDispatchModal from "../../../outreach/components/CampaignDispatchModal";
 import { parseUtcDate, formatDateInTimezone } from "../../../../utils/dateUtils";
+import { OnboardingChecklistWidget } from "../OnboardingChecklistWidget";
 
 export const ProfessionalDashboardView: React.FC = () => {
   const navigate = useNavigate();
@@ -418,6 +419,15 @@ export const ProfessionalDashboardView: React.FC = () => {
               <Badge variant={gmailConnected ? "success" : "neutral"}>
                 {gmailConnected ? "Verified Channels" : "Channels Offline"}
               </Badge>
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent("open-user-manual"))}
+                className="inline-flex items-center gap-1.5 px-3 py-0.5 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-200 border border-indigo-500/40 rounded-full text-xs font-extrabold tracking-wider transition-all shadow-xs focus:outline-none cursor-pointer"
+                title="Open User Manual & Feature Guide"
+              >
+                <span>📖</span>
+                <span>User Guide</span>
+              </button>
             </div>
             <h2 className="text-2xl sm:text-3xl font-black tracking-tight">{user.name || "Candidate User"}</h2>
             <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
@@ -471,6 +481,22 @@ export const ProfessionalDashboardView: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Interactive User Onboarding Checklist Widget */}
+      <OnboardingChecklistWidget
+        candidateProfile={candidateProfile}
+        gmailConnected={gmailConnected}
+        dispatchMode={localStorage.getItem("campaign_dispatch_mode") || "DIRECT_SEND"}
+        campaignEnabled={hrOutreachCampaignEnabled}
+        sentCount={sentCount}
+        queueCount={queueItems.length}
+        userId={userId}
+        onOpenProfile={() => navigate("/profile/settings")}
+        onConnectGmail={handleConnectGmail}
+        onOpenOutreachModes={() => setIsCampaignModalOpen(true)}
+        onStartCampaign={() => setIsCampaignModalOpen(true)}
+        onOpenUserManual={(sec?: string) => window.dispatchEvent(new CustomEvent("open-user-manual", { detail: { section: sec } }))}
+      />
 
       {/* Tabbed Navigation Menu */}
       <div role="tablist" aria-label="Dashboard sections" className="flex border-b border-slate-200 dark:border-slate-800 mb-8 gap-6 text-sm font-bold">

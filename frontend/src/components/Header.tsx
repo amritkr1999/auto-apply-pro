@@ -201,6 +201,18 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
               <button
                 type="button"
                 onClick={() => {
+                  window.dispatchEvent(new CustomEvent("open-user-manual"));
+                }}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60 rounded-full text-xs font-semibold shadow-xs transition-all focus:outline-none cursor-pointer"
+                title="User Manual & Feature Guide"
+              >
+                <span>📖</span>
+                <span className="hidden sm:inline">Guide</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
                   localStorage.removeItem(`walkthrough_completed_${user.id}`);
                   localStorage.removeItem(`last_tip_dismissed_date_${user.id}`);
                   window.dispatchEvent(new CustomEvent("start-walkthrough"));
