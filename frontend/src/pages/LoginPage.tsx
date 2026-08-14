@@ -61,7 +61,7 @@ export const LoginPage: React.FC = () => {
         isPendingDeletion: false
       };
       
-      authLogin(userData);
+      authLogin(userData, true);
       trackEvent("login_success", { method: "oauth", role: userData.role });
       
       const targetPath = getRedirectTarget(userData.role);

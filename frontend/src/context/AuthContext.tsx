@@ -108,12 +108,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = (userData: User, rememberMe: boolean = false) => {
+    localStorage.setItem("user", JSON.stringify(userData));
+    if (userData.token) {
+      localStorage.setItem("token", userData.token);
+    }
     if (rememberMe) {
-      localStorage.setItem("user", JSON.stringify(userData));
-      sessionStorage.removeItem("user");
-    } else {
       sessionStorage.setItem("user", JSON.stringify(userData));
-      localStorage.removeItem("user");
     }
     setUser(userData);
     setToken(userData.token || null);
@@ -121,6 +121,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     localStorage.removeItem("user");
+    localStorage.removeItem("token");
     sessionStorage.removeItem("user");
     setUser(null);
     setToken(null);
@@ -130,12 +131,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser((prev) => {
       if (!prev) return null;
       const updated = { ...prev, ...updatedFields };
-      if (localStorage.getItem("user")) {
-        localStorage.setItem("user", JSON.stringify(updated));
-      } else if (sessionStorage.getItem("user")) {
+      localStorage.setItem("user", JSON.stringify(updated));
+      if (updated.token) {
+        localStorage.setItem("token", updated.token);
+      }
+      if (sessionStorage.getItem("user")) {
         sessionStorage.setItem("user", JSON.stringify(updated));
-      } else {
-        localStorage.setItem("user", JSON.stringify(updated));
       }
       return updated;
     });

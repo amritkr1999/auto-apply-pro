@@ -120,7 +120,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public AuthResponse verifyEmail(VerifyEmailRequest request) {
-        User user = userRepository.findByEmail(request.getEmail().trim())
+        String cleanEmail = request.getEmail() != null ? request.getEmail().trim().toLowerCase() : "";
+        User user = userRepository.findByEmailIgnoreCase(cleanEmail)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + request.getEmail()));
 
         if (Boolean.TRUE.equals(user.getIsEmailVerified())) {
@@ -185,7 +186,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void resendVerification(ResendVerificationRequest request) {
-        User user = userRepository.findByEmail(request.getEmail().trim())
+        String cleanEmail = request.getEmail() != null ? request.getEmail().trim().toLowerCase() : "";
+        User user = userRepository.findByEmailIgnoreCase(cleanEmail)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + request.getEmail()));
 
         if (Boolean.TRUE.equals(user.getIsEmailVerified())) {
@@ -208,7 +210,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
+        String cleanEmail = request.getEmail() != null ? request.getEmail().trim().toLowerCase() : "";
+        User user = userRepository.findByEmailIgnoreCase(cleanEmail)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
 
         if (user.getStatus() == UserStatus.DELETED) {

@@ -261,7 +261,7 @@ public class SocialOAuthController {
                 User user = socialOAuthService.processGithubLogin(email, githubUsername, githubProfileUrl);
 
                 String roleName = user.getRole() != null ? user.getRole().name() : "CANDIDATE";
-                String jwtToken = jwtUtil.generateToken(user.getId(), user.getEmail(), roleName);
+                String jwtToken = jwtUtil.generateToken(user.getId(), user.getEmail(), roleName, true);
                 String nameStr = user.getName() != null ? user.getName() : "User";
                 int streak = user.getLoginStreak() != null ? user.getLoginStreak() : 1;
                 String mobileStr = user.getMobile() != null ? user.getMobile() : "";
@@ -486,7 +486,7 @@ public class SocialOAuthController {
                 User user = socialOAuthService.processLinkedinLogin(email, linkedinName, linkedinProfileUrl);
 
                 String roleName = user.getRole() != null ? user.getRole().name() : "CANDIDATE";
-                String jwtToken = jwtUtil.generateToken(user.getId(), user.getEmail(), roleName);
+                String jwtToken = jwtUtil.generateToken(user.getId(), user.getEmail(), roleName, true);
                 String nameStr = user.getName() != null ? user.getName() : "User";
                 int streak = user.getLoginStreak() != null ? user.getLoginStreak() : 1;
                 String mobileStr = user.getMobile() != null ? user.getMobile() : "";

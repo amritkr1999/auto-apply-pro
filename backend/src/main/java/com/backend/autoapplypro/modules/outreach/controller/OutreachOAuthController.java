@@ -126,12 +126,13 @@ public class OutreachOAuthController {
             }
 
             if (isLogin) {
+                String cleanEmail = email != null ? email.trim().toLowerCase() : "";
                 // Find or register user
-                User user = userRepository.findByEmail(email).orElse(null);
+                User user = userRepository.findByEmailIgnoreCase(cleanEmail).orElse(null);
                 if (user == null) {
                     String randomPassword = java.util.UUID.randomUUID().toString();
                     user = User.builder()
-                            .email(email)
+                            .email(cleanEmail)
                             .passwordHash(passwordEncoder.encode(randomPassword))
                             .role(UserRole.CANDIDATE)
                             .name(name)
@@ -145,7 +146,7 @@ public class OutreachOAuthController {
                     try {
                         marketingCampaignService.sendWelcomeEmail(user);
                     } catch (Exception ex) {
-                        log.error("Failed to send welcome email during OAuth registration for email: {}", email, ex);
+                        log.error("Failed to send welcome email during OAuth registration for email: {}", cleanEmail, ex);
                     }
 
                     ProfessionalProfile candidate = ProfessionalProfile.builder()
@@ -157,7 +158,7 @@ public class OutreachOAuthController {
                 }
 
                 String roleName = user.getRole() != null ? user.getRole().name() : "CANDIDATE";
-                String jwtToken = jwtUtil.generateToken(user.getId(), user.getEmail(), roleName);
+                String jwtToken = jwtUtil.generateToken(user.getId(), user.getEmail(), roleName, true);
                 String nameStr = user.getName() != null ? user.getName() : "User";
                 int streak = user.getLoginStreak() != null ? user.getLoginStreak() : 1;
                 String mobileStr = user.getMobile() != null ? user.getMobile() : "";

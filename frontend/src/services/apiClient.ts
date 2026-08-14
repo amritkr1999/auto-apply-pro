@@ -5,7 +5,13 @@ export const getStoredToken = (): string | null => {
     const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
     if (userStr) {
       const user = JSON.parse(userStr);
-      return user.token || null;
+      if (user && typeof user === "object" && user.token) {
+        return user.token;
+      }
+    }
+    const tokenStr = localStorage.getItem("token") || sessionStorage.getItem("token");
+    if (tokenStr) {
+      return tokenStr;
     }
   } catch (e) {
     console.error("Error reading stored user token:", e);
@@ -23,9 +29,15 @@ export const getAuthHeaders = (): Record<string, string> => {
 
 export const isTokenExpired = (token: string): boolean => {
   try {
-    const payloadBase64 = token.split(".")[1];
-    if (!payloadBase64) return true;
-    const base64 = payloadBase64.replace(/-/g, "+").replace(/_/g, "/");
+    if (!token || typeof token !== "string") return true;
+    const parts = token.split(".");
+    if (parts.length !== 3) return false;
+    let base64Url = parts[1];
+    if (!base64Url) return false;
+    let base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    while (base64.length % 4) {
+      base64 += "=";
+    }
     const jsonPayload = decodeURIComponent(
       atob(base64)
         .split("")
@@ -33,12 +45,11 @@ export const isTokenExpired = (token: string): boolean => {
         .join("")
     );
     const payload = JSON.parse(jsonPayload);
-    if (payload.exp) {
-      // payload.exp is in seconds
+    if (payload && payload.exp) {
       return payload.exp * 1000 < Date.now();
     }
   } catch (e) {
-    console.error("Failed to parse JWT token expiration:", e);
+    console.warn("Could not check JWT token expiration safely:", e);
   }
   return false;
 };

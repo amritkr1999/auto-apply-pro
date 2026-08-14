@@ -28,14 +28,15 @@ public class SocialOAuthService {
 
     @Transactional
     public User processLinkedinLogin(String email, String linkedinName, String linkedinProfileUrl) {
-        if (email == null || email.isEmpty()) {
+        if (email == null || email.trim().isEmpty()) {
             email = (linkedinName != null && !linkedinName.isEmpty() ? linkedinName.replaceAll("\\s+", ".").toLowerCase() : "linkedin.user") + "@linkedin.com";
         }
-        User user = userRepository.findByEmail(email).orElse(null);
+        String cleanEmail = email.trim().toLowerCase();
+        User user = userRepository.findByEmailIgnoreCase(cleanEmail).orElse(null);
         if (user == null) {
             String randomPassword = UUID.randomUUID().toString();
             user = User.builder()
-                    .email(email)
+                    .email(cleanEmail)
                     .passwordHash(passwordEncoder.encode(randomPassword))
                     .role(UserRole.CANDIDATE)
                     .name(linkedinName != null && !linkedinName.isEmpty() ? linkedinName : "LinkedIn User")
@@ -48,7 +49,7 @@ public class SocialOAuthService {
             try {
                 marketingCampaignService.sendWelcomeEmail(user);
             } catch (Exception ex) {
-                log.error("Failed to send welcome email for LinkedIn user: {}", email, ex);
+                log.error("Failed to send welcome email for LinkedIn user: {}", cleanEmail, ex);
             }
 
             ProfessionalProfile candidate = ProfessionalProfile.builder()
@@ -105,10 +106,11 @@ public class SocialOAuthService {
 
     @Transactional
     public User processGithubLogin(String email, String githubUsername, String githubProfileUrl) {
-        if (email == null || email.isEmpty()) {
+        if (email == null || email.trim().isEmpty()) {
             email = (githubUsername != null ? githubUsername : "github-user") + "@github.com";
         }
-        User user = userRepository.findByEmail(email).orElse(null);
+        String cleanEmail = email.trim().toLowerCase();
+        User user = userRepository.findByEmailIgnoreCase(cleanEmail).orElse(null);
         if (user == null) {
             String randomPassword = UUID.randomUUID().toString();
             user = User.builder()
