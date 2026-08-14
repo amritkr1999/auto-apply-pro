@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { SEOHead } from "../components/SEOHead";
 import { plaqueCardService, type PublicPlaqueCardResponse } from "../features/profile/services/plaqueCardService";
-import { API_BASE } from "../config/api";
+import { profileService } from "../features/profile/services/profileService";
 
 export const PublicPlaqueCardPage: React.FC = () => {
   const { username } = useParams<{ username: string }>();
@@ -111,7 +111,6 @@ export const PublicPlaqueCardPage: React.FC = () => {
   }
 
   const settings = profile.card.settings || {};
-  const resumeUrl = `${API_BASE}/v1/profiles/candidate/${profile.userId}/resume`;
   const displayName = settings.displayName || profile.name;
   const headline = settings.customHeadline || profile.professionalVertical?.replace("_", " ");
   const location = settings.customLocation || "Bengaluru, India";
@@ -277,13 +276,20 @@ export const PublicPlaqueCardPage: React.FC = () => {
 
         {/* RESUME DOWNLOAD BUTTON */}
         {settings.showResume && (
-          <a
-            href={resumeUrl}
-            download
-            className="w-full py-4 text-sm font-extrabold text-white bg-primary rounded-2xl shadow-lg hover:shadow-xl hover:opacity-90 active:scale-98 transition-all flex items-center justify-center gap-2 select-none"
+          <button
+            type="button"
+            onClick={async () => {
+              if (!profile.userId) return;
+              try {
+                await profileService.downloadResume(profile.userId, null, "resume.pdf");
+              } catch (err) {
+                console.error("Failed to download resume", err);
+              }
+            }}
+            className="w-full py-4 text-sm font-extrabold text-white bg-primary rounded-2xl shadow-lg hover:shadow-xl hover:opacity-90 active:scale-98 transition-all flex items-center justify-center gap-2 select-none cursor-pointer"
           >
             <span>📄</span> Download Resume
-          </a>
+          </button>
         )}
 
         {/* EMAIL CONTACT INQUIRY */}

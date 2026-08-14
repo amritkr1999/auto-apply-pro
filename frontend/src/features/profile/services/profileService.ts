@@ -1,23 +1,7 @@
 import { API_BASE } from "../../../config/api";
+import { apiFetch, getAuthHeaders } from "../../../services/apiClient";
 
 const API_BASE_V1 = `${API_BASE}/v1`;
-
-const getAuthHeaders = (): Record<string, string> => {
-  const userStr = localStorage.getItem("user");
-  if (userStr) {
-    try {
-      const user = JSON.parse(userStr);
-      if (user.token) {
-        return {
-          "Authorization": `Bearer ${user.token}`
-        };
-      }
-    } catch (e) {
-      console.error("Failed to parse user from localStorage", e);
-    }
-  }
-  return {};
-};
 
 export interface UserAuthData {
   token: string;
@@ -414,7 +398,7 @@ export const profileService = {
   },
 
   async getCandidateProfiles(userId: number): Promise<CandidateProfile[]> {
-    const response = await fetch(`${API_BASE_V1}/profiles/candidate/${userId}/all`, {
+    const response = await apiFetch(`${API_BASE_V1}/profiles/candidate/${userId}/all`, {
       headers: getAuthHeaders(),
     });
     if (!response.ok) {
@@ -430,7 +414,7 @@ export const profileService = {
   },
 
   async createCandidateProfile(userId: number, profileName: string): Promise<CandidateProfile> {
-    const response = await fetch(`${API_BASE_V1}/profiles/candidate/${userId}/create?profileName=${encodeURIComponent(profileName)}`, {
+    const response = await apiFetch(`${API_BASE_V1}/profiles/candidate/${userId}/create?profileName=${encodeURIComponent(profileName)}`, {
       method: "POST",
       headers: getAuthHeaders(),
     });
@@ -441,7 +425,7 @@ export const profileService = {
   },
 
   async selectDefaultProfile(userId: number, profileId: number): Promise<any> {
-    const response = await fetch(`${API_BASE_V1}/profiles/candidate/${userId}/select/${profileId}`, {
+    const response = await apiFetch(`${API_BASE_V1}/profiles/candidate/${userId}/select/${profileId}`, {
       method: "PUT",
       headers: getAuthHeaders(),
     });
@@ -452,7 +436,7 @@ export const profileService = {
   },
 
   async deleteCandidateProfile(userId: number, profileId: number): Promise<any> {
-    const response = await fetch(`${API_BASE_V1}/profiles/candidate/${userId}/profile/${profileId}`, {
+    const response = await apiFetch(`${API_BASE_V1}/profiles/candidate/${userId}/profile/${profileId}`, {
       method: "DELETE",
       headers: getAuthHeaders(),
     });
@@ -531,5 +515,68 @@ export const profileService = {
 
   getCoverLetterUrl(): string {
     return `${API_BASE}/users/profile/cover-letter`;
+  },
+
+  async downloadResume(userId: number, profileId?: number | null, fallbackFilename = "resume.pdf"): Promise<void> {
+    const url = profileId 
+      ? `${API_BASE_V1}/profiles/candidate/${userId}/profile/${profileId}/resume`
+      : `${API_BASE_V1}/profiles/candidate/${userId}/resume`;
+    
+    const response = await fetch(url, {
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to download resume. File may not be uploaded yet.");
+    }
+
+    const blob = await response.blob();
+    const disposition = response.headers.get("Content-Disposition");
+    let filename = fallbackFilename;
+    if (disposition && disposition.includes("filename=")) {
+      const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+      if (matches != null && matches[1]) {
+        filename = matches[1].replace(/['"]/g, '');
+      }
+    }
+
+    const blobUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(blobUrl);
+  },
+
+  async downloadCoverLetter(fallbackFilename = "cover_letter.pdf"): Promise<void> {
+    const url = `${API_BASE}/users/profile/cover-letter`;
+    const response = await fetch(url, {
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to download cover letter. File may not be uploaded yet.");
+    }
+
+    const blob = await response.blob();
+    const disposition = response.headers.get("Content-Disposition");
+    let filename = fallbackFilename;
+    if (disposition && disposition.includes("filename=")) {
+      const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+      if (matches != null && matches[1]) {
+        filename = matches[1].replace(/['"]/g, '');
+      }
+    }
+
+    const blobUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(blobUrl);
   },
 };

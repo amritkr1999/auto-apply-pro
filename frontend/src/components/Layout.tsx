@@ -116,7 +116,7 @@ export const Layout: React.FC = () => {
       <div className="flex-grow flex w-full mx-auto">
         {/* Desktop Persistent Sidebar (hidden on mobile) */}
         {user && (
-          <div className="hidden lg:block sticky top-16 h-[calc(100vh-64px)] shrink-0">
+          <div className="hidden lg:block sticky top-16 h-[calc(100vh-64px)] shrink-0 z-30">
             <DashboardSidebar onLogout={handleLogoutRequest} />
           </div>
         )}

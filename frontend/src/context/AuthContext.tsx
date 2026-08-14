@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { isTokenExpired } from "../services/apiClient";
 
 export interface User {
   id: number;
@@ -22,7 +23,7 @@ interface AuthContextType {
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (userData: User) => void;
+  login: (userData: User, rememberMe?: boolean) => void;
   logout: () => void;
   updateUser: (userData: Partial<User>) => void;
 }
@@ -39,10 +40,16 @@ export const useAuth = (): AuthContextType => {
 
 const getInitialAuthState = (): { user: User | null; token: string | null } => {
   try {
-    const storedUserStr = localStorage.getItem("user");
+    const storedUserStr = localStorage.getItem("user") || sessionStorage.getItem("user");
     if (storedUserStr) {
       const parsedUser = JSON.parse(storedUserStr);
       if (parsedUser && typeof parsedUser === "object" && parsedUser.id) {
+        if (parsedUser.token && isTokenExpired(parsedUser.token)) {
+          console.warn("Stored JWT token has expired. Clearing session.");
+          localStorage.removeItem("user");
+          sessionStorage.removeItem("user");
+          return { user: null, token: null };
+        }
         return {
           user: parsedUser,
           token: parsedUser.token || null,
@@ -52,6 +59,7 @@ const getInitialAuthState = (): { user: User | null; token: string | null } => {
   } catch (err) {
     console.error("Failed to parse stored user session on mount:", err);
     localStorage.removeItem("user");
+    sessionStorage.removeItem("user");
   }
   return { user: null, token: null };
 };
@@ -68,8 +76,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (e.newValue) {
           try {
             const parsed = JSON.parse(e.newValue);
-            setUser(parsed);
-            setToken(parsed.token || null);
+            if (parsed.token && isTokenExpired(parsed.token)) {
+              setUser(null);
+              setToken(null);
+            } else {
+              setUser(parsed);
+              setToken(parsed.token || null);
+            }
           } catch {
             setUser(null);
             setToken(null);
@@ -81,18 +94,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
 
+    const handleUnauthorized = () => {
+      logout();
+    };
+
     window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
+    window.addEventListener("auth:session-expired", handleUnauthorized);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("auth:session-expired", handleUnauthorized);
+    };
   }, []);
 
-  const login = (userData: User) => {
-    localStorage.setItem("user", JSON.stringify(userData));
+  const login = (userData: User, rememberMe: boolean = false) => {
+    if (rememberMe) {
+      localStorage.setItem("user", JSON.stringify(userData));
+      sessionStorage.removeItem("user");
+    } else {
+      sessionStorage.setItem("user", JSON.stringify(userData));
+      localStorage.removeItem("user");
+    }
     setUser(userData);
     setToken(userData.token || null);
   };
 
   const logout = () => {
     localStorage.removeItem("user");
+    sessionStorage.removeItem("user");
     setUser(null);
     setToken(null);
   };
@@ -101,7 +130,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser((prev) => {
       if (!prev) return null;
       const updated = { ...prev, ...updatedFields };
-      localStorage.setItem("user", JSON.stringify(updated));
+      if (localStorage.getItem("user")) {
+        localStorage.setItem("user", JSON.stringify(updated));
+      } else if (sessionStorage.getItem("user")) {
+        sessionStorage.setItem("user", JSON.stringify(updated));
+      } else {
+        localStorage.setItem("user", JSON.stringify(updated));
+      }
       return updated;
     });
   };
@@ -122,3 +157,4 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     </AuthContext.Provider>
   );
 };
+

@@ -184,7 +184,7 @@ export const LoginPage: React.FC = () => {
         return;
       }
 
-      authLogin(userData);
+      authLogin(userData, rememberMe);
       trackEvent("login_success", { method: "credentials", role: userData.role });
       
       const targetPath = getRedirectTarget(userData.role);

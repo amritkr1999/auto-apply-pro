@@ -1,23 +1,7 @@
 import { API_BASE } from "../../../config/api";
+import { apiFetch, getAuthHeaders } from "../../../services/apiClient";
 
 const API_BASE_V1 = `${API_BASE}/v1`;
-
-const getAuthHeaders = (): Record<string, string> => {
-  const userStr = localStorage.getItem("user");
-  if (userStr) {
-    try {
-      const user = JSON.parse(userStr);
-      if (user.token) {
-        return {
-          "Authorization": `Bearer ${user.token}`
-        };
-      }
-    } catch (e) {
-      console.error("Failed to parse user from localStorage", e);
-    }
-  }
-  return {};
-};
 
 export interface Topic {
   id: number;
@@ -124,7 +108,7 @@ export interface Progress {
 
 export const learningService = {
   async getTopics(): Promise<Topic[]> {
-    const response = await fetch(`${API_BASE_V1}/learning/topics`, {
+    const response = await apiFetch(`${API_BASE_V1}/learning/topics`, {
       headers: getAuthHeaders(),
     });
     if (!response.ok) {
@@ -134,7 +118,7 @@ export const learningService = {
   },
 
   async getResources(topicId: number): Promise<Resource[]> {
-    const response = await fetch(`${API_BASE_V1}/learning/topics/${topicId}/resources`, {
+    const response = await apiFetch(`${API_BASE_V1}/learning/topics/${topicId}/resources`, {
       headers: getAuthHeaders(),
     });
     if (!response.ok) {
@@ -144,7 +128,7 @@ export const learningService = {
   },
 
   async getQuestions(topicId: number): Promise<PracticeQuestion[]> {
-    const response = await fetch(`${API_BASE_V1}/learning/topics/${topicId}/questions`, {
+    const response = await apiFetch(`${API_BASE_V1}/learning/topics/${topicId}/questions`, {
       headers: getAuthHeaders(),
     });
     if (!response.ok) {
@@ -154,7 +138,7 @@ export const learningService = {
   },
 
   async submitAnswer(questionId: number, answer: string): Promise<SubmitResponse> {
-    const response = await fetch(`${API_BASE_V1}/learning/questions/${questionId}/submit`, {
+    const response = await apiFetch(`${API_BASE_V1}/learning/questions/${questionId}/submit`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -169,7 +153,7 @@ export const learningService = {
   },
 
   async toggleResource(resourceId: number): Promise<{ completed: boolean }> {
-    const response = await fetch(`${API_BASE_V1}/learning/resources/${resourceId}/complete`, {
+    const response = await apiFetch(`${API_BASE_V1}/learning/resources/${resourceId}/complete`, {
       method: "POST",
       headers: getAuthHeaders(),
     });
@@ -180,7 +164,7 @@ export const learningService = {
   },
 
   async getDailyContent(): Promise<DailyContent> {
-    const response = await fetch(`${API_BASE_V1}/learning/daily`, {
+    const response = await apiFetch(`${API_BASE_V1}/learning/daily`, {
       headers: getAuthHeaders(),
     });
     if (!response.ok) {
@@ -190,7 +174,7 @@ export const learningService = {
   },
 
   async getProgress(): Promise<Progress> {
-    const response = await fetch(`${API_BASE_V1}/learning/progress`, {
+    const response = await apiFetch(`${API_BASE_V1}/learning/progress`, {
       headers: getAuthHeaders(),
     });
     if (!response.ok) {
@@ -200,7 +184,7 @@ export const learningService = {
   },
 
   async getRoadmaps(): Promise<Roadmap[]> {
-    const response = await fetch(`${API_BASE_V1}/learning/roadmaps`, {
+    const response = await apiFetch(`${API_BASE_V1}/learning/roadmaps`, {
       headers: getAuthHeaders(),
     });
     if (!response.ok) {
@@ -210,7 +194,7 @@ export const learningService = {
   },
 
   async getRoadmapDetails(id: number): Promise<Roadmap> {
-    const response = await fetch(`${API_BASE_V1}/learning/roadmaps/${id}`, {
+    const response = await apiFetch(`${API_BASE_V1}/learning/roadmaps/${id}`, {
       headers: getAuthHeaders(),
     });
     if (!response.ok) {
@@ -229,7 +213,7 @@ export const learningService = {
     subjectId: number;
     topicId: number;
   }): Promise<QuestionSubmission> {
-    const response = await fetch(`${API_BASE_V1}/learning/submissions`, {
+    const response = await apiFetch(`${API_BASE_V1}/learning/submissions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -245,7 +229,7 @@ export const learningService = {
   },
 
   async getUserSubmissions(): Promise<QuestionSubmission[]> {
-    const response = await fetch(`${API_BASE_V1}/learning/submissions/my`, {
+    const response = await apiFetch(`${API_BASE_V1}/learning/submissions/my`, {
       headers: getAuthHeaders(),
     });
     if (!response.ok) {
@@ -255,7 +239,7 @@ export const learningService = {
   },
 
   async getPendingSubmissions(): Promise<QuestionSubmission[]> {
-    const response = await fetch(`${API_BASE_V1}/learning/submissions/pending`, {
+    const response = await apiFetch(`${API_BASE_V1}/learning/submissions/pending`, {
       headers: getAuthHeaders(),
     });
     if (!response.ok) {
@@ -268,7 +252,7 @@ export const learningService = {
     submissionId: number,
     payload: { status: "APPROVED" | "REJECTED"; feedback: string }
   ): Promise<QuestionSubmission> {
-    const response = await fetch(`${API_BASE_V1}/learning/submissions/${submissionId}/review`, {
+    const response = await apiFetch(`${API_BASE_V1}/learning/submissions/${submissionId}/review`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -287,7 +271,7 @@ export const learningService = {
     questionId: number,
     payload: { rating: number; comment?: string }
   ): Promise<{ message: string }> {
-    const response = await fetch(`${API_BASE_V1}/learning/questions/${questionId}/rate`, {
+    const response = await apiFetch(`${API_BASE_V1}/learning/questions/${questionId}/rate`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

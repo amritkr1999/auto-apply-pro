@@ -114,18 +114,28 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isMobile = f
   const iconClass = minimizedState ? "w-5 h-5 shrink-0" : "w-5 h-5 mr-3 shrink-0";
 
   const linkStyle = ({ isActive }: { isActive: boolean }) =>
-    `flex items-center ${minimizedState ? "justify-center px-2" : "px-3"} py-2.5 text-sm font-medium rounded-btn transition-all duration-150 ${
+    `relative group flex items-center ${minimizedState ? "justify-center px-2" : "px-3"} py-2.5 text-sm font-medium rounded-btn transition-all duration-150 ${
       isActive
         ? "bg-slate-100 dark:bg-slate-800 text-primary border-l-4 border-primary pl-2"
         : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary"
     }`;
 
-  const anchorStyle = `flex items-center ${minimizedState ? "justify-center px-2" : "px-3"} py-2.5 text-sm font-medium rounded-btn text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary transition-all duration-150`;
+  const anchorStyle = `relative group flex items-center ${minimizedState ? "justify-center px-2" : "px-3"} py-2.5 text-sm font-medium rounded-btn text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary transition-all duration-150`;
 
   const handleLinkClick = () => {
     if (isMobile && onClose) {
       onClose();
     }
+  };
+
+  const SidebarTooltip: React.FC<{ label: string }> = ({ label }) => {
+    if (!minimizedState) return null;
+    return (
+      <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3 px-3 py-1.5 bg-slate-900/95 dark:bg-slate-800/95 backdrop-blur-md text-slate-100 text-xs font-medium tracking-wide rounded-lg shadow-xl border border-slate-700/50 dark:border-slate-700/60 whitespace-nowrap opacity-0 scale-95 translate-x-1 group-hover:opacity-100 group-hover:scale-100 group-hover:translate-x-0 transition-all duration-150 ease-out pointer-events-none z-[100] flex items-center">
+        <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-slate-900/95 dark:bg-slate-800/95 border-l border-b border-slate-700/50 dark:border-slate-700/60 rotate-45" />
+        <span className="relative z-10">{label}</span>
+      </div>
+    );
   };
 
   return (
@@ -134,11 +144,11 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isMobile = f
       className={`${
       isMobile 
         ? "w-full h-full" 
-        : minimizedState ? "w-[72px]" : "w-[240px]"
+        : minimizedState ? "w-[72px] overflow-visible" : "w-[240px] overflow-y-auto"
     } shrink-0 p-4 ${
-      isMobile ? "" : "border-r border-slate-200 dark:border-slate-800 h-full overflow-y-auto"
+      isMobile ? "" : "border-r border-slate-200 dark:border-slate-800 h-full"
     } bg-white dark:bg-slate-900 flex flex-col justify-between transition-all duration-300`}>
-      <div className="flex-1">
+      <div className="flex-1 overflow-visible">
         {/* Sidebar Toggle & Header */}
         <div className={`flex items-center ${minimizedState ? "justify-center" : "justify-between"} mb-6`}>
           {!minimizedState && (
@@ -153,8 +163,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isMobile = f
             <button
               type="button"
               onClick={() => setIsMinimized(!isMinimized)}
-              className="p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
-              title={minimizedState ? "Expand Sidebar" : "Minimize Sidebar"}
+              className="relative group p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
             >
               {minimizedState ? (
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -165,86 +174,100 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isMobile = f
                   <path strokeLinecap="round" strokeLinejoin="round" d="M11 19l-7-7 7-7M19 19l-7-7 7-7" />
                 </svg>
               )}
+              <SidebarTooltip label={minimizedState ? "Expand Sidebar" : "Minimize Sidebar"} />
             </button>
           )}
         </div>
 
         {/* Navigation links */}
-        <nav className="space-y-1">
-          <NavLink to={getOverviewPath()} className={linkStyle} end title={minimizedState ? "Overview" : undefined} onClick={handleLinkClick}>
+        <nav className="space-y-1 overflow-visible">
+          <NavLink to={getOverviewPath()} className={linkStyle} end onClick={handleLinkClick}>
             <OverviewIcon className={iconClass} />
             {!minimizedState && <span>Overview</span>}
+            <SidebarTooltip label="Overview" />
           </NavLink>
 
           {role === "CANDIDATE" && (
             <>
-              <NavLink to="/opportunities/tracker" className={linkStyle} title={minimizedState ? "Opportunity Tracker" : undefined} onClick={handleLinkClick}>
+              <NavLink to="/opportunities/tracker" className={linkStyle} onClick={handleLinkClick}>
                 <ApplicationsIcon className={iconClass} />
                 {!minimizedState && <span>Opportunity Tracker</span>}
+                <SidebarTooltip label="Opportunity Tracker" />
               </NavLink>
-              <a href="#saved" className={anchorStyle} title={minimizedState ? "Saved Jobs" : undefined} onClick={handleLinkClick}>
+              <a href="#saved" className={anchorStyle} onClick={handleLinkClick}>
                 <SavedJobsIcon className={iconClass} />
                 {!minimizedState && <span>Saved Jobs</span>}
+                <SidebarTooltip label="Saved Jobs" />
               </a>
-              <NavLink to="/opportunities/import" className={linkStyle} title={minimizedState ? "Import Opportunity" : undefined} onClick={handleLinkClick}>
+              <NavLink to="/opportunities/import" className={linkStyle} onClick={handleLinkClick}>
                 <ParseIcon className={iconClass} />
                 {!minimizedState && <span>Import Opportunity</span>}
+                <SidebarTooltip label="Import Opportunity" />
               </NavLink>
-              <NavLink to="/outreach/templates" className={linkStyle} title={minimizedState ? "Email Templates" : undefined} onClick={handleLinkClick}>
+              <NavLink to="/outreach/templates" className={linkStyle} onClick={handleLinkClick}>
                 <TemplatesIcon className={iconClass} />
                 {!minimizedState && <span>Email Templates</span>}
+                <SidebarTooltip label="Email Templates" />
               </NavLink>
-              <NavLink to="/outreach/draft" className={linkStyle} title={minimizedState ? "Draft Outreach" : undefined} onClick={handleLinkClick}>
+              <NavLink to="/outreach/draft" className={linkStyle} onClick={handleLinkClick}>
                 <OutreachIcon className={iconClass} />
                 {!minimizedState && <span>Draft Outreach</span>}
+                <SidebarTooltip label="Draft Outreach" />
               </NavLink>
-              <NavLink to="/billing/portal" className={linkStyle} title={minimizedState ? "Billing" : undefined} onClick={handleLinkClick}>
+              <NavLink to="/billing/portal" className={linkStyle} onClick={handleLinkClick}>
                 <BillingIcon className={iconClass} />
                 {!minimizedState && <span>Billing</span>}
+                <SidebarTooltip label="Billing" />
               </NavLink>
             </>
           )}
 
           {role === "RECRUITER" && (
             <>
-              <a href="#outreach" className={anchorStyle} title={minimizedState ? "Outreach" : undefined} onClick={handleLinkClick}>
+              <a href="#outreach" className={anchorStyle} onClick={handleLinkClick}>
                 <OutreachIcon className={iconClass} />
                 {!minimizedState && <span>Outreach</span>}
+                <SidebarTooltip label="Outreach" />
               </a>
-              <a href="#candidates" className={anchorStyle} title={minimizedState ? "Candidates" : undefined} onClick={handleLinkClick}>
+              <a href="#candidates" className={anchorStyle} onClick={handleLinkClick}>
                 <CandidatesIcon className={iconClass} />
                 {!minimizedState && <span>Candidates</span>}
+                <SidebarTooltip label="Candidates" />
               </a>
             </>
           )}
 
           {role === "COMPANY" && (
             <>
-              <a href="#jobs" className={anchorStyle} title={minimizedState ? "Job Listings" : undefined} onClick={handleLinkClick}>
+              <a href="#jobs" className={anchorStyle} onClick={handleLinkClick}>
                 <ListingsIcon className={iconClass} />
                 {!minimizedState && <span>Job Listings</span>}
+                <SidebarTooltip label="Job Listings" />
               </a>
-              <a href="#recruiters" className={anchorStyle} title={minimizedState ? "Recruiters" : undefined} onClick={handleLinkClick}>
+              <a href="#recruiters" className={anchorStyle} onClick={handleLinkClick}>
                 <RecruitersIcon className={iconClass} />
                 {!minimizedState && <span>Recruiters</span>}
+                <SidebarTooltip label="Recruiters" />
               </a>
             </>
           )}
 
           {role === "ADMIN" && (
             <>
-              <NavLink to="/admin/telemetry" className={linkStyle} title={minimizedState ? "AI Telemetry" : undefined} onClick={handleLinkClick}>
+              <NavLink to="/admin/telemetry" className={linkStyle} onClick={handleLinkClick}>
                 <svg className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
                 {!minimizedState && <span>AI Telemetry</span>}
+                <SidebarTooltip label="AI Telemetry" />
               </NavLink>
             </>
           )}
 
-          <NavLink to="/profile/settings" data-tour="sidebar-profile" className={linkStyle} title={minimizedState ? "Profile Settings" : undefined} onClick={handleLinkClick}>
+          <NavLink to="/profile/settings" data-tour="sidebar-profile" className={linkStyle} onClick={handleLinkClick}>
             <ProfileIcon className={iconClass} />
             {!minimizedState && <span>Profile Settings</span>}
+            <SidebarTooltip label="Profile Settings" />
           </NavLink>
         </nav>
       </div>
@@ -253,11 +276,11 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isMobile = f
         <button
           type="button"
           onClick={handleLogout}
-          className={`flex items-center justify-center ${minimizedState ? "w-10 h-10 p-0" : "w-full py-2.5 px-4"} rounded-btn border border-rose-200 dark:border-rose-950 bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 font-medium hover:bg-rose-100 dark:hover:bg-rose-900/30 transition-colors text-sm mx-auto`}
-          title={minimizedState ? "Logout" : undefined}
+          className={`relative group flex items-center justify-center ${minimizedState ? "w-10 h-10 p-0" : "w-full py-2.5 px-4"} rounded-btn border border-rose-200 dark:border-rose-950 bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 font-medium hover:bg-rose-100 dark:hover:bg-rose-900/30 transition-colors text-sm mx-auto`}
         >
           <LogoutIcon className="w-5 h-5 shrink-0" />
           {!minimizedState && <span className="ml-2">Logout</span>}
+          <SidebarTooltip label="Logout" />
         </button>
       </div>
     </aside>

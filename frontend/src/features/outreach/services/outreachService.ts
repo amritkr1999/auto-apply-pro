@@ -1,23 +1,7 @@
 import { API_BASE, buildApiUrl } from "../../../config/api";
+import { getAuthHeaders } from "../../../services/apiClient";
 
 const API_BASE_V1 = `${API_BASE}/v1`;
-
-const getAuthHeaders = (): Record<string, string> => {
-  const userStr = localStorage.getItem("user");
-  if (userStr) {
-    try {
-      const user = JSON.parse(userStr);
-      if (user.token) {
-        return {
-          "Authorization": `Bearer ${user.token}`
-        };
-      }
-    } catch (e) {
-      console.error("Failed to parse user from localStorage", e);
-    }
-  }
-  return {};
-};
 
 export interface EmailTemplate {
   id: string;

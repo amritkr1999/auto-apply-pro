@@ -28,7 +28,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   let activeUser = user;
   if (!activeUser) {
     try {
-      const stored = localStorage.getItem("user");
+      const stored = localStorage.getItem("user") || sessionStorage.getItem("user");
       if (stored) {
         const parsed = JSON.parse(stored);
         if (parsed && typeof parsed === "object" && parsed.id) {

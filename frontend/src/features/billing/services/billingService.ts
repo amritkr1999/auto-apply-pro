@@ -1,23 +1,7 @@
 import { API_BASE } from "../../../config/api";
+import { apiFetch, getAuthHeaders } from "../../../services/apiClient";
 
 const API_BASE_V1 = `${API_BASE}/v1`;
-
-const getAuthHeaders = (): Record<string, string> => {
-  const userStr = localStorage.getItem("user");
-  if (userStr) {
-    try {
-      const user = JSON.parse(userStr);
-      if (user.token) {
-        return {
-          Authorization: `Bearer ${user.token}`,
-        };
-      }
-    } catch (e) {
-      console.error("Failed to parse user from localStorage", e);
-    }
-  }
-  return {};
-};
 
 // --- Interfaces ---
 
@@ -26,28 +10,36 @@ export interface PlanDto {
   name: string;
   description: string;
   amount: number;
+  amountInInr: number;
   currency: string;
   billingInterval: string;
+  billingPeriod: string;
   razorpayPlanId: string;
+  featuresJson: string;
 }
 
 export interface SubscriptionDto {
   id: number;
+  userId: number;
   razorpaySubscriptionId: string;
+  planId: number;
   planName: string;
   status: string;
   currentPeriodStart: string;
   currentPeriodEnd: string;
   cancelAtPeriodEnd: boolean;
-  shortUrl: string;
+  shortUrl?: string;
   createdAt: string;
 }
 
 export interface PaymentTransactionDto {
   id: number;
+  userId: number;
+  subscriptionId?: number;
   razorpayPaymentId: string;
-  razorpayOrderId: string;
+  razorpayOrderId?: string;
   amount: number;
+  amountInInr: number;
   status: string;
   paymentMethod: string;
   errorCode: string | null;
@@ -56,10 +48,12 @@ export interface PaymentTransactionDto {
 }
 
 export interface CheckoutConfig {
+  keyId: string;
+  razorpayKeyId?: string;
   subscriptionId: string;
-  razorpayKeyId: string;
   planName: string;
   amount: number;
+  amountInInr: number;
   currency: string;
   userName: string;
   userEmail: string;
@@ -69,7 +63,7 @@ export interface CheckoutConfig {
 // --- API Methods ---
 
 export const getPlans = async (): Promise<PlanDto[]> => {
-  const res = await fetch(`${API_BASE_V1}/billing/plans`);
+  const res = await apiFetch(`${API_BASE_V1}/billing/plans`);
   if (!res.ok) {
     throw new Error("Failed to fetch plans");
   }
@@ -77,7 +71,7 @@ export const getPlans = async (): Promise<PlanDto[]> => {
 };
 
 export const createSubscription = async (razorpayPlanId: string): Promise<CheckoutConfig> => {
-  const res = await fetch(`${API_BASE_V1}/billing/subscribe`, {
+  const res = await apiFetch(`${API_BASE_V1}/billing/subscribe`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -97,7 +91,7 @@ export const verifySubscription = async (data: {
   razorpay_subscription_id: string;
   razorpay_signature: string;
 }): Promise<{ message: string }> => {
-  const res = await fetch(`${API_BASE_V1}/billing/verify`, {
+  const res = await apiFetch(`${API_BASE_V1}/billing/verify`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -114,7 +108,7 @@ export const verifySubscription = async (data: {
 
 export const getActiveSubscription = async (): Promise<SubscriptionDto | null> => {
   try {
-    const res = await fetch(`${API_BASE_V1}/billing/subscription`, {
+    const res = await apiFetch(`${API_BASE_V1}/billing/subscription`, {
       headers: { ...getAuthHeaders() },
     });
     if (!res.ok || res.status === 204) {
@@ -129,7 +123,7 @@ export const getActiveSubscription = async (): Promise<SubscriptionDto | null> =
 };
 
 export const cancelSubscription = async (): Promise<SubscriptionDto> => {
-  const res = await fetch(`${API_BASE_V1}/billing/cancel`, {
+  const res = await apiFetch(`${API_BASE_V1}/billing/cancel`, {
     method: "POST",
     headers: { ...getAuthHeaders() },
   });
@@ -142,7 +136,7 @@ export const cancelSubscription = async (): Promise<SubscriptionDto> => {
 
 export const getTransactions = async (): Promise<PaymentTransactionDto[]> => {
   try {
-    const res = await fetch(`${API_BASE_V1}/billing/transactions`, {
+    const res = await apiFetch(`${API_BASE_V1}/billing/transactions`, {
       headers: { ...getAuthHeaders() },
     });
     if (!res.ok || res.status === 204) {
@@ -169,7 +163,7 @@ export const submitUtrPayment = async (data: {
   utrNumber: string;
   amount?: number;
 }): Promise<UpiSubmissionResponse> => {
-  const res = await fetch(`${API_BASE_V1}/payments/submit-utr`, {
+  const res = await apiFetch(`${API_BASE_V1}/payments/submit-utr`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -196,7 +190,7 @@ export const getMyUpiPaymentStatus = async (): Promise<{
   } | null;
 }> => {
   try {
-    const res = await fetch(`${API_BASE_V1}/payments/my-status`, {
+    const res = await apiFetch(`${API_BASE_V1}/payments/my-status`, {
       headers: { ...getAuthHeaders() },
     });
     if (!res.ok) {

@@ -9,13 +9,22 @@ import { SEOHead } from "../components/SEOHead";
 
 export const LandingPage: React.FC = () => {
   const { toggleTheme, resolvedTheme } = useTheme();
-  const userStr = localStorage.getItem("user");
+  const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
   const user = userStr ? JSON.parse(userStr) : null;
 
   const [feedbacks, setFeedbacks] = useState<FeedbackResponse[]>([]);
   const [activeSlide, setActiveSlide] = useState<string>("intro");
   const [showMobileAppModal, setShowMobileAppModal] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showSessionExpiredToast, setShowSessionExpiredToast] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("sessionExpired") === "true") {
+      setShowSessionExpiredToast(true);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   const slides = [
     { id: "intro", label: "Intro" },
@@ -139,6 +148,22 @@ export const LandingPage: React.FC = () => {
         canonicalUrl="https://easynaukri.online/"
         jsonLd={landingPageJsonLd}
       />
+
+      {showSessionExpiredToast && (
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 flex items-center gap-3 bg-amber-500/90 backdrop-blur-md text-slate-950 font-medium px-5 py-3 rounded-full shadow-xl border border-amber-400 animate-bounce">
+          <svg className="w-5 h-5 text-slate-950" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <span>Your session has expired. Please log in again to access your account.</span>
+          <button
+            onClick={() => setShowSessionExpiredToast(false)}
+            className="ml-2 text-slate-950 hover:text-slate-800 font-bold"
+            aria-label="Close message"
+          >
+            ✕
+          </button>
+        </div>
+      )}
       {/* ==================== Navigation Navbar ==================== */}
       <nav className="landing-nav">
         <div className="nav-container">

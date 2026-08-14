@@ -1427,13 +1427,19 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
                 <div className="flex flex-col items-center gap-2 mt-2">
                   <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-xl shadow-xs border border-slate-150">
                     <span className="text-sm font-semibold text-slate-700 truncate max-w-[200px]">📄 {profile.resumeFilename}</span>
-                    <a
-                      href={`/api/v1/profiles/candidate/${userId}/resume`}
-                      download
-                      className="text-xs text-primary hover:underline font-bold border-l border-slate-200 pl-2"
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          await profileService.downloadResume(userId, selectedProfileId, profile.resumeFilename || "resume.pdf");
+                        } catch (err: any) {
+                          setError(err.message || "Failed to download resume");
+                        }
+                      }}
+                      className="text-xs text-primary hover:underline font-bold border-l border-slate-200 pl-2 cursor-pointer bg-transparent"
                     >
                       Download
-                    </a>
+                    </button>
                   </div>
                   <button
                     type="button"
@@ -1484,13 +1490,19 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
                 {coverLetterFilename ? (
                   <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-lg border border-slate-200">
                     <span className="text-xs font-semibold text-slate-700 truncate max-w-[180px]">📝 {coverLetterFilename}</span>
-                    <a
-                      href={profileService.getCoverLetterUrl()}
-                      download
-                      className="text-[11px] text-indigo-600 hover:underline font-bold border-l border-slate-200 pl-2"
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          await profileService.downloadCoverLetter(coverLetterFilename || "cover_letter.pdf");
+                        } catch (err: any) {
+                          setError(err.message || "Failed to download cover letter");
+                        }
+                      }}
+                      className="text-[11px] text-indigo-600 hover:underline font-bold border-l border-slate-200 pl-2 cursor-pointer bg-transparent"
                     >
                       Download
-                    </a>
+                    </button>
                     <button
                       type="button"
                       onClick={handleCoverLetterDelete}

@@ -140,7 +140,7 @@ const PricingPage: React.FC = () => {
 
       // Open Razorpay checkout
       const options = {
-        key: checkout.razorpayKeyId,
+        key: checkout.keyId || checkout.razorpayKeyId || "",
         subscription_id: checkout.subscriptionId,
         name: "EasyNaukri",
         description: `${plan.name} Subscription`,
