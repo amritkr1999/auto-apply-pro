@@ -82,11 +82,13 @@ interface DashboardSidebarProps {
 }
 
 import { useAuth } from "../../../context/AuthContext";
+import ReferralProgramModal from "../../referral_program/components/ReferralProgramModal";
 
 export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isMobile = false, onClose, onLogout }) => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [isMinimized, setIsMinimized] = useState(true);
+  const [isReferralModalOpen, setIsReferralModalOpen] = useState(false);
   const role = user?.role || "CANDIDATE";
 
   const handleLogout = () => {
@@ -219,6 +221,24 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isMobile = f
                 {!minimizedState && <span>Billing</span>}
                 <SidebarTooltip label="Billing" />
               </NavLink>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsReferralModalOpen(true);
+                  if (handleLinkClick) handleLinkClick();
+                }}
+                className={anchorStyle}
+              >
+                <span className="text-lg leading-none shrink-0">🎁</span>
+                {!minimizedState && (
+                  <span className="flex items-center justify-between w-full ml-3">
+                    <span>Refer & Earn</span>
+                    <span className="bg-amber-400 text-slate-950 font-bold text-[9px] px-1.5 py-0.5 rounded-full uppercase tracking-wider ml-1">Soon</span>
+                  </span>
+                )}
+                <SidebarTooltip label="Refer & Earn (Coming Soon)" />
+              </button>
             </>
           )}
 
@@ -283,6 +303,14 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isMobile = f
           <SidebarTooltip label="Logout" />
         </button>
       </div>
+
+      {user?.id && (
+        <ReferralProgramModal
+          userId={user.id}
+          isOpen={isReferralModalOpen}
+          onClose={() => setIsReferralModalOpen(false)}
+        />
+      )}
     </aside>
   );
 };

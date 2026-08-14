@@ -688,6 +688,37 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
+      {/* ==================== Referral Program Coming Soon Banner ==================== */}
+      <section className="landing-section" style={{ minHeight: "auto", padding: "40px 2rem" }}>
+        <div style={{
+          background: "linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(168, 85, 247, 0.12), rgba(236, 72, 153, 0.12))",
+          border: "1px solid rgba(168, 85, 247, 0.3)",
+          borderRadius: "1.25rem",
+          padding: "2.5rem",
+          position: "relative",
+          overflow: "hidden"
+        }}>
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "1.5rem" }}>
+            <div style={{ maxWidth: "600px" }}>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "#f59e0b", color: "#000", fontWeight: 800, fontSize: "0.75rem", textTransform: "uppercase", padding: "0.2rem 0.75rem", borderRadius: "9999px", marginBottom: "0.75rem" }}>
+                🚀 Coming Soon
+              </div>
+              <h2 style={{ fontSize: "1.75rem", fontWeight: 800, color: "var(--text-primary)", marginBottom: "0.5rem" }}>
+                Refer Friends & Get 7 Days Premium Free 🎁
+              </h2>
+              <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem", lineHeight: "1.6" }}>
+                Invite job seekers to AutoApplyPro using your unique referral code. When your referred friend subscribes to any plan, both of you automatically unlock 7 Days of Premium features free!
+              </p>
+            </div>
+            <div>
+              <Link to="/login?tab=register" className="landing-btn btn-primary" style={{ padding: "0.85rem 1.75rem", fontSize: "0.95rem" }}>
+                Join Waitlist & Register
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ==================== Testimonials Section ==================== */}
       <section id="testimonials" className="landing-section">
         <div className="section-header">

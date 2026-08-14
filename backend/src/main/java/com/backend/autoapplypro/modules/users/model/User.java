@@ -206,6 +206,12 @@ public class User {
     @Column(name = "trial_expired_sent")
     private Boolean trialExpiredSent = false;
 
+    @Column(name = "referral_code", unique = true, length = 30)
+    private String referralCode;
+
+    @Column(name = "referred_by_code", length = 30)
+    private String referredByCode;
+
     @Column(name = "deletion_scheduled_at")
     private LocalDateTime deletionScheduledAt;
 

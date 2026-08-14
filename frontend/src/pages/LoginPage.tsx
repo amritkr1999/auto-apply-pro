@@ -81,7 +81,17 @@ export const LoginPage: React.FC = () => {
     }
 
     const tabParam = params.get("tab");
-    if (tabParam === "register" || tabParam === "login") {
+    const refParam = params.get("ref");
+    if (refParam) {
+      setReferralCode(refParam);
+      setTab("register");
+      // Fire-and-forget click tracking
+      fetch(`/api/v1/referral-program/track-click`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ referralCode: refParam })
+      }).catch(() => {});
+    } else if (tabParam === "register" || tabParam === "login") {
       setTab(tabParam);
     }
   }, [location.search, navigate, isAuthenticated, user]);
@@ -102,6 +112,12 @@ export const LoginPage: React.FC = () => {
     email: "",
     password: "",
     confirmPassword: "",
+  });
+
+  // Referral code state captured from URL query ?ref=CODE
+  const [referralCode, setReferralCode] = useState<string>(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get("ref") || "";
   });
   
   // Show/Hide password states
@@ -273,6 +289,7 @@ export const LoginPage: React.FC = () => {
         mobile,
         password,
         role: selectedRole?.toUpperCase(),
+        referralCode: referralCode ? referralCode.trim() : undefined,
       });
 
       clearInterval(stageTimer);
@@ -733,6 +750,28 @@ export const LoginPage: React.FC = () => {
             {/* Step 2: Details Registration Form */}
             {regStep === 2 && !isVerifyingEmail && (
               <form className={`auth-form ${isRegisteringSubmit ? "submitting" : ""}`} onSubmit={handleRegisterSubmit}>
+                {referralCode && (
+                  <div style={{
+                    background: "linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15))",
+                    border: "1px solid rgba(168, 85, 247, 0.3)",
+                    color: "#e2e8f0",
+                    padding: "10px 14px",
+                    borderRadius: "10px",
+                    marginBottom: "1.25rem",
+                    fontSize: "0.85rem",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px"
+                  }}>
+                    <span style={{ fontSize: "1.2rem" }}>🎁</span>
+                    <div>
+                      <strong style={{ color: "#fbbf24" }}>Referred by Code: {referralCode}</strong>
+                      <div style={{ fontSize: "0.75rem", color: "#cbd5e1", marginTop: "2px" }}>
+                        Unlock 7 Days Premium Trial on your first paid subscription!
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <div className="auth-group">
                   <label className="auth-label" htmlFor="reg-name">
                     Full Name

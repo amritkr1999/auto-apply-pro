@@ -23,6 +23,7 @@ public class UpiPaymentService {
     private final UpiPaymentTransactionRepository upiPaymentTransactionRepository;
     private final UserRepository userRepository;
     private final TelegramBotService telegramBotService;
+    private final com.backend.autoapplypro.modules.referral_program.service.ReferralProgramService referralProgramService;
 
     /**
      * Submits a new UTR reference for manual verification.
@@ -107,6 +108,13 @@ public class UpiPaymentService {
                 user.setIsPremium(true);
                 user.setRole(UserRole.PRO);
                 userRepository.save(user);
+
+                // Trigger referral program reward conversion if user was referred
+                try {
+                    referralProgramService.processSubscriptionConversion(user.getId());
+                } catch (Exception e) {
+                    log.error("Failed to process referral conversion for user {}: {}", user.getId(), e.getMessage());
+                }
 
                 upiPaymentTransactionRepository.save(transaction);
 

@@ -29,6 +29,7 @@ public class UserServiceImpl implements UserService {
     private final MarketingEmailCampaignService marketingCampaignService;
     private final JavaResumeParserService javaResumeParserService;
     private final EvidenceEngine evidenceEngine;
+    private final com.backend.autoapplypro.modules.referral_program.service.ReferralProgramService referralProgramService;
 
     @org.springframework.beans.factory.annotation.Value("${pipeline.service.url:http://localhost:8000}")
     private String pythonServiceUrl;
@@ -71,9 +72,19 @@ public class UserServiceImpl implements UserService {
                 .trialEndAt(trialEnd)
                 .trialTier("ELITE_AUTOPILOT")
                 .trialUsed(true)
+                .referredByCode(request.getReferralCode() != null ? request.getReferralCode().trim() : null)
                 .build();
 
         user = userRepository.save(user);
+
+        // Process referral relationship if referral code was provided
+        if (request.getReferralCode() != null && !request.getReferralCode().isBlank()) {
+            try {
+                referralProgramService.processReferralSignup(user.getId(), request.getReferralCode().trim());
+            } catch (Exception e) {
+                org.slf4j.LoggerFactory.getLogger(UserServiceImpl.class).error("Failed to process referral code during signup: {}", e.getMessage());
+            }
+        }
 
         // Create associated profile based on role
         if (role == UserRole.CANDIDATE) {

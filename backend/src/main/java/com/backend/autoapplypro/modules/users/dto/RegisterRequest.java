@@ -32,4 +32,6 @@ public class RegisterRequest {
     private String password;
 
     private String role; // "CANDIDATE", "RECRUITER", "COMPANY"
+
+    private String referralCode;
 }
