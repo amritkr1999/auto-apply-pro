@@ -11,8 +11,14 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         output: {
           manualChunks(id: string) {
-            if (id.includes('node_modules/react') || id.includes('node_modules/react-dom') || id.includes('node_modules/react-router-dom') || id.includes('node_modules/react-helmet-async')) {
-              return 'vendor-react';
+            if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
+              return 'vendor-core';
+            }
+            if (id.includes('node_modules/react-router') || id.includes('node_modules/react-helmet-async')) {
+              return 'vendor-router';
+            }
+            if (id.includes('node_modules/react-dropzone')) {
+              return 'vendor-dropzone';
             }
           },
         },

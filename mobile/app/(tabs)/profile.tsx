@@ -471,22 +471,35 @@ export default function ProfileScreen() {
           <View className="flex-row bg-slate-100 dark:bg-slate-950 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800">
             {(['system', 'light', 'dark'] as const).map((mode) => {
               const isActive = themeMode === mode;
+              const isDark = mode === 'dark';
               return (
                 <TouchableOpacity
                   key={mode}
-                  onPress={() => setTheme(mode)}
+                  onPress={() => {
+                    if (isDark) {
+                      Alert.alert('Coming Soon', 'Dark mode is currently under development and coming soon!');
+                      return;
+                    }
+                    setTheme(mode);
+                  }}
                   className={`flex-1 py-3 items-center justify-center rounded-xl transition-all ${
-                    isActive
+                    isDark
+                      ? 'bg-transparent opacity-50'
+                      : isActive
                       ? 'bg-white dark:bg-slate-900 shadow-sm border border-slate-200/50 dark:border-slate-800'
                       : 'bg-transparent'
                   }`}
                 >
                   <Text
                     className={`font-semibold text-xs capitalize ${
-                      isActive ? 'text-emerald-500' : 'text-slate-500 dark:text-slate-400'
+                      isDark
+                        ? 'text-slate-400 dark:text-slate-600'
+                        : isActive
+                        ? 'text-emerald-500'
+                        : 'text-slate-500 dark:text-slate-400'
                     }`}
                   >
-                    {mode}
+                    {isDark ? 'dark ⏳' : mode}
                   </Text>
                 </TouchableOpacity>
               );

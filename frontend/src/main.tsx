@@ -24,3 +24,18 @@ createRoot(document.getElementById("root")!).render(
   </StrictMode>,
 );
 
+// Register Service Worker for offline asset caching on slow networks
+if ("serviceWorker" in navigator && import.meta.env.PROD) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("/sw.js")
+      .then((reg) => {
+        console.log("ServiceWorker registered successfully with scope:", reg.scope);
+      })
+      .catch((err) => {
+        console.warn("ServiceWorker registration failed:", err);
+      });
+  });
+}
+
+

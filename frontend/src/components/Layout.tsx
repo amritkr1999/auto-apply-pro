@@ -10,6 +10,8 @@ import { feedbackService } from "../features/profile/services/feedbackService";
 
 import { useAuth } from "../context/AuthContext";
 
+import NetworkStatusNotifier from "./NetworkStatusNotifier";
+
 export const Layout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -71,6 +73,7 @@ export const Layout: React.FC = () => {
     <div className="flex flex-col min-h-screen bg-bg-color dark:bg-slate-950 text-base-text dark:text-slate-100 font-sans transition-colors">
       <Header onMenuClick={() => setMobileMenuOpen(true)} />
       <TrialCountdownBanner />
+      <NetworkStatusNotifier />
       {user && <WalkthroughTour />}
       {showFeedbackModal && (
         <FeedbackModal
