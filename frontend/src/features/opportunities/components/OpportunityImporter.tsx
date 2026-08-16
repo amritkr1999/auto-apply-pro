@@ -7,6 +7,8 @@ import Button from "../../../components/ui/Button";
 import Badge from "../../../components/ui/Badge";
 import { useAnalytics } from "../../../context/AnalyticsContext";
 import { validateFile } from "../../../utils/validation";
+import { HarvesterToggleCard } from "./HarvesterToggleCard";
+import { JobPostingFeedSection } from "./JobPostingFeedSection";
 
 interface UploadItem {
   id: string;
@@ -494,6 +496,10 @@ export const ScreenshotUploader: React.FC = () => {
 
   return (
     <div className="max-w-[900px] mx-auto w-full px-4 py-8">
+      {/* Harvester Toggle & Latest Job Updates Feed */}
+      <HarvesterToggleCard />
+      <JobPostingFeedSection />
+
       {/* 0. Image Editor Modal */}
       {filesToEdit.length > 0 && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">

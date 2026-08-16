@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "EasyNaukri Harvester & Auto Apply Node",
+  "version": "1.0.0",
+  "description": "Background job harvester and auto-apply extension node for EasyNaukri (Auto Apply Pro).",
+  "permissions": [
+    "alarms",
+    "storage"
+  ],
+  "host_permissions": [
+    "*://*.naukri.com/*",
+    "*://*.linkedin.com/*",
+    "*://localhost/*",
+    "*://127.0.0.1/*",
+    "*://*.easynaukri.online/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon.png"
+  }
+}

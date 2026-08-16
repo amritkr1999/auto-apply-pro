@@ -41,6 +41,8 @@ public class SecurityConfig {
                     "/api/v1/billing/status",
                     "/api/v1/billing/webhook",
                     "/api/v1/payments/telegram-webhook",
+                    "/api/v1/jobs/scraper/**",
+                    "/api/v1/jobs/postings/**",
                     "/v3/api-docs/**",
                     "/swagger-ui/**",
                     "/swagger-ui.html",
