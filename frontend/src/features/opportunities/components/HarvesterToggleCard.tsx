@@ -76,6 +76,8 @@ export const HarvesterToggleCard: React.FC = () => {
   };
 
   useEffect(() => {
+    let pongReceived = false;
+
     const handleSyncEvent = (e: any) => {
       if (e.detail && e.detail.added) {
         setContributedCount((prev) => {
@@ -88,17 +90,33 @@ export const HarvesterToggleCard: React.FC = () => {
 
     const handleMessage = (event: MessageEvent) => {
       if (event.data && event.data.type === 'EASYNAUKRI_EXTENSION_PONG') {
+        pongReceived = true;
         setIsExtensionInstalled(true);
         localStorage.setItem('auto_extension_installed', 'true');
+        setErrorMessage(null);
       }
     };
 
     window.addEventListener('harvester-sync-success', handleSyncEvent);
     window.addEventListener('message', handleMessage);
 
+    // Send dynamic heartbeat ping to check if extension is currently installed
+    window.postMessage({ type: 'EASYNAUKRI_EXTENSION_PING' }, '*');
+
+    // If no extension response within 1 second, mark extension as uninstalled and turn OFF toggle!
+    const timeoutId = setTimeout(() => {
+      if (!pongReceived && !Boolean((window as any).__EASYNAUKRI_EXTENSION_ACTIVE__)) {
+        setIsExtensionInstalled(false);
+        localStorage.removeItem('auto_extension_installed');
+        setIsEnabled(false);
+        localStorage.setItem('auto_harvester_enabled', 'false');
+      }
+    }, 1000);
+
     return () => {
       window.removeEventListener('harvester-sync-success', handleSyncEvent);
       window.removeEventListener('message', handleMessage);
+      clearTimeout(timeoutId);
     };
   }, []);
 
