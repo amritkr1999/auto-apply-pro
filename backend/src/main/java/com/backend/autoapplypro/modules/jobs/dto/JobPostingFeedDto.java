@@ -23,4 +23,6 @@ public class JobPostingFeedDto {
     private String hrEmail;
     private LocalDateTime createdAt;
     private long daysAgo;
+    private int matchScore;
+    private java.util.List<String> skillBadges;
 }

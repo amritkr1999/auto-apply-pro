@@ -12,12 +12,15 @@ interface JobPostingFeedDto {
   hrEmail: string;
   createdAt: string;
   daysAgo: number;
+  matchScore?: number;
+  skillBadges?: string[];
 }
 
 export const JobPostingFeedSection: React.FC = () => {
   const [postings, setPostings] = useState<JobPostingFeedDto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [filterMode, setFilterMode] = useState<'all' | 'recommended'>('all');
   const [error, setError] = useState<string | null>(null);
 
   const fetchLatestJobs = async () => {
@@ -38,15 +41,17 @@ export const JobPostingFeedSection: React.FC = () => {
         {
           id: 101,
           title: 'Senior Java Backend Engineer',
-          company: 'SourceFuse Technologies',
+          company: 'American Chase',
           location: 'Bengaluru / Remote',
           description: 'Looking for a Senior Java engineer with Spring Boot, Microservices and AWS expertise.',
           requirements: 'Java 17+, Spring Boot 3, PostgreSQL, Docker',
           salary: '₹18 - ₹24 LPA',
           sourceUrl: 'https://naukri.com/job-listings',
-          hrEmail: 'akanksha.puri@sourcefuse.com',
+          hrEmail: 'hansika.dubey@americanchase.com',
           createdAt: new Date().toISOString(),
-          daysAgo: 1
+          daysAgo: 1,
+          matchScore: 94,
+          skillBadges: ['Java', 'Spring Boot', 'PostgreSQL', 'Docker']
         },
         {
           id: 102,
@@ -59,7 +64,9 @@ export const JobPostingFeedSection: React.FC = () => {
           sourceUrl: 'https://linkedin.com/jobs',
           hrEmail: 'akanksha.sogani@perennialsys.com',
           createdAt: new Date().toISOString(),
-          daysAgo: 3
+          daysAgo: 3,
+          matchScore: 89,
+          skillBadges: ['React', 'TypeScript', 'Node.js', 'REST API']
         }
       ]);
     } finally {
@@ -71,12 +78,17 @@ export const JobPostingFeedSection: React.FC = () => {
     fetchLatestJobs();
   }, []);
 
-  const filteredPostings = postings.filter(
-    (p) =>
+  const filteredPostings = postings.filter((p) => {
+    const matchesSearch =
       p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       p.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (p.location && p.location.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+      (p.location && p.location.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    if (filterMode === 'recommended') {
+      return matchesSearch && (p.matchScore || 0) >= 90;
+    }
+    return matchesSearch;
+  });
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl text-white">
@@ -101,12 +113,35 @@ export const JobPostingFeedSection: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
+          <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800 shrink-0">
+            <button
+              onClick={() => setFilterMode('all')}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                filterMode === 'all'
+                  ? 'bg-indigo-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              All Jobs
+            </button>
+            <button
+              onClick={() => setFilterMode('recommended')}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1 ${
+                filterMode === 'recommended'
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              🎯 90%+ Match
+            </button>
+          </div>
+
           <input
             type="text"
             placeholder="Filter title or company..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="px-3.5 py-2 text-sm bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-colors w-full md:w-64"
+            className="px-3.5 py-2 text-sm bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-colors w-full md:w-56"
           />
           <button
             onClick={fetchLatestJobs}
@@ -136,9 +171,16 @@ export const JobPostingFeedSection: React.FC = () => {
               <div>
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <h4 className="font-bold text-base text-slate-100 group-hover:text-indigo-400 transition-colors">
-                      {job.title}
-                    </h4>
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-bold text-base text-slate-100 group-hover:text-indigo-400 transition-colors">
+                        {job.title}
+                      </h4>
+                      {job.matchScore && (
+                        <span className="px-2 py-0.5 text-[10px] font-extrabold rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                          🔥 {job.matchScore}% Match
+                        </span>
+                      )}
+                    </div>
                     <div className="text-xs font-semibold text-indigo-400 mt-0.5">
                       {job.company}
                     </div>
@@ -147,6 +189,20 @@ export const JobPostingFeedSection: React.FC = () => {
                     {job.daysAgo === 0 ? 'Today' : `${job.daysAgo}d ago`}
                   </span>
                 </div>
+
+                {/* Skill Badges */}
+                {job.skillBadges && job.skillBadges.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-3">
+                    {job.skillBadges.map((skill, idx) => (
+                      <span
+                        key={idx}
+                        className="px-2 py-0.5 text-[10px] font-medium rounded-md bg-indigo-950/60 text-indigo-300 border border-indigo-800/50"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                )}
 
                 <div className="flex flex-wrap gap-2 text-xs text-slate-400 mt-3">
                   {job.location && (

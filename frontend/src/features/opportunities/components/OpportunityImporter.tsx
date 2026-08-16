@@ -9,6 +9,7 @@ import { useAnalytics } from "../../../context/AnalyticsContext";
 import { validateFile } from "../../../utils/validation";
 import { HarvesterToggleCard } from "./HarvesterToggleCard";
 import { JobPostingFeedSection } from "./JobPostingFeedSection";
+import ExtensionDownloadSection from "./ExtensionDownloadSection";
 
 interface UploadItem {
   id: string;
@@ -499,6 +500,11 @@ export const ScreenshotUploader: React.FC = () => {
       {/* Harvester Toggle & Latest Job Updates Feed */}
       <HarvesterToggleCard />
       <JobPostingFeedSection />
+      
+      {/* Extension Download Card & 4-Step Installation Guide */}
+      <div className="my-8">
+        <ExtensionDownloadSection />
+      </div>
 
       {/* 0. Image Editor Modal */}
       {filesToEdit.length > 0 && (

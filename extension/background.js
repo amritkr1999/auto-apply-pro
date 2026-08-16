@@ -14,6 +14,17 @@ chrome.alarms.onAlarm.addListener((alarm) => {
   }
 });
 
+async function ensureOffscreenDocument() {
+  if (await chrome.offscreen.hasDocument()) {
+    return;
+  }
+  await chrome.offscreen.createDocument({
+    url: 'offscreen.html',
+    reasons: ['DOM_PARSING'],
+    justification: 'Background silent DOM parsing for job harvester node.'
+  });
+}
+
 async function runBackgroundHarvestingJob() {
   chrome.storage.local.get(['auto_harvester_enabled'], async (result) => {
     if (result.auto_harvester_enabled === false) {
@@ -23,44 +34,36 @@ async function runBackgroundHarvestingJob() {
 
     console.log('Running background job harvesting task...');
     try {
-      // 1. Fetch target keywords from backend
+      // 1. Fetch target keywords from backend (90/10 weighted tasks)
       const tasksRes = await fetch(`${BACKEND_URL}/api/v1/jobs/scraper/client-tasks`);
       if (!tasksRes.ok) return;
       const tasks = await tasksRes.json();
       
       const targetRole = tasks && tasks.length > 0 ? tasks[0] : 'Full Stack Developer';
 
-      // 2. Perform silent sample harvest
-      const sampleHarvestedItems = [
-        {
-          title: `${targetRole}`,
-          company: 'Acme Global Technologies',
-          location: 'Bengaluru / Remote',
-          description: `Hiring ${targetRole} for building high scale web services.`,
-          requirements: 'Java, Spring Boot, React, Postgres',
-          salary: '15-22 LPA',
-          sourceUrl: 'https://www.naukri.com/job-listings-sample',
-          hrName: 'Deepak Sharma',
-          hrEmail: `deepak.sharma@acmeglobal.com`,
-          hrTitle: 'Talent Acquisition Manager'
+      // 2. Ensure offscreen document context is active
+      await ensureOffscreenDocument();
+
+      // 3. Delegate DOM parsing to offscreen document
+      chrome.runtime.sendMessage({ type: 'EXECUTE_OFFSCREEN_HARVEST', keyword: targetRole }, async (response) => {
+        if (response && response.success && response.items) {
+          // 4. Sync payload to backend
+          const syncRes = await fetch(`${BACKEND_URL}/api/v1/jobs/scraper/client-sync`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              clientNodeId: 'chrome-ext-offscreen-' + Math.random().toString(36).substring(7),
+              sourcePortal: 'Offscreen Background Harvester',
+              items: response.items
+            })
+          });
+
+          if (syncRes.ok) {
+            const syncData = await syncRes.json();
+            console.log('Harvesting sync successful:', syncData);
+          }
         }
-      ];
-
-      // 3. Post to backend sync endpoint
-      const syncRes = await fetch(`${BACKEND_URL}/api/v1/jobs/scraper/client-sync`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          clientNodeId: 'chrome-ext-' + Math.random().toString(36).substring(7),
-          sourcePortal: 'Naukri/LinkedIn',
-          items: sampleHarvestedItems
-        })
       });
-
-      if (syncRes.ok) {
-        const syncData = await syncRes.json();
-        console.log('Harvesting sync successful:', syncData);
-      }
     } catch (err) {
       console.error('Error during background harvesting job:', err);
     }

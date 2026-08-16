@@ -30,6 +30,7 @@ const TelemetryDashboard = lazy(() => import("../features/dashboard/components/v
 
 const PublicProfilePage = lazy(() => import("../pages/PublicProfilePage"));
 const PublicPlaqueCardPage = lazy(() => import("../pages/PublicPlaqueCardPage"));
+const ExtensionLandingPage = lazy(() => import("../pages/ExtensionLandingPage"));
 const PrivacyPolicy = lazy(() => import("../components/pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("../components/pages/TermsOfService"));
 const AboutUsPage = lazy(() => import("../pages/AboutUsPage"));
@@ -60,6 +61,7 @@ export const AppRoutes: React.FC = () => {
         <Route path="/contact" element={<ContactUsPage />} />
         <Route path="/profile/:username" element={<PublicProfilePage />} />
         <Route path="/card/:username" element={<PublicPlaqueCardPage />} />
+        <Route path="/extension" element={<ExtensionLandingPage />} />
 
         <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
           <Route
