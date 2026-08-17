@@ -7,9 +7,6 @@ import Button from "../../../components/ui/Button";
 import Badge from "../../../components/ui/Badge";
 import { useAnalytics } from "../../../context/AnalyticsContext";
 import { validateFile } from "../../../utils/validation";
-import { HarvesterToggleCard } from "./HarvesterToggleCard";
-import { JobPostingFeedSection } from "./JobPostingFeedSection";
-import ExtensionDownloadSection from "./ExtensionDownloadSection";
 
 interface UploadItem {
   id: string;
@@ -496,14 +493,27 @@ export const ScreenshotUploader: React.FC = () => {
   const hasActiveUploads = uploadQueue.some(item => item.status === "QUEUED" || item.status === "UPLOADING");
 
   return (
-    <div className="max-w-[900px] mx-auto w-full px-4 py-8">
-      {/* Harvester Toggle & Latest Job Updates Feed */}
-      <HarvesterToggleCard />
-      <JobPostingFeedSection />
-      
-      {/* Extension Download Card & 4-Step Installation Guide */}
-      <div className="my-8">
-        <ExtensionDownloadSection />
+    <div className="max-w-[1050px] mx-auto w-full px-4 py-8 space-y-8">
+      {/* Top Feature Navigation Bar */}
+      <div className="flex items-center justify-center">
+        <div className="bg-slate-100 dark:bg-slate-800/90 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-700/60 inline-flex items-center gap-1.5 shadow-sm">
+          <button
+            type="button"
+            onClick={() => navigate("/opportunities/import")}
+            className="px-5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-2 bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-md border border-slate-200/80 dark:border-slate-700"
+          >
+            <span>📸</span>
+            <span>AI Multi-Screenshot Job Parser</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("/opportunities/harvester")}
+            className="px-5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50"
+          >
+            <span>⚡</span>
+            <span>Automated Background HR Harvester</span>
+          </button>
+        </div>
       </div>
 
       {/* 0. Image Editor Modal */}
@@ -745,12 +755,39 @@ export const ScreenshotUploader: React.FC = () => {
         </div>
       )}
 
-      <header className="mb-8 text-center">
-        <h1 className="text-3xl font-bold text-slate-800 mb-2">AI Multi-Screenshot Job Parser</h1>
-        <p className="text-sm text-slate-500">
-          Upload multiple screenshots of job postings. The system processes them in the background, generates cold outreach drafts, and schedules approved emails sequentially.
-        </p>
-      </header>
+      {/* Hero Header Banner Card */}
+      <div className="bg-gradient-to-br from-indigo-50/80 via-white to-violet-50/50 dark:from-indigo-950/30 dark:via-slate-900 dark:to-violet-950/20 border border-indigo-100/80 dark:border-slate-800 rounded-3xl p-6 sm:p-10 shadow-sm relative overflow-hidden text-center sm:text-left">
+        <div className="absolute -top-20 -right-20 w-60 h-60 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6 relative z-10">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-700 dark:text-indigo-400 text-xs font-bold uppercase tracking-wider mb-4">
+              <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+              AI Document & OCR Intelligence
+            </div>
+
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight mb-3">
+              AI Multi-Screenshot Job Parser
+            </h1>
+
+            <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              Upload multiple job posting screenshots simultaneously. Our intelligent OCR engine extracts recruiter emails, job requirements, and company details to generate custom cold outreach drafts automatically.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-1 gap-3 shrink-0 w-full sm:w-auto">
+            <div className="bg-white/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 p-3.5 rounded-2xl shadow-sm text-center">
+              <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Processing Mode</span>
+              <span className="text-lg font-extrabold text-indigo-600 dark:text-indigo-400">Batch Queue</span>
+            </div>
+            <div className="bg-white/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 p-3.5 rounded-2xl shadow-sm text-center">
+              <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Formats Supported</span>
+              <span className="text-lg font-extrabold text-violet-600 dark:text-violet-400">PNG / JPG / WEBP</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Coming Soon Card */}
       <div className="bg-white border border-indigo-100 rounded-3xl p-8 sm:p-10 text-center shadow-md max-w-2xl mx-auto my-6 relative overflow-hidden">

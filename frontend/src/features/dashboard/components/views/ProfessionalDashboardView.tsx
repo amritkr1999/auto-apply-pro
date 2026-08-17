@@ -406,10 +406,7 @@ export const ProfessionalDashboardView: React.FC = () => {
 
       <h1 className="sr-only">Candidate Dashboard - EasyNaukri</h1>
 
-      {/* Chrome Extension Download Card & Setup Guide */}
-      <div className="mb-8">
-        <ExtensionDownloadSection />
-      </div>
+
 
       {/* Universal Career Passport Header */}
       <div data-tour="dashboard-header" className="mb-8 p-6 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 text-white rounded-card shadow-lg border border-slate-800 relative overflow-hidden">
@@ -1226,6 +1223,11 @@ export const ProfessionalDashboardView: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Chrome Extension Download Card & Setup Guide at Bottom of Dashboard */}
+      <div className="mt-8 mb-6">
+        <ExtensionDownloadSection />
+      </div>
 
       {/* Sliding Review Drawer */}
       <ReviewDrawer

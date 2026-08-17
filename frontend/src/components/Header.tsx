@@ -168,12 +168,6 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           </Link>
           {user && (
             <nav className="hidden lg:flex items-center gap-6 whitespace-nowrap shrink-0">
-              <Link to={getDashboardPath()} className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">
-                Dashboard
-              </Link>
-              <Link to="/profile/settings" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">
-                Profile
-              </Link>
               <Link to="/learning" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">
                 Learning Space
               </Link>

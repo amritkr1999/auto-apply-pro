@@ -14,6 +14,7 @@ const RecruiterDashboardView = lazy(() => import("../features/dashboard/componen
 const CompanyDashboardView = lazy(() => import("../features/dashboard/components/views/CompanyDashboardView"));
 const ProfessionalProfile = lazy(() => import("../features/profile/ProfessionalProfile"));
 const OpportunityImporter = lazy(() => import("../features/opportunities/components/OpportunityImporter"));
+const HrHarvesterPage = lazy(() => import("../pages/HrHarvesterPage"));
 const TemplateManager = lazy(() => import("../features/outreach/components/TemplateManager").then((m: any) => ({ default: m.TemplateManager || m.default })));
 const OutreachDraftSection = lazy(() => import("../features/outreach/components/OutreachDraftSection").then((m: any) => ({ default: m.OutreachDraftSection || m.default })));
 const DraftsReviewPage = lazy(() => import("../pages/DraftsReviewPage"));
@@ -27,6 +28,7 @@ const UserSubmissionsList = lazy(() => import("../features/learning/components/U
 const AdminModerationList = lazy(() => import("../features/learning/components/AdminModerationList").then((m: any) => ({ default: m.AdminModerationList || m.default })));
 const BillingPortal = lazy(() => import("../features/billing/components/BillingPortal"));
 const TelemetryDashboard = lazy(() => import("../features/dashboard/components/views/TelemetryDashboard").then((m: any) => ({ default: m.TelemetryDashboard || m.default })));
+const SarkariNaukriPage = lazy(() => import("../pages/SarkariNaukriPage"));
 
 const PublicProfilePage = lazy(() => import("../pages/PublicProfilePage"));
 const PublicPlaqueCardPage = lazy(() => import("../pages/PublicPlaqueCardPage"));
@@ -80,6 +82,9 @@ export const AppRoutes: React.FC = () => {
           <Route path="/candidate/profile" element={<ProfessionalProfile />} />
           <Route path="/opportunities/tracker" element={<JobTrackerPage />} />
           <Route path="/opportunities/import" element={<OpportunityImporter />} />
+          <Route path="/opportunities/parser" element={<OpportunityImporter />} />
+          <Route path="/opportunities/harvester" element={<HrHarvesterPage />} />
+          <Route path="/harvester" element={<Navigate to="/opportunities/harvester" replace />} />
           <Route path="/outreach/templates" element={<TemplateManager />} />
           <Route path="/outreach/draft" element={<OutreachDraftSection />} />
           <Route path="/outreach/drafts/review" element={<DraftsReviewPage />} />
@@ -95,6 +100,8 @@ export const AppRoutes: React.FC = () => {
           <Route path="/billing/portal" element={<BillingPortal />} />
           <Route path="/pricing" element={<BillingPortal />} />
           <Route path="/admin/telemetry" element={<TelemetryDashboard />} />
+          <Route path="/sarkari-naukri" element={<SarkariNaukriPage />} />
+          <Route path="/govt-jobs" element={<Navigate to="/sarkari-naukri" replace />} />
         </Route>
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
