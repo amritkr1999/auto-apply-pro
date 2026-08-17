@@ -51,7 +51,7 @@ public class ServerScraperScheduler {
      * Runs every 2 minutes (120,000 ms).
      * Server-side dynamic crawler task that generates & syncs non-repeating fresh recruiter contacts.
      */
-    // @Scheduled(fixedRate = 120000, initialDelay = 5000)
+    @Scheduled(fixedRate = 120000, initialDelay = 5000)
     public void runServerScraperTask() {
         log.info("[SERVER SCRAPER SCHEDULER] Executing automated 2-minute server crawler batch...");
         try {
