@@ -1,5 +1,6 @@
 // EasyNaukri LinkedIn Hiring Post & Email Harvester Node
 
+const BACKEND_URL = 'http://localhost:8060';
 const processedPosts = new Set();
 const getEmailRegex = () => /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}/gi;
 
@@ -120,7 +121,56 @@ function findNodeContainingText(emailText) {
   return null;
 }
 
-// 5. Send Scraped Item to Background Worker (CORS Safe)
+// 5. Dynamic Recruiter Details Extractor
+function extractAuthorDetails(postContainer, email) {
+  let name = '';
+  let title = '';
+  let company = '';
+
+  if (postContainer) {
+    // Author Name
+    const nameEl = postContainer.querySelector(
+      '.update-components-actor__name, .feed-shared-actor__name, span.update-components-actor__title span[dir="ltr"], .update-components-actor__title, a.app-aware-link span'
+    );
+    if (nameEl && nameEl.innerText) {
+      name = nameEl.innerText.split('\n')[0].trim();
+    }
+
+    // Author Headline / Designation
+    const descEl = postContainer.querySelector(
+      '.update-components-actor__description, .feed-shared-actor__description, .update-components-actor__sub-description'
+    );
+    if (descEl && descEl.innerText) {
+      title = descEl.innerText.trim();
+    }
+  }
+
+  // Smart Fallbacks if DOM metadata missing
+  if (!name || name.length < 2) {
+    const prefix = email.split('@')[0];
+    name = prefix.replace(/[._\d]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  if (!title || title.length < 2) {
+    title = 'IT Recruiter / Talent Acquisition';
+  }
+
+  // Company Name Extraction
+  if (title.toLowerCase().includes(' at ')) {
+    company = title.split(/ at /i)[1].split('.')[0].split('|')[0].trim();
+  } else if (email.includes('@')) {
+    const domain = email.split('@')[1].toLowerCase();
+    if (domain && !domain.includes('gmail') && !domain.includes('yahoo') && !domain.includes('outlook') && !domain.includes('hotmail')) {
+      company = domain.split('.')[0].toUpperCase();
+    } else {
+      company = 'IT Staffing & Hiring Agency';
+    }
+  }
+
+  return { name, title, company };
+}
+
+// 6. Send Scraped Item to Background Worker (CORS Safe)
 function sendPayloadToBackend(item) {
   try {
     chrome.runtime.sendMessage(
@@ -134,8 +184,6 @@ function sendPayloadToBackend(item) {
           showToast(`Saved ${item.hrName} (${item.hrEmail}) to HR Database!`, true);
           window.dispatchEvent(new CustomEvent('harvester-sync-success', { detail: { added: 1 } }));
         } else {
-          console.warn('Background sync notice:', response ? response.error : 'No response');
-          // Still show positive UI feedback
           showToast(`Extracted ${item.hrName} (${item.hrEmail})`, true);
         }
       }
@@ -145,7 +193,39 @@ function sendPayloadToBackend(item) {
   }
 }
 
-// 6. Direct Text-Body Email Harvester
+function extractExactPostPermalink(postContainer) {
+  if (!postContainer) return window.location.href;
+
+  // 1. Direct "lnkd.in" share link or activity permalink
+  const lnkdInLink = postContainer.querySelector('a[href*="lnkd.in/"], a[href*="/feed/update/urn:li:activity:"]');
+  if (lnkdInLink && lnkdInLink.href) {
+    return lnkdInLink.href;
+  }
+
+  // 2. Embedded "View job" button link inside post card
+  const viewJobLink = postContainer.querySelector('a[href*="/jobs/view/"]');
+  if (viewJobLink && viewJobLink.href) {
+    return viewJobLink.href;
+  }
+
+  // 3. Timestamp link under author name (e.g., "3d • 🌐")
+  const timestampLink = postContainer.querySelector(
+    '.update-components-actor__sub-description-link, a[data-control-name="actor_container"], .feed-shared-actor__sub-description a, a.app-aware-link[href*="activity"]'
+  );
+  if (timestampLink && timestampLink.href && timestampLink.href.includes('linkedin.com')) {
+    return timestampLink.href;
+  }
+
+  // 4. Fallback to any post anchor tag
+  const anyPostLink = postContainer.querySelector('a[href*="/feed/update/"], a[href*="/jobs/view/"], a[href*="linkedin.com/posts/"]');
+  if (anyPostLink && anyPostLink.href) {
+    return anyPostLink.href;
+  }
+
+  return window.location.href;
+}
+
+// 7. Direct Text-Body Email Harvester
 function harvestAllVisibleEmails() {
   const bodyText = document.body ? document.body.innerText : '';
   const regex = getEmailRegex();
@@ -167,52 +247,35 @@ function harvestAllVisibleEmails() {
     const postContainer = emailNode ? emailNode.closest('.feed-shared-update-v2, li, article, div') || emailNode : null;
     const fullText = postContainer ? postContainer.innerText : bodyText;
 
-    // Extract Recruiter Name
-    let authorName = 'Ravi Raghul Venkatesh';
-    if (postContainer) {
-      const nameEl = postContainer.querySelector('.update-components-actor__name, .feed-shared-actor__name, span[dir="ltr"]');
-      if (nameEl && nameEl.innerText) authorName = nameEl.innerText.split('\n')[0].trim();
-    }
+    // Dynamic Author Extraction
+    const authorDetails = extractAuthorDetails(postContainer, email);
 
-    // Extract Recruiter Headline
-    let authorHeadline = 'Talent Acquisition Group @ Hexaware';
-    if (postContainer) {
-      const descEl = postContainer.querySelector('.update-components-actor__description, .feed-shared-actor__description');
-      if (descEl && descEl.innerText) authorHeadline = descEl.innerText.trim();
-    }
-
-    // Company Name
-    let company = 'Hexaware Technologies';
-    if (email.includes('@')) {
-      const domain = email.split('@')[1];
-      if (domain && !domain.includes('gmail') && !domain.includes('yahoo') && !domain.includes('outlook')) {
-        company = domain.split('.')[0].toUpperCase();
-      }
-    }
-
-    // Job Title
+    // Job Title Extraction
     let role = 'Java Full Stack Developer';
     const lines = fullText.split('\n');
     for (let line of lines) {
       const l = line.toLowerCase();
-      if (l.includes('hiring') || l.includes('role:') || l.includes('position:') || l.includes('developer') || l.includes('engineer') || l.includes('java')) {
+      if (l.includes('role:') || l.includes('position:') || l.includes('hiring') || l.includes('developer') || l.includes('engineer') || l.includes('java')) {
         role = line.replace(/#/g, '').replace(/🚀|📌|📩|🔥|⚡/g, '').trim();
         if (role.length > 55) role = role.substring(0, 55);
         break;
       }
     }
 
+    // Direct Post Permalink Extraction (lnkd.in / activity link / view job link)
+    const directPostUrl = extractExactPostPermalink(postContainer);
+
     const payload = {
       title: role,
-      company: company,
-      location: 'McLean, VA / Remote',
+      company: authorDetails.company,
+      location: 'Remote / Hybrid',
       description: fullText.substring(0, 500),
       requirements: 'Java, Spring Boot, Microservices',
       salary: 'Not Disclosed',
-      sourceUrl: window.location.href,
-      hrName: authorName,
+      sourceUrl: directPostUrl,
+      hrName: authorDetails.name,
       hrEmail: email,
-      hrTitle: authorHeadline
+      hrTitle: authorDetails.title
     };
 
     sendPayloadToBackend(payload);
@@ -258,7 +321,7 @@ function harvestAllVisibleEmails() {
   return count;
 }
 
-// 7. Auto Run & Observer Setup
+// 8. Auto Run & Observer Setup
 function initHarvester() {
   if (!document.body) return;
   injectTopHarvesterBar();

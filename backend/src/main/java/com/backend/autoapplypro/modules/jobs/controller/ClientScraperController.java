@@ -1,6 +1,8 @@
 package com.backend.autoapplypro.modules.jobs.controller;
 
+import com.backend.autoapplypro.modules.hr.HrRepository;
 import com.backend.autoapplypro.modules.jobs.dto.ClientScrapePayloadDto;
+import com.backend.autoapplypro.modules.jobs.repository.JobPostingRepository;
 import com.backend.autoapplypro.modules.jobs.service.ClientScraperService;
 import com.backend.autoapplypro.modules.users.model.User;
 import com.backend.autoapplypro.modules.users.repository.UserRepository;
@@ -22,6 +24,8 @@ public class ClientScraperController {
 
     private final ClientScraperService clientScraperService;
     private final UserRepository userRepository;
+    private final HrRepository hrRepository;
+    private final JobPostingRepository jobPostingRepository;
 
     @GetMapping("/client-tasks")
     public ResponseEntity<List<String>> getClientTasks(@AuthenticationPrincipal UserDetails userDetails) {
@@ -46,5 +50,14 @@ public class ClientScraperController {
         Map<String, Object> response = clientScraperService.processClientScrapePayload(payload, user);
         return ResponseEntity.ok(response);
     }
-}
 
+    @GetMapping("/stats")
+    public ResponseEntity<Map<String, Object>> getScraperStats() {
+        long totalHrContacts = hrRepository.count();
+        long totalJobPostings = jobPostingRepository.count();
+        return ResponseEntity.ok(Map.of(
+            "totalHrContacts", totalHrContacts,
+            "totalJobPostings", totalJobPostings
+        ));
+    }
+}

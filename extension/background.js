@@ -2,10 +2,14 @@
 
 const BACKEND_URL = 'http://localhost:8060'; // Production API endpoint
 
-// Setup periodic alarm for background harvester
+// Setup periodic alarm for background harvester (Runs every 5 minutes)
 chrome.runtime.onInstalled.addListener(() => {
   console.log('EasyNaukri Harvester Extension installed.');
-  chrome.alarms.create('harvesterTaskAlarm', { periodInMinutes: 20 });
+  chrome.alarms.create('harvesterTaskAlarm', { periodInMinutes: 5 });
+});
+
+chrome.runtime.onStartup.addListener(() => {
+  chrome.alarms.create('harvesterTaskAlarm', { periodInMinutes: 5 });
 });
 
 chrome.alarms.onAlarm.addListener((alarm) => {

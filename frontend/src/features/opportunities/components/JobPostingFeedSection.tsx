@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { buildApiUrl } from '../../../config/api';
 
 interface JobPostingFeedDto {
   id: number;
@@ -22,12 +23,18 @@ export const JobPostingFeedSection: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filterMode, setFilterMode] = useState<'all' | 'recommended'>('all');
   const [error, setError] = useState<string | null>(null);
+  const [queuedJobIds, setQueuedJobIds] = useState<Set<number>>(new Set());
+  const [queueStatusMessage, setQueueStatusMessage] = useState<string | null>(null);
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const ITEMS_PER_PAGE = 6;
 
   const fetchLatestJobs = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/v1/jobs/postings/latest?page=0&size=30');
+      const response = await fetch(buildApiUrl('/v1/jobs/postings/latest?page=0&size=100'));
       if (!response.ok) {
         throw new Error('Failed to fetch job updates feed');
       }
@@ -36,7 +43,6 @@ export const JobPostingFeedSection: React.FC = () => {
     } catch (err: any) {
       console.error('Error fetching job postings feed:', err);
       setError('Unable to load latest job postings. Showing cached feed.');
-      // Provide clean fallback data if backend is offline
       setPostings([
         {
           id: 101,
@@ -46,7 +52,7 @@ export const JobPostingFeedSection: React.FC = () => {
           description: 'Looking for a Senior Java engineer with Spring Boot, Microservices and AWS expertise.',
           requirements: 'Java 17+, Spring Boot 3, PostgreSQL, Docker',
           salary: '₹18 - ₹24 LPA',
-          sourceUrl: 'https://naukri.com/job-listings',
+          sourceUrl: 'https://www.linkedin.com/jobs/view/american-chase-java',
           hrEmail: 'hansika.dubey@americanchase.com',
           createdAt: new Date().toISOString(),
           daysAgo: 1,
@@ -61,7 +67,7 @@ export const JobPostingFeedSection: React.FC = () => {
           description: 'Hiring React + Node.js developers for modern SaaS web application product team.',
           requirements: 'React, TypeScript, TailwindCSS, REST APIs',
           salary: '₹12 - ₹16 LPA',
-          sourceUrl: 'https://linkedin.com/jobs',
+          sourceUrl: 'https://www.linkedin.com/jobs/view/perennial-react',
           hrEmail: 'akanksha.sogani@perennialsys.com',
           createdAt: new Date().toISOString(),
           daysAgo: 3,
@@ -74,9 +80,37 @@ export const JobPostingFeedSection: React.FC = () => {
     }
   };
 
+  const handleQueueEmail = async (job: JobPostingFeedDto) => {
+    if (!job.hrEmail) return;
+    try {
+      const res = await fetch(buildApiUrl('/v1/jobs/postings/queue-email'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jobId: job.id,
+          title: job.title,
+          company: job.company,
+          hrEmail: job.hrEmail
+        })
+      });
+      if (res.ok) {
+        setQueuedJobIds(prev => new Set(prev).add(job.id));
+        setQueueStatusMessage(`⚡ Successfully queued outreach email to ${job.hrEmail}!`);
+        setTimeout(() => setQueueStatusMessage(null), 4000);
+      }
+    } catch (err) {
+      console.error('Failed to queue email:', err);
+    }
+  };
+
   useEffect(() => {
     fetchLatestJobs();
   }, []);
+
+  // Reset pagination to page 1 whenever filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterMode]);
 
   const filteredPostings = postings.filter((p) => {
     const matchesSearch =
@@ -89,6 +123,13 @@ export const JobPostingFeedSection: React.FC = () => {
     }
     return matchesSearch;
   });
+
+  // Calculate Paginated Slice
+  const totalItems = filteredPostings.length;
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE) || 1;
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, totalItems);
+  const paginatedPostings = filteredPostings.slice(startIndex, endIndex);
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl text-white">
@@ -110,6 +151,11 @@ export const JobPostingFeedSection: React.FC = () => {
               ⚠️ {error}
             </div>
           )}
+          {queueStatusMessage && (
+            <div className="text-xs text-emerald-400 font-semibold mt-1 bg-emerald-950/80 border border-emerald-800/80 px-3 py-1.5 rounded-lg inline-flex items-center gap-1.5 animate-pulse">
+              {queueStatusMessage}
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-3">
@@ -122,7 +168,7 @@ export const JobPostingFeedSection: React.FC = () => {
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              All Jobs
+              All Jobs ({postings.length})
             </button>
             <button
               onClick={() => setFilterMode('recommended')}
@@ -162,91 +208,141 @@ export const JobPostingFeedSection: React.FC = () => {
           No job postings match your filter. Harvester is constantly discovering new posts!
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filteredPostings.map((job) => (
-            <div
-              key={job.id}
-              className="bg-slate-950/60 border border-slate-800/80 hover:border-indigo-500/40 rounded-xl p-5 transition-all flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-bold text-base text-slate-100 group-hover:text-indigo-400 transition-colors">
-                        {job.title}
-                      </h4>
-                      {job.matchScore && (
-                        <span className="px-2 py-0.5 text-[10px] font-extrabold rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                          🔥 {job.matchScore}% Match
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {paginatedPostings.map((job) => (
+              <div
+                key={job.id}
+                className="bg-slate-950/60 border border-slate-800/80 hover:border-indigo-500/40 rounded-xl p-5 transition-all flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-bold text-base text-slate-100">
+                          {job.title}
+                        </h4>
+
+                        {job.matchScore && (
+                          <span className="px-2 py-0.5 text-[10px] font-extrabold rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shrink-0">
+                            🔥 {job.matchScore}% Match
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs font-semibold text-indigo-400 mt-0.5">
+                        {job.company}
+                      </div>
+                    </div>
+                    <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-slate-800 text-slate-300 border border-slate-700 shrink-0">
+                      {job.daysAgo === 0 ? 'Today' : `${job.daysAgo}d ago`}
+                    </span>
+                  </div>
+
+                  {/* Skill Badges */}
+                  {job.skillBadges && job.skillBadges.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-3">
+                      {job.skillBadges.map((skill, idx) => (
+                        <span
+                          key={idx}
+                          className="px-2 py-0.5 text-[10px] font-medium rounded-md bg-indigo-950/60 text-indigo-300 border border-indigo-800/50"
+                        >
+                          {skill}
                         </span>
-                      )}
+                      ))}
                     </div>
-                    <div className="text-xs font-semibold text-indigo-400 mt-0.5">
-                      {job.company}
-                    </div>
-                  </div>
-                  <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-slate-800 text-slate-300 border border-slate-700 shrink-0">
-                    {job.daysAgo === 0 ? 'Today' : `${job.daysAgo}d ago`}
-                  </span>
-                </div>
+                  )}
 
-                {/* Skill Badges */}
-                {job.skillBadges && job.skillBadges.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mt-3">
-                    {job.skillBadges.map((skill, idx) => (
-                      <span
-                        key={idx}
-                        className="px-2 py-0.5 text-[10px] font-medium rounded-md bg-indigo-950/60 text-indigo-300 border border-indigo-800/50"
-                      >
-                        {skill}
+                  <div className="flex flex-wrap gap-2 text-xs text-slate-400 mt-3">
+                    {job.location && (
+                      <span className="flex items-center gap-1 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
+                        📍 {job.location}
                       </span>
-                    ))}
+                    )}
+                    {job.salary && (
+                      <span className="flex items-center gap-1 bg-slate-900 px-2 py-0.5 rounded border border-slate-800 text-emerald-400">
+                        💰 {job.salary}
+                      </span>
+                    )}
                   </div>
-                )}
 
-                <div className="flex flex-wrap gap-2 text-xs text-slate-400 mt-3">
-                  {job.location && (
-                    <span className="flex items-center gap-1 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
-                      📍 {job.location}
-                    </span>
-                  )}
-                  {job.salary && (
-                    <span className="flex items-center gap-1 bg-slate-900 px-2 py-0.5 rounded border border-slate-800 text-emerald-400">
-                      💰 {job.salary}
-                    </span>
+                  {job.description && (
+                    <p className="text-xs text-slate-400 line-clamp-2 mt-3 leading-relaxed">
+                      {job.description}
+                    </p>
                   )}
                 </div>
 
-                {job.description && (
-                  <p className="text-xs text-slate-400 line-clamp-2 mt-3 leading-relaxed">
-                    {job.description}
-                  </p>
-                )}
+                <div className="mt-4 pt-3 border-t border-slate-800/60 flex flex-wrap items-center justify-between gap-2">
+                  {job.hrEmail ? (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-emerald-400 font-mono font-medium truncate max-w-[180px]" title={job.hrEmail}>
+                        ✉️ {job.hrEmail}
+                      </span>
+                      <button
+                        onClick={() => handleQueueEmail(job)}
+                        disabled={queuedJobIds.has(job.id)}
+                        className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition-all flex items-center gap-1 ${
+                          queuedJobIds.has(job.id)
+                            ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/80 cursor-default'
+                            : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm hover:scale-[1.02] active:scale-[0.98]'
+                        }`}
+                      >
+                        {queuedJobIds.has(job.id) ? '✓ Email Queued!' : '✉️ Queue HR Email'}
+                      </button>
+                    </div>
+                  ) : (
+                    <span className="text-xs text-slate-500">No HR email listed</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="mt-6 pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
+              <div>
+                Showing <span className="font-bold text-slate-200">{totalItems > 0 ? startIndex + 1 : 0}</span> to{' '}
+                <span className="font-bold text-slate-200">{endIndex}</span> of{' '}
+                <span className="font-bold text-slate-200">{totalItems}</span> Job Postings
               </div>
 
-              <div className="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between gap-2">
-                {job.hrEmail ? (
-                  <span className="text-xs text-emerald-400 font-mono font-medium truncate max-w-[200px]" title={job.hrEmail}>
-                    ✉️ {job.hrEmail}
-                  </span>
-                ) : (
-                  <span className="text-xs text-slate-500">No HR email listed</span>
-                )}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all font-semibold"
+                >
+                  ← Previous
+                </button>
 
-                {job.sourceUrl && (
-                  <a
-                    href={job.sourceUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold hover:underline flex items-center gap-1"
-                  >
-                    Apply Link ↗
-                  </a>
-                )}
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`w-7 h-7 rounded-lg text-xs font-bold transition-all ${
+                        currentPage === page
+                          ? 'bg-indigo-600 text-white shadow-sm'
+                          : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200 border border-slate-700/60'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all font-semibold"
+                >
+                  Next →
+                </button>
               </div>
             </div>
-          ))}
-        </div>
+          )}
+        </>
       )}
     </div>
   );

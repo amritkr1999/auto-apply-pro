@@ -109,6 +109,10 @@ public class ClientScraperServiceImpl implements ClientScraperService {
         LocalDateTime cutoff = LocalDateTime.now().minusDays(20);
         List<JobPosting> jobList = jobPostingRepository.findByCreatedAtAfterOrderByCreatedAtDesc(cutoff, PageRequest.of(page, size));
         
+        if (jobList == null || jobList.isEmpty()) {
+            jobList = jobPostingRepository.findAll(PageRequest.of(page, size, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "id"))).getContent();
+        }
+        
         return jobList.stream().map(job -> {
             long daysAgo = 0;
             if (job.getCreatedAt() != null) {

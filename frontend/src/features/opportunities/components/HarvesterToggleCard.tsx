@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ChromeExtensionSetupModal } from './ChromeExtensionSetupModal';
+import { buildApiUrl } from '../../../config/api';
 
 interface PortalOption {
   id: string;
@@ -29,7 +30,7 @@ export const HarvesterToggleCard: React.FC = () => {
 
   const [contributedCount, setContributedCount] = useState<number>(() => {
     const saved = localStorage.getItem('auto_harvester_contributed_count');
-    return saved ? parseInt(saved, 10) : 18;
+    return saved ? parseInt(saved, 10) : 0;
   });
 
   const [isExtensionInstalled, setIsExtensionInstalled] = useState<boolean>(() => {
@@ -112,6 +113,23 @@ export const HarvesterToggleCard: React.FC = () => {
         localStorage.setItem('auto_harvester_enabled', 'false');
       }
     }, 1000);
+
+    // Fetch live total HR contacts stats from backend
+    const fetchLiveStats = async () => {
+      try {
+        const res = await fetch(buildApiUrl('/v1/jobs/scraper/stats'));
+        if (res.ok) {
+          const data = await res.json();
+          if (data && typeof data.totalHrContacts === 'number') {
+            setContributedCount(data.totalHrContacts);
+            localStorage.setItem('auto_harvester_contributed_count', String(data.totalHrContacts));
+          }
+        }
+      } catch (err) {
+        console.warn('Could not fetch live HR contacts stats:', err);
+      }
+    };
+    fetchLiveStats();
 
     return () => {
       window.removeEventListener('harvester-sync-success', handleSyncEvent);
