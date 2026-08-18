@@ -504,8 +504,17 @@ export const TemplateManager: React.FC = () => {
     (activeTemplate.creatorId === currentUserId && activeTemplate.id && !activeTemplate.id.startsWith("default-") && !activeTemplate.isSystemTemplate)
   );
 
+  const getCleanBody = (text?: string) => {
+    if (!text) return "";
+    let clean = text;
+    clean = clean.replace(/^(<br\s*\/?>|\s)*(Dear|Hi)\s+\{\{(recruiterName|hrName)\}\},?(<br\s*\/?>|\s)*/gi, "");
+    clean = clean.replace(/(<br\s*\/?>|\s)*Best(\s+regards)?,?(<br\s*\/?>|\s)*Candidate User\s*$/gi, "");
+    return clean.trim();
+  };
+
   const renderTemplateCard = (tpl: EmailTemplate) => {
     const isActive = tpl.id === activeTemplateId;
+    const cleanedSnippet = getCleanBody(tpl.body || tpl.skillsTemplate || tpl.intro || "").replace(/<[^>]*>/g, '');
     return (
       <div
         key={tpl.id}
@@ -551,10 +560,18 @@ export const TemplateManager: React.FC = () => {
             </span>
           </div>
 
-          <div
-            className="text-xs text-slate-500 leading-relaxed font-mono whitespace-pre-line overflow-hidden line-clamp-3 bg-slate-50 p-3 rounded border border-slate-100/50"
-            dangerouslySetInnerHTML={{ __html: tpl.body.replace(/\n/g, "<br/>") }}
-          />
+          <div className="bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-150 dark:border-slate-700 flex flex-col justify-between gap-2.5 min-h-[110px]">
+            <p 
+              className="text-xs text-slate-650 dark:text-slate-300 leading-relaxed font-sans line-clamp-3"
+              dangerouslySetInnerHTML={{ __html: cleanedSnippet }}
+            />
+            <div className="flex flex-wrap items-center justify-between gap-1.5 pt-2 border-t border-slate-200/60 dark:border-slate-700/60 text-[10px] font-medium text-slate-400">
+              <span className="truncate max-w-[55%]">Subject: {tpl.subject || "No subject"}</span>
+              <span className="text-emerald-700 dark:text-emerald-300 font-semibold bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <span>✍️</span> Dynamic Sign-off
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -563,26 +580,58 @@ export const TemplateManager: React.FC = () => {
   return (
     <div className="max-w-[1000px] mx-auto w-full">
       {/* HEADER SECTION */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 border-b border-slate-200 pb-5">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-800">Email Templates</h1>
-          <p className="text-sm text-slate-500 mt-1">Manage and customize your cold email outreach templates</p>
-          <p className="text-xs text-indigo-600 font-semibold mt-1">Upgrade to Premium for multiple template use.</p>
+      <div className="mb-8 space-y-5 border-b border-slate-200 dark:border-slate-800 pb-6">
+        {/* Tier 1: Title & Primary CTA */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-800 dark:text-slate-100">
+                Email & Outreach Templates
+              </h1>
+              {!isPremium && (
+                <Link
+                  to="/billing/pricing"
+                  className="hidden md:inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 px-2.5 py-0.5 rounded-full hover:bg-indigo-100 transition-all"
+                >
+                  <span>✦</span> Upgrade to Premium
+                </Link>
+              )}
+            </div>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+              Manage, customize, and activate cold email outreach and cover letter templates
+            </p>
+          </div>
+
+          {!activeTemplate && (
+            <button
+              onClick={isLimitReached ? undefined : handleCreateNew}
+              disabled={isLimitReached}
+              className={`${
+                isLimitReached
+                  ? "bg-slate-100 dark:bg-slate-800 text-slate-400 border border-slate-200 dark:border-slate-700 cursor-not-allowed"
+                  : "bg-primary hover:bg-primary-hover text-white shadow-sm"
+              } px-4 py-2 rounded-xl text-xs font-bold transition-all duration-150 shrink-0 flex items-center gap-1.5 self-start sm:self-auto`}
+            >
+              <span>+</span> Create New Template
+            </button>
+          )}
         </div>
+
+        {/* Tier 2: Category Navigation & Filter Toolbar */}
         {!activeTemplate && (
-          <div className="flex items-center gap-3 shrink-0 flex-wrap sm:flex-nowrap">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
             {/* Category Switcher Tabs */}
-            <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+            <div className="flex items-center bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200 dark:border-slate-700 self-start sm:self-auto">
               <button
                 type="button"
                 onClick={() => {
                   setTemplateCategoryTab("EMAIL");
                   fetchTemplates(sortBy, "EMAIL");
                 }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   templateCategoryTab === "EMAIL"
-                    ? "bg-white text-indigo-600 shadow-xs"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
                 }`}
               >
                 📧 Email Templates
@@ -593,53 +642,45 @@ export const TemplateManager: React.FC = () => {
                   setTemplateCategoryTab("COVER_LETTER");
                   fetchTemplates(sortBy, "COVER_LETTER");
                 }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   templateCategoryTab === "COVER_LETTER"
-                    ? "bg-white text-indigo-600 shadow-xs"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
                 }`}
               >
                 📄 Cover Letter Templates
               </button>
             </div>
 
-            {/* Starred Filter Button */}
-            <button
-              onClick={() => setShowStarredOnly(!showStarredOnly)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-btn text-xs font-semibold border transition-all ${
-                showStarredOnly
-                  ? "bg-amber-500 hover:bg-amber-600 text-white border-amber-500 shadow-sm"
-                  : "bg-white hover:bg-slate-50 text-slate-650 border-slate-200"
-              }`}
-            >
-              <svg className={`w-3.5 h-3.5 fill-current ${showStarredOnly ? "text-white" : "text-amber-400"}`} viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-              </svg>
-              {showStarredOnly ? "Starred Only" : "Filter Starred"}
-            </button>
-
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs font-semibold text-slate-500">Sort by:</span>
-              <select
-                value={sortBy}
-                onChange={handleSortChange}
-                className="bg-white border border-slate-200 rounded px-2 py-1 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent transition-all"
+            {/* Filter & Sort Controls */}
+            <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+              {/* Starred Filter Button */}
+              <button
+                onClick={() => setShowStarredOnly(!showStarredOnly)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                  showStarredOnly
+                    ? "bg-amber-500 hover:bg-amber-600 text-white border-amber-500 shadow-sm"
+                    : "bg-white dark:bg-slate-800 text-slate-650 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700"
+                }`}
               >
-                <option value="">Default</option>
-                <option value="rating">Highest Rating</option>
-              </select>
+                <svg className={`w-3.5 h-3.5 fill-current ${showStarredOnly ? "text-white" : "text-amber-400"}`} viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                {showStarredOnly ? "Starred Only" : "Filter Starred"}
+              </button>
+
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Sort:</span>
+                <select
+                  value={sortBy}
+                  onChange={handleSortChange}
+                  className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer transition-all"
+                >
+                  <option value="">Default</option>
+                  <option value="rating">Highest Rating</option>
+                </select>
+              </div>
             </div>
-            <button
-              onClick={isLimitReached ? undefined : handleCreateNew}
-              disabled={isLimitReached}
-              className={`${
-                isLimitReached
-                  ? "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed"
-                  : "bg-primary hover:bg-primary-hover text-white shadow-sm"
-              } px-4 py-2 rounded-btn text-xs font-semibold transition-all duration-150 shrink-0`}
-            >
-              Create New Template
-            </button>
           </div>
         )}
       </div>
@@ -693,14 +734,20 @@ export const TemplateManager: React.FC = () => {
               </div>
               {currentActiveTemplate ? (
                 <>
-                  <h2 className="text-xl font-bold text-slate-800">{currentActiveTemplate.name}</h2>
-                  <p className="text-xs text-indigo-600 font-semibold">
-                    Subject: <span className="text-slate-650 font-normal">{currentActiveTemplate.subject}</span>
-                  </p>
-                  <div 
-                    className="text-xs text-slate-550 leading-relaxed font-mono whitespace-pre-line bg-white/70 backdrop-blur-sm p-3 rounded-lg border border-slate-200 max-w-xl shadow-inner mt-2 line-clamp-2"
-                    dangerouslySetInnerHTML={{ __html: currentActiveTemplate.body.replace(/\n/g, "<br/>") }}
-                  />
+                  <h2 className="text-xl font-bold text-slate-850 dark:text-slate-100">{currentActiveTemplate.name}</h2>
+                  <div className="bg-white/80 dark:bg-slate-850/80 backdrop-blur-sm p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-700 max-w-xl shadow-xs mt-2 space-y-2">
+                    <p className="text-xs text-slate-650 dark:text-slate-300 leading-relaxed font-sans line-clamp-2">
+                      {getCleanBody(currentActiveTemplate.body || currentActiveTemplate.skillsTemplate).replace(/<[^>]*>/g, '')}
+                    </p>
+                    <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-150 dark:border-slate-750 text-[10px]">
+                      <span className="bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded font-semibold border border-indigo-150 dark:border-indigo-800 flex items-center gap-1">
+                        <span>✉️</span> Subject: {currentActiveTemplate.subject}
+                      </span>
+                      <span className="bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded font-semibold border border-emerald-150 dark:border-emerald-800 flex items-center gap-1">
+                        <span>✍️</span> Dynamic Sign-off ({"{{candidateName}}"})
+                      </span>
+                    </div>
+                  </div>
                 </>
               ) : (
                 <>
@@ -1149,11 +1196,52 @@ export const TemplateManager: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Body html display */}
-                <div
-                  className="text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-mono whitespace-pre-line bg-slate-50 dark:bg-slate-800 p-4 rounded border border-slate-100 dark:border-slate-700 max-h-[300px] overflow-y-auto"
-                  dangerouslySetInnerHTML={{ __html: activeTemplate.body }}
-                />
+                {/* Full Structured Template Preview */}
+                <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-xl p-4 space-y-3 max-h-[50vh] overflow-y-auto">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-200/80 dark:border-slate-700">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                      <span>📄</span> Structured Email Layout
+                    </span>
+                    <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded-full">
+                      ✓ Dynamic Candidate Placeholders Enabled
+                    </span>
+                  </div>
+
+                  {/* 1. Recruiter Greeting */}
+                  {activeTemplate.intro && (
+                    <div className="bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-slate-200/70 dark:border-slate-750 text-xs font-mono text-slate-700 dark:text-slate-200">
+                      <span className="text-[9px] font-bold text-slate-400 uppercase block mb-0.5 font-sans">Greeting</span>
+                      {activeTemplate.intro}
+                    </div>
+                  )}
+
+                  {/* 2. Skills Match */}
+                  {activeTemplate.skillsTemplate && (
+                    <div className="bg-indigo-50/60 dark:bg-indigo-950/40 p-2.5 rounded-lg border border-indigo-150 dark:border-indigo-800/60 text-xs font-mono text-indigo-900 dark:text-indigo-200">
+                      <span className="text-[9px] font-bold text-indigo-500 uppercase block mb-0.5 font-sans">Skills Match Section</span>
+                      {activeTemplate.skillsTemplate}
+                    </div>
+                  )}
+
+                  {/* 3. Core Body */}
+                  {activeTemplate.body && (
+                    <div className="bg-white dark:bg-slate-900 p-3 rounded-lg border border-slate-200/70 dark:border-slate-750 text-xs leading-relaxed font-sans text-slate-700 dark:text-slate-200">
+                      <span className="text-[9px] font-bold text-slate-400 uppercase block mb-1 font-sans">Core Message</span>
+                      <div dangerouslySetInnerHTML={{ __html: getCleanBody(activeTemplate.body).replace(/\n/g, "<br/>") }} />
+                    </div>
+                  )}
+
+                  {/* 4. Dynamic Sign-off Block */}
+                  {activeTemplate.signOff && (
+                    <div className="bg-emerald-50/60 dark:bg-emerald-950/40 p-3 rounded-lg border border-emerald-200/70 dark:border-emerald-800/60 text-xs font-mono text-emerald-950 dark:text-emerald-200 whitespace-pre-line">
+                      <div className="flex items-center justify-between mb-1 font-sans">
+                        <span className="text-[9px] font-bold text-emerald-700 dark:text-emerald-300 uppercase">Sign-off Block</span>
+                        <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-semibold">Dynamic Auto-fill from Profile</span>
+                      </div>
+                      {activeTemplate.signOff}
+                    </div>
+                  )}
+                </div>
 
                 {/* Ratings & Interactive Rate widget */}
                 <div className="bg-slate-50/50 dark:bg-slate-800/50 rounded p-4 border border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4">

@@ -48,7 +48,7 @@ public class EmailTemplateController {
                     .subject("Application for {{jobRole}} | {{hrName}}")
                     .intro("Dear {{recruiterName}},")
                     .skillsTemplate("I am writing to apply for the {{jobRole}} position. I noticed your team is looking for a developer experienced in {{skills}}, which maps closely to my skillset.")
-                    .body("Hi {{hrName}},<br/><br/>I hope you are doing well.<br/><br/>I am reaching out to express my interest in the <strong>{{jobRole}}</strong> position at <strong>{{companyName}}</strong>. Having worked with frontend systems, I believe my background aligns well with your team's current expansion goals.<br/><br/>Please find my profile details attached. I would love to connect and discuss how I can add value to {{companyName}}.<br/><br/>Best regards,<br/>Candidate User")
+                    .body("I am reaching out to express my interest in the <strong>{{jobRole}}</strong> position at <strong>{{companyName}}</strong>. Having worked with frontend systems, I believe my background aligns well with your team's current expansion goals.<br/><br/>Please find my profile details attached. I would love to connect and discuss how I can add value to {{companyName}}.")
                     .signOff("Regards,\n{{candidateName}}\n{{candidateMobile}}\n{{candidateEmail}}")
                     .isSystemTemplate(true)
                     .isPublic(true)
@@ -72,6 +72,10 @@ public class EmailTemplateController {
                     t.setSkillsTemplate("I am writing to apply for the {{jobRole}} position. I noticed your team is looking for a developer experienced in {{skills}}, which maps closely to my skillset.");
                     updated = true;
                 }
+                if (t.getBody() == null || t.getBody().contains("Candidate User") || t.getBody().contains("Hi {{hrName}}")) {
+                    t.setBody("I am reaching out to express my interest in the <strong>{{jobRole}}</strong> position at <strong>{{companyName}}</strong>. Having worked with frontend systems, I believe my background aligns well with your team's current expansion goals.<br/><br/>Please find my profile details attached. I would love to connect and discuss how I can add value to {{companyName}}.");
+                    updated = true;
+                }
                 if (t.getSignOff() == null || t.getSignOff().trim().isEmpty()) {
                     t.setSignOff("Regards,\n{{candidateName}}\n{{candidateMobile}}\n{{candidateEmail}}");
                     updated = true;
@@ -90,7 +94,7 @@ public class EmailTemplateController {
                     .subject("Follow up: {{jobRole}} application - {{companyName}}")
                     .intro("Hi {{recruiterName}},")
                     .skillsTemplate("I wanted to follow up on my application for the {{jobRole}} role. My hands-on skills in {{skills}} make me excited about joining {{companyName}}.")
-                    .body("Hi {{hrName}},<br/><br/>Hope your week is going well.<br/><br/>I wanted to quickly check in on my application for the <strong>{{jobRole}}</strong> role. I remain very excited about the opportunity to join <strong>{{companyName}}</strong> and would love to share more about my experience.<br/><br/>Looking forward to hearing from you.<br/><br/>Best,<br/>Candidate User")
+                    .body("I wanted to quickly check in on my application for the <strong>{{jobRole}}</strong> role. I remain very excited about the opportunity to join <strong>{{companyName}}</strong> and would love to share more about my experience.<br/><br/>Looking forward to hearing from you.")
                     .signOff("Regards,\n{{candidateName}}\n{{candidateMobile}}\n{{candidateEmail}}")
                     .isSystemTemplate(true)
                     .isPublic(true)
@@ -112,6 +116,10 @@ public class EmailTemplateController {
                 }
                 if (t.getSkillsTemplate() == null || t.getSkillsTemplate().trim().isEmpty()) {
                     t.setSkillsTemplate("I wanted to follow up on my application for the {{jobRole}} role. My hands-on skills in {{skills}} make me excited about joining {{companyName}}.");
+                    updated = true;
+                }
+                if (t.getBody() == null || t.getBody().contains("Candidate User") || t.getBody().contains("Hi {{hrName}}")) {
+                    t.setBody("I wanted to quickly check in on my application for the <strong>{{jobRole}}</strong> role. I remain very excited about the opportunity to join <strong>{{companyName}}</strong> and would love to share more about my experience.<br/><br/>Looking forward to hearing from you.");
                     updated = true;
                 }
                 if (t.getSignOff() == null || t.getSignOff().trim().isEmpty()) {
