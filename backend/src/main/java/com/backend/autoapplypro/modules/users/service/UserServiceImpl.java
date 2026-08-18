@@ -679,11 +679,41 @@ public class UserServiceImpl implements UserService {
         if (candidate.getResumeBytes() == null || candidate.getResumeBytes().length == 0) {
             throw new IllegalStateException("No resume uploaded to sync profile from.");
         }
-        return javaResumeParserService.parseResume(
+        ParsedResumeDto dto = javaResumeParserService.parseResume(
                 candidate.getResumeBytes(),
                 candidate.getResumeContentType(),
                 candidate.getResumeFilename()
         );
+
+        if (dto != null) {
+            if (dto.getSummary() != null && !dto.getSummary().trim().isEmpty()) {
+                candidate.setSummary(dto.getSummary());
+            }
+            if (dto.getExperience() != null && !dto.getExperience().isEmpty()) {
+                candidate.setExperience(dto.getExperience());
+            }
+            if (dto.getEducation() != null && !dto.getEducation().isEmpty()) {
+                candidate.setEducation(dto.getEducation());
+            }
+            if (dto.getCertifications() != null && !dto.getCertifications().isEmpty()) {
+                candidate.setCertifications(dto.getCertifications());
+            }
+            if (dto.getSkills() != null && !dto.getSkills().isEmpty()) {
+                java.util.Set<Skill> dbSkills = candidate.getSkills() != null ? new java.util.HashSet<>(candidate.getSkills()) : new java.util.HashSet<>();
+                for (String skillName : dto.getSkills()) {
+                    String trimmedName = skillName.trim();
+                    if (!trimmedName.isEmpty()) {
+                        Skill skill = skillRepository.findByNameIgnoreCase(trimmedName)
+                                .orElseGet(() -> skillRepository.save(Skill.builder().name(trimmedName).build()));
+                        dbSkills.add(skill);
+                    }
+                }
+                candidate.setSkills(dbSkills);
+            }
+            professionalProfileRepository.save(candidate);
+        }
+
+        return dto;
     }
 
     @Override

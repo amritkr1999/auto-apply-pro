@@ -152,11 +152,11 @@ class ResumeParser:
                 
                 model_name = self.config.ollama_llm_model
                 if "gemini-1.5-flash" in model_name.lower():
-                    model_name = "gemini-3.5-flash"
+                    model_name = "gemini-2.5-flash"
                 elif "gemini-1.5-pro" in model_name.lower():
                     model_name = "gemini-2.5-pro"
                 elif "gemini" not in model_name.lower():
-                    model_name = "gemini-3.5-flash"
+                    model_name = "gemini-2.5-flash"
                 
                 model = genai.GenerativeModel(
                     model_name=model_name,
