@@ -167,9 +167,10 @@ export const LandingPage: React.FC = () => {
       {/* ==================== Navigation Navbar ==================== */}
       <nav className="landing-nav">
         <div className="nav-container">
-          <a href="#" className="nav-logo flex items-center gap-2.5" aria-label="EasyNaukri Home">
+          <a href="#" className="nav-logo" aria-label="EasyNaukri Home">
             <img src="/branding/easynaukri_logo.png" alt="EasyNaukri Logo" className="h-9 w-9 rounded-xl object-contain shadow-xs select-none" />
-            <span className="hidden sm:inline-block font-extrabold text-xl tracking-tight text-slate-900 dark:text-white select-none whitespace-nowrap">EasyNaukri</span>
+            <span className="nav-logo-title hidden sm:inline-block">EasyNaukri</span>
+            <span className="nav-beta-badge">BETA</span>
           </a>
 
           <div className="nav-ctas">

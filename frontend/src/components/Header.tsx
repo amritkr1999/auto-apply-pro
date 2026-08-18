@@ -162,9 +162,12 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
               </svg>
             </button>
           )}
-          <Link to={getDashboardPath()} className="hover:opacity-90 transition-opacity flex items-center gap-2.5 shrink-0" aria-label="EasyNaukri Home">
+          <Link to={getDashboardPath()} className="hover:opacity-90 transition-opacity flex items-center gap-2 sm:gap-2.5 shrink-0" aria-label="EasyNaukri Home">
             <img src="/branding/easynaukri_logo.png" alt="EasyNaukri Logo" className="h-9 w-9 rounded-xl object-contain shadow-xs select-none" />
             <span className="hidden sm:inline-block font-extrabold text-xl tracking-tight text-slate-900 dark:text-white select-none whitespace-nowrap">EasyNaukri</span>
+            <span className="px-1.5 py-0.5 text-[10px] leading-none font-black uppercase tracking-wider text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/60 border border-sky-200 dark:border-sky-800/80 rounded-full shadow-xs select-none shrink-0">
+              BETA
+            </span>
           </Link>
           {user && (
             <nav className="hidden lg:flex items-center gap-6 whitespace-nowrap shrink-0">

@@ -331,13 +331,16 @@ export const SarkariNaukriPage: React.FC = () => {
             <div className="flex items-center gap-3">
               <span className="p-2 rounded-xl bg-amber-400 text-slate-950 font-bold">📢</span>
               <div>
-                <h3 className="font-bold text-slate-900 dark:text-amber-200 text-sm">Upcoming Official Govt Examination Notifications</h3>
-                <p className="text-xs text-slate-600 dark:text-slate-400">Preview of upcoming notifications being processed for auto-scraping and AI PDF breakdown.</p>
+                <h3 className="font-bold text-slate-900 dark:text-amber-200 text-sm">Autonomous Govt Job Ingestion Pipeline Live</h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400">Tracking UPSC, SSC, IBPS, RRB, NTA & 28 State PSCs 24/7 with zero human interference.</p>
               </div>
             </div>
-            <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-400 text-slate-950 uppercase tracking-wide shrink-0">
-              Feature Launching Q3 2026
-            </span>
+            <a
+              href="/government-exams"
+              className="px-4 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 hover:from-amber-300 hover:to-orange-400 transition shadow-md shrink-0"
+            >
+              Explore Live Portal →
+            </a>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -521,9 +524,17 @@ export const SarkariNaukriPage: React.FC = () => {
       {activeTab === "learning" && (
         <div className="space-y-6">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-6">
-            <div>
-              <h3 className="text-lg font-extrabold text-slate-900 dark:text-white">Sample Previous Year Questions (PYQs) & Answer Explanations</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Test your knowledge with authentic past year questions from UPSC, SSC, and Railway exams.</p>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-extrabold text-slate-900 dark:text-white">Sample Previous Year Questions (PYQs) & Answer Explanations</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Test your knowledge with authentic past year questions from UPSC, SSC, and Railway exams.</p>
+              </div>
+              <a
+                href="/government-exams"
+                className="px-4 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 hover:from-amber-300 hover:to-orange-400 transition shadow-sm shrink-0"
+              >
+                Download Year-Wise PDF Papers 📄 →
+              </a>
             </div>
 
             <div className="space-y-4">

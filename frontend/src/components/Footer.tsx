@@ -7,7 +7,7 @@ export const Footer: React.FC = () => {
       <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
         <div className="flex flex-col sm:flex-row items-center gap-2">
           <img src="/branding/easynaukri_logo.png" alt="EasyNaukri Logo" className="w-5 h-5 rounded-md object-contain shadow-xs select-none shrink-0" />
-          <span>© {new Date().getFullYear()} EasyNaukri. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} EasyNaukri (Beta). All rights reserved.</span>
           <span className="font-semibold text-indigo-600 dark:text-indigo-400">Made with ❤️ by an Indian for India 🇮🇳</span>
         </div>
         <div className="flex flex-wrap items-center gap-5">

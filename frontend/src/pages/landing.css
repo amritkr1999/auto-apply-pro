@@ -103,16 +103,48 @@ html.dark .landing-root,
   font-size: 1.4rem;
   font-weight: 800;
   text-decoration: none;
-  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   transition: opacity 0.2s;
   white-space: nowrap;
   flex-shrink: 0;
+}
+
+.nav-logo-title {
+  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.4rem;
+}
+
+.nav-beta-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--accent-cyan);
+  -webkit-text-fill-color: var(--accent-cyan);
+  background: rgba(2, 132, 199, 0.1);
+  border: 1px solid rgba(2, 132, 199, 0.25);
+  border-radius: 9999px;
+  line-height: 1;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+html.dark .nav-beta-badge,
+.dark .nav-beta-badge {
+  color: var(--accent-cyan);
+  -webkit-text-fill-color: var(--accent-cyan);
+  background: rgba(56, 189, 248, 0.15);
+  border-color: rgba(56, 189, 248, 0.3);
 }
 
 .nav-logo:hover {
