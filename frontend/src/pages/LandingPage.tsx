@@ -29,6 +29,7 @@ export const LandingPage: React.FC = () => {
     { id: "intro", label: "Intro" },
     { id: "what-we-do", label: "Workflow Automation" },
     { id: "benefits", label: "Key Advantages" },
+    { id: "govt-jobs", label: "Sarkari Naukri Engine" },
     { id: "google-oauth", label: "Google OAuth & Privacy" },
     { id: "pricing", label: "Pricing Tiers" },
     { id: "testimonials", label: "Success Stories" },
@@ -94,18 +95,18 @@ export const LandingPage: React.FC = () => {
       "@context": "https://schema.org",
       "@type": "WebApplication",
       "name": "EasyNaukri",
-      "alternateName": "EasyNaukri Auto Apply",
+      "alternateName": "EasyNaukri Auto Apply & Outreach",
       "url": "https://easynaukri.online/",
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "All",
-      "description": "EasyNaukri is an automated job application & resume matching platform. Streamline your job search, optimize your resume, and send recruiter outreach emails effortlessly."
+      "description": "EasyNaukri is an AI-powered auto job application and cold outreach email platform. Optimize your resume, streamline recruiter outreach, and automate job searches with one click."
     },
     {
       "@context": "https://schema.org",
       "@type": "Organization",
       "name": "EasyNaukri",
       "url": "https://easynaukri.online/",
-      "logo": "https://easynaukri.online/favicon.svg"
+      "logo": "https://easynaukri.online/branding/easynaukri_logo.png"
     },
     {
       "@context": "https://schema.org",
@@ -142,8 +143,8 @@ export const LandingPage: React.FC = () => {
   return (
     <div className="landing-root">
       <SEOHead
-        title="EasyNaukri - Automated Job Application & Resume Matching Platform"
-        description="Streamline your job search with EasyNaukri. Automated resume matching, AI-assisted recruiter outreach, and personalized application tracking."
+        title="EasyNaukri - Auto Job Application & Cold Outreach Email Platform"
+        description="EasyNaukri is an AI-powered auto job application and cold outreach email platform. Optimize your resume, streamline recruiter outreach, and automate job searches with one click."
         canonicalUrl="https://easynaukri.online/"
         jsonLd={landingPageJsonLd}
       />
@@ -174,6 +175,10 @@ export const LandingPage: React.FC = () => {
           <div className="nav-ctas">
             {/* Desktop-only Action Controls */}
             <div className="nav-desktop-only" style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+              <Link to="/sarkari-naukri-alerts" className="landing-btn btn-text" style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--amber-400)" }}>
+                🇮🇳 Govt Jobs
+              </Link>
+
               <button
                 type="button"
                 onClick={() => setShowMobileAppModal(true)}
@@ -251,6 +256,11 @@ export const LandingPage: React.FC = () => {
                 Sign In / Login
               </Link>
             )}
+
+            <Link to="/sarkari-naukri-alerts" onClick={() => setMobileMenuOpen(false)} style={{ fontSize: "0.9rem", fontWeight: 700, color: "var(--amber-400)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <span>🇮🇳</span>
+              <span>Sarkari Naukri Alerts</span>
+            </Link>
 
             <div style={{ height: "1px", background: "var(--card-border)", margin: "0.25rem 0" }}></div>
 
@@ -466,6 +476,59 @@ export const LandingPage: React.FC = () => {
               </p>
             </div>
           </div>
+
+          <div className="benefit-card">
+            <div className="benefit-icon-wrapper">🇮🇳</div>
+            <div className="benefit-info">
+              <h3 className="benefit-title">Sarkari Naukri &amp; Govt Job Engine</h3>
+              <p className="benefit-description">
+                Track UPSC, SSC, RRB, Banking notifications, calculate age eligibility, and practice past year question (PYQ) banks.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ==================== Sarkari Naukri & Govt Job Section ==================== */}
+      <section id="govt-jobs" className="landing-section">
+        <div className="section-header">
+          <span className="section-label">Government Jobs India</span>
+          <h2 className="section-title">🇮🇳 Sarkari Naukri Alerts &amp; Exam Prep</h2>
+          <p className="section-subtitle">
+            Never miss an official government job deadline. Monitor gazette updates, calculate category age eligibility, practice PYQs, and check syllabus weightage.
+          </p>
+        </div>
+
+        <div className="steps-container" style={{ marginBottom: "2.5rem" }}>
+          <div className="step-card">
+            <div className="step-icon">📢</div>
+            <h3 className="step-title">Real-Time Gazette Alerts</h3>
+            <p className="step-description">
+              Instant notification updates for UPSC, SSC (CGL, CHSL, JE), Indian Railways (RRB NTPC), IBPS Banking, Defence, and 28 State PSCs.
+            </p>
+          </div>
+
+          <div className="step-card">
+            <div className="step-icon">🧮</div>
+            <h3 className="step-title">Age &amp; Category Eligibility</h3>
+            <p className="step-description">
+              Calculate your exact age as of cutoff dates with built-in relaxation rules for General, OBC (+3y), SC/ST (+5y), and PwBD (+10y).
+            </p>
+          </div>
+
+          <div className="step-card">
+            <div className="step-icon">📚</div>
+            <h3 className="step-title">PYQs &amp; Exam Syllabus</h3>
+            <p className="step-description">
+              Access topic-wise marks distribution, negative marking rules, and authentic past year question banks with step-by-step AI explanations.
+            </p>
+          </div>
+        </div>
+
+        <div style={{ textAlign: "center" }}>
+          <Link to="/sarkari-naukri-alerts" className="landing-btn btn-primary" style={{ padding: "0.9rem 2.2rem", fontSize: "1rem" }}>
+            Explore Sarkari Naukri Engine →
+          </Link>
         </div>
       </section>
 
@@ -707,7 +770,7 @@ export const LandingPage: React.FC = () => {
                 Refer Friends & Get 7 Days Premium Free 🎁
               </h2>
               <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem", lineHeight: "1.6" }}>
-                Invite job seekers to AutoApplyPro using your unique referral code. When your referred friend subscribes to any plan, both of you automatically unlock 7 Days of Premium features free!
+                Invite job seekers to EasyNaukri using your unique referral code. When your referred friend subscribes to any plan, both of you automatically unlock 7 Days of Premium features free!
               </p>
             </div>
             <div>
@@ -833,6 +896,13 @@ export const LandingPage: React.FC = () => {
             <p className="faq-content">
               Your security is our priority. We encrypt your personal data and documents during transit
               and at rest. OAuth tokens are stored securely, and we never sell your personal information or resume files to third-party data brokers.
+            </p>
+          </details>
+
+          <details className="faq-item" name="landing-faqs">
+            <summary>Does EasyNaukri provide Sarkari Naukri and Government Job alerts?</summary>
+            <p className="faq-content">
+              Yes! EasyNaukri features a dedicated Sarkari Naukri Engine that tracks central and state government job gazettes (UPSC, SSC, RRB, IBPS, Defence, State PSCs), provides an age &amp; category eligibility calculator, and offers PYQ practice materials. Visit our <Link to="/sarkari-naukri-alerts" style={{ color: "var(--accent-cyan)", textDecoration: "underline" }}>Sarkari Naukri Alerts page</Link> to learn more.
             </p>
           </details>
         </div>

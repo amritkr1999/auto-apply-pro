@@ -12,8 +12,8 @@ export interface SEOHeadProps {
 }
 
 export const SEOHead: React.FC<SEOHeadProps> = ({
-  title = "EasyNaukri - Automated Job Application & Resume Matching Platform",
-  description = "EasyNaukri is an automated job application & resume matching platform. Streamline your job search, optimize your resume, and send recruiter outreach emails effortlessly.",
+  title = "EasyNaukri - Auto Job Application & Cold Outreach Email Platform",
+  description = "EasyNaukri is an AI-powered auto job application and cold outreach email platform. Optimize your resume, streamline recruiter outreach, and automate job searches with one click.",
   canonicalUrl = "https://easynaukri.online/",
   ogImage = "https://easynaukri.online/dashboard_mockup.png",
   ogType = "website",

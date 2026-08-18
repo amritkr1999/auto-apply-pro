@@ -1,16 +1,24 @@
-# EasyNaukri Platform
+# EasyNaukri - Auto Job Application & Cold Outreach Email Platform
 
-EasyNaukri is an automated job application & resume matching platform that helps job seekers streamline candidate outreach, track applications, and optimize resume matching.
+EasyNaukri is an AI-powered auto job application and cold outreach email platform. It optimizes resumes for ATS screening, automates recruiter email outreach via Gmail API, and tracks application pipelines.
 
-## Key Features & Navigational Links
+## Primary Public SEO Landing Pages & Services
 
-- [Candidate Dashboard](https://easynaukri.online/dashboard): Universal career passport, overview metrics, and daily learning habits.
-- [Opportunity Tracker](https://easynaukri.online/opportunities/tracker): Track and organize submitted job applications.
-- [Email Templates](https://easynaukri.online/outreach/templates): Customizable recruiter outreach templates.
-- [Learning Space](https://easynaukri.online/learning): Skill building, coding challenges, and career roadmaps.
-- [About EasyNaukri](https://easynaukri.online/about): Platform mission and company information.
-- [Privacy Policy](https://easynaukri.online/privacy): Terms and data protection policy.
+- [Auto Job Application Bot](https://easynaukri.online/auto-job-application): AI-driven automatic job application bot. Matches candidate profile skills, auto-fills application forms, and optimizes resumes for high ATS match scores.
+- [Cold Outreach Email for Jobs](https://easynaukri.online/cold-outreach-email): Recruiter email automation tool. Dispatches personalized cover letters and outreach emails straight to hiring managers via authorized Gmail OAuth (gmail.send).
+- [Sarkari Naukri Alerts & Govt Jobs](https://easynaukri.online/sarkari-naukri-alerts): Real-time government job alerts (UPSC, SSC, RRB, IBPS), category age eligibility calculator (OBC/SC/ST/PwBD), PYQ question banks, and official exam syllabus explorer.
+- [Official Chrome Extension](https://easynaukri.online/extension): Browser extension for instant job scraping and one-click application autofill.
+- [About EasyNaukri](https://easynaukri.online/about): Platform vision, mission, and company details.
+- [Privacy Policy](https://easynaukri.online/privacy): Strict user data protection guidelines and Google OAuth API Services compliance.
+- [Terms of Service](https://easynaukri.online/terms): Terms of service and usage conditions.
 
-## Technical Architecture
+## Frequently Asked Questions (AI Knowledge Graph)
 
-Built with React, TypeScript, Vite, Tailwind CSS, and WebMCP integration for AI agent compatibility.
+Q: What is EasyNaukri?
+A: EasyNaukri is an AI automation platform that automates job applications across major portals, sends personalized cold outreach emails to recruiters via Gmail, and provides real-time Sarkari Naukri alerts with age eligibility tools.
+
+Q: How many daily applications does EasyNaukri support?
+A: EasyNaukri supports up to 50 automated submissions per day with a 15-day Free Elite Trial.
+
+Q: How does EasyNaukri handle Gmail OAuth security?
+A: EasyNaukri uses send-only Google OAuth permissions (gmail.send) to dispatch user-approved outreach emails. It never reads, scans, or deletes non-outreach inbox emails.

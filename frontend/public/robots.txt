@@ -1,18 +1,34 @@
 User-agent: *
 Allow: /
-Allow: /dashboard
+Allow: /auto-job-application
+Allow: /cold-outreach-email
+Allow: /sarkari-naukri-alerts
+Allow: /sarkari-naukri
 Allow: /login
 Allow: /privacy
 Allow: /terms
 Allow: /about
 Allow: /careers
-Allow: /learning
+Allow: /contact
+Allow: /extension
 Allow: /profile/
 Allow: /card/
 Allow: /assets/
+Allow: /branding/
 
-# Disallow internal admin & draft queues from search indexing
+# Disallow private & auth-locked application dashboards
+Disallow: /dashboard
+Disallow: /dashboard/*
+Disallow: /recruiter-dashboard
+Disallow: /recruiter-dashboard/*
+Disallow: /company-dashboard
+Disallow: /company-dashboard/*
+Disallow: /settings/*
+Disallow: /profile/settings
+Disallow: /candidate/profile
+Disallow: /opportunities/
+Disallow: /outreach/
+Disallow: /billing/
 Disallow: /admin/
-Disallow: /outreach/queue
 
 Sitemap: https://easynaukri.online/sitemap.xml

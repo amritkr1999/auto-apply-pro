@@ -45,7 +45,7 @@ export const ReferralProgramModal: React.FC<Props> = ({ userId, isOpen, onClose 
                   </span>
                 </div>
                 <p className="text-xs text-indigo-100 mt-1">
-                  Invite friends to AutoApplyPro. Earn 7 Days Premium Trial on their 1st paid subscription!
+                  Invite friends to EasyNaukri. Earn 7 Days Premium Trial on their 1st paid subscription!
                 </p>
               </div>
             </div>
@@ -188,7 +188,7 @@ export const ReferralProgramModal: React.FC<Props> = ({ userId, isOpen, onClose 
 
         {/* Footer */}
         <div className="bg-slate-50 dark:bg-slate-800/80 px-6 py-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
-          <span className="text-xs text-slate-400">AutoApplyPro Growth Network</span>
+          <span className="text-xs text-slate-400">EasyNaukri Growth Network</span>
           <Button onClick={onClose} variant="secondary">Close Preview</Button>
         </div>
       </div>

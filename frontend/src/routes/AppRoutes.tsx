@@ -29,6 +29,9 @@ const AdminModerationList = lazy(() => import("../features/learning/components/A
 const BillingPortal = lazy(() => import("../features/billing/components/BillingPortal"));
 const TelemetryDashboard = lazy(() => import("../features/dashboard/components/views/TelemetryDashboard").then((m: any) => ({ default: m.TelemetryDashboard || m.default })));
 const SarkariNaukriPage = lazy(() => import("../pages/SarkariNaukriPage"));
+const AutoJobApplicationPage = lazy(() => import("../pages/AutoJobApplicationPage"));
+const ColdOutreachEmailPage = lazy(() => import("../pages/ColdOutreachEmailPage"));
+const SarkariNaukriAlertsPage = lazy(() => import("../pages/SarkariNaukriAlertsPage"));
 
 const PublicProfilePage = lazy(() => import("../pages/PublicProfilePage"));
 const PublicPlaqueCardPage = lazy(() => import("../pages/PublicPlaqueCardPage"));
@@ -64,6 +67,11 @@ export const AppRoutes: React.FC = () => {
         <Route path="/profile/:username" element={<PublicProfilePage />} />
         <Route path="/card/:username" element={<PublicPlaqueCardPage />} />
         <Route path="/extension" element={<ExtensionLandingPage />} />
+        <Route path="/auto-job-application" element={<AutoJobApplicationPage />} />
+        <Route path="/cold-outreach-email" element={<ColdOutreachEmailPage />} />
+        <Route path="/sarkari-naukri-alerts" element={<SarkariNaukriAlertsPage />} />
+        <Route path="/sarkari-naukri" element={<SarkariNaukriPage />} />
+        <Route path="/govt-jobs" element={<Navigate to="/sarkari-naukri-alerts" replace />} />
 
         <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
           <Route
@@ -100,8 +108,6 @@ export const AppRoutes: React.FC = () => {
           <Route path="/billing/portal" element={<BillingPortal />} />
           <Route path="/pricing" element={<BillingPortal />} />
           <Route path="/admin/telemetry" element={<TelemetryDashboard />} />
-          <Route path="/sarkari-naukri" element={<SarkariNaukriPage />} />
-          <Route path="/govt-jobs" element={<Navigate to="/sarkari-naukri" replace />} />
         </Route>
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
