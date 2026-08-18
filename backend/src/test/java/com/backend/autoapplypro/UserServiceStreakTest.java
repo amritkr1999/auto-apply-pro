@@ -57,6 +57,7 @@ class UserServiceStreakTest {
         LoginRequest request = new LoginRequest("test@example.com", "password");
 
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailIgnoreCase("test@example.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("password", "hashedPassword")).thenReturn(true);
         when(jwtUtil.generateToken(any(), any(), any())).thenReturn("mockToken");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -83,6 +84,7 @@ class UserServiceStreakTest {
         LoginRequest request = new LoginRequest("test@example.com", "password");
 
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailIgnoreCase("test@example.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("password", "hashedPassword")).thenReturn(true);
         when(jwtUtil.generateToken(any(), any(), any())).thenReturn("mockToken");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -108,6 +110,7 @@ class UserServiceStreakTest {
         LoginRequest request = new LoginRequest("test@example.com", "password");
 
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailIgnoreCase("test@example.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("password", "hashedPassword")).thenReturn(true);
         when(jwtUtil.generateToken(any(), any(), any())).thenReturn("mockToken");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -133,6 +136,7 @@ class UserServiceStreakTest {
         LoginRequest request = new LoginRequest("test@example.com", "password");
 
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailIgnoreCase("test@example.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("password", "hashedPassword")).thenReturn(true);
         when(jwtUtil.generateToken(any(), any(), any())).thenReturn("mockToken");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));

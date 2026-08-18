@@ -115,6 +115,7 @@ class UserDeletionTest {
         LoginRequest request = new LoginRequest("pending@example.com", "password");
 
         when(userRepository.findByEmail("pending@example.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailIgnoreCase("pending@example.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("password", "hashedPassword")).thenReturn(true);
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(jwtUtil.generateToken(any(), any(), any())).thenReturn("mockToken");
