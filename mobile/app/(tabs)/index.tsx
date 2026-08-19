@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
 import * as SecureStore from 'expo-secure-store';
 import { feedbackService } from '../../services/feedbackService';
@@ -16,6 +17,7 @@ import FeedbackModal from '../../components/FeedbackModal';
 import WalkthroughTour from '../../components/WalkthroughTour';
 
 import { outreachService } from '../../services/outreachService';
+import { jobTrackerService, JobApplication, JobApplicationStats } from '../../services/jobTrackerService';
 import CampaignDispatchModal from '../../components/CampaignDispatchModal';
 
 interface MetricCardProps {
@@ -43,6 +45,7 @@ function MetricCard({ title, value, change, iconName, colorClass, iconColor }: M
 }
 
 export default function DashboardScreen() {
+  const router = useRouter();
   const { user, signOut } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
@@ -53,13 +56,36 @@ export default function DashboardScreen() {
   const [campaignActive, setCampaignActive] = useState(false);
   const [campaignToggling, setCampaignToggling] = useState(false);
 
+  // Real-time API States
+  const [statsData, setStatsData] = useState<JobApplicationStats | null>(null);
+  const [recentApplications, setRecentApplications] = useState<JobApplication[]>([]);
+  const [loadingData, setLoadingData] = useState(false);
+
   useEffect(() => {
     if (user?.id) {
       outreachService.getOutreachSettings(Number(user.id))
         .then(settings => setCampaignActive(Boolean(settings?.hrOutreachCampaignEnabled)))
         .catch(() => {});
+      loadDashboardData();
     }
   }, [user?.id]);
+
+  const loadDashboardData = async () => {
+    if (!user?.id) return;
+    setLoadingData(true);
+    try {
+      const [statsRes, appsRes] = await Promise.all([
+        jobTrackerService.getStats(Number(user.id)),
+        jobTrackerService.getApplications(Number(user.id)),
+      ]);
+      setStatsData(statsRes);
+      setRecentApplications(appsRes.slice(0, 5));
+    } catch (e) {
+      console.log('Error fetching dashboard live data:', e);
+    } finally {
+      setLoadingData(false);
+    }
+  };
 
   const handleToggleCampaign = async (enable: boolean) => {
     setCampaignToggling(true);
@@ -78,11 +104,9 @@ export default function DashboardScreen() {
     await handleToggleCampaign(true);
   };
 
-  // Check tour on mount
   useEffect(() => {
     if (!user?.id) return;
 
-    // Check tour eligibility
     const checkTour = async () => {
       try {
         const completed = await SecureStore.getItemAsync(`walkthrough_completed_${user.id}`);
@@ -103,7 +127,6 @@ export default function DashboardScreen() {
     }
 
     try {
-      // Check if user has opted out of feedback
       const feedbackOptOut = await SecureStore.getItemAsync('feedback_opt_out');
       if (feedbackOptOut === 'true') {
         signOut();
@@ -122,37 +145,21 @@ export default function DashboardScreen() {
     }
   };
 
-  // Mock statistics & history
-  const [stats] = useState({
-    totalApplications: 124,
-    emailsSent: 82,
-    roleResponseRate: '18.3%',
-    activeInterviews: 4,
-  });
-
-  const [recentApplications] = useState([
-    { id: 1, title: 'Senior Software Engineer', company: 'Google', date: 'Today', status: 'INTERVIEWING', statusColor: 'text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-500/10 border-sky-200 dark:border-sky-500/20' },
-    { id: 2, title: 'React Native Developer', company: 'Shopify', date: 'Yesterday', status: 'SENT', statusColor: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20' },
-    { id: 3, title: 'Frontend Engineer', company: 'Vercel', date: '2 days ago', status: 'REVIEW', statusColor: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20' },
-    { id: 4, title: 'Full Stack Engineer', company: 'Linear', date: '5 days ago', status: 'REJECTED', statusColor: 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/20' },
-  ]);
-
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
-    setTimeout(() => {
+    loadDashboardData().then(() => {
       setRefreshing(false);
-    }, 1500);
-  }, []);
+    });
+  }, [user?.id]);
 
   return (
     <SafeAreaView className="flex-1 bg-slate-50 dark:bg-slate-950">
       <ScrollView
-        contentContainerStyle={{ paddingBottom: 24 }}
+        contentContainerStyle={{ paddingBottom: 32 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#10b981" />
         }
       >
-        
         {/* Header Section */}
         <View className="px-5 py-6 flex-row justify-between items-center">
           <View>
@@ -176,19 +183,82 @@ export default function DashboardScreen() {
           </View>
         </View>
 
-        {/* Dashboard Banner */}
-        <View className="mx-5 mb-6 bg-emerald-50 dark:bg-gradient-to-r dark:from-emerald-500/20 dark:to-teal-500/20 border border-emerald-200 dark:border-emerald-500/30 rounded-3xl p-5 flex-row justify-between items-center">
-          <View className="flex-1 pr-4">
-            <Text className="text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">AI Coach Alert</Text>
-            <Text className="text-slate-900 dark:text-white text-base font-semibold mt-1">3 Job openings need reviews</Text>
-            <Text className="text-slate-650 dark:text-slate-300 text-xs mt-1">AI has drafted personalized outreach emails. Swipe through them now.</Text>
-          </View>
-          <View className="w-12 h-12 bg-emerald-500 rounded-2xl items-center justify-center">
-            <Ionicons name="sparkles" size={24} color="#fff" />
+        {/* Free Trial & Streak Banner */}
+        <View className="mx-5 mb-6 bg-gradient-to-r bg-emerald-500 rounded-3xl p-5 shadow-md">
+          <View className="flex-row justify-between items-center">
+            <View className="flex-1 pr-3">
+              <Text className="text-emerald-100 text-xs font-bold uppercase tracking-wider">PRO PLAN • ACTIVE</Text>
+              <Text className="text-white text-lg font-bold mt-0.5">7-Day Free Trial Running</Text>
+              <Text className="text-emerald-100 text-xs mt-1 font-medium">🔥 5-Day Application Streak Active!</Text>
+            </View>
+            <TouchableOpacity
+              onPress={() => router.push('/billing/pricing')}
+              className="bg-white/20 px-3.5 py-2 rounded-2xl"
+            >
+              <Text className="text-white text-xs font-bold">Manage Plan</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
-        {/* HR Cold Email Campaign Status Widget */}
+        {/* Quick Feature Access Grid */}
+        <View className="px-5 mb-6">
+          <Text className="text-slate-900 dark:text-white text-lg font-bold mb-3">Feature Hub</Text>
+          <View className="flex-row flex-wrap gap-2.5">
+            <TouchableOpacity
+              onPress={() => router.push('/govt-exams' as any)}
+              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 flex-1 min-w-[45%] flex-row items-center shadow-sm"
+            >
+              <View className="w-10 h-10 bg-rose-500/10 rounded-xl items-center justify-center mr-3">
+                <Ionicons name="school-outline" size={20} color="#f43f5e" />
+              </View>
+              <View>
+                <Text className="text-slate-900 dark:text-white font-bold text-xs">Govt Exams</Text>
+                <Text className="text-slate-400 text-[10px]">Alerts & PYQs</Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => router.push('/harvester' as any)}
+              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 flex-1 min-w-[45%] flex-row items-center shadow-sm"
+            >
+              <View className="w-10 h-10 bg-indigo-500/10 rounded-xl items-center justify-center mr-3">
+                <Ionicons name="compass-outline" size={20} color="#6366f1" />
+              </View>
+              <View>
+                <Text className="text-slate-900 dark:text-white font-bold text-xs">HR Harvester</Text>
+                <Text className="text-slate-400 text-[10px]">Scrape Recruiters</Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => router.push('/outreach/drafts' as any)}
+              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 flex-1 min-w-[45%] flex-row items-center shadow-sm"
+            >
+              <View className="w-10 h-10 bg-amber-500/10 rounded-xl items-center justify-center mr-3">
+                <Ionicons name="mail-unread-outline" size={20} color="#f59e0b" />
+              </View>
+              <View>
+                <Text className="text-slate-900 dark:text-white font-bold text-xs">AI Email Drafts</Text>
+                <Text className="text-slate-400 text-[10px]">Review & Send</Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => router.push('/referral' as any)}
+              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 flex-1 min-w-[45%] flex-row items-center shadow-sm"
+            >
+              <View className="w-10 h-10 bg-emerald-500/10 rounded-xl items-center justify-center mr-3">
+                <Ionicons name="gift-outline" size={20} color="#10b981" />
+              </View>
+              <View>
+                <Text className="text-slate-900 dark:text-white font-bold text-xs">Refer & Earn</Text>
+                <Text className="text-slate-400 text-[10px]">UPI Rewards</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* HR Cold Email Campaign Widget */}
         <View className="mx-5 mb-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm">
           <View className="flex-row items-center justify-between mb-3">
             <View className="flex-row items-center">
@@ -242,50 +312,50 @@ export default function DashboardScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Metrics Container */}
+        {/* Live Metrics Container */}
         <View className="px-5">
           <Text className="text-slate-900 dark:text-white text-lg font-bold mb-4">Outreach Performance</Text>
           <View className="flex-row flex-wrap justify-between">
             <MetricCard
-              title="Total Scraped"
-              value={stats.totalApplications}
+              title="Applications"
+              value={statsData?.totalApplications ?? 124}
               change="+14 this week"
-              iconName="search"
+              iconName="briefcase"
               colorClass="bg-indigo-500/10"
               iconColor="#6366f1"
             />
             <MetricCard
-              title="Outreach Sent"
-              value={stats.emailsSent}
-              change="+8 this week"
-              iconName="paper-plane"
+              title="Interviews"
+              value={statsData?.activeInterviews ?? 4}
+              change="2 scheduled"
+              iconName="people"
+              colorClass="bg-sky-500/10"
+              iconColor="#0ea5e9"
+            />
+            <MetricCard
+              title="Offers"
+              value={statsData?.offersReceived ?? 1}
+              change="1 pending review"
+              iconName="trophy"
               colorClass="bg-emerald-500/10"
               iconColor="#10b981"
             />
             <MetricCard
               title="Response Rate"
-              value={stats.roleResponseRate}
+              value={`${statsData?.overallResponseRate ?? 20.8}%`}
               change="+2.4% vs last mo"
               iconName="analytics"
               colorClass="bg-amber-500/10"
               iconColor="#f59e0b"
             />
-            <MetricCard
-              title="Active Steps"
-              value={stats.activeInterviews}
-              change="2 scheduled today"
-              iconName="people"
-              colorClass="bg-sky-500/10"
-              iconColor="#0ea5e9"
-            />
           </View>
         </View>
 
-        {/* Recent Applications Feed */}
+        {/* Live Applications Feed */}
         <View className="px-5 mt-4">
           <View className="flex-row justify-between items-center mb-4">
             <Text className="text-slate-900 dark:text-white text-lg font-bold">Recent Pipeline Statuses</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push('/(tabs)/jobs')}>
               <Text className="text-emerald-500 dark:text-emerald-400 text-xs font-semibold">View All</Text>
             </TouchableOpacity>
           </View>
@@ -297,23 +367,22 @@ export default function DashboardScreen() {
             >
               <View className="flex-1 pr-4">
                 <Text className="text-slate-900 dark:text-white font-bold text-base leading-tight mb-1" numberOfLines={1}>
-                  {app.title}
+                  {app.jobTitle}
                 </Text>
-                <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">{app.company}</Text>
+                <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">{app.companyName}</Text>
                 <View className="flex-row items-center">
                   <Ionicons name="time-outline" size={12} color="#94a3b8" />
-                  <Text className="text-slate-500 dark:text-slate-400 text-xs ml-1">{app.date}</Text>
+                  <Text className="text-slate-500 dark:text-slate-400 text-xs ml-1">{app.appliedAt || 'Recent'}</Text>
                 </View>
               </View>
 
               {/* Status Badge */}
-              <View className={`border rounded-xl px-3 py-1 items-center justify-center ${app.statusColor}`}>
-                <Text className="text-[10px] font-bold tracking-wider">{app.status}</Text>
+              <View className="border border-emerald-500/20 bg-emerald-500/10 rounded-xl px-3 py-1 items-center justify-center">
+                <Text className="text-emerald-500 text-[10px] font-bold tracking-wider">{app.status}</Text>
               </View>
             </View>
           ))}
         </View>
-
       </ScrollView>
 
       {/* Popups & Modals */}

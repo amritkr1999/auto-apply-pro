@@ -409,6 +409,58 @@ export default function ProfileScreen() {
         <View className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-3 mb-6 space-y-2">
           
           <TouchableOpacity
+            onPress={() => router.push('/govt-exams' as any)}
+            className="flex-row items-center justify-between p-3 rounded-2xl active:bg-slate-50 dark:active:bg-slate-950"
+          >
+            <View className="flex-row items-center">
+              <View className="w-9 h-9 bg-rose-500/10 rounded-xl items-center justify-center mr-3">
+                <Ionicons name="school-outline" size={18} color="#f43f5e" />
+              </View>
+              <Text className="text-slate-900 dark:text-white font-bold text-sm">Govt Exams & Sarkari Hub</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#94a3b8" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => router.push('/harvester' as any)}
+            className="flex-row items-center justify-between p-3 rounded-2xl active:bg-slate-50 dark:active:bg-slate-950"
+          >
+            <View className="flex-row items-center">
+              <View className="w-9 h-9 bg-indigo-500/10 rounded-xl items-center justify-center mr-3">
+                <Ionicons name="compass-outline" size={18} color="#6366f1" />
+              </View>
+              <Text className="text-slate-900 dark:text-white font-bold text-sm">HR Harvester & Scraper</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#94a3b8" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => router.push('/outreach/drafts' as any)}
+            className="flex-row items-center justify-between p-3 rounded-2xl active:bg-slate-50 dark:active:bg-slate-950"
+          >
+            <View className="flex-row items-center">
+              <View className="w-9 h-9 bg-amber-500/10 rounded-xl items-center justify-center mr-3">
+                <Ionicons name="mail-unread-outline" size={18} color="#f59e0b" />
+              </View>
+              <Text className="text-slate-900 dark:text-white font-bold text-sm">AI Cold Email Drafts</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#94a3b8" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => router.push('/referral' as any)}
+            className="flex-row items-center justify-between p-3 rounded-2xl active:bg-slate-50 dark:active:bg-slate-950"
+          >
+            <View className="flex-row items-center">
+              <View className="w-9 h-9 bg-emerald-500/10 rounded-xl items-center justify-center mr-3">
+                <Ionicons name="gift-outline" size={18} color="#10b981" />
+              </View>
+              <Text className="text-slate-900 dark:text-white font-bold text-sm">Referral Program & UPI Rewards</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#94a3b8" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
             onPress={() => router.push('/outreach/templates')}
             className="flex-row items-center justify-between p-3 rounded-2xl active:bg-slate-50 dark:active:bg-slate-950"
           >
@@ -466,40 +518,27 @@ export default function ProfileScreen() {
         <Text className="text-slate-900 dark:text-white text-lg font-bold mb-4 mt-2">Appearance</Text>
         <View className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 mb-6">
           <Text className="text-slate-500 dark:text-slate-400 text-xs mt-0.5 leading-relaxed mb-4">
-            Customize how EasyNaukri looks on your device. Choose Light, Dark, or System Default theme.
+            Customize how Auto Apply Pro looks on your device. Choose Light, Dark, or System Default theme.
           </Text>
           <View className="flex-row bg-slate-100 dark:bg-slate-950 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800">
             {(['system', 'light', 'dark'] as const).map((mode) => {
               const isActive = themeMode === mode;
-              const isDark = mode === 'dark';
               return (
                 <TouchableOpacity
                   key={mode}
-                  onPress={() => {
-                    if (isDark) {
-                      Alert.alert('Coming Soon', 'Dark mode is currently under development and coming soon!');
-                      return;
-                    }
-                    setTheme(mode);
-                  }}
+                  onPress={() => setTheme(mode)}
                   className={`flex-1 py-3 items-center justify-center rounded-xl transition-all ${
-                    isDark
-                      ? 'bg-transparent opacity-50'
-                      : isActive
+                    isActive
                       ? 'bg-white dark:bg-slate-900 shadow-sm border border-slate-200/50 dark:border-slate-800'
                       : 'bg-transparent'
                   }`}
                 >
                   <Text
                     className={`font-semibold text-xs capitalize ${
-                      isDark
-                        ? 'text-slate-400 dark:text-slate-600'
-                        : isActive
-                        ? 'text-emerald-500'
-                        : 'text-slate-500 dark:text-slate-400'
+                      isActive ? 'text-emerald-500 font-bold' : 'text-slate-500 dark:text-slate-400'
                     }`}
                   >
-                    {isDark ? 'dark ⏳' : mode}
+                    {mode}
                   </Text>
                 </TouchableOpacity>
               );

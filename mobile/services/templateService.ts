@@ -5,6 +5,9 @@ export interface EmailTemplate {
   name: string;
   subject: string;
   body: string;
+  intro?: string;
+  skillsTemplate?: string;
+  signOff?: string;
   isDefault?: boolean;
   category?: string;
   updatedAt?: string;
