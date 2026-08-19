@@ -47,6 +47,16 @@ export const OutreachDraftSection: React.FC = () => {
   const [statusMessage, setStatusMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
+  const getFullTemplateBody = (tpl: EmailTemplate) => {
+    const parts = [
+      tpl.intro || "Dear {{recruiterName}},",
+      tpl.skillsTemplate || "",
+      tpl.body || "",
+      tpl.signOff || "Regards,\n{{candidateName}}\n{{candidateMobile}}\n{{candidateEmail}}"
+    ].filter(Boolean);
+    return parts.join("\n\n");
+  };
+
   useEffect(() => {
     const loadTemplates = async () => {
       try {
@@ -55,7 +65,7 @@ export const OutreachDraftSection: React.FC = () => {
         if (data.length > 0) {
           setSelectedTemplateId(data[0].id);
           setRawSubject(data[0].subject);
-          setRawBody(data[0].body);
+          setRawBody(getFullTemplateBody(data[0]));
         }
 
         const clData = await outreachService.getTemplates(undefined, "COVER_LETTER");
@@ -101,7 +111,7 @@ export const OutreachDraftSection: React.FC = () => {
     const selected = templates.find(t => t.id === id);
     if (selected) {
       setRawSubject(selected.subject);
-      setRawBody(selected.body);
+      setRawBody(getFullTemplateBody(selected));
     }
   };
 
@@ -254,7 +264,7 @@ export const OutreachDraftSection: React.FC = () => {
       const currentSelected = templates.find(t => t.id === selectedTemplateId);
       if (currentSelected) {
         setRawSubject(currentSelected.subject);
-        setRawBody(currentSelected.body);
+        setRawBody(getFullTemplateBody(currentSelected));
       }
     } catch {
       throw new Error("Failed to save outreach draft.");

@@ -18,6 +18,12 @@ public interface JobPostingRepository extends JpaRepository<JobPosting, Long> {
     
     List<JobPosting> findByCreatedAtAfterOrderByCreatedAtDesc(LocalDateTime cutoff, Pageable pageable);
 
+    @Query("SELECT j FROM JobPosting j WHERE j.createdAt >= :cutoff AND j.hrEmail IS NOT NULL AND TRIM(j.hrEmail) != '' ORDER BY j.createdAt DESC")
+    List<JobPosting> findActiveWithHrEmail(LocalDateTime cutoff);
+
+    @Query("SELECT j FROM JobPosting j WHERE j.createdAt >= :cutoff AND j.hrEmail IS NOT NULL AND TRIM(j.hrEmail) != '' AND (LOWER(j.title) LIKE LOWER(CONCAT('%', :roleKeyword, '%')) OR LOWER(j.requirements) LIKE LOWER(CONCAT('%', :roleKeyword, '%')) OR LOWER(j.description) LIKE LOWER(CONCAT('%', :roleKeyword, '%'))) ORDER BY j.createdAt DESC")
+    List<JobPosting> findActiveByRoleAndHrEmail(String roleKeyword, LocalDateTime cutoff);
+
     @Transactional
     @Modifying
     @Query(value = "DELETE FROM job_posting_skills WHERE job_posting_id IN (SELECT id FROM job_postings WHERE created_at < :cutoff)", nativeQuery = true)

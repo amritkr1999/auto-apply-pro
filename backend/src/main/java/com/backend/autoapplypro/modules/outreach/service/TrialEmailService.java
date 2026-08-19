@@ -70,23 +70,31 @@ public class TrialEmailService {
         if (rawSubject == null || rawSubject.trim().isEmpty()) {
             rawSubject = "Application for {{jobRole}} | {{companyName}}";
         }
+        if (rawIntro == null || rawIntro.trim().isEmpty()) {
+            rawIntro = "Dear {{recruiterName}},";
+        }
         if (rawBody == null || rawBody.trim().isEmpty()) {
-            rawBody = "Hi {{hrName}},\n\nI am reaching out regarding the {{jobRole}} position at {{companyName}}.";
+            rawBody = "I am reaching out regarding the {{jobRole}} position at {{companyName}}.";
+        }
+        if (rawSignOff == null || rawSignOff.trim().isEmpty()) {
+            rawSignOff = "Regards,\n{{candidateName}}\n{{candidateMobile}}\n{{candidateEmail}}";
         }
 
         // Assemble full body from sections if separate sections are present
-        StringBuilder fullBodyBuilder = new StringBuilder();
+        java.util.List<String> rawSegments = new java.util.ArrayList<>();
         if (rawIntro != null && !rawIntro.trim().isEmpty()) {
-            fullBodyBuilder.append(rawIntro.trim()).append("\n\n");
+            rawSegments.add(rawIntro.trim());
         }
         if (rawSkills != null && !rawSkills.trim().isEmpty()) {
-            fullBodyBuilder.append(rawSkills.trim()).append("\n\n");
+            rawSegments.add(rawSkills.trim());
         }
-        fullBodyBuilder.append(rawBody.trim());
+        if (rawBody != null && !rawBody.trim().isEmpty()) {
+            rawSegments.add(rawBody.trim());
+        }
         if (rawSignOff != null && !rawSignOff.trim().isEmpty()) {
-            fullBodyBuilder.append("\n\n").append(rawSignOff.trim());
+            rawSegments.add(rawSignOff.trim());
         }
-        String combinedBodyText = fullBodyBuilder.toString();
+        String combinedBodyText = String.join("\n\n", rawSegments);
 
         // Retrieve user profile defaults
         ProfessionalProfile profile = profileRepository.findByUserIdAndIsDefaultTrue(userId).orElse(null);
@@ -118,19 +126,27 @@ public class TrialEmailService {
 
         // Render placeholders
         String renderedSubject = renderPlaceholders(rawSubject, recruiterName, companyName, jobRole, skills, experienceYears, candidateName, candidateMobile, candidateEmail);
-        String renderedBody = renderPlaceholders(combinedBodyText, recruiterName, companyName, jobRole, skills, experienceYears, candidateName, candidateMobile, candidateEmail);
+        
+        java.util.List<String> renderedSegments = new java.util.ArrayList<>();
+        for (String seg : rawSegments) {
+            String r = renderPlaceholders(seg, recruiterName, companyName, jobRole, skills, experienceYears, candidateName, candidateMobile, candidateEmail);
+            if (r != null && !r.trim().isEmpty()) {
+                renderedSegments.add(r.trim().replace("\n", "<br/>"));
+            }
+        }
+        String renderedBodyHtml = String.join("<br/><br/>", renderedSegments);
 
         // Prefix subject line with [TRIAL EMAIL] banner
         String trialSubject = "[TRIAL EMAIL] " + renderedSubject;
 
         // Wrap body in trial banner
-        String trialBody = "--------------------------------------------------------\n" +
-                "  TRIAL EMAIL DISPATCH - VERIFICATION RUN\n" +
-                "  This email was sent to verify your automated template.\n" +
-                "--------------------------------------------------------\n\n" +
-                renderedBody + "\n\n" +
-                "--------------------------------------------------------\n" +
-                "Sent via AutoApplyPro Trial Email Verification Tool.\n" +
+        String trialBody = "--------------------------------------------------------<br/>" +
+                "  TRIAL EMAIL DISPATCH - VERIFICATION RUN<br/>" +
+                "  This email was sent to verify your automated template.<br/>" +
+                "--------------------------------------------------------<br/><br/>" +
+                renderedBodyHtml + "<br/><br/>" +
+                "--------------------------------------------------------<br/>" +
+                "Sent via AutoApplyPro Trial Email Verification Tool.<br/>" +
                 "--------------------------------------------------------";
 
         try {

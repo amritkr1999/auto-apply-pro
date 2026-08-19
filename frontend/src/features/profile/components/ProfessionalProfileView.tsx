@@ -114,7 +114,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
   const [hrOutreachCampaignEnabled, setHrOutreachCampaignEnabled] = useState(false);
   const [hrOutreachTargetRole, setHrOutreachTargetRole] = useState("Software Engineer");
   const [hrOutreachTemplateId, setHrOutreachTemplateId] = useState("default-1");
-  const [hrOutreachSourceTable, setHrOutreachSourceTable] = useState("MAIN");
+  const [hrOutreachSourceTable, setHrOutreachSourceTable] = useState("SMART_MATCH");
   const [templatesList, setTemplatesList] = useState<any[]>([]);
   
   const [loading, setLoading] = useState(true);
@@ -453,7 +453,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
         setHrOutreachCampaignEnabled(!!data.hrOutreachCampaignEnabled);
         setHrOutreachTargetRole(data.hrOutreachTargetRole || "Software Engineer");
         setHrOutreachTemplateId(data.hrOutreachTemplateId || "default-1");
-        setHrOutreachSourceTable(data.hrOutreachSourceTable || "MAIN");
+        setHrOutreachSourceTable(data.hrOutreachSourceTable || "SMART_MATCH");
 
         if (data.timezone && data.timezone !== "UTC") {
           setTimezone(data.timezone);
@@ -500,7 +500,7 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
         hrOutreachCampaignEnabled,
         hrOutreachTargetRole,
         hrOutreachTemplateId,
-        hrOutreachSourceTable: hrOutreachSourceTable || "MAIN"
+        hrOutreachSourceTable: hrOutreachSourceTable || "SMART_MATCH"
       });
       setMessage(res.message || "Outreach settings updated successfully.");
     } catch (err: any) {
@@ -1991,21 +1991,24 @@ export const ProfessionalProfileView: React.FC<Props> = ({ userId, activeTab, on
                         </label>
                       </div>
 
-                      {import.meta.env.DEV && (
-                        <div>
-                          <label className="block text-xs font-bold text-slate-600 mb-1.5">
-                            Source HR Contacts Database Table <span className="text-[10px] text-amber-600 font-semibold">(Dev Mode Only)</span>
-                          </label>
-                          <select
-                            value={hrOutreachSourceTable}
-                            onChange={(e) => setHrOutreachSourceTable(e.target.value)}
-                            className="w-full px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-medium"
-                          >
-                            <option value="TESTING">Testing Emails Table (testing_emails)</option>
-                            <option value="MAIN">Main HR Details Table (hr_details)</option>
-                          </select>
-                        </div>
-                      )}
+                      <div>
+                        <label className="block text-xs font-bold text-slate-600 mb-1.5">
+                          Outreach Campaign Target Strategy
+                        </label>
+                        <select
+                          value={hrOutreachSourceTable}
+                          onChange={(e) => setHrOutreachSourceTable(e.target.value)}
+                          className="w-full px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-medium"
+                        >
+                          <option value="SMART_MATCH">⚡ Smart Match (Active Jobs + HR Database Fallback - Recommended)</option>
+                          <option value="ACTIVE_JOBS">🎯 Active Job Postings Only (Last 20 Days)</option>
+                          <option value="MAIN">🏢 Permanent Recruiter Database (hr_details)</option>
+                          <option value="TESTING">🧪 Testing Emails List</option>
+                        </select>
+                        <span className="block text-[10px] text-slate-400 font-medium mt-1">
+                          Smart Match targets HRs actively hiring for your role in the last 20 days first, then seamlessly falls back to the recruiter database.
+                        </span>
+                      </div>
                     </div>
 
                     <div className="space-y-4">

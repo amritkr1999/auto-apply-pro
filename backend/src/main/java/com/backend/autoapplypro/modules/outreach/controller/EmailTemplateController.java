@@ -149,10 +149,26 @@ public class EmailTemplateController {
             log.info("Seeded default-3 template.");
         } else {
             templateRepository.findById("default-3").ifPresent(t -> {
+                boolean updated = false;
                 if (!Boolean.TRUE.equals(t.getIsSystemTemplate()) || !Boolean.TRUE.equals(t.getIsPublic()) || t.getCreatorId() != null) {
                     t.setIsSystemTemplate(true);
                     t.setIsPublic(true);
                     t.setCreatorId(null);
+                    updated = true;
+                }
+                if (t.getIntro() == null || t.getIntro().trim().isEmpty()) {
+                    t.setIntro("Dear {{recruiterName}},");
+                    updated = true;
+                }
+                if (t.getSkillsTemplate() == null || t.getSkillsTemplate().trim().isEmpty()) {
+                    t.setSkillsTemplate("I noticed that {{companyName}} is expanding and looking for developers skilled in {{skills}}. I wanted to connect to see if my background might be a fit.");
+                    updated = true;
+                }
+                if (t.getSignOff() == null || t.getSignOff().trim().isEmpty()) {
+                    t.setSignOff("Best regards,\n{{candidateName}}\n{{candidateMobile}}\n{{candidateEmail}}");
+                    updated = true;
+                }
+                if (updated) {
                     templateRepository.save(t);
                     log.info("Migrated default-3 template schema fields.");
                 }
@@ -175,10 +191,26 @@ public class EmailTemplateController {
             log.info("Seeded default-4 template.");
         } else {
             templateRepository.findById("default-4").ifPresent(t -> {
+                boolean updated = false;
                 if (!Boolean.TRUE.equals(t.getIsSystemTemplate()) || !Boolean.TRUE.equals(t.getIsPublic()) || t.getCreatorId() != null) {
                     t.setIsSystemTemplate(true);
                     t.setIsPublic(true);
                     t.setCreatorId(null);
+                    updated = true;
+                }
+                if (t.getIntro() == null || t.getIntro().trim().isEmpty()) {
+                    t.setIntro("Hi {{recruiterName}},");
+                    updated = true;
+                }
+                if (t.getSkillsTemplate() == null || t.getSkillsTemplate().trim().isEmpty()) {
+                    t.setSkillsTemplate("I've been following {{companyName}}'s growth and was particularly interested in your work requiring {{skills}}.");
+                    updated = true;
+                }
+                if (t.getSignOff() == null || t.getSignOff().trim().isEmpty()) {
+                    t.setSignOff("Sincerely,\n{{candidateName}}\n{{candidateMobile}}\n{{candidateEmail}}");
+                    updated = true;
+                }
+                if (updated) {
                     templateRepository.save(t);
                     log.info("Migrated default-4 template schema fields.");
                 }
@@ -201,10 +233,26 @@ public class EmailTemplateController {
             log.info("Seeded default-5 template.");
         } else {
             templateRepository.findById("default-5").ifPresent(t -> {
+                boolean updated = false;
                 if (!Boolean.TRUE.equals(t.getIsSystemTemplate()) || !Boolean.TRUE.equals(t.getIsPublic()) || t.getCreatorId() != null) {
                     t.setIsSystemTemplate(true);
                     t.setIsPublic(true);
                     t.setCreatorId(null);
+                    updated = true;
+                }
+                if (t.getIntro() == null || t.getIntro().trim().isEmpty()) {
+                    t.setIntro("Dear {{recruiterName}},");
+                    updated = true;
+                }
+                if (t.getSkillsTemplate() == null || t.getSkillsTemplate().trim().isEmpty()) {
+                    t.setSkillsTemplate("I am a software engineer specializing in {{skills}} with a deep passion for building high-quality products that users love.");
+                    updated = true;
+                }
+                if (t.getSignOff() == null || t.getSignOff().trim().isEmpty()) {
+                    t.setSignOff("Best,\n{{candidateName}}\n{{candidateMobile}}\n{{candidateEmail}}");
+                    updated = true;
+                }
+                if (updated) {
                     templateRepository.save(t);
                     log.info("Migrated default-5 template schema fields.");
                 }
@@ -391,7 +439,13 @@ public class EmailTemplateController {
 
         existing.setName(templateDetails.getName());
         existing.setSubject(templateDetails.getSubject());
+        existing.setIntro(templateDetails.getIntro());
+        existing.setSkillsTemplate(templateDetails.getSkillsTemplate());
         existing.setBody(templateDetails.getBody());
+        existing.setSignOff(templateDetails.getSignOff());
+        if (templateDetails.getTemplateType() != null) {
+            existing.setTemplateType(templateDetails.getTemplateType());
+        }
         existing.setIsPublic(templateDetails.getIsPublic());
 
         if (user.getRole() == UserRole.ADMIN) {

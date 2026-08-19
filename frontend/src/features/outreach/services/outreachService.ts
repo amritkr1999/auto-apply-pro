@@ -508,7 +508,7 @@ export const outreachService = {
       hrOutreachCampaignEnabled: false,
       hrOutreachTargetRole: "Software Engineer",
       hrOutreachTemplateId: "default-1",
-      hrOutreachSourceTable: "MAIN",
+      hrOutreachSourceTable: "SMART_MATCH",
       hrOutreachDispatchMode: localStorage.getItem("campaign_dispatch_mode") || "DIRECT_SEND",
       marketingEmailsEnabled: true,
       aiPersonalizationEnabled: false,

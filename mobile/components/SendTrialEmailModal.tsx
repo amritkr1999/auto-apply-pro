@@ -51,7 +51,12 @@ export default function SendTrialEmailModal({
   if (!visible) return null;
 
   const targetSubject = propSubject || template?.subject || 'Application for {{jobRole}} | {{companyName}}';
-  const targetBody = propBody || template?.body || '';
+  const targetIntro = propIntro || template?.intro || '';
+  const targetSkills = propSkillsTemplate || template?.skillsTemplate || '';
+  const targetBodySeg = propBody || template?.body || '';
+  const targetSignOff = propSignOff || template?.signOff || '';
+  const fullBodySections = [targetIntro, targetSkills, targetBodySeg, targetSignOff].filter(Boolean).join('\n\n');
+  const targetBody = fullBodySections || propBody || template?.body || '';
 
   const renderPreviewText = (text: string) => {
     if (!text) return '';

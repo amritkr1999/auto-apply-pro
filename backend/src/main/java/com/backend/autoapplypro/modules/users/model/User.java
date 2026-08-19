@@ -119,7 +119,7 @@ public class User {
 
     @Builder.Default
     @Column(name = "hr_outreach_source_table")
-    private String hrOutreachSourceTable = "MAIN";
+    private String hrOutreachSourceTable = "SMART_MATCH";
 
     @Builder.Default
     @Column(name = "hr_outreach_dispatch_mode")
@@ -274,7 +274,7 @@ public class User {
             hrOutreachTemplateId = "default-1";
         }
         if (hrOutreachSourceTable == null) {
-            hrOutreachSourceTable = "MAIN";
+            hrOutreachSourceTable = "SMART_MATCH";
         }
         if (hrOutreachDispatchMode == null) {
             hrOutreachDispatchMode = "DIRECT_SEND";
