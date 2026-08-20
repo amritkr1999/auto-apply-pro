@@ -14,6 +14,15 @@ import java.util.List;
 public class HrController {
 
     private final HrService hrService;
+    private final EmailEnrichmentService emailEnrichmentService;
+
+    @PostMapping("/enrich-domain")
+    public ResponseEntity<List<HrDetails>> enrichCompanyDomain(
+            @RequestParam String domain,
+            @RequestParam(required = false) String companyName) {
+        List<HrDetails> enriched = emailEnrichmentService.enrichCompanyDomain(domain, companyName);
+        return ResponseEntity.ok(enriched);
+    }
 
     @PostMapping
     public ResponseEntity<HrResponseDto> createHr(@RequestBody HrRequestDto hrRequestDto) {

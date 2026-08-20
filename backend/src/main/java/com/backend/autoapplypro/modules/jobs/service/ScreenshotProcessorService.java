@@ -127,7 +127,15 @@ public class ScreenshotProcessorService {
                 }
             }
             if (emails.isEmpty()) {
-                emails.add("recruiter@example.com");
+                String comp = (jobDetails.getCompany() != null && !jobDetails.getCompany().isBlank()) 
+                        ? jobDetails.getCompany().toLowerCase().replaceAll("[^a-z0-9]", "") : "company";
+                String domain = comp + ".com";
+                String fallbackEmail = "careers@" + domain;
+                if (ClientScraperServiceImpl.hasMxRecord(domain)) {
+                    emails.add(fallbackEmail);
+                } else {
+                    emails.add("hr@" + comp + ".com");
+                }
             }
 
             String primaryEmail = emails.get(0);

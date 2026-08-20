@@ -4,6 +4,7 @@ import com.backend.autoapplypro.modules.hr.HrDetails;
 import com.backend.autoapplypro.modules.hr.HrRepository;
 import com.backend.autoapplypro.modules.jobs.model.JobPosting;
 import com.backend.autoapplypro.modules.jobs.repository.JobPostingRepository;
+import com.backend.autoapplypro.modules.jobs.service.ClientScraperServiceImpl;
 import com.backend.autoapplypro.modules.billing.service.SubscriptionGatingService;
 import com.backend.autoapplypro.modules.outreach.model.EmailQueue;
 import com.backend.autoapplypro.modules.outreach.model.EmailTemplate;
@@ -336,11 +337,20 @@ public class HrOutreachCampaignService {
 
     private boolean isEligible(RecipientInfo r, Set<String> processedEmails, List<String> excludedCompanies) {
         if (r == null || r.email == null || r.email.trim().isEmpty()) return false;
-        if (processedEmails.contains(r.email.toLowerCase().trim())) return false;
+        String cleanEmail = r.email.toLowerCase().trim();
+        if (processedEmails.contains(cleanEmail)) return false;
         if (excludedCompanies != null && !excludedCompanies.isEmpty() && r.companyName != null) {
-            return excludedCompanies.stream().noneMatch(c -> c.trim().equalsIgnoreCase(r.companyName.trim()));
+            if (excludedCompanies.stream().anyMatch(c -> c.trim().equalsIgnoreCase(r.companyName.trim()))) {
+                return false;
+            }
         }
-        return true;
+        if (!cleanEmail.contains("@")) return false;
+        String domain = cleanEmail.substring(cleanEmail.indexOf('@') + 1);
+        if (domain.isBlank() || domain.endsWith(".invalid") || domain.endsWith(".local") || domain.equals("example.com")) {
+            return false;
+        }
+
+        return ClientScraperServiceImpl.hasMxRecord(domain);
     }
 
     private String substitutePlaceholders(String text, RecipientInfo recipient, String targetRole,

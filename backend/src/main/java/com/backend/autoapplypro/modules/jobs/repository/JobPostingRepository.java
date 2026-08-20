@@ -15,6 +15,7 @@ import java.util.Optional;
 @Repository
 public interface JobPostingRepository extends JpaRepository<JobPosting, Long> {
     Optional<JobPosting> findByTitleAndCompany(String title, String company);
+    boolean existsByTitleAndCompany(String title, String company);
     
     List<JobPosting> findByCreatedAtAfterOrderByCreatedAtDesc(LocalDateTime cutoff, Pageable pageable);
 

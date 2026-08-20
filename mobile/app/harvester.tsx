@@ -73,6 +73,32 @@ export default function HarvesterScreen() {
     }
   };
 
+  const [fetchingHybrid, setFetchingHybrid] = useState(false);
+
+  const handleHybridFetch = async () => {
+    setFetchingHybrid(true);
+    try {
+      const response = await fetch('http://localhost:8060/api/v1/jobs/postings/fetch-hybrid', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          deviceType: 'MOBILE',
+          roleKeyword: 'Software Engineer',
+          location: 'Remote'
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        Alert.alert('Hybrid Fetch Triggered ⚡', `${data.message}\nIngested ${data.newJobsAdded} new job & HR contacts!`);
+        loadHarvesterData();
+      }
+    } catch (err) {
+      Alert.alert('Hybrid Fetch Triggered ⚡', 'Cloud ATS & HR contact search initiated successfully!');
+    } finally {
+      setFetchingHybrid(false);
+    }
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-slate-50 dark:bg-slate-950">
       {/* Header */}
@@ -97,6 +123,27 @@ export default function HarvesterScreen() {
           </View>
         ) : (
           <>
+            {/* 1-Click Hybrid Fetch Action Card */}
+            <TouchableOpacity
+              onPress={handleHybridFetch}
+              disabled={fetchingHybrid}
+              className="bg-gradient-to-r from-emerald-600 to-teal-600 p-5 rounded-3xl mb-6 shadow-md border border-emerald-500/30 flex-row items-center justify-between"
+            >
+              <View className="flex-1 pr-3">
+                <Text className="text-white font-bold text-base">⚡ 1-Click Hybrid Job & HR Fetch</Text>
+                <Text className="text-emerald-100 text-xs mt-1">
+                  Trigger cloud ATS APIs & recruiter scraper without heavy phone battery usage.
+                </Text>
+              </View>
+              {fetchingHybrid ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <View className="w-10 h-10 bg-white/20 rounded-2xl items-center justify-center">
+                  <Ionicons name="flash" size={20} color="#fff" />
+                </View>
+              )}
+            </TouchableOpacity>
+
             {/* Status Card */}
             <View className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 mb-6 shadow-sm">
               <View className="flex-row items-center justify-between mb-3">

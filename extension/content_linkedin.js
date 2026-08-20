@@ -43,6 +43,45 @@ function showToast(message, isSuccess = true) {
   }, 4000);
 }
 
+let isAutoScrolling = false;
+let autoScrollTimer = null;
+
+function toggleAutoScroll() {
+  const btn = document.getElementById('easynaukri-autoscroll-btn');
+  if (!isAutoScrolling) {
+    isAutoScrolling = true;
+    if (btn) {
+      btn.innerHTML = '⏸ Pause Auto-Scroll';
+      btn.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+    }
+    showToast('⚡ Auto-Scroll Harvester active! Scrolling and parsing jobs...', true);
+    
+    autoScrollTimer = setInterval(() => {
+      window.scrollBy({
+        top: Math.floor(Math.random() * 200) + 150,
+        behavior: 'smooth'
+      });
+      harvestAllVisibleEmails();
+
+      // Click any "See more" / "Load more jobs" buttons automatically
+      const seeMoreBtns = document.querySelectorAll('.feed-shared-inline-show-more-text__button, button.see-more-jobs, .artdeco-button--muted');
+      seeMoreBtns.forEach(b => {
+        if (b && b.innerText && (b.innerText.includes('see more') || b.innerText.includes('Load more'))) {
+          b.click();
+        }
+      });
+    }, 1400);
+  } else {
+    isAutoScrolling = false;
+    if (autoScrollTimer) clearInterval(autoScrollTimer);
+    if (btn) {
+      btn.innerHTML = '▶ Start Auto-Scroll';
+      btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+    }
+    showToast('Auto-Scroll Harvester paused.', true);
+  }
+}
+
 // 2. Sticky Top Harvester Control Bar
 function injectTopHarvesterBar() {
   if (!document.body) return;
@@ -74,6 +113,17 @@ function injectTopHarvesterBar() {
       <span style="color:#10b981;">●</span>
       <span>EasyNaukri Harvester</span>
     </div>
+    <button id="easynaukri-autoscroll-btn" style="
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border: none;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 11px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(16,185,129,0.4);
+    ">▶ Start Auto-Scroll</button>
     <button id="easynaukri-scan-all-btn" style="
       background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
       color: white;
@@ -88,6 +138,8 @@ function injectTopHarvesterBar() {
   `;
 
   document.body.appendChild(bar);
+
+  document.getElementById('easynaukri-autoscroll-btn')?.addEventListener('click', toggleAutoScroll);
 
   document.getElementById('easynaukri-scan-all-btn')?.addEventListener('click', () => {
     const count = harvestAllVisibleEmails();

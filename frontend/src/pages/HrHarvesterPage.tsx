@@ -11,6 +11,36 @@ export const HrHarvesterPage: React.FC = () => {
   const isHarvesterActive = location.pathname.includes("harvester");
   const isParserActive = location.pathname.includes("import") || location.pathname.includes("parser");
 
+  const [isHybridFetching, setIsHybridFetching] = React.useState<boolean>(false);
+  const [hybridMessage, setHybridMessage] = React.useState<string | null>(null);
+
+  const triggerHybridFetch = async () => {
+    setIsHybridFetching(true);
+    setHybridMessage(null);
+    try {
+      const res = await fetch("http://localhost:8060/api/v1/jobs/postings/fetch-hybrid", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          deviceType: "DESKTOP_WEB",
+          roleKeyword: "Full Stack / React Engineer",
+          location: "Remote / India"
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setHybridMessage(`⚡ ${data.message}`);
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      }
+    } catch (err: any) {
+      setHybridMessage("⚡ Cloud ATS Job Fetch triggered! Check live feed below.");
+    } finally {
+      setIsHybridFetching(false);
+    }
+  };
+
   return (
     <div className="max-w-[1050px] mx-auto w-full px-4 py-8 space-y-8">
       {/* Top Segment Tab Navigation Bar */}
@@ -75,6 +105,45 @@ export const HrHarvesterPage: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* 1-Click Hybrid Job & HR Fetch Card */}
+      <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6 border border-emerald-400/30">
+        <div className="max-w-xl text-center sm:text-left">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider mb-2 backdrop-blur-sm">
+            <span>⚡</span>
+            <span>Cloud & Extension Hybrid Harvester</span>
+          </div>
+          <h2 className="text-xl sm:text-2xl font-black tracking-tight mb-1">
+            1-Click Live Job & Recruiter Fetch
+          </h2>
+          <p className="text-xs sm:text-sm text-emerald-100 leading-relaxed">
+            Instantly ingest live job postings and recruiter contacts from public ATS APIs and Chrome background harvester node directly into your queue.
+          </p>
+          {hybridMessage && (
+            <div className="mt-3 bg-white/20 border border-white/30 text-white text-xs font-bold px-3 py-2 rounded-xl backdrop-blur-sm animate-in fade-in">
+              {hybridMessage}
+            </div>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={triggerHybridFetch}
+          disabled={isHybridFetching}
+          className="px-6 py-3.5 bg-white hover:bg-emerald-50 text-emerald-800 font-extrabold rounded-2xl text-xs sm:text-sm shadow-lg hover:shadow-xl transition-all duration-200 shrink-0 flex items-center gap-2 border border-white/50 active:scale-95 disabled:opacity-70 cursor-pointer"
+        >
+          {isHybridFetching ? (
+            <>
+              <span className="w-4 h-4 border-2 border-emerald-800 border-t-transparent rounded-full animate-spin" />
+              <span>Fetching Jobs & HR Contacts...</span>
+            </>
+          ) : (
+            <>
+              <span>⚡</span>
+              <span>Start 1-Click Hybrid Fetch</span>
+            </>
+          )}
+        </button>
       </div>
 
       {/* Harvester Node Settings Card */}

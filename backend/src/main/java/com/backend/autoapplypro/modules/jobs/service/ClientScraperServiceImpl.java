@@ -14,6 +14,10 @@ import org.springframework.data.domain.PageRequest;
 
 import org.springframework.stereotype.Service;
 
+import javax.naming.directory.Attribute;
+import javax.naming.directory.Attributes;
+import javax.naming.directory.DirContext;
+import javax.naming.directory.InitialDirContext;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -195,11 +199,40 @@ public class ClientScraperServiceImpl implements ClientScraperService {
 
     private boolean isValidEmail(String email) {
         if (email == null || email.isBlank()) return false;
-        String lower = email.toLowerCase();
+        String lower = email.trim().toLowerCase();
         // Ignore generic/invalid addresses
         if (lower.startsWith("support@") || lower.startsWith("info@") || lower.startsWith("no-reply@") || lower.startsWith("noreply@") || lower.startsWith("careers@")) {
             return false;
         }
-        return lower.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$");
+        if (!lower.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$")) {
+            return false;
+        }
+
+        String[] parts = lower.split("@");
+        if (parts.length != 2) return false;
+        String domain = parts[1];
+
+        if (domain.endsWith(".invalid") || domain.endsWith(".local") || domain.equals("example.com")) {
+            return false;
+        }
+
+        return hasMxRecord(domain);
+    }
+
+    public static boolean hasMxRecord(String domain) {
+        if (domain == null || domain.isBlank()) return false;
+        try {
+            Hashtable<String, String> env = new Hashtable<>();
+            env.put("java.naming.factory.initial", "com.sun.jndi.dns.DnsContextFactory");
+            env.put("com.sun.jndi.dns.timeout.initial", "1500");
+            env.put("com.sun.jndi.dns.timeout.retries", "1");
+            DirContext ictx = new InitialDirContext(env);
+            Attributes attrs = ictx.getAttributes(domain, new String[]{"MX"});
+            Attribute attr = attrs.get("MX");
+            return attr != null && attr.size() > 0;
+        } catch (Exception e) {
+            log.warn("DNS MX lookup failed for domain '{}': {}", domain, e.getMessage());
+            return false;
+        }
     }
 }
