@@ -39,6 +39,7 @@ const PublicProfilePage = lazy(() => import("../pages/PublicProfilePage"));
 const PublicPlaqueCardPage = lazy(() => import("../pages/PublicPlaqueCardPage"));
 const ExtensionLandingPage = lazy(() => import("../pages/ExtensionLandingPage"));
 const PrivacyPolicy = lazy(() => import("../components/pages/PrivacyPolicy"));
+const CookiePolicy = lazy(() => import("../components/pages/CookiePolicy"));
 const TermsOfService = lazy(() => import("../components/pages/TermsOfService"));
 const AboutUsPage = lazy(() => import("../pages/AboutUsPage"));
 const CareersPage = lazy(() => import("../pages/CareersPage"));
@@ -62,6 +63,8 @@ export const AppRoutes: React.FC = () => {
         <Route path="/verify-email" element={<VerifyEmailPage />} />
         <Route path="/unsubscribe" element={<UnsubscribePage />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/cookie-policy" element={<CookiePolicy />} />
+        <Route path="/cookies" element={<Navigate to="/cookie-policy" replace />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/about" element={<AboutUsPage />} />
         <Route path="/careers" element={<CareersPage />} />

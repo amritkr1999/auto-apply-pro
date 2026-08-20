@@ -265,8 +265,9 @@ export const LandingPage: React.FC = () => {
 
             <div style={{ height: "1px", background: "var(--card-border)", margin: "0.25rem 0" }}></div>
 
-            <Link to="/privacy" onClick={() => setMobileMenuOpen(false)} style={{ fontSize: "0.85rem", opacity: 0.8 }}>Privacy Policy</Link>
-            <Link to="/terms" onClick={() => setMobileMenuOpen(false)} style={{ fontSize: "0.85rem", opacity: 0.8 }}>Terms of Service</Link>
+            <Link to="/privacy" onClick={() => setMobileMenuOpen(false)} style={{ fontSize: "0.85rem", opacity: 0.9 }}>Privacy Policy</Link>
+            <Link to="/cookie-policy" onClick={() => setMobileMenuOpen(false)} style={{ fontSize: "0.85rem", opacity: 0.9 }}>Cookie Policy</Link>
+            <Link to="/terms" onClick={() => setMobileMenuOpen(false)} style={{ fontSize: "0.85rem", opacity: 0.9 }}>Terms of Service</Link>
           </div>
         )}
       </nav>

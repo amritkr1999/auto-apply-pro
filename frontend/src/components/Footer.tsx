@@ -36,6 +36,12 @@ export const Footer: React.FC = () => {
             Privacy Policy
           </Link>
           <Link
+            to="/cookie-policy"
+            className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium"
+          >
+            Cookie Policy
+          </Link>
+          <Link
             to="/terms"
             className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium"
           >

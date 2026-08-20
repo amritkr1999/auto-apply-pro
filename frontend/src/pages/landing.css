@@ -10,15 +10,15 @@
   --font-main: var(--font-body);
   --bg-color: #f8fafc;
   --bg-radial: radial-gradient(circle at 50% -20%, #e0e7ff 0%, #f8fafc 70%);
-  --card-bg: rgba(255, 255, 255, 0.7);
-  --card-border: rgba(15, 23, 42, 0.08);
-  --accent-cyan: #0284c7; /* Sky Blue for optimal light-mode contrast */
-  --accent-purple: #7c3aed; /* Violet */
+  --card-bg: rgba(255, 255, 255, 0.85);
+  --card-border: rgba(15, 23, 42, 0.12);
+  --accent-cyan: #0369a1; /* Deep Sky Blue for optimal light-mode contrast */
+  --accent-purple: #6d28d9; /* Deep Violet */
   --text-primary: #0f172a; /* Slate 900 */
-  --text-secondary: #475569; /* Slate 600 */
+  --text-secondary: #334155; /* Slate 700 for high-contrast WCAG AA compliance */
   --text-dark: #0f172a;
-  --nav-bg: rgba(255, 255, 255, 0.85);
-  --nav-border: rgba(15, 23, 42, 0.06);
+  --nav-bg: rgba(255, 255, 255, 0.92);
+  --nav-border: rgba(15, 23, 42, 0.1);
   --footer-bg: #f1f5f9;
   
   font-family: var(--font-body);
@@ -40,15 +40,15 @@ html.dark .landing-root,
 .dark .landing-root {
   --bg-color: #090d16;
   --bg-radial: radial-gradient(circle at 50% -20%, #1e1b4b 0%, #090d16 70%);
-  --card-bg: rgba(15, 23, 42, 0.75);
-  --card-border: rgba(255, 255, 255, 0.08);
+  --card-bg: rgba(15, 23, 42, 0.85);
+  --card-border: rgba(255, 255, 255, 0.12);
   --accent-cyan: #38bdf8;
-  --accent-purple: #a855f7;
+  --accent-purple: #c084fc;
   --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
+  --text-secondary: #cbd5e1; /* Slate 300 for dark mode contrast */
   --text-dark: #f8fafc;
-  --nav-bg: rgba(15, 23, 42, 0.85);
-  --nav-border: rgba(255, 255, 255, 0.08);
+  --nav-bg: rgba(15, 23, 42, 0.92);
+  --nav-border: rgba(255, 255, 255, 0.12);
   --footer-bg: #090d16;
 }
 

@@ -1,0 +1,67 @@
+{
+  "cookies": [
+    {
+      "name": "JSESSIONID",
+      "value": "3F30A172E8586E2C9BC036731C804CAE",
+      "domain": "localhost",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "__Host-GAPS",
+      "value": "1:b-dwt6pvjqBg2nvBIyUUFJLD5VInoA:KU9Ci1dhbSVuB-PQ",
+      "domain": "accounts.google.com",
+      "path": "/",
+      "expires": 1821755087.050035,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "OTZ",
+      "value": "8748185_34_34__34_",
+      "domain": "accounts.google.com",
+      "path": "/",
+      "expires": 1789787088,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "NID",
+      "value": "534=TIgJMwcTrxsfrJbPrGvmaFD7eEdtvbhYH_l4jDBPnuMVOEWDK8ZNUAqqis4yQCuz7uMKrXTyOyR6xzB4XlBkKjY3EVS8IGgpWOkRA-BVQRcwRCZiunxu1i9Gv0hOs8S_3qxMEh4Wqq2Nftz6pa8N1UkLsqYkOIqrFXYHdQkuOD1uY3Q0j3QmAZj_cwZoWYJda8U07Q",
+      "domain": ".google.com",
+      "path": "/",
+      "expires": 1803006288.995882,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None"
+    }
+  ],
+  "origins": [
+    {
+      "origin": "http://localhost:5173",
+      "localStorage": [
+        {
+          "name": "token",
+          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhd3dtcml0QGdtYWlsLmNvbSIsInVzZXJJZCI6OCwicm9sZSI6IkNBTkRJREFURSIsImlhdCI6MTc4NzE5NTE1NiwiZXhwIjoxNzg3MjgxNTU2fQ.sQ7lDsL-hl8U0ZaT2AYUzrgHo-ioxfWnGKlr6O3wxSU"
+        },
+        {
+          "name": "last_tip_dismissed_date_8",
+          "value": "Thu Aug 20 2026"
+        },
+        {
+          "name": "user",
+          "value": "{\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhd3dtcml0QGdtYWlsLmNvbSIsInVzZXJJZCI6OCwicm9sZSI6IkNBTkRJREFURSIsImlhdCI6MTc4NzE5NTE1NiwiZXhwIjoxNzg3MjgxNTU2fQ.sQ7lDsL-hl8U0ZaT2AYUzrgHo-ioxfWnGKlr6O3wxSU\",\"id\":8,\"email\":\"awwmrit@gmail.com\",\"name\":\"AMRIT KUMAR\",\"mobile\":\"8789498334\",\"officialEmail\":\"\",\"role\":\"CANDIDATE\",\"loginStreak\":1,\"isPendingDeletion\":false,\"isEmailVerified\":true,\"requiresVerification\":false,\"isTrialActive\":true,\"trialDaysRemaining\":6,\"trialEndAt\":\"2026-08-25T09:58:25.828597\",\"trialTier\":\"ELITE_AUTOPILOT\",\"trialUsed\":true}"
+        },
+        {
+          "name": "walkthrough_completed_8",
+          "value": "true"
+        }
+      ]
+    }
+  ]
+}

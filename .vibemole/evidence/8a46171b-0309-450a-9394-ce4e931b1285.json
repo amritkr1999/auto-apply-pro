@@ -1,0 +1,4034 @@
+{
+  "version": "vibemole.evidence.v1",
+  "scanId": "8a46171b-0309-450a-9394-ce4e931b1285",
+  "target": {
+    "root": "/Users/amrit/Development/work/auto-apply-pro",
+    "baseUrl": "http://localhost:5173/",
+    "generatedAt": "2026-08-20T03:06:47.358Z",
+    "reportLocale": "en"
+  },
+  "projectEvidence": {
+    "root": "/Users/amrit/Development/work/auto-apply-pro",
+    "packageManager": "npm",
+    "frameworks": [],
+    "dependencies": [],
+    "routes": {
+      "privacy": false,
+      "terms": false,
+      "dashboard": false,
+      "account": false,
+      "billing": false
+    },
+    "policyCandidates": [],
+    "runtimeRouteCandidates": [],
+    "envNames": [
+      "ADMIN_EMAIL",
+      "CARE_EMAIL",
+      "CORS_ALLOWED_ORIGINS",
+      "DB_NAME",
+      "DB_PASSWORD",
+      "DB_USER",
+      "FRONTEND_URL",
+      "GITHUB_CLIENT_ID",
+      "GITHUB_CLIENT_SECRET",
+      "GITHUB_REDIRECT_URI",
+      "GOOGLE_CLIENT_ID",
+      "GOOGLE_CLIENT_SECRET",
+      "GOOGLE_REDIRECT_URI",
+      "INVOICES_EMAIL",
+      "LINKEDIN_CLIENT_ID",
+      "LINKEDIN_CLIENT_SECRET",
+      "LINKEDIN_REDIRECT_URI",
+      "NOTIFICATIONS_EMAIL",
+      "OLLAMA_BASE_URL",
+      "RAZORPAY_KEY_ID",
+      "RAZORPAY_KEY_SECRET",
+      "RAZORPAY_WEBHOOK_SECRET",
+      "SMTP_HOST",
+      "SMTP_PASSWORD",
+      "SMTP_PORT",
+      "SMTP_USERNAME",
+      "SPRING_MAIL_HOST",
+      "SPRING_MAIL_PASSWORD",
+      "SPRING_MAIL_PORT",
+      "SPRING_MAIL_USERNAME",
+      "SUPPORT_EMAIL",
+      "SUPPORT_SMTP_PASSWORD",
+      "TECH_EMAIL"
+    ],
+    "configFiles": [],
+    "findings": [
+      {
+        "severity": "risk",
+        "title": "No consent package detected",
+        "detail": "This is a package-level hint only; runtime scan should verify whether consent UI exists."
+      }
+    ]
+  },
+  "runtimeProfiles": [
+    {
+      "profileId": "authenticated:/:none",
+      "routeUrl": "http://localhost:5173/",
+      "consentMode": "none",
+      "authenticated": true,
+      "evidence": {
+        "navigationSucceeded": true,
+        "finalUrl": "http://localhost:5173/",
+        "status": 200,
+        "title": "EasyNaukri - Auto Job Application & Cold Outreach Email Platform",
+        "securityHeaders": {
+          "content-security-policy": null,
+          "strict-transport-security": null,
+          "x-frame-options": null,
+          "x-content-type-options": null,
+          "referrer-policy": null
+        },
+        "cookies": [
+          {
+            "name": "JSESSIONID",
+            "domain": "localhost",
+            "path": "/",
+            "expiry": null,
+            "isSession": true,
+            "secure": false,
+            "httpOnly": true,
+            "sameSite": "Lax"
+          },
+          {
+            "name": "__Host-GAPS",
+            "domain": "accounts.google.com",
+            "path": "/",
+            "expiry": "2027-09-24T03:04:47.050Z",
+            "isSession": false,
+            "secure": true,
+            "httpOnly": true,
+            "sameSite": "Lax"
+          },
+          {
+            "name": "OTZ",
+            "domain": "accounts.google.com",
+            "path": "/",
+            "expiry": "2026-09-19T03:04:48.000Z",
+            "isSession": false,
+            "secure": true,
+            "httpOnly": false,
+            "sameSite": "Lax"
+          },
+          {
+            "name": "NID",
+            "domain": ".google.com",
+            "path": "/",
+            "expiry": "2027-02-19T03:04:48.995Z",
+            "isSession": false,
+            "secure": true,
+            "httpOnly": true,
+            "sameSite": "None"
+          }
+        ],
+        "storage": [
+          {
+            "type": "localStorage",
+            "key": "token"
+          },
+          {
+            "type": "localStorage",
+            "key": "last_tip_dismissed_date_8"
+          },
+          {
+            "type": "localStorage",
+            "key": "user"
+          },
+          {
+            "type": "localStorage",
+            "key": "walkthrough_completed_8"
+          }
+        ],
+        "requestDomains": [
+          "fonts.googleapis.com",
+          "fonts.gstatic.com",
+          "localhost"
+        ],
+        "scriptDomains": [
+          "localhost"
+        ],
+        "resourceDomains": [
+          "fonts.googleapis.com",
+          "fonts.gstatic.com",
+          "localhost"
+        ],
+        "trackerDomains": [],
+        "knownGlobals": [],
+        "renderedLinks": [
+          {
+            "href": "http://localhost:5173/#",
+            "text": "EasyNaukriBETA",
+            "selector": "a[href]:nth-of-type(1)"
+          },
+          {
+            "href": "http://localhost:5173/sarkari-naukri-alerts",
+            "text": "🇮🇳 Govt Jobs",
+            "selector": "a[href]:nth-of-type(2)"
+          },
+          {
+            "href": "http://localhost:5173/dashboard",
+            "text": "Dashboard",
+            "selector": "a[href]:nth-of-type(3)"
+          },
+          {
+            "href": "http://localhost:5173/dashboard",
+            "text": "Back to Dashboard",
+            "selector": "a[href]:nth-of-type(4)"
+          },
+          {
+            "href": "http://localhost:5173/sarkari-naukri-alerts",
+            "text": "Explore Sarkari Naukri Engine →",
+            "selector": "a[href]:nth-of-type(5)"
+          },
+          {
+            "href": "http://localhost:5173/login?tab=register",
+            "text": "Get Started Free",
+            "selector": "a[href]:nth-of-type(6)"
+          },
+          {
+            "href": "http://localhost:5173/login?tab=register",
+            "text": "Start Starter Plan",
+            "selector": "a[href]:nth-of-type(7)"
+          },
+          {
+            "href": "http://localhost:5173/login?tab=register",
+            "text": "Upgrade to Pro",
+            "selector": "a[href]:nth-of-type(8)"
+          },
+          {
+            "href": "http://localhost:5173/login?tab=register",
+            "text": "Get Elite Autopilot",
+            "selector": "a[href]:nth-of-type(9)"
+          },
+          {
+            "href": "http://localhost:5173/login?tab=register",
+            "text": "Join Waitlist & Register",
+            "selector": "a[href]:nth-of-type(10)"
+          },
+          {
+            "href": "http://localhost:5173/sarkari-naukri-alerts",
+            "text": "Sarkari Naukri Alerts page",
+            "selector": "a[href]:nth-of-type(11)"
+          },
+          {
+            "href": "http://localhost:5173/login",
+            "text": "Sign in with Google",
+            "selector": "a[href]:nth-of-type(12)"
+          },
+          {
+            "href": "http://localhost:5173/privacy",
+            "text": "Privacy Policy",
+            "selector": "a[href]:nth-of-type(13)"
+          },
+          {
+            "href": "http://localhost:5173/terms",
+            "text": "Terms of Service",
+            "selector": "a[href]:nth-of-type(14)"
+          },
+          {
+            "href": "http://localhost:5173/#what-we-do",
+            "text": "Features",
+            "selector": "a[href]:nth-of-type(15)"
+          },
+          {
+            "href": "http://localhost:5173/#pricing",
+            "text": "Pricing Plans",
+            "selector": "a[href]:nth-of-type(16)"
+          },
+          {
+            "href": "http://localhost:5173/#google-oauth",
+            "text": "OAuth & Privacy",
+            "selector": "a[href]:nth-of-type(17)"
+          },
+          {
+            "href": "http://localhost:5173/#faqs",
+            "text": "Q&A Support",
+            "selector": "a[href]:nth-of-type(18)"
+          },
+          {
+            "href": "http://localhost:5173/#google-oauth",
+            "text": "Security Audits",
+            "selector": "a[href]:nth-of-type(21)"
+          },
+          {
+            "href": "http://localhost:5173/about",
+            "text": "About Us",
+            "selector": "a[href]:nth-of-type(22)"
+          },
+          {
+            "href": "http://localhost:5173/careers",
+            "text": "Careers",
+            "selector": "a[href]:nth-of-type(23)"
+          },
+          {
+            "href": "http://localhost:5173/contact",
+            "text": "Contact Us",
+            "selector": "a[href]:nth-of-type(24)"
+          }
+        ],
+        "consent": {
+          "bannerFound": false,
+          "acceptPresent": false,
+          "rejectPresent": false,
+          "settingsPresent": false,
+          "detectionConfidence": "low",
+          "detectionBasis": "keyword/attribute match: google oauth & privacy; precision_gate:insufficient_consent_signals",
+          "bannerTextSnippet": null,
+          "matchedAcceptLabel": null,
+          "matchedRejectLabel": null,
+          "matchedSettingsLabel": null,
+          "consentUxMetrics": {
+            "bannerSelector": null,
+            "acceptLabel": null,
+            "acceptSelector": null,
+            "rejectLabel": null,
+            "rejectSelector": null,
+            "settingsLabel": null,
+            "settingsSelector": null,
+            "blocking": false,
+            "fullscreen": false,
+            "boundingBox": null,
+            "captureQualityClass": "unusable",
+            "captureQualityReasons": [
+              "precision_gate_rejected"
+            ]
+          }
+        },
+        "accessibility": {
+          "scanned": false,
+          "violations": [],
+          "skippedReason": "accessibility scan disabled"
+        },
+        "loadedScriptUrls": [],
+        "resourceUrls": [
+          "https://fonts.googleapis.com/css2",
+          "https://fonts.gstatic.com/s/outfit/v15/QGYvz_MVcBeNP4NJtEtqUYLknw.woff2",
+          "https://fonts.gstatic.com/s/plusjakartasans/v12/LDIZaomQNQcsA88c7O9yZ4KMCoOg4KozySKCdSNG9OcqYQ0lCS_XOKyKQt2l-Fs.woff2",
+          "https://fonts.gstatic.com/s/plusjakartasans/v12/LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko20yygg_vb.woff2",
+          "https://fonts.gstatic.com/s/plusjakartasans/v12/LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko40yygg_vbd-E.woff2"
+        ],
+        "pageSiteSignals": {
+          "faviconUrl": "http://localhost:5173/favicon.svg",
+          "faviconFromExplicitLink": true,
+          "metaDescription": "EasyNaukri is an AI-powered auto job application and cold outreach email platform. Optimize your resume, streamline recruiter outreach, and automate job searches with one click.",
+          "canonicalUrl": "https://easynaukri.online/",
+          "htmlLang": "en",
+          "policyLinkUrls": [
+            "http://localhost:5173/#google-oauth",
+            "http://localhost:5173/privacy",
+            "http://localhost:5173/terms"
+          ]
+        }
+      },
+      "consentInteraction": {
+        "attempted": false,
+        "succeeded": true,
+        "action": "none"
+      }
+    }
+  ],
+  "policyEvidence": {
+    "candidates": [
+      {
+        "url": "http://localhost:5173/#google-oauth",
+        "typeGuess": "privacy",
+        "provenance": "rendered-link",
+        "sourceRouteUrl": "http://localhost:5173/",
+        "selector": "a[href]:nth-of-type(17)",
+        "linkTextSnippet": "OAuth & Privacy"
+      },
+      {
+        "url": "http://localhost:5173/privacy",
+        "typeGuess": "privacy",
+        "provenance": "rendered-link",
+        "sourceRouteUrl": "http://localhost:5173/",
+        "selector": "a[href]:nth-of-type(13)",
+        "linkTextSnippet": "Privacy Policy"
+      },
+      {
+        "url": "http://localhost:5173/terms",
+        "typeGuess": "terms",
+        "provenance": "rendered-link",
+        "sourceRouteUrl": "http://localhost:5173/",
+        "selector": "a[href]:nth-of-type(14)",
+        "linkTextSnippet": "Terms of Service"
+      }
+    ],
+    "fetched": [
+      {
+        "url": "http://localhost:5173/#google-oauth",
+        "status": 200,
+        "finalUrl": "http://localhost:5173/",
+        "fetched": true,
+        "extractionSucceeded": false,
+        "plainTextExcerpt": "EasyNaukri - Auto Job Application & Cold Outreach Email Platform \n\nEasyNaukri \n\nLoading application...",
+        "normalizedTextExcerpt": "EasyNaukri - Auto Job Application & Cold Outreach Email Platform EasyNaukri Loading application...",
+        "mentions": {
+          "analytics": false,
+          "cookies": false,
+          "storage": false,
+          "tag managers": false,
+          "tracking pixels": false
+        },
+        "contentLooksLikePolicy": false,
+        "error": "fetched content does not look like policy text"
+      },
+      {
+        "url": "http://localhost:5173/privacy",
+        "status": 200,
+        "finalUrl": "http://localhost:5173/privacy",
+        "fetched": true,
+        "extractionSucceeded": false,
+        "plainTextExcerpt": "EasyNaukri - Auto Job Application & Cold Outreach Email Platform \n\nEasyNaukri \n\nLoading application...",
+        "normalizedTextExcerpt": "EasyNaukri - Auto Job Application & Cold Outreach Email Platform EasyNaukri Loading application...",
+        "mentions": {
+          "analytics": false,
+          "cookies": false,
+          "storage": false,
+          "tag managers": false,
+          "tracking pixels": false
+        },
+        "contentLooksLikePolicy": false,
+        "error": "fetched content does not look like policy text"
+      },
+      {
+        "url": "http://localhost:5173/terms",
+        "status": 200,
+        "finalUrl": "http://localhost:5173/terms",
+        "fetched": true,
+        "extractionSucceeded": false,
+        "plainTextExcerpt": "EasyNaukri - Auto Job Application & Cold Outreach Email Platform \n\nEasyNaukri \n\nLoading application...",
+        "normalizedTextExcerpt": "EasyNaukri - Auto Job Application & Cold Outreach Email Platform EasyNaukri Loading application...",
+        "mentions": {
+          "analytics": false,
+          "cookies": false,
+          "storage": false,
+          "tag managers": false,
+          "tracking pixels": false
+        },
+        "contentLooksLikePolicy": false,
+        "error": "fetched content does not look like policy text"
+      }
+    ]
+  },
+  "redactionSummary": {
+    "cookieValuesStripped": 4,
+    "storageValuesStripped": 4,
+    "authTokensStripped": 0,
+    "rawHtmlStripped": true,
+    "inlineScriptsStripped": true,
+    "policyTextCappedToChars": 24000
+  },
+  "collectorDiagnostics": {
+    "startedAt": "2026-08-20T03:06:47.358Z",
+    "finishedAt": "2026-08-20T03:06:47.374Z",
+    "routeCap": 10,
+    "warnings": [
+      "Skipped consent variants for /: no consent banner found",
+      "No cookie policy was found although cookies, storage, or tracking signals were observed.",
+      "Policy candidate http://localhost:5173/#google-oauth was fetched but content did not look like policy text.",
+      "Policy candidate http://localhost:5173/privacy was fetched but content did not look like policy text.",
+      "Policy candidate http://localhost:5173/terms was fetched but content did not look like policy text."
+    ]
+  },
+  "styleMole": {
+    "project": {
+      "scanKind": "local_project",
+      "status": "completed",
+      "summary": {
+        "sourceCandidates": 191,
+        "sourceCollected": 191,
+        "packageCandidates": 2,
+        "packageDependenciesCollected": 48,
+        "skippedFiles": 0,
+        "truncatedFiles": 0,
+        "charactersCollected": 1905241,
+        "maximumCharacters": 5000000,
+        "sourceFileLimitReached": false,
+        "totalCharacterLimitReached": false
+      },
+      "report": {
+        "version": "stylemole.report.v2",
+        "scanId": "8a46171b-0309-450a-9394-ce4e931b1285",
+        "generatedAt": "2026-08-20T03:06:46.839Z",
+        "target": {
+          "root": ".",
+          "baseUrl": "http://localhost:5173/"
+        },
+        "registry": {
+          "fingerprint": "40b6c03b5c2c85e07277643e434fef5f7b57f42ea5b41c6d5a0897e042ea7b92",
+          "providerVersions": {
+            "provider.dom-snapshot": "1.0.0",
+            "provider.dom-text": "1.0.0"
+          },
+          "matcherVersions": {
+            "matcher.dom-visual": "1.0.0",
+            "wording.heuristic": "1.0.0",
+            "wording.pattern-set": "1.0.0"
+          },
+          "clueVersions": {
+            "clue.dom.accent-border-cards": "1.0.0",
+            "clue.dom.blur-overuse": "1.0.0",
+            "clue.dom.dark-glow-treatments": "1.0.0",
+            "clue.dom.excessive-centered-alignment": "1.0.0",
+            "clue.dom.excessive-full-width-sections": "1.0.0",
+            "clue.dom.excessive-hero-line-length": "1.0.0",
+            "clue.dom.excessive-pill-elements": "1.0.0",
+            "clue.dom.excessive-rounded-containers": "1.0.0",
+            "clue.dom.fake-ui-panels": "1.0.0",
+            "clue.dom.glass-backgrounds": "1.0.0",
+            "clue.dom.gradient-headings": "1.0.0",
+            "clue.dom.hero-eyebrow-pill": "1.0.0",
+            "clue.dom.icon-above-heading": "1.0.0",
+            "clue.dom.low-text-contrast": "1.0.0",
+            "clue.dom.monotonous-vertical-spacing": "1.0.0",
+            "clue.dom.nested-bordered-containers": "1.0.0",
+            "clue.dom.numbered-step-sections": "1.0.0",
+            "clue.dom.one-sided-accent-border": "1.0.0",
+            "clue.dom.oversized-hero-heading": "1.0.0",
+            "clue.dom.purple-blue-gradients": "1.0.0",
+            "clue.dom.repeated-card-geometry": "1.0.0",
+            "clue.dom.repeated-eyebrow-labels": "1.0.0",
+            "clue.dom.repeated-feature-grid": "1.0.0",
+            "clue.dom.repeated-section-geometry": "1.0.0",
+            "clue.dom.stat-banner-metrics": "1.0.0",
+            "clue.dom.tiny-supporting-text": "1.0.0",
+            "clue.dom.uniform-radius": "1.0.0",
+            "clue.dom.uniform-shadow": "1.0.0",
+            "clue.dom.weak-heading-size-separation": "1.0.0",
+            "clue.typography.default-font-stack-dominance": "1.0.0",
+            "clue.typography.excessive-body-line-length": "1.0.0",
+            "clue.typography.single-font-family-dominance": "1.0.0",
+            "clue.typography.uniform-body-type-treatment": "1.0.0",
+            "clue.wording.contrast-aphorisms": "1.0.0",
+            "clue.wording.em-dash-overuse": "1.0.0",
+            "clue.wording.generic-completeness-claims": "1.0.0",
+            "clue.wording.generic-cta-labels": "1.0.0",
+            "clue.wording.generic-ease-speed-claims": "1.0.0",
+            "clue.wording.generic-saas-buzzwords": "1.0.0",
+            "clue.wording.generic-transformation-claims": "1.0.0",
+            "clue.wording.low-product-specificity": "1.0.0",
+            "clue.wording.repeated-cta-labels": "1.0.0",
+            "clue.wording.repeated-heading-rhythm": "1.0.0",
+            "clue.wording.repeated-short-sentence-cadence": "1.0.0",
+            "clue.wording.vague-value-propositions": "1.0.0"
+          },
+          "composerVersions": {
+            "composer.style.cross-surface-corroboration": "1.0.0",
+            "composer.style.default-typography": "1.0.0",
+            "composer.style.generic-marketing-copy": "1.0.0",
+            "composer.style.generic-visual-treatment": "1.0.0",
+            "composer.style.readability-quality": "1.0.0",
+            "composer.style.repeated-card-template": "1.0.0",
+            "composer.style.repetitive-copy-system": "1.0.0",
+            "composer.style.repetitive-layout": "1.0.0"
+          }
+        },
+        "score": 49,
+        "band": "some_generic_patterns",
+        "scoreMeaning": "higher_is_worse",
+        "summary": {
+          "evidenceRecords": 241,
+          "clueObservations": 12,
+          "reviews": 8,
+          "passed": 3,
+          "failed": 5,
+          "unknown": 0,
+          "notApplicable": 0
+        },
+        "clues": [
+          {
+            "id": "smc_0cba1b121857d5d0de0e2795",
+            "clueId": "clue.wording.repeated-short-sentence-cadence",
+            "clueVersion": "1.0.0",
+            "category": "wording",
+            "confidence": 0.69,
+            "occurrenceCount": 46,
+            "evidence": [
+              {
+                "evidenceId": "sme_5cefa8ba7a232a6b9e0d5456",
+                "providerId": "provider.dom-text",
+                "kind": "dom.text",
+                "summary": "Repeated rhythm in 🎁 15-Day Elite Trial",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/header[1]/div[1]/div[1]/span[1]",
+                  "boundingBox": {
+                    "x": 87,
+                    "y": 97,
+                    "width": 118.359375,
+                    "height": 16
+                  }
+                },
+                "metrics": {
+                  "locale": "en",
+                  "pageWordCount": 1314,
+                  "thresholds": {
+                    "minSamples": 4,
+                    "minMatching": 3,
+                    "minSections": 2,
+                    "rhythmTarget": "sentence"
+                  },
+                  "rhythmSignature": "3-4:none",
+                  "qualifyingSections": [
+                    "element-103",
+                    "element-134",
+                    "element-154",
+                    "element-227",
+                    "element-323",
+                    "element-345",
+                    "element-82"
+                  ],
+                  "totalSamples": 105,
+                  "sectionId": null
+                }
+              },
+              {
+                "evidenceId": "sme_5cefa8ba7a232a6b9e0d5456",
+                "providerId": "provider.dom-text",
+                "kind": "dom.text",
+                "summary": "Repeated rhythm in Zero Payment Details Required",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(3)",
+                  "domPath": "body[1]/div[1]/div[1]/header[1]/div[1]/div[1]/span[3]",
+                  "boundingBox": {
+                    "x": 229.5625,
+                    "y": 97,
+                    "width": 186.78125,
+                    "height": 16
+                  }
+                },
+                "metrics": {
+                  "locale": "en",
+                  "pageWordCount": 1314,
+                  "thresholds": {
+                    "minSamples": 4,
+                    "minMatching": 3,
+                    "minSections": 2,
+                    "rhythmTarget": "sentence"
+                  },
+                  "rhythmSignature": "3-4:none",
+                  "qualifyingSections": [
+                    "element-103",
+                    "element-134",
+                    "element-154",
+                    "element-227",
+                    "element-323",
+                    "element-345",
+                    "element-82"
+                  ],
+                  "totalSamples": 105,
+                  "sectionId": null
+                }
+              },
+              {
+                "evidenceId": "sme_5cefa8ba7a232a6b9e0d5456",
+                "providerId": "provider.dom-text",
+                "kind": "dom.text",
+                "summary": "Repeated rhythm in Welcome to EasyNaukri",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(1) > h1:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/header[1]/div[1]/h1[1]",
+                  "boundingBox": {
+                    "x": 72,
+                    "y": 132,
+                    "width": 589.59375,
+                    "height": 140.78125
+                  }
+                },
+                "metrics": {
+                  "locale": "en",
+                  "pageWordCount": 1314,
+                  "thresholds": {
+                    "minSamples": 4,
+                    "minMatching": 3,
+                    "minSections": 2,
+                    "rhythmTarget": "sentence"
+                  },
+                  "rhythmSignature": "3-4:none",
+                  "qualifyingSections": [
+                    "element-103",
+                    "element-134",
+                    "element-154",
+                    "element-227",
+                    "element-323",
+                    "element-345",
+                    "element-82"
+                  ],
+                  "totalSamples": 105,
+                  "sectionId": null
+                }
+              },
+              {
+                "evidenceId": "sme_5cefa8ba7a232a6b9e0d5456",
+                "providerId": "provider.dom-text",
+                "kind": "dom.text",
+                "summary": "Repeated rhythm in 15-Day Elite Trial Active",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/header[1]/div[2]/div[2]/div[1]/span[1]",
+                  "boundingBox": {
+                    "x": 1029.533447265625,
+                    "y": 180.94757080078125,
+                    "width": 154.59130859375,
+                    "height": 27.316604614257812
+                  }
+                },
+                "metrics": {
+                  "locale": "en",
+                  "pageWordCount": 1314,
+                  "thresholds": {
+                    "minSamples": 4,
+                    "minMatching": 3,
+                    "minSections": 2,
+                    "rhythmTarget": "sentence"
+                  },
+                  "rhythmSignature": "3-4:none",
+                  "qualifyingSections": [
+                    "element-103",
+                    "element-134",
+                    "element-154",
+                    "element-227",
+                    "element-323",
+                    "element-345",
+                    "element-82"
+                  ],
+                  "totalSamples": 105,
+                  "sectionId": null
+                }
+              },
+              {
+                "evidenceId": "sme_5cefa8ba7a232a6b9e0d5456",
+                "providerId": "provider.dom-text",
+                "kind": "dom.text",
+                "summary": "Repeated rhythm in Match Score Threshold",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > span:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/header[1]/div[2]/div[2]/div[2]/span[1]",
+                  "boundingBox": {
+                    "x": 751.0567016601562,
+                    "y": 237.57247924804688,
+                    "width": 147.106201171875,
+                    "height": 21.643951416015625
+                  }
+                },
+                "metrics": {
+                  "locale": "en",
+                  "pageWordCount": 1314,
+                  "thresholds": {
+                    "minSamples": 4,
+                    "minMatching": 3,
+                    "minSections": 2,
+                    "rhythmTarget": "sentence"
+                  },
+                  "rhythmSignature": "3-4:none",
+                  "qualifyingSections": [
+                    "element-103",
+                    "element-134",
+                    "element-154",
+                    "element-227",
+                    "element-323",
+                    "element-345",
+                    "element-82"
+                  ],
+                  "totalSamples": 105,
+                  "sectionId": null
+                }
+              },
+              {
+                "evidenceId": "sme_5cefa8ba7a232a6b9e0d5456",
+                "providerId": "provider.dom-text",
+                "kind": "dom.text",
+                "summary": "Repeated rhythm in Daily Submission Limit",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(3) > span:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/header[1]/div[2]/div[2]/div[3]/span[1]",
+                  "boundingBox": {
+                    "x": 750.7666625976562,
+                    "y": 271.55560302734375,
+                    "width": 141.90325927734375,
+                    "height": 21.59954833984375
+                  }
+                },
+                "metrics": {
+                  "locale": "en",
+                  "pageWordCount": 1314,
+                  "thresholds": {
+                    "minSamples": 4,
+                    "minMatching": 3,
+                    "minSections": 2,
+                    "rhythmTarget": "sentence"
+                  },
+                  "rhythmSignature": "3-4:none",
+                  "qualifyingSections": [
+                    "element-103",
+                    "element-134",
+                    "element-154",
+                    "element-227",
+                    "element-323",
+                    "element-345",
+                    "element-82"
+                  ],
+                  "totalSamples": 105,
+                  "sectionId": null
+                }
+              },
+              {
+                "evidenceId": "sme_5cefa8ba7a232a6b9e0d5456",
+                "providerId": "provider.dom-text",
+                "kind": "dom.text",
+                "summary": "Repeated rhythm in 50 / day (Elite Trial)",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(3) > span:nth-of-type(2)",
+                  "domPath": "body[1]/div[1]/div[1]/header[1]/div[2]/div[2]/div[3]/span[2]",
+                  "boundingBox": {
+                    "x": 1060.38037109375,
+                    "y": 274.19818115234375,
+                    "width": 122.9508056640625,
+                    "height": 21.43780517578125
+                  }
+                },
+                "metrics": {
+                  "locale": "en",
+                  "pageWordCount": 1314,
+                  "thresholds": {
+                    "minSamples": 4,
+                    "minMatching": 3,
+                    "minSections": 2,
+                    "rhythmTarget": "sentence"
+                  },
+                  "rhythmSignature": "3-4:none",
+                  "qualifyingSections": [
+                    "element-103",
+                    "element-134",
+                    "element-154",
+                    "element-227",
+                    "element-323",
+                    "element-345",
+                    "element-82"
+                  ],
+                  "totalSamples": 105,
+                  "sectionId": null
+                }
+              },
+              {
+                "evidenceId": "sme_5cefa8ba7a232a6b9e0d5456",
+                "providerId": "provider.dom-text",
+                "kind": "dom.text",
+                "summary": "Repeated rhythm in Weekly Queue Progress",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(4) > span:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/header[1]/div[2]/div[2]/div[4]/span[1]",
+                  "boundingBox": {
+                    "x": 750.4560546875,
+                    "y": 307.9449157714844,
+                    "width": 154.54339599609375,
+                    "height": 21.707427978515625
+                  }
+                },
+                "metrics": {
+                  "locale": "en",
+                  "pageWordCount": 1314,
+                  "thresholds": {
+                    "minSamples": 4,
+                    "minMatching": 3,
+                    "minSections": 2,
+                    "rhythmTarget": "sentence"
+                  },
+                  "rhythmSignature": "3-4:none",
+                  "qualifyingSections": [
+                    "element-103",
+                    "element-134",
+                    "element-154",
+                    "element-227",
+                    "element-323",
+                    "element-345",
+                    "element-82"
+                  ],
+                  "totalSamples": 105,
+                  "sectionId": null
+                }
+              }
+            ],
+            "tags": [
+              "repetition",
+              "wording"
+            ],
+            "scope": {
+              "kind": "page",
+              "pageUrl": "http://localhost:5173/"
+            }
+          },
+          {
+            "id": "smc_15c7188cfb628d1d4c228f97",
+            "clueId": "clue.dom.accent-border-cards",
+            "clueVersion": "1.0.0",
+            "category": "visual-treatment",
+            "confidence": 0.75,
+            "occurrenceCount": 5,
+            "evidence": [
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Accent border card (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]/div[1]",
+                  "boundingBox": {
+                    "x": 72,
+                    "y": 1508.265625,
+                    "width": 552,
+                    "height": 172.90625
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "siblingAccentCards": 5
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "minSaturation": 0.45
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Accent border card (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2)",
+                  "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]/div[2]",
+                  "boundingBox": {
+                    "x": 656,
+                    "y": 1508.265625,
+                    "width": 552,
+                    "height": 172.90625
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "siblingAccentCards": 5
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "minSaturation": 0.45
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Accent border card (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(3))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(3)",
+                  "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]/div[3]",
+                  "boundingBox": {
+                    "x": 72,
+                    "y": 1713.171875,
+                    "width": 552,
+                    "height": 150.578125
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "siblingAccentCards": 5
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "minSaturation": 0.45
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Accent border card (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(4))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(4)",
+                  "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]/div[4]",
+                  "boundingBox": {
+                    "x": 656,
+                    "y": 1713.171875,
+                    "width": 552,
+                    "height": 150.578125
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "siblingAccentCards": 5
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "minSaturation": 0.45
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Accent border card (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(5))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(5)",
+                  "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]/div[5]",
+                  "boundingBox": {
+                    "x": 72,
+                    "y": 1895.75,
+                    "width": 552,
+                    "height": 150.578125
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "siblingAccentCards": 5
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "minSaturation": 0.45
+                  }
+                }
+              }
+            ],
+            "tags": [
+              "cards",
+              "dom"
+            ],
+            "scope": {
+              "kind": "page",
+              "pageUrl": "http://localhost:5173/"
+            }
+          },
+          {
+            "id": "smc_23b1dcfd04ff39fd525ea5c4",
+            "clueId": "clue.dom.repeated-section-geometry",
+            "clueVersion": "1.0.0",
+            "category": "template-fingerprint",
+            "confidence": 0.78,
+            "occurrenceCount": 7,
+            "evidence": [
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Repeated section geometry (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(1))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/section[1]",
+                  "boundingBox": {
+                    "x": 40,
+                    "y": 566.515625,
+                    "width": 1200,
+                    "height": 634.015625
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "widthRatio": 0.9375,
+                    "paddingSignature": "92,32,32,32",
+                    "textAlign": "start"
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "maxWidthRatioDelta": 0.05,
+                    "maxPaddingDeltaPx": 8
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Repeated section geometry (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2)",
+                  "domPath": "body[1]/div[1]/div[1]/section[2]",
+                  "boundingBox": {
+                    "x": 40,
+                    "y": 1200.53125,
+                    "width": 1200,
+                    "height": 875.796875
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "widthRatio": 0.9375,
+                    "paddingSignature": "92,32,32,32",
+                    "textAlign": "start"
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "maxWidthRatioDelta": 0.05,
+                    "maxPaddingDeltaPx": 8
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Repeated section geometry (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(3))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(3)",
+                  "domPath": "body[1]/div[1]/div[1]/section[3]",
+                  "boundingBox": {
+                    "x": 40,
+                    "y": 2076.328125,
+                    "width": 1200,
+                    "height": 755.671875
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "widthRatio": 0.9375,
+                    "paddingSignature": "92,32,32,32",
+                    "textAlign": "start"
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "maxWidthRatioDelta": 0.05,
+                    "maxPaddingDeltaPx": 8
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Repeated section geometry (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(4))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(4)",
+                  "domPath": "body[1]/div[1]/div[1]/section[4]",
+                  "boundingBox": {
+                    "x": 40,
+                    "y": 2832,
+                    "width": 1200,
+                    "height": 1504.28125
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "widthRatio": 0.9375,
+                    "paddingSignature": "92,32,32,32",
+                    "textAlign": "start"
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "maxWidthRatioDelta": 0.05,
+                    "maxPaddingDeltaPx": 8
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Repeated section geometry (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(5))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(5)",
+                  "domPath": "body[1]/div[1]/div[1]/section[5]",
+                  "boundingBox": {
+                    "x": 40,
+                    "y": 4336.28125,
+                    "width": 1200,
+                    "height": 1087.984375
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "widthRatio": 0.9375,
+                    "paddingSignature": "92,32,32,32",
+                    "textAlign": "start"
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "maxWidthRatioDelta": 0.05,
+                    "maxPaddingDeltaPx": 8
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Repeated section geometry (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(7))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(7)",
+                  "domPath": "body[1]/div[1]/div[1]/section[7]",
+                  "boundingBox": {
+                    "x": 40,
+                    "y": 5738.984375,
+                    "width": 1200,
+                    "height": 631.71875
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "widthRatio": 0.9375,
+                    "paddingSignature": "92,32,32,32",
+                    "textAlign": "start"
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "maxWidthRatioDelta": 0.05,
+                    "maxPaddingDeltaPx": 8
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Repeated section geometry (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(8))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(8)",
+                  "domPath": "body[1]/div[1]/div[1]/section[8]",
+                  "boundingBox": {
+                    "x": 40,
+                    "y": 6370.703125,
+                    "width": 1200,
+                    "height": 1051.671875
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "widthRatio": 0.9375,
+                    "paddingSignature": "92,32,32,32",
+                    "textAlign": "start"
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "maxWidthRatioDelta": 0.05,
+                    "maxPaddingDeltaPx": 8
+                  }
+                }
+              }
+            ],
+            "tags": [
+              "dom",
+              "layout",
+              "repetition"
+            ],
+            "scope": {
+              "kind": "page",
+              "pageUrl": "http://localhost:5173/"
+            }
+          },
+          {
+            "id": "smc_71f9c8f96ba4b7bfebe50289",
+            "clueId": "clue.dom.repeated-card-geometry",
+            "clueVersion": "1.0.0",
+            "category": "template-fingerprint",
+            "confidence": 0.78,
+            "occurrenceCount": 5,
+            "evidence": [
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Repeated card geometry (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]/div[1]",
+                  "boundingBox": {
+                    "x": 72,
+                    "y": 1508.265625,
+                    "width": 552,
+                    "height": 172.90625
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "siblingCards": 5,
+                    "widthCv": 0,
+                    "heightCv": 0.06857592309302277
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "maxWidthCv": 0.12,
+                    "maxHeightCv": 0.12
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Repeated card geometry (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2)",
+                  "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]/div[2]",
+                  "boundingBox": {
+                    "x": 656,
+                    "y": 1508.265625,
+                    "width": 552,
+                    "height": 172.90625
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "siblingCards": 5,
+                    "widthCv": 0,
+                    "heightCv": 0.06857592309302277
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "maxWidthCv": 0.12,
+                    "maxHeightCv": 0.12
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Repeated card geometry (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(3))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(3)",
+                  "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]/div[3]",
+                  "boundingBox": {
+                    "x": 72,
+                    "y": 1713.171875,
+                    "width": 552,
+                    "height": 150.578125
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "siblingCards": 5,
+                    "widthCv": 0,
+                    "heightCv": 0.06857592309302277
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "maxWidthCv": 0.12,
+                    "maxHeightCv": 0.12
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Repeated card geometry (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(4))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(4)",
+                  "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]/div[4]",
+                  "boundingBox": {
+                    "x": 656,
+                    "y": 1713.171875,
+                    "width": 552,
+                    "height": 150.578125
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "siblingCards": 5,
+                    "widthCv": 0,
+                    "heightCv": 0.06857592309302277
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "maxWidthCv": 0.12,
+                    "maxHeightCv": 0.12
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Repeated card geometry (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(5))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(5)",
+                  "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]/div[5]",
+                  "boundingBox": {
+                    "x": 72,
+                    "y": 1895.75,
+                    "width": 552,
+                    "height": 150.578125
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "siblingCards": 5,
+                    "widthCv": 0,
+                    "heightCv": 0.06857592309302277
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "maxWidthCv": 0.12,
+                    "maxHeightCv": 0.12
+                  }
+                }
+              }
+            ],
+            "tags": [
+              "cards",
+              "dom",
+              "repetition"
+            ],
+            "scope": {
+              "kind": "page",
+              "pageUrl": "http://localhost:5173/"
+            }
+          },
+          {
+            "id": "smc_73b0f080c1ea4adf3eb98874",
+            "clueId": "clue.dom.repeated-eyebrow-labels",
+            "clueVersion": "1.0.0",
+            "category": "template-fingerprint",
+            "confidence": 0.74,
+            "occurrenceCount": 7,
+            "evidence": [
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Repeated eyebrow label pattern (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(1) > h2:nth-of-type(1))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(1) > h2:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/section[1]/div[1]/h2[1]",
+                  "boundingBox": {
+                    "x": 405.640625,
+                    "y": 687.703125,
+                    "width": 468.71875,
+                    "height": 52.796875
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "eyebrowHeadings": 7,
+                    "labelSelector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(1)",
+                    "labelLength": 19,
+                    "fontSizeRatio": 0.29090909090909095
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "minLabelLength": 2,
+                    "maxLabelLength": 32,
+                    "maxFontRatio": 0.8,
+                    "minUppercaseShare": 0.7,
+                    "minLetterSpacingRatio": 0.08
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Repeated eyebrow label pattern (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(1) > h2:nth-of-type(1))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(1) > h2:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/section[2]/div[1]/h2[1]",
+                  "boundingBox": {
+                    "x": 362.984375,
+                    "y": 1321.71875,
+                    "width": 554.03125,
+                    "height": 52.796875
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "eyebrowHeadings": 7,
+                    "labelSelector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(1)",
+                    "labelLength": 14,
+                    "fontSizeRatio": 0.29090909090909095
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "minLabelLength": 2,
+                    "maxLabelLength": 32,
+                    "maxFontRatio": 0.8,
+                    "minUppercaseShare": 0.7,
+                    "minLetterSpacingRatio": 0.08
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Repeated eyebrow label pattern (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(3) > div:nth-of-type(1) > h2:nth-of-type(1))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(3) > div:nth-of-type(1) > h2:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/section[3]/div[1]/h2[1]",
+                  "boundingBox": {
+                    "x": 270.671875,
+                    "y": 2197.515625,
+                    "width": 738.640625,
+                    "height": 52.796875
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "eyebrowHeadings": 7,
+                    "labelSelector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(3) > div:nth-of-type(1) > span:nth-of-type(1)",
+                    "labelLength": 21,
+                    "fontSizeRatio": 0.29090909090909095
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "minLabelLength": 2,
+                    "maxLabelLength": 32,
+                    "maxFontRatio": 0.8,
+                    "minUppercaseShare": 0.7,
+                    "minLetterSpacingRatio": 0.08
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Repeated eyebrow label pattern (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(4) > div:nth-of-type(1) > h2:nth-of-type(1))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(4) > div:nth-of-type(1) > h2:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/section[4]/div[1]/h2[1]",
+                  "boundingBox": {
+                    "x": 232.390625,
+                    "y": 2953.1875,
+                    "width": 815.21875,
+                    "height": 52.796875
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "eyebrowHeadings": 7,
+                    "labelSelector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(4) > div:nth-of-type(1) > span:nth-of-type(1)",
+                    "labelLength": 21,
+                    "fontSizeRatio": 0.29090909090909095
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "minLabelLength": 2,
+                    "maxLabelLength": 32,
+                    "maxFontRatio": 0.8,
+                    "minUppercaseShare": 0.7,
+                    "minLetterSpacingRatio": 0.08
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Repeated eyebrow label pattern (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(5) > div:nth-of-type(1) > h2:nth-of-type(1))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(5) > div:nth-of-type(1) > h2:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/section[5]/div[1]/h2[1]",
+                  "boundingBox": {
+                    "x": 412.078125,
+                    "y": 4457.46875,
+                    "width": 455.828125,
+                    "height": 52.796875
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "eyebrowHeadings": 7,
+                    "labelSelector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(5) > div:nth-of-type(1) > span:nth-of-type(1)",
+                    "labelLength": 13,
+                    "fontSizeRatio": 0.29090909090909095
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "minLabelLength": 2,
+                    "maxLabelLength": 32,
+                    "maxFontRatio": 0.8,
+                    "minUppercaseShare": 0.7,
+                    "minLetterSpacingRatio": 0.08
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Repeated eyebrow label pattern (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(7) > div:nth-of-type(1) > h2:nth-of-type(1))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(7) > div:nth-of-type(1) > h2:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/section[7]/div[1]/h2[1]",
+                  "boundingBox": {
+                    "x": 426.203125,
+                    "y": 5860.171875,
+                    "width": 427.59375,
+                    "height": 52.796875
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "eyebrowHeadings": 7,
+                    "labelSelector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(7) > div:nth-of-type(1) > span:nth-of-type(1)",
+                    "labelLength": 15,
+                    "fontSizeRatio": 0.29090909090909095
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "minLabelLength": 2,
+                    "maxLabelLength": 32,
+                    "maxFontRatio": 0.8,
+                    "minUppercaseShare": 0.7,
+                    "minLetterSpacingRatio": 0.08
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Repeated eyebrow label pattern (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(8) > div:nth-of-type(1) > h2:nth-of-type(1))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(8) > div:nth-of-type(1) > h2:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/section[8]/div[1]/h2[1]",
+                  "boundingBox": {
+                    "x": 358.46875,
+                    "y": 6491.890625,
+                    "width": 563.046875,
+                    "height": 52.796875
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "eyebrowHeadings": 7,
+                    "labelSelector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(8) > div:nth-of-type(1) > span:nth-of-type(1)",
+                    "labelLength": 19,
+                    "fontSizeRatio": 0.29090909090909095
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "minLabelLength": 2,
+                    "maxLabelLength": 32,
+                    "maxFontRatio": 0.8,
+                    "minUppercaseShare": 0.7,
+                    "minLetterSpacingRatio": 0.08
+                  }
+                }
+              }
+            ],
+            "tags": [
+              "dom",
+              "repetition",
+              "typography"
+            ],
+            "scope": {
+              "kind": "page",
+              "pageUrl": "http://localhost:5173/"
+            }
+          },
+          {
+            "id": "smc_73e0ef6d597829a3c53c54c8",
+            "clueId": "clue.dom.repeated-feature-grid",
+            "clueVersion": "1.0.0",
+            "category": "template-fingerprint",
+            "confidence": 0.81,
+            "occurrenceCount": 15,
+            "evidence": [
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Feature grid child (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]/div[1]",
+                  "boundingBox": {
+                    "x": 72,
+                    "y": 1508.265625,
+                    "width": 552,
+                    "height": 172.90625
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "structureSignature": "h-p"
+                  },
+                  "thresholds": {
+                    "minGridChildren": 6,
+                    "minGrids": 2,
+                    "minGridChildrenAlt": 3,
+                    "minStructureShare": 0.8
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Feature grid child (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2)",
+                  "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]/div[2]",
+                  "boundingBox": {
+                    "x": 656,
+                    "y": 1508.265625,
+                    "width": 552,
+                    "height": 172.90625
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "structureSignature": "h-p"
+                  },
+                  "thresholds": {
+                    "minGridChildren": 6,
+                    "minGrids": 2,
+                    "minGridChildrenAlt": 3,
+                    "minStructureShare": 0.8
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Feature grid child (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(3))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(3)",
+                  "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]/div[3]",
+                  "boundingBox": {
+                    "x": 72,
+                    "y": 1713.171875,
+                    "width": 552,
+                    "height": 150.578125
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "structureSignature": "h-p"
+                  },
+                  "thresholds": {
+                    "minGridChildren": 6,
+                    "minGrids": 2,
+                    "minGridChildrenAlt": 3,
+                    "minStructureShare": 0.8
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Feature grid child (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(4))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(4)",
+                  "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]/div[4]",
+                  "boundingBox": {
+                    "x": 656,
+                    "y": 1713.171875,
+                    "width": 552,
+                    "height": 150.578125
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "structureSignature": "h-p"
+                  },
+                  "thresholds": {
+                    "minGridChildren": 6,
+                    "minGrids": 2,
+                    "minGridChildrenAlt": 3,
+                    "minStructureShare": 0.8
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Feature grid child (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(5))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(5)",
+                  "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]/div[5]",
+                  "boundingBox": {
+                    "x": 72,
+                    "y": 1895.75,
+                    "width": 552,
+                    "height": 150.578125
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "structureSignature": "h-p"
+                  },
+                  "thresholds": {
+                    "minGridChildren": 6,
+                    "minGrids": 2,
+                    "minGridChildrenAlt": 3,
+                    "minStructureShare": 0.8
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Repeated feature grid (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2)",
+                  "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]",
+                  "boundingBox": {
+                    "x": 72,
+                    "y": 1508.265625,
+                    "width": 1136,
+                    "height": 538.0625
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "childCount": 5,
+                    "repeatedChildCount": 5,
+                    "dominantSignature": "h-p",
+                    "structureShare": 1
+                  },
+                  "thresholds": {
+                    "minGridChildren": 6,
+                    "minGrids": 2,
+                    "minGridChildrenAlt": 3,
+                    "minStructureShare": 0.8
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Feature grid child (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(5) > div:nth-of-type(2) > div:nth-of-type(1))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(5) > div:nth-of-type(2) > div:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/section[5]/div[2]/div[1]",
+                  "boundingBox": {
+                    "x": 72,
+                    "y": 4644.015625,
+                    "width": 266,
+                    "height": 750.25
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "structureSignature": "h-p"
+                  },
+                  "thresholds": {
+                    "minGridChildren": 6,
+                    "minGrids": 2,
+                    "minGridChildrenAlt": 3,
+                    "minStructureShare": 0.8
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Repeated feature grid (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(5) > div:nth-of-type(2))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(5) > div:nth-of-type(2)",
+                  "domPath": "body[1]/div[1]/div[1]/section[5]/div[2]",
+                  "boundingBox": {
+                    "x": 72,
+                    "y": 4644.015625,
+                    "width": 1136,
+                    "height": 750.25
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "childCount": 4,
+                    "repeatedChildCount": 4,
+                    "dominantSignature": "h-p",
+                    "structureShare": 1
+                  },
+                  "thresholds": {
+                    "minGridChildren": 6,
+                    "minGrids": 2,
+                    "minGridChildrenAlt": 3,
+                    "minStructureShare": 0.8
+                  }
+                }
+              }
+            ],
+            "tags": [
+              "dom",
+              "layout",
+              "repetition"
+            ],
+            "scope": {
+              "kind": "page",
+              "pageUrl": "http://localhost:5173/"
+            }
+          },
+          {
+            "id": "smc_7bc9e20c8b28fd348d1e0448",
+            "clueId": "clue.dom.numbered-step-sections",
+            "clueVersion": "1.0.0",
+            "category": "template-fingerprint",
+            "confidence": 0.7,
+            "occurrenceCount": 3,
+            "evidence": [
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Numbered step marker (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(1))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/section[1]/div[2]/div[1]/span[1]",
+                  "boundingBox": {
+                    "x": 105,
+                    "y": 851.25,
+                    "width": 48,
+                    "height": 48
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "stepValue": 1,
+                    "runLength": 3
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "minMarkerFontSizePx": 20
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Numbered step marker (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > span:nth-of-type(1))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > span:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/section[1]/div[2]/div[2]/span[1]",
+                  "boundingBox": {
+                    "x": 497,
+                    "y": 851.25,
+                    "width": 48,
+                    "height": 48
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "stepValue": 2,
+                    "runLength": 3
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "minMarkerFontSizePx": 20
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Numbered step marker (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > span:nth-of-type(1))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > span:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/section[1]/div[2]/div[3]/span[1]",
+                  "boundingBox": {
+                    "x": 889,
+                    "y": 851.25,
+                    "width": 48,
+                    "height": 48
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "stepValue": 3,
+                    "runLength": 3
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "minMarkerFontSizePx": 20
+                  }
+                }
+              }
+            ],
+            "tags": [
+              "content",
+              "dom"
+            ],
+            "scope": {
+              "kind": "page",
+              "pageUrl": "http://localhost:5173/"
+            }
+          },
+          {
+            "id": "smc_8d21cc65c0e8501f1ed7c7f4",
+            "clueId": "clue.wording.repeated-heading-rhythm",
+            "clueVersion": "1.0.0",
+            "category": "wording",
+            "confidence": 0.71,
+            "occurrenceCount": 15,
+            "evidence": [
+              {
+                "evidenceId": "sme_5cefa8ba7a232a6b9e0d5456",
+                "providerId": "provider.dom-text",
+                "kind": "dom.text",
+                "summary": "Repeated rhythm in Frontend Developer",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(6) > div:nth-of-type(2) > h4:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/header[1]/div[2]/div[2]/div[6]/div[2]/h4[1]",
+                  "boundingBox": {
+                    "x": 808.3558349609375,
+                    "y": 383.0203857421875,
+                    "width": 219.080810546875,
+                    "height": 28.741973876953125
+                  }
+                },
+                "metrics": {
+                  "locale": "en",
+                  "pageWordCount": 1314,
+                  "thresholds": {
+                    "minSamples": 4,
+                    "minMatching": 3,
+                    "minSections": 1,
+                    "rhythmTarget": "heading"
+                  },
+                  "rhythmSignature": "1-2|none|other",
+                  "qualifyingSections": [
+                    "element-103",
+                    "element-227",
+                    "element-323",
+                    "element-82"
+                  ],
+                  "totalSamples": 27,
+                  "sectionId": null
+                }
+              },
+              {
+                "evidenceId": "sme_5cefa8ba7a232a6b9e0d5456",
+                "providerId": "provider.dom-text",
+                "kind": "dom.text",
+                "summary": "Repeated rhythm in Applications Submitted",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(2) > h5:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/header[1]/div[2]/div[3]/div[2]/h5[1]",
+                  "boundingBox": {
+                    "x": 1073.09375,
+                    "y": 431.984375,
+                    "width": 133.90625,
+                    "height": 19.1875
+                  }
+                },
+                "metrics": {
+                  "locale": "en",
+                  "pageWordCount": 1314,
+                  "thresholds": {
+                    "minSamples": 4,
+                    "minMatching": 3,
+                    "minSections": 1,
+                    "rhythmTarget": "heading"
+                  },
+                  "rhythmSignature": "1-2|none|other",
+                  "qualifyingSections": [
+                    "element-103",
+                    "element-227",
+                    "element-323",
+                    "element-82"
+                  ],
+                  "totalSamples": 27,
+                  "sectionId": null
+                }
+              },
+              {
+                "evidenceId": "sme_5cefa8ba7a232a6b9e0d5456",
+                "providerId": "provider.dom-text",
+                "kind": "dom.text",
+                "summary": "Repeated rhythm in Smart Matching",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > h3:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/section[1]/div[2]/div[2]/h3[1]",
+                  "boundingBox": {
+                    "x": 497,
+                    "y": 999.25,
+                    "width": 286,
+                    "height": 26
+                  }
+                },
+                "metrics": {
+                  "locale": "en",
+                  "pageWordCount": 1314,
+                  "thresholds": {
+                    "minSamples": 4,
+                    "minMatching": 3,
+                    "minSections": 1,
+                    "rhythmTarget": "heading"
+                  },
+                  "rhythmSignature": "1-2|none|other",
+                  "qualifyingSections": [
+                    "element-103",
+                    "element-227",
+                    "element-323",
+                    "element-82"
+                  ],
+                  "totalSamples": 27,
+                  "sectionId": "element-82"
+                }
+              },
+              {
+                "evidenceId": "sme_5cefa8ba7a232a6b9e0d5456",
+                "providerId": "provider.dom-text",
+                "kind": "dom.text",
+                "summary": "Repeated rhythm in Autopilot Applying",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > h3:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/section[1]/div[2]/div[3]/h3[1]",
+                  "boundingBox": {
+                    "x": 889,
+                    "y": 999.25,
+                    "width": 286,
+                    "height": 26
+                  }
+                },
+                "metrics": {
+                  "locale": "en",
+                  "pageWordCount": 1314,
+                  "thresholds": {
+                    "minSamples": 4,
+                    "minMatching": 3,
+                    "minSections": 1,
+                    "rhythmTarget": "heading"
+                  },
+                  "rhythmSignature": "1-2|none|other",
+                  "qualifyingSections": [
+                    "element-103",
+                    "element-227",
+                    "element-323",
+                    "element-82"
+                  ],
+                  "totalSamples": 27,
+                  "sectionId": "element-82"
+                }
+              },
+              {
+                "evidenceId": "sme_5cefa8ba7a232a6b9e0d5456",
+                "providerId": "provider.dom-text",
+                "kind": "dom.text",
+                "summary": "Repeated rhythm in Recruiter Partnerships",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(4) > div:nth-of-type(2) > h3:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]/div[4]/div[2]/h3[1]",
+                  "boundingBox": {
+                    "x": 769,
+                    "y": 1750.171875,
+                    "width": 402,
+                    "height": 23.921875
+                  }
+                },
+                "metrics": {
+                  "locale": "en",
+                  "pageWordCount": 1314,
+                  "thresholds": {
+                    "minSamples": 4,
+                    "minMatching": 3,
+                    "minSections": 1,
+                    "rhythmTarget": "heading"
+                  },
+                  "rhythmSignature": "1-2|none|other",
+                  "qualifyingSections": [
+                    "element-103",
+                    "element-227",
+                    "element-323",
+                    "element-82"
+                  ],
+                  "totalSamples": 27,
+                  "sectionId": "element-103"
+                }
+              },
+              {
+                "evidenceId": "sme_5cefa8ba7a232a6b9e0d5456",
+                "providerId": "provider.dom-text",
+                "kind": "dom.text",
+                "summary": "Repeated rhythm in Candidate Free",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(5) > div:nth-of-type(2) > div:nth-of-type(1) > h3:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/section[5]/div[2]/div[1]/h3[1]",
+                  "boundingBox": {
+                    "x": 109,
+                    "y": 4693.015625,
+                    "width": 192,
+                    "height": 26
+                  }
+                },
+                "metrics": {
+                  "locale": "en",
+                  "pageWordCount": 1314,
+                  "thresholds": {
+                    "minSamples": 4,
+                    "minMatching": 3,
+                    "minSections": 1,
+                    "rhythmTarget": "heading"
+                  },
+                  "rhythmSignature": "1-2|none|other",
+                  "qualifyingSections": [
+                    "element-103",
+                    "element-227",
+                    "element-323",
+                    "element-82"
+                  ],
+                  "totalSamples": 27,
+                  "sectionId": "element-227"
+                }
+              },
+              {
+                "evidenceId": "sme_5cefa8ba7a232a6b9e0d5456",
+                "providerId": "provider.dom-text",
+                "kind": "dom.text",
+                "summary": "Repeated rhythm in Starter Plan",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(5) > div:nth-of-type(2) > div:nth-of-type(2) > h3:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/section[5]/div[2]/div[2]/h3[1]",
+                  "boundingBox": {
+                    "x": 399,
+                    "y": 4693.015625,
+                    "width": 192,
+                    "height": 26
+                  }
+                },
+                "metrics": {
+                  "locale": "en",
+                  "pageWordCount": 1314,
+                  "thresholds": {
+                    "minSamples": 4,
+                    "minMatching": 3,
+                    "minSections": 1,
+                    "rhythmTarget": "heading"
+                  },
+                  "rhythmSignature": "1-2|none|other",
+                  "qualifyingSections": [
+                    "element-103",
+                    "element-227",
+                    "element-323",
+                    "element-82"
+                  ],
+                  "totalSamples": 27,
+                  "sectionId": "element-227"
+                }
+              },
+              {
+                "evidenceId": "sme_5cefa8ba7a232a6b9e0d5456",
+                "providerId": "provider.dom-text",
+                "kind": "dom.text",
+                "summary": "Repeated rhythm in Candidate Pro",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(5) > div:nth-of-type(2) > div:nth-of-type(3) > h3:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/section[5]/div[2]/div[3]/h3[1]",
+                  "boundingBox": {
+                    "x": 690,
+                    "y": 4694.015625,
+                    "width": 190,
+                    "height": 26
+                  }
+                },
+                "metrics": {
+                  "locale": "en",
+                  "pageWordCount": 1314,
+                  "thresholds": {
+                    "minSamples": 4,
+                    "minMatching": 3,
+                    "minSections": 1,
+                    "rhythmTarget": "heading"
+                  },
+                  "rhythmSignature": "1-2|none|other",
+                  "qualifyingSections": [
+                    "element-103",
+                    "element-227",
+                    "element-323",
+                    "element-82"
+                  ],
+                  "totalSamples": 27,
+                  "sectionId": "element-227"
+                }
+              }
+            ],
+            "tags": [
+              "repetition",
+              "wording"
+            ],
+            "scope": {
+              "kind": "page",
+              "pageUrl": "http://localhost:5173/"
+            }
+          },
+          {
+            "id": "smc_b6ecbee8fa9b9d0015b0d5fd",
+            "clueId": "clue.dom.blur-overuse",
+            "clueVersion": "1.0.0",
+            "category": "visual-treatment",
+            "confidence": 0.74,
+            "occurrenceCount": 5,
+            "evidence": [
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Blurred element (body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/header[1]/div[2]/div[1]",
+                  "boundingBox": {
+                    "x": 653.234375,
+                    "y": 108.234375,
+                    "width": 627.125,
+                    "height": 410.046875
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "backdropBlurPx": 0,
+                    "filterBlurPx": 50
+                  },
+                  "thresholds": {
+                    "minOccurrences": 5,
+                    "minMajorBlocks": 3,
+                    "minBlurPx": 8
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Blurred element (body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+                  "domPath": "body[1]/div[1]/div[1]/header[1]/div[2]/div[2]",
+                  "boundingBox": {
+                    "x": 724.2565307617188,
+                    "y": 153.36216735839844,
+                    "width": 485.08074951171875,
+                    "height": 319.52764892578125
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "backdropBlurPx": 20,
+                    "filterBlurPx": 0
+                  },
+                  "thresholds": {
+                    "minOccurrences": 5,
+                    "minMajorBlocks": 3,
+                    "minBlurPx": 8
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Blurred element (body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3)",
+                  "domPath": "body[1]/div[1]/div[1]/header[1]/div[2]/div[3]",
+                  "boundingBox": {
+                    "x": 1004.09375,
+                    "y": 414.984375,
+                    "width": 223.90625,
+                    "height": 75.984375
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "backdropBlurPx": 12,
+                    "filterBlurPx": 0
+                  },
+                  "thresholds": {
+                    "minOccurrences": 5,
+                    "minMajorBlocks": 3,
+                    "minBlurPx": 8
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Blurred element (body > div:nth-of-type(1) > div:nth-of-type(1) > nav:nth-of-type(1))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > nav:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/nav[1]",
+                  "boundingBox": {
+                    "x": 0,
+                    "y": 0,
+                    "width": 1280,
+                    "height": 76
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "backdropBlurPx": 16,
+                    "filterBlurPx": 0
+                  },
+                  "thresholds": {
+                    "minOccurrences": 5,
+                    "minMajorBlocks": 3,
+                    "minBlurPx": 8
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Blurred element (body > div:nth-of-type(1) > div:nth-of-type(1) > nav:nth-of-type(2))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > nav:nth-of-type(2)",
+                  "domPath": "body[1]/div[1]/div[1]/nav[2]",
+                  "boundingBox": {
+                    "x": 1228,
+                    "y": 254,
+                    "width": 28,
+                    "height": 212
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "backdropBlurPx": 10,
+                    "filterBlurPx": 0
+                  },
+                  "thresholds": {
+                    "minOccurrences": 5,
+                    "minMajorBlocks": 3,
+                    "minBlurPx": 8
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "5 blurred elements detected",
+                "location": {
+                  "kind": "page",
+                  "pageUrl": "http://localhost:5173/"
+                },
+                "metrics": {
+                  "observed": {
+                    "blurredElements": 5,
+                    "blurredMajorBlocks": 0
+                  },
+                  "thresholds": {
+                    "minOccurrences": 5,
+                    "minMajorBlocks": 3,
+                    "minBlurPx": 8
+                  }
+                }
+              }
+            ],
+            "tags": [
+              "dom",
+              "layout"
+            ],
+            "scope": {
+              "kind": "page",
+              "pageUrl": "http://localhost:5173/"
+            }
+          },
+          {
+            "id": "smc_c5fdeb42e3e7d3fdccd75a1f",
+            "clueId": "clue.dom.low-text-contrast",
+            "clueVersion": "1.0.0",
+            "category": "design-quality",
+            "confidence": 0.84,
+            "occurrenceCount": 47,
+            "evidence": [
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Low text contrast (body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(1))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/header[1]/div[1]/div[1]/span[1]",
+                  "boundingBox": {
+                    "x": 87,
+                    "y": 97,
+                    "width": 118.359375,
+                    "height": 16
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "contrastRatio": 3.0449172460947063,
+                    "fontSizePx": 12
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "minContrastNormal": 4.5,
+                    "minContrastLarge": 3,
+                    "minLargeFontPx": 24,
+                    "minLargeFontBoldPx": 18.66,
+                    "minBoldWeight": 700,
+                    "minTextOpacity": 0.5
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Low text contrast (body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(2))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(2)",
+                  "domPath": "body[1]/div[1]/div[1]/header[1]/div[1]/div[1]/span[2]",
+                  "boundingBox": {
+                    "x": 213.359375,
+                    "y": 97,
+                    "width": 8.203125,
+                    "height": 16
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "contrastRatio": 3.0449172460947063,
+                    "fontSizePx": 12
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "minContrastNormal": 4.5,
+                    "minContrastLarge": 3,
+                    "minLargeFontPx": 24,
+                    "minLargeFontBoldPx": 18.66,
+                    "minBoldWeight": 700,
+                    "minTextOpacity": 0.5
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Low text contrast (body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(3))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(3)",
+                  "domPath": "body[1]/div[1]/div[1]/header[1]/div[1]/div[1]/span[3]",
+                  "boundingBox": {
+                    "x": 229.5625,
+                    "y": 97,
+                    "width": 186.78125,
+                    "height": 16
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "contrastRatio": 3.0449172460947063,
+                    "fontSizePx": 12
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "minContrastNormal": 4.5,
+                    "minContrastLarge": 3,
+                    "minLargeFontPx": 24,
+                    "minLargeFontBoldPx": 18.66,
+                    "minBoldWeight": 700,
+                    "minTextOpacity": 0.5
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Low text contrast (body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > a:nth-of-type(1))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > a:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/header[1]/div[1]/div[2]/a[1]",
+                  "boundingBox": {
+                    "x": 72,
+                    "y": 428.9375,
+                    "width": 181.578125,
+                    "height": 45.578125
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "contrastRatio": 1.0462758042084466,
+                    "fontSizePx": 15.2
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "minContrastNormal": 4.5,
+                    "minContrastLarge": 3,
+                    "minLargeFontPx": 24,
+                    "minLargeFontBoldPx": 18.66,
+                    "minBoldWeight": 700,
+                    "minTextOpacity": 0.5
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Low text contrast (body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1) > strong:nth-of-type(1))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1) > strong:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/header[1]/div[1]/p[1]/strong[1]",
+                  "boundingBox": {
+                    "x": 378.703125,
+                    "y": 330.5,
+                    "width": 278.515625,
+                    "height": 24
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "contrastRatio": 2.0526735714649136,
+                    "fontSizePx": 19.2
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "minContrastNormal": 4.5,
+                    "minContrastLarge": 3,
+                    "minLargeFontPx": 24,
+                    "minLargeFontBoldPx": 18.66,
+                    "minBoldWeight": 700,
+                    "minTextOpacity": 0.5
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Low text contrast (body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(6) > span:nth-of-type(1))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(6) > span:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/header[1]/div[2]/div[2]/div[6]/span[1]",
+                  "boundingBox": {
+                    "x": 1105.7349853515625,
+                    "y": 399.9959716796875,
+                    "width": 61.9326171875,
+                    "height": 18.526611328125
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "contrastRatio": 2.18443208180572,
+                    "fontSizePx": 12
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "minContrastNormal": 4.5,
+                    "minContrastLarge": 3,
+                    "minLargeFontPx": 24,
+                    "minLargeFontBoldPx": 18.66,
+                    "minBoldWeight": 700,
+                    "minTextOpacity": 0.5
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Low text contrast (body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(1))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/header[1]/div[2]/div[3]/div[1]",
+                  "boundingBox": {
+                    "x": 1025.09375,
+                    "y": 434.96875,
+                    "width": 36,
+                    "height": 36
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "contrastRatio": 2.894302312366935,
+                    "fontSizePx": 16
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "minContrastNormal": 4.5,
+                    "minContrastLarge": 3,
+                    "minLargeFontPx": 24,
+                    "minLargeFontBoldPx": 18.66,
+                    "minBoldWeight": 700,
+                    "minTextOpacity": 0.5
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Low text contrast (body > div:nth-of-type(1) > div:nth-of-type(1) > nav:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > nav:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/nav[1]/div[1]/div[1]/a[1]",
+                  "boundingBox": {
+                    "x": 1092.765625,
+                    "y": 14.703125,
+                    "width": 123.234375,
+                    "height": 45.578125
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "contrastRatio": 1.0018048651490001,
+                    "fontSizePx": 15.2
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "minContrastNormal": 4.5,
+                    "minContrastLarge": 3,
+                    "minLargeFontPx": 24,
+                    "minLargeFontBoldPx": 18.66,
+                    "minBoldWeight": 700,
+                    "minTextOpacity": 0.5
+                  }
+                }
+              }
+            ],
+            "tags": [
+              "contrast",
+              "dom",
+              "typography"
+            ],
+            "scope": {
+              "kind": "page",
+              "pageUrl": "http://localhost:5173/"
+            }
+          },
+          {
+            "id": "smc_cb0cdfd0f3dc03a73a532034",
+            "clueId": "clue.dom.purple-blue-gradients",
+            "clueVersion": "1.0.0",
+            "category": "visual-treatment",
+            "confidence": 0.71,
+            "occurrenceCount": 3,
+            "evidence": [
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Purple/blue gradient treatment (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(6) > div:nth-of-type(1))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(6) > div:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/section[6]/div[1]",
+                  "boundingBox": {
+                    "x": 72,
+                    "y": 5464.265625,
+                    "width": 1136,
+                    "height": 234.71875
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "gradientCount": 1
+                  },
+                  "thresholds": {
+                    "minOccurrences": 2,
+                    "minHue": 200,
+                    "maxHue": 300,
+                    "minSaturation": 0.35
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Purple/blue gradient treatment (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(9) > div:nth-of-type(1))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(9) > div:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/section[9]/div[1]",
+                  "boundingBox": {
+                    "x": 72,
+                    "y": 7482.375,
+                    "width": 1136,
+                    "height": 327.3125
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "gradientCount": 1
+                  },
+                  "thresholds": {
+                    "minOccurrences": 2,
+                    "minHue": 200,
+                    "maxHue": 300,
+                    "minSaturation": 0.35
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Purple/blue gradient treatment (body > div:nth-of-type(1) > div:nth-of-type(1))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]",
+                  "boundingBox": {
+                    "x": 0,
+                    "y": 0,
+                    "width": 1280,
+                    "height": 720
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "gradientCount": 1
+                  },
+                  "thresholds": {
+                    "minOccurrences": 2,
+                    "minHue": 200,
+                    "maxHue": 300,
+                    "minSaturation": 0.35
+                  }
+                }
+              }
+            ],
+            "tags": [
+              "dom",
+              "gradient"
+            ],
+            "scope": {
+              "kind": "page",
+              "pageUrl": "http://localhost:5173/"
+            }
+          },
+          {
+            "id": "smc_e280840f7f8f1c225a346605",
+            "clueId": "clue.dom.nested-bordered-containers",
+            "clueVersion": "1.0.0",
+            "category": "generic-ui",
+            "confidence": 0.72,
+            "occurrenceCount": 3,
+            "evidence": [
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Bordered container nested within bordered ancestor (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(4) > div:nth-of-type(2) > div:nth-of-type(1))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(4) > div:nth-of-type(2) > div:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/section[4]/div[2]/div[1]",
+                  "boundingBox": {
+                    "x": 113,
+                    "y": 3231.609375,
+                    "width": 1054,
+                    "height": 403.703125
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "nestedBorderedContainers": 3
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "maxAncestorLevels": 3
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Bordered container nested within bordered ancestor (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(4) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(4) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1)",
+                  "domPath": "body[1]/div[1]/div[1]/section[4]/div[2]/div[2]/div[1]",
+                  "boundingBox": {
+                    "x": 113,
+                    "y": 3659.3125,
+                    "width": 515,
+                    "height": 331.984375
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "nestedBorderedContainers": 3
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "maxAncestorLevels": 3
+                  }
+                }
+              },
+              {
+                "evidenceId": "sme_288c8c7a8ecd8145de0b83ff",
+                "providerId": "provider.dom-snapshot",
+                "kind": "dom.snapshot",
+                "summary": "Bordered container nested within bordered ancestor (body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(4) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2))",
+                "location": {
+                  "kind": "dom",
+                  "pageUrl": "http://localhost:5173/",
+                  "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(4) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2)",
+                  "domPath": "body[1]/div[1]/div[1]/section[4]/div[2]/div[2]/div[2]",
+                  "boundingBox": {
+                    "x": 652,
+                    "y": 3659.3125,
+                    "width": 515,
+                    "height": 331.984375
+                  }
+                },
+                "metrics": {
+                  "observed": {
+                    "nestedBorderedContainers": 3
+                  },
+                  "thresholds": {
+                    "minOccurrences": 3,
+                    "maxAncestorLevels": 3
+                  }
+                }
+              }
+            ],
+            "tags": [
+              "cards",
+              "dom",
+              "repetition"
+            ],
+            "scope": {
+              "kind": "page",
+              "pageUrl": "http://localhost:5173/"
+            }
+          }
+        ],
+        "reviews": [
+          {
+            "id": "composer.style.cross-surface-corroboration",
+            "composerId": "composer.style.cross-surface-corroboration",
+            "composerVersion": "1.0.0",
+            "category": "template-fingerprint",
+            "severity": "medium",
+            "status": "fail",
+            "title": "Cross-surface generic pattern corroboration",
+            "summary": "Detected 10 DOM clues, 2 wording clues across 1 page (161 occurrences, 2 provider types).",
+            "confidence": 0.92,
+            "scoreContribution": 11,
+            "clueObservationIds": [
+              "smc_0cba1b121857d5d0de0e2795",
+              "smc_15c7188cfb628d1d4c228f97",
+              "smc_23b1dcfd04ff39fd525ea5c4",
+              "smc_71f9c8f96ba4b7bfebe50289",
+              "smc_73b0f080c1ea4adf3eb98874",
+              "smc_73e0ef6d597829a3c53c54c8",
+              "smc_7bc9e20c8b28fd348d1e0448",
+              "smc_8d21cc65c0e8501f1ed7c7f4",
+              "smc_b6ecbee8fa9b9d0015b0d5fd",
+              "smc_c5fdeb42e3e7d3fdccd75a1f",
+              "smc_cb0cdfd0f3dc03a73a532034",
+              "smc_e280840f7f8f1c225a346605"
+            ],
+            "locations": [
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(1)",
+                "domPath": "body[1]/div[1]/div[1]/header[1]/div[1]/div[1]/span[1]",
+                "boundingBox": {
+                  "x": 87,
+                  "y": 97,
+                  "width": 118.359375,
+                  "height": 16
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(2)",
+                "domPath": "body[1]/div[1]/div[1]/header[1]/div[1]/div[1]/span[2]",
+                "boundingBox": {
+                  "x": 213.359375,
+                  "y": 97,
+                  "width": 8.203125,
+                  "height": 16
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(3)",
+                "domPath": "body[1]/div[1]/div[1]/header[1]/div[1]/div[1]/span[3]",
+                "boundingBox": {
+                  "x": 229.5625,
+                  "y": 97,
+                  "width": 186.78125,
+                  "height": 16
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > a:nth-of-type(1)",
+                "domPath": "body[1]/div[1]/div[1]/header[1]/div[1]/div[2]/a[1]",
+                "boundingBox": {
+                  "x": 72,
+                  "y": 428.9375,
+                  "width": 181.578125,
+                  "height": 45.578125
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(1) > h1:nth-of-type(1)",
+                "domPath": "body[1]/div[1]/div[1]/header[1]/div[1]/h1[1]",
+                "boundingBox": {
+                  "x": 72,
+                  "y": 132,
+                  "width": 589.59375,
+                  "height": 140.78125
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1) > strong:nth-of-type(1)",
+                "domPath": "body[1]/div[1]/div[1]/header[1]/div[1]/p[1]/strong[1]",
+                "boundingBox": {
+                  "x": 378.703125,
+                  "y": 330.5,
+                  "width": 278.515625,
+                  "height": 24
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1)",
+                "domPath": "body[1]/div[1]/div[1]/header[1]/div[2]/div[1]",
+                "boundingBox": {
+                  "x": 653.234375,
+                  "y": 108.234375,
+                  "width": 627.125,
+                  "height": 410.046875
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(1)",
+                "domPath": "body[1]/div[1]/div[1]/header[1]/div[2]/div[2]/div[1]/span[1]",
+                "boundingBox": {
+                  "x": 1029.533447265625,
+                  "y": 180.94757080078125,
+                  "width": 154.59130859375,
+                  "height": 27.316604614257812
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > span:nth-of-type(1)",
+                "domPath": "body[1]/div[1]/div[1]/header[1]/div[2]/div[2]/div[2]/span[1]",
+                "boundingBox": {
+                  "x": 751.0567016601562,
+                  "y": 237.57247924804688,
+                  "width": 147.106201171875,
+                  "height": 21.643951416015625
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(3) > span:nth-of-type(1)",
+                "domPath": "body[1]/div[1]/div[1]/header[1]/div[2]/div[2]/div[3]/span[1]",
+                "boundingBox": {
+                  "x": 750.7666625976562,
+                  "y": 271.55560302734375,
+                  "width": 141.90325927734375,
+                  "height": 21.59954833984375
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(3) > span:nth-of-type(2)",
+                "domPath": "body[1]/div[1]/div[1]/header[1]/div[2]/div[2]/div[3]/span[2]",
+                "boundingBox": {
+                  "x": 1060.38037109375,
+                  "y": 274.19818115234375,
+                  "width": 122.9508056640625,
+                  "height": 21.43780517578125
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(4) > span:nth-of-type(1)",
+                "domPath": "body[1]/div[1]/div[1]/header[1]/div[2]/div[2]/div[4]/span[1]",
+                "boundingBox": {
+                  "x": 750.4560546875,
+                  "y": 307.9449157714844,
+                  "width": 154.54339599609375,
+                  "height": 21.707427978515625
+                }
+              }
+            ],
+            "fixPrompt": "Address the strongest repeated visual and copy patterns together so the page feels less like a generic template.",
+            "falsePositiveNotes": "Mature design systems may still trigger corroboration when many surfaces intentionally share patterns.",
+            "coverage": {
+              "requiredProviderIds": [
+                "provider.dom-snapshot",
+                "provider.dom-text"
+              ],
+              "incompleteProviderIds": []
+            }
+          },
+          {
+            "id": "composer.style.default-typography",
+            "composerId": "composer.style.default-typography",
+            "composerVersion": "1.0.0",
+            "category": "typography",
+            "severity": "low",
+            "status": "pass",
+            "title": "Default typography stack",
+            "summary": "No qualifying patterns for this review were detected in the completed evidence.",
+            "confidence": null,
+            "scoreContribution": 0,
+            "clueObservationIds": [],
+            "locations": [],
+            "fixPrompt": null,
+            "falsePositiveNotes": "Requires a default/system font stack (e.g. Inter, Arial, system-ui) to dominate the page AND at least one corroborating uniformity signal. A single deliberately chosen brand font dominating the page does not trigger this finding on its own.",
+            "coverage": {
+              "requiredProviderIds": [
+                "provider.dom-snapshot"
+              ],
+              "incompleteProviderIds": []
+            }
+          },
+          {
+            "id": "composer.style.generic-marketing-copy",
+            "composerId": "composer.style.generic-marketing-copy",
+            "composerVersion": "1.0.0",
+            "category": "wording",
+            "severity": "medium",
+            "status": "pass",
+            "title": "Generic marketing copy patterns",
+            "summary": "No qualifying patterns for this review were detected in the completed evidence.",
+            "confidence": null,
+            "scoreContribution": 0,
+            "clueObservationIds": [],
+            "locations": [],
+            "fixPrompt": null,
+            "coverage": {
+              "requiredProviderIds": [
+                "provider.dom-text"
+              ],
+              "incompleteProviderIds": []
+            }
+          },
+          {
+            "id": "composer.style.generic-visual-treatment",
+            "composerId": "composer.style.generic-visual-treatment",
+            "composerVersion": "1.0.0",
+            "category": "visual-treatment",
+            "severity": "medium",
+            "status": "fail",
+            "title": "Generic visual treatment stack",
+            "summary": "Detected 3 DOM clues across 1 page (13 occurrences, 1 provider type).",
+            "confidence": 0.6799999999999999,
+            "scoreContribution": 10,
+            "clueObservationIds": [
+              "smc_15c7188cfb628d1d4c228f97",
+              "smc_b6ecbee8fa9b9d0015b0d5fd",
+              "smc_cb0cdfd0f3dc03a73a532034"
+            ],
+            "locations": [
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1)",
+                "domPath": "body[1]/div[1]/div[1]/header[1]/div[2]/div[1]",
+                "boundingBox": {
+                  "x": 653.234375,
+                  "y": 108.234375,
+                  "width": 627.125,
+                  "height": 410.046875
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+                "domPath": "body[1]/div[1]/div[1]/header[1]/div[2]/div[2]",
+                "boundingBox": {
+                  "x": 724.2565307617188,
+                  "y": 153.36216735839844,
+                  "width": 485.08074951171875,
+                  "height": 319.52764892578125
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3)",
+                "domPath": "body[1]/div[1]/div[1]/header[1]/div[2]/div[3]",
+                "boundingBox": {
+                  "x": 1004.09375,
+                  "y": 414.984375,
+                  "width": 223.90625,
+                  "height": 75.984375
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > nav:nth-of-type(1)",
+                "domPath": "body[1]/div[1]/div[1]/nav[1]",
+                "boundingBox": {
+                  "x": 0,
+                  "y": 0,
+                  "width": 1280,
+                  "height": 76
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > nav:nth-of-type(2)",
+                "domPath": "body[1]/div[1]/div[1]/nav[2]",
+                "boundingBox": {
+                  "x": 1228,
+                  "y": 254,
+                  "width": 28,
+                  "height": 212
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1)",
+                "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]/div[1]",
+                "boundingBox": {
+                  "x": 72,
+                  "y": 1508.265625,
+                  "width": 552,
+                  "height": 172.90625
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2)",
+                "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]/div[2]",
+                "boundingBox": {
+                  "x": 656,
+                  "y": 1508.265625,
+                  "width": 552,
+                  "height": 172.90625
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(3)",
+                "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]/div[3]",
+                "boundingBox": {
+                  "x": 72,
+                  "y": 1713.171875,
+                  "width": 552,
+                  "height": 150.578125
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(4)",
+                "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]/div[4]",
+                "boundingBox": {
+                  "x": 656,
+                  "y": 1713.171875,
+                  "width": 552,
+                  "height": 150.578125
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(5)",
+                "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]/div[5]",
+                "boundingBox": {
+                  "x": 72,
+                  "y": 1895.75,
+                  "width": 552,
+                  "height": 150.578125
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(6) > div:nth-of-type(1)",
+                "domPath": "body[1]/div[1]/div[1]/section[6]/div[1]",
+                "boundingBox": {
+                  "x": 72,
+                  "y": 5464.265625,
+                  "width": 1136,
+                  "height": 234.71875
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(9) > div:nth-of-type(1)",
+                "domPath": "body[1]/div[1]/div[1]/section[9]/div[1]",
+                "boundingBox": {
+                  "x": 72,
+                  "y": 7482.375,
+                  "width": 1136,
+                  "height": 327.3125
+                }
+              }
+            ],
+            "fixPrompt": "Reduce stacked gradients, glow, glass, and accent-border treatments that repeat without product-specific purpose.",
+            "coverage": {
+              "requiredProviderIds": [
+                "provider.dom-snapshot"
+              ],
+              "incompleteProviderIds": []
+            }
+          },
+          {
+            "id": "composer.style.readability-quality",
+            "composerId": "composer.style.readability-quality",
+            "composerVersion": "1.0.0",
+            "category": "design-quality",
+            "severity": "medium",
+            "status": "pass",
+            "title": "Readability quality issues",
+            "summary": "No qualifying patterns for this review were detected in the completed evidence.",
+            "confidence": null,
+            "scoreContribution": 0,
+            "clueObservationIds": [],
+            "locations": [],
+            "fixPrompt": null,
+            "coverage": {
+              "requiredProviderIds": [
+                "provider.dom-snapshot"
+              ],
+              "incompleteProviderIds": []
+            }
+          },
+          {
+            "id": "composer.style.repeated-card-template",
+            "composerId": "composer.style.repeated-card-template",
+            "composerVersion": "1.0.0",
+            "category": "template-fingerprint",
+            "severity": "medium",
+            "status": "fail",
+            "title": "Repeated card template patterns",
+            "summary": "Detected 4 DOM clues across 1 page (28 occurrences, 1 provider type).",
+            "confidence": 0.74,
+            "scoreContribution": 13,
+            "clueObservationIds": [
+              "smc_15c7188cfb628d1d4c228f97",
+              "smc_71f9c8f96ba4b7bfebe50289",
+              "smc_73e0ef6d597829a3c53c54c8",
+              "smc_e280840f7f8f1c225a346605"
+            ],
+            "locations": [
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1)",
+                "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]/div[1]",
+                "boundingBox": {
+                  "x": 72,
+                  "y": 1508.265625,
+                  "width": 552,
+                  "height": 172.90625
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2)",
+                "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]/div[2]",
+                "boundingBox": {
+                  "x": 656,
+                  "y": 1508.265625,
+                  "width": 552,
+                  "height": 172.90625
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(3)",
+                "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]/div[3]",
+                "boundingBox": {
+                  "x": 72,
+                  "y": 1713.171875,
+                  "width": 552,
+                  "height": 150.578125
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(4)",
+                "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]/div[4]",
+                "boundingBox": {
+                  "x": 656,
+                  "y": 1713.171875,
+                  "width": 552,
+                  "height": 150.578125
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(5)",
+                "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]/div[5]",
+                "boundingBox": {
+                  "x": 72,
+                  "y": 1895.75,
+                  "width": 552,
+                  "height": 150.578125
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2)",
+                "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]",
+                "boundingBox": {
+                  "x": 72,
+                  "y": 1508.265625,
+                  "width": 1136,
+                  "height": 538.0625
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(4) > div:nth-of-type(2) > div:nth-of-type(1)",
+                "domPath": "body[1]/div[1]/div[1]/section[4]/div[2]/div[1]",
+                "boundingBox": {
+                  "x": 113,
+                  "y": 3231.609375,
+                  "width": 1054,
+                  "height": 403.703125
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(4) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1)",
+                "domPath": "body[1]/div[1]/div[1]/section[4]/div[2]/div[2]/div[1]",
+                "boundingBox": {
+                  "x": 113,
+                  "y": 3659.3125,
+                  "width": 515,
+                  "height": 331.984375
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(4) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2)",
+                "domPath": "body[1]/div[1]/div[1]/section[4]/div[2]/div[2]/div[2]",
+                "boundingBox": {
+                  "x": 652,
+                  "y": 3659.3125,
+                  "width": 515,
+                  "height": 331.984375
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(5) > div:nth-of-type(2) > div:nth-of-type(1)",
+                "domPath": "body[1]/div[1]/div[1]/section[5]/div[2]/div[1]",
+                "boundingBox": {
+                  "x": 72,
+                  "y": 4644.015625,
+                  "width": 266,
+                  "height": 750.25
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(5) > div:nth-of-type(2)",
+                "domPath": "body[1]/div[1]/div[1]/section[5]/div[2]",
+                "boundingBox": {
+                  "x": 72,
+                  "y": 4644.015625,
+                  "width": 1136,
+                  "height": 750.25
+                }
+              },
+              {
+                "kind": "page",
+                "pageUrl": "http://localhost:5173/"
+              }
+            ],
+            "fixPrompt": "Vary card structure, spacing, and surface treatment so sections feel less templated.",
+            "falsePositiveNotes": "Design systems with intentional card repetition may trigger this finding.",
+            "coverage": {
+              "requiredProviderIds": [
+                "provider.dom-snapshot"
+              ],
+              "incompleteProviderIds": []
+            }
+          },
+          {
+            "id": "composer.style.repetitive-copy-system",
+            "composerId": "composer.style.repetitive-copy-system",
+            "composerVersion": "1.0.0",
+            "category": "wording",
+            "severity": "low",
+            "status": "fail",
+            "title": "Repetitive copy system",
+            "summary": "Detected 2 wording clues across 1 page (61 occurrences, 1 provider type).",
+            "confidence": 0.5900000000000001,
+            "scoreContribution": 6,
+            "clueObservationIds": [
+              "smc_0cba1b121857d5d0de0e2795",
+              "smc_8d21cc65c0e8501f1ed7c7f4"
+            ],
+            "locations": [
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(1)",
+                "domPath": "body[1]/div[1]/div[1]/header[1]/div[1]/div[1]/span[1]",
+                "boundingBox": {
+                  "x": 87,
+                  "y": 97,
+                  "width": 118.359375,
+                  "height": 16
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(3)",
+                "domPath": "body[1]/div[1]/div[1]/header[1]/div[1]/div[1]/span[3]",
+                "boundingBox": {
+                  "x": 229.5625,
+                  "y": 97,
+                  "width": 186.78125,
+                  "height": 16
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(1) > h1:nth-of-type(1)",
+                "domPath": "body[1]/div[1]/div[1]/header[1]/div[1]/h1[1]",
+                "boundingBox": {
+                  "x": 72,
+                  "y": 132,
+                  "width": 589.59375,
+                  "height": 140.78125
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(1)",
+                "domPath": "body[1]/div[1]/div[1]/header[1]/div[2]/div[2]/div[1]/span[1]",
+                "boundingBox": {
+                  "x": 1029.533447265625,
+                  "y": 180.94757080078125,
+                  "width": 154.59130859375,
+                  "height": 27.316604614257812
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > span:nth-of-type(1)",
+                "domPath": "body[1]/div[1]/div[1]/header[1]/div[2]/div[2]/div[2]/span[1]",
+                "boundingBox": {
+                  "x": 751.0567016601562,
+                  "y": 237.57247924804688,
+                  "width": 147.106201171875,
+                  "height": 21.643951416015625
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(3) > span:nth-of-type(1)",
+                "domPath": "body[1]/div[1]/div[1]/header[1]/div[2]/div[2]/div[3]/span[1]",
+                "boundingBox": {
+                  "x": 750.7666625976562,
+                  "y": 271.55560302734375,
+                  "width": 141.90325927734375,
+                  "height": 21.59954833984375
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(3) > span:nth-of-type(2)",
+                "domPath": "body[1]/div[1]/div[1]/header[1]/div[2]/div[2]/div[3]/span[2]",
+                "boundingBox": {
+                  "x": 1060.38037109375,
+                  "y": 274.19818115234375,
+                  "width": 122.9508056640625,
+                  "height": 21.43780517578125
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(4) > span:nth-of-type(1)",
+                "domPath": "body[1]/div[1]/div[1]/header[1]/div[2]/div[2]/div[4]/span[1]",
+                "boundingBox": {
+                  "x": 750.4560546875,
+                  "y": 307.9449157714844,
+                  "width": 154.54339599609375,
+                  "height": 21.707427978515625
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(6) > div:nth-of-type(2) > h4:nth-of-type(1)",
+                "domPath": "body[1]/div[1]/div[1]/header[1]/div[2]/div[2]/div[6]/div[2]/h4[1]",
+                "boundingBox": {
+                  "x": 808.3558349609375,
+                  "y": 383.0203857421875,
+                  "width": 219.080810546875,
+                  "height": 28.741973876953125
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(2) > h5:nth-of-type(1)",
+                "domPath": "body[1]/div[1]/div[1]/header[1]/div[2]/div[3]/div[2]/h5[1]",
+                "boundingBox": {
+                  "x": 1073.09375,
+                  "y": 431.984375,
+                  "width": 133.90625,
+                  "height": 19.1875
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > h3:nth-of-type(1)",
+                "domPath": "body[1]/div[1]/div[1]/section[1]/div[2]/div[2]/h3[1]",
+                "boundingBox": {
+                  "x": 497,
+                  "y": 999.25,
+                  "width": 286,
+                  "height": 26
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > h3:nth-of-type(1)",
+                "domPath": "body[1]/div[1]/div[1]/section[1]/div[2]/div[3]/h3[1]",
+                "boundingBox": {
+                  "x": 889,
+                  "y": 999.25,
+                  "width": 286,
+                  "height": 26
+                }
+              }
+            ],
+            "fixPrompt": "Vary CTA labels, heading rhythms, and sentence cadence so copy feels less formulaic.",
+            "coverage": {
+              "requiredProviderIds": [
+                "provider.dom-text"
+              ],
+              "incompleteProviderIds": []
+            }
+          },
+          {
+            "id": "composer.style.repetitive-layout",
+            "composerId": "composer.style.repetitive-layout",
+            "composerVersion": "1.0.0",
+            "category": "layout-hierarchy",
+            "severity": "medium",
+            "status": "fail",
+            "title": "Repetitive layout rhythm",
+            "summary": "Detected 2 DOM clues across 1 page (22 occurrences, 1 provider type).",
+            "confidence": 0.64,
+            "scoreContribution": 9,
+            "clueObservationIds": [
+              "smc_23b1dcfd04ff39fd525ea5c4",
+              "smc_73e0ef6d597829a3c53c54c8"
+            ],
+            "locations": [
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(1)",
+                "domPath": "body[1]/div[1]/div[1]/section[1]",
+                "boundingBox": {
+                  "x": 40,
+                  "y": 566.515625,
+                  "width": 1200,
+                  "height": 634.015625
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1)",
+                "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]/div[1]",
+                "boundingBox": {
+                  "x": 72,
+                  "y": 1508.265625,
+                  "width": 552,
+                  "height": 172.90625
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2)",
+                "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]/div[2]",
+                "boundingBox": {
+                  "x": 656,
+                  "y": 1508.265625,
+                  "width": 552,
+                  "height": 172.90625
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(3)",
+                "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]/div[3]",
+                "boundingBox": {
+                  "x": 72,
+                  "y": 1713.171875,
+                  "width": 552,
+                  "height": 150.578125
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(4)",
+                "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]/div[4]",
+                "boundingBox": {
+                  "x": 656,
+                  "y": 1713.171875,
+                  "width": 552,
+                  "height": 150.578125
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(5)",
+                "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]/div[5]",
+                "boundingBox": {
+                  "x": 72,
+                  "y": 1895.75,
+                  "width": 552,
+                  "height": 150.578125
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(2)",
+                "domPath": "body[1]/div[1]/div[1]/section[2]/div[2]",
+                "boundingBox": {
+                  "x": 72,
+                  "y": 1508.265625,
+                  "width": 1136,
+                  "height": 538.0625
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(2)",
+                "domPath": "body[1]/div[1]/div[1]/section[2]",
+                "boundingBox": {
+                  "x": 40,
+                  "y": 1200.53125,
+                  "width": 1200,
+                  "height": 875.796875
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(3)",
+                "domPath": "body[1]/div[1]/div[1]/section[3]",
+                "boundingBox": {
+                  "x": 40,
+                  "y": 2076.328125,
+                  "width": 1200,
+                  "height": 755.671875
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(4)",
+                "domPath": "body[1]/div[1]/div[1]/section[4]",
+                "boundingBox": {
+                  "x": 40,
+                  "y": 2832,
+                  "width": 1200,
+                  "height": 1504.28125
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(5) > div:nth-of-type(2) > div:nth-of-type(1)",
+                "domPath": "body[1]/div[1]/div[1]/section[5]/div[2]/div[1]",
+                "boundingBox": {
+                  "x": 72,
+                  "y": 4644.015625,
+                  "width": 266,
+                  "height": 750.25
+                }
+              },
+              {
+                "kind": "dom",
+                "pageUrl": "http://localhost:5173/",
+                "selector": "body > div:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(5) > div:nth-of-type(2)",
+                "domPath": "body[1]/div[1]/div[1]/section[5]/div[2]",
+                "boundingBox": {
+                  "x": 72,
+                  "y": 4644.015625,
+                  "width": 1136,
+                  "height": 750.25
+                }
+              }
+            ],
+            "fixPrompt": "Introduce more varied section geometry, spacing, and alignment patterns.",
+            "coverage": {
+              "requiredProviderIds": [
+                "provider.dom-snapshot"
+              ],
+              "incompleteProviderIds": []
+            }
+          }
+        ],
+        "coverage": {
+          "status": "complete",
+          "targetKinds": [
+            "page",
+            "project"
+          ],
+          "source": {
+            "candidates": 191,
+            "collected": 191,
+            "skipped": 0,
+            "truncatedFiles": 0,
+            "charactersCollected": 1905241,
+            "maximumCharacters": 5000000,
+            "characterLimitReached": false
+          },
+          "runtime": {
+            "routeCap": 10,
+            "selectedRoutes": [
+              "http://localhost:5173/"
+            ],
+            "completedRoutes": [
+              "http://localhost:5173/"
+            ],
+            "failedRoutes": [],
+            "truncatedRoutes": []
+          },
+          "providers": [
+            {
+              "providerId": "provider.dom-snapshot",
+              "status": "complete",
+              "evidenceRecords": 1,
+              "expectedScopes": 1,
+              "completedScopes": 1,
+              "failedScopes": 0,
+              "truncatedScopes": 0,
+              "warnings": []
+            },
+            {
+              "providerId": "provider.dom-text",
+              "status": "complete",
+              "evidenceRecords": 1,
+              "expectedScopes": 1,
+              "completedScopes": 1,
+              "failedScopes": 0,
+              "truncatedScopes": 0,
+              "warnings": []
+            },
+            {
+              "providerId": "provider.package-manifest",
+              "status": "not_applicable",
+              "evidenceRecords": 0,
+              "expectedScopes": 0,
+              "completedScopes": 0,
+              "failedScopes": 0,
+              "truncatedScopes": 0,
+              "warnings": []
+            },
+            {
+              "providerId": "provider.source-file",
+              "status": "not_applicable",
+              "evidenceRecords": 0,
+              "expectedScopes": 0,
+              "completedScopes": 0,
+              "failedScopes": 0,
+              "truncatedScopes": 0,
+              "warnings": []
+            }
+          ]
+        },
+        "diagnostics": {
+          "warnings": [],
+          "droppedEvidence": 0,
+          "truncatedEvidence": 0,
+          "failedProviders": []
+        }
+      },
+      "warnings": []
+    }
+  }
+}
