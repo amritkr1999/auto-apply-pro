@@ -36,7 +36,10 @@ public class DashboardController {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
 
-        // 1. Get Login Streak Info
+        // 1. Get & Update Login Streak Info
+        if (user.updateLoginStreak()) {
+            user = userRepository.save(user);
+        }
         int loginStreak = user.getLoginStreak() != null ? user.getLoginStreak() : 0;
         String lastLoginDateStr = user.getLastLoginDate() != null ? user.getLastLoginDate().toString() : "";
 

@@ -25,4 +25,6 @@ public class JobPostingFeedDto {
     private long daysAgo;
     private int matchScore;
     private java.util.List<String> skillBadges;
+    private String queueStatus;
+    private Long queueId;
 }

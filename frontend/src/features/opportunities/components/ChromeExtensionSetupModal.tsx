@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { buildApiUrl } from '../../../config/api';
 
 interface ChromeExtensionSetupModalProps {
   isOpen: boolean;
@@ -19,7 +20,7 @@ export const ChromeExtensionSetupModal: React.FC<ChromeExtensionSetupModalProps>
 
   const handleDownload = () => {
     const link = document.createElement('a');
-    link.href = '/easynaukri-extension.zip';
+    link.href = buildApiUrl('/v1/public/extension/download');
     link.download = 'easynaukri-extension.zip';
     document.body.appendChild(link);
     link.click();
@@ -170,7 +171,7 @@ export const ChromeExtensionSetupModal: React.FC<ChromeExtensionSetupModalProps>
               <div className="flex-1">
                 <h4 className="font-bold text-sm text-slate-100">Pin Extension & Start Harvesting</h4>
                 <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                  Pin EasyNaukri to your Chrome toolbar, visit LinkedIn, and click <strong>"⚡ Harvest Emails On Screen"</strong>!
+                  Pin EasyNaukri to your Chrome toolbar, visit LinkedIn, and click <strong>"⚡ Harvest Job Posts On Screen"</strong>!
                 </p>
               </div>
             </div>

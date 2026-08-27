@@ -34,6 +34,9 @@ public class UserServiceImpl implements UserService {
     @org.springframework.beans.factory.annotation.Value("${pipeline.service.url:http://localhost:8000}")
     private String pythonServiceUrl;
 
+    @org.springframework.beans.factory.annotation.Value("${app.frontend.url:http://localhost:5173}")
+    private String frontendUrl;
+
     @Override
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -200,7 +203,8 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
 
         try {
-            String verificationLink = "http://localhost:5173/verify-email?token=" + otpCode + "&email=" + user.getEmail();
+            String baseUrl = (frontendUrl != null && !frontendUrl.trim().isEmpty()) ? frontendUrl.replaceAll("/+$", "") : "http://localhost:5173";
+            String verificationLink = baseUrl + "/verify-email?token=" + otpCode + "&email=" + user.getEmail();
             systemEmailService.sendEmailVerificationEmail(user.getEmail(), verificationLink, otpCode);
         } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(UserServiceImpl.class).error("Failed to resend verification email: {}", e.getMessage(), e);
@@ -230,20 +234,7 @@ public class UserServiceImpl implements UserService {
 
         // Calculate login streak
         java.time.LocalDate today = java.time.LocalDate.now();
-        if (user.getLastLoginDate() == null) {
-            user.setLoginStreak(1);
-            user.setLastLoginDate(today);
-        } else {
-            long daysBetween = java.time.temporal.ChronoUnit.DAYS.between(user.getLastLoginDate(), today);
-            if (daysBetween == 1) {
-                user.setLoginStreak(user.getLoginStreak() + 1);
-                user.setLastLoginDate(today);
-            } else if (daysBetween > 1) {
-                user.setLoginStreak(1);
-                user.setLastLoginDate(today);
-            }
-            // if daysBetween == 0, keep current streak and date (already logged in today)
-        }
+        user.updateLoginStreak();
         user = userRepository.save(user);
 
         // Save LOGIN activity log
@@ -817,7 +808,8 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Email is required");
         }
         
-        java.util.Optional<User> userOpt = userRepository.findByEmail(request.getEmail().trim());
+        String cleanEmail = request.getEmail().trim().toLowerCase();
+        java.util.Optional<User> userOpt = userRepository.findByEmailIgnoreCase(cleanEmail);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             String token = java.util.UUID.randomUUID().toString();
@@ -825,7 +817,8 @@ public class UserServiceImpl implements UserService {
             user.setResetTokenExpiry(java.time.LocalDateTime.now().plusMinutes(15));
             userRepository.save(user);
 
-            String resetLink = "http://localhost:5173/reset-password?token=" + token;
+            String baseUrl = (frontendUrl != null && !frontendUrl.trim().isEmpty()) ? frontendUrl.replaceAll("/+$", "") : "http://localhost:5173";
+            String resetLink = baseUrl + "/reset-password?token=" + token;
             systemEmailService.sendPasswordResetEmail(user.getEmail(), resetLink);
         } else {
             // Log for security auditing without exposing to client
@@ -839,8 +832,11 @@ public class UserServiceImpl implements UserService {
         if (request.getToken() == null || request.getToken().trim().isEmpty()) {
             throw new IllegalArgumentException("Token is required");
         }
-        if (request.getNewPassword() == null || request.getNewPassword().length() < 6) {
-            throw new IllegalArgumentException("Password must be at least 6 characters long");
+        if (request.getNewPassword() == null || request.getNewPassword().length() < 8) {
+            throw new IllegalArgumentException("Password must be at least 8 characters long");
+        }
+        if (!request.getNewPassword().matches(".*[a-zA-Z].*") || !request.getNewPassword().matches(".*[0-9].*")) {
+            throw new IllegalArgumentException("Password must contain both letters and numbers");
         }
 
         User user = userRepository.findByResetToken(request.getToken().trim())

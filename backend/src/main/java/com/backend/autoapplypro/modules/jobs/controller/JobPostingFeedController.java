@@ -35,6 +35,15 @@ public class JobPostingFeedController {
         private String title;
         private String company;
         private String hrEmail;
+        private String templateName;
+        private String customSubject;
+        private String customBody;
+    }
+
+    @Data
+    public static class QueueBatchJobEmailRequest {
+        private List<QueueJobEmailRequest> items;
+        private String templateName;
     }
 
     /**
@@ -89,14 +98,23 @@ public class JobPostingFeedController {
 
         String title = req.getTitle() != null ? req.getTitle() : "Software Engineer";
         String company = req.getCompany() != null ? req.getCompany() : "Hiring Company";
-        String subject = "Application for " + title + " Position - " + user.getName();
-        String body = "Dear Hiring Team,\n\n" +
-                "I am writing to express my strong interest in the " + title + " role at " + company + ".\n\n" +
-                "With my hands-on experience building scalable applications, microservices, and robust software architectures, I am confident I can add immediate value to your engineering team.\n\n" +
-                "I have attached my resume for your review. I would welcome the opportunity to discuss how my technical skills align with your hiring goals.\n\n" +
-                "Best regards,\n" +
-                user.getName() + "\n" +
-                "Email: " + user.getEmail();
+        
+        String subject = req.getCustomSubject() != null && !req.getCustomSubject().isBlank()
+                ? req.getCustomSubject()
+                : "Application for " + title + " Position - " + user.getName();
+
+        String body;
+        if (req.getCustomBody() != null && !req.getCustomBody().isBlank()) {
+            body = req.getCustomBody();
+        } else {
+            body = "Dear Hiring Team,\n\n" +
+                    "I am writing to express my strong interest in the " + title + " role at " + company + ".\n\n" +
+                    "With my hands-on experience building scalable applications, microservices, and robust software architectures, I am confident I can add immediate value to your engineering team.\n\n" +
+                    "I have attached my resume for your review. I would welcome the opportunity to discuss how my technical skills align with your hiring goals.\n\n" +
+                    "Best regards,\n" +
+                    user.getName() + "\n" +
+                    "Email: " + user.getEmail();
+        }
 
         EmailQueue queueItem = EmailQueue.builder()
                 .user(user)
@@ -115,6 +133,40 @@ public class JobPostingFeedController {
                 "message", "Queued email to " + saved.getRecipientEmail() + " successfully!",
                 "queueId", saved.getId(),
                 "recipientEmail", saved.getRecipientEmail()
+        ));
+    }
+
+    /**
+     * Batch Queuing Endpoint for multiple harvested items at once.
+     */
+    @PostMapping("/queue-emails-batch")
+    public ResponseEntity<Map<String, Object>> queueBatchHrEmails(@RequestBody QueueBatchJobEmailRequest batchReq) {
+        if (batchReq.getItems() == null || batchReq.getItems().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "No items provided for batch queuing."));
+        }
+
+        int queuedCount = 0;
+        List<Long> queueIds = new java.util.ArrayList<>();
+
+        for (QueueJobEmailRequest req : batchReq.getItems()) {
+            if (req.getHrEmail() != null && !req.getHrEmail().isBlank()) {
+                if (batchReq.getTemplateName() != null && !batchReq.getTemplateName().isBlank()) {
+                    req.setTemplateName(batchReq.getTemplateName());
+                }
+                ResponseEntity<Map<String, Object>> resp = queueHrEmail(req);
+                if (resp.getStatusCode().is2xxSuccessful() && resp.getBody() != null) {
+                    queuedCount++;
+                    Object qId = resp.getBody().get("queueId");
+                    if (qId instanceof Long) queueIds.add((Long) qId);
+                }
+            }
+        }
+
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "queuedCount", queuedCount,
+                "message", String.format("Successfully added %d outreach email(s) to sending queue!", queuedCount),
+                "queueIds", queueIds
         ));
     }
 
@@ -137,7 +189,28 @@ public class JobPostingFeedController {
         
         log.info("Received Hybrid Auto-Fetch request from Device: [{}] for Role: [{}]", device, role);
 
-        int newJobsAdded = publicAtsJobFetcherService.fetchLiveJobsFromPublicAts();
+        PublicAtsJobFetcherService.PublicAtsFetchResult result = publicAtsJobFetcherService.fetchLiveJobsWithDetails();
+        
+        List<JobPostingFeedDto> fetchedJobsDtos;
+        if (result.getNewJobPostings() != null && !result.getNewJobPostings().isEmpty()) {
+            fetchedJobsDtos = result.getNewJobPostings().stream().map(job -> JobPostingFeedDto.builder()
+                    .id(job.getId())
+                    .title(job.getTitle())
+                    .company(job.getCompany())
+                    .location(job.getLocation())
+                    .description(job.getDescription())
+                    .requirements(job.getRequirements())
+                    .salary(job.getSalary())
+                    .sourceUrl(job.getSourceUrl())
+                    .hrEmail(job.getHrEmail())
+                    .createdAt(job.getCreatedAt())
+                    .daysAgo(0)
+                    .matchScore(94)
+                    .skillBadges(java.util.Arrays.asList(job.getCompany(), "Public ATS API", "Verified HR"))
+                    .build()).collect(java.util.stream.Collectors.toList());
+        } else {
+            fetchedJobsDtos = clientScraperService.getLatestJobPostingFeed(0, 8);
+        }
 
         String executionMode = "MOBILE".equals(device) 
             ? "Cloud ATS & Enrichment APIs (Zero Mobile Device Load)"
@@ -147,8 +220,11 @@ public class JobPostingFeedController {
                 "success", true,
                 "deviceType", device,
                 "executionMode", executionMode,
-                "newJobsAdded", newJobsAdded,
-                "message", "Hybrid Job & HR details search triggered successfully via " + executionMode
+                "newJobsAdded", result.getTotalNewJobs(),
+                "fetchedJobs", fetchedJobsDtos,
+                "companiesScanned", result.getCompaniesScanned(),
+                "message", String.format("Hybrid Job & HR details fetch completed! %d new live job postings ingested across %d ATS portals.",
+                        result.getTotalNewJobs(), result.getCompaniesScanned().size())
         ));
     }
 }

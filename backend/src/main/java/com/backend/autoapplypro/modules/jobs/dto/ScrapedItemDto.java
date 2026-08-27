@@ -21,4 +21,6 @@ public class ScrapedItemDto {
     private String hrEmail;
     private String hrPhone;
     private String hrTitle;
+    private String applyUrl;
+    private String rawText;
 }

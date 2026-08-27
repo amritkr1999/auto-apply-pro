@@ -64,6 +64,9 @@ public class SecurityConfig {
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .collect(java.util.stream.Collectors.toList());
+        origins.add("chrome-extension://*");
+        origins.add("http://localhost:*");
+        origins.add("http://127.0.0.1:*");
         configuration.setAllowedOriginPatterns(origins);
         configuration.setAllowedMethods(java.util.Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         

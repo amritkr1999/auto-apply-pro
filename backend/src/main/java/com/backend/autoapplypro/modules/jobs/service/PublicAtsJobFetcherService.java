@@ -6,6 +6,8 @@ import com.backend.autoapplypro.modules.jobs.model.JobPosting;
 import com.backend.autoapplypro.modules.jobs.repository.JobPostingRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Builder;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,30 +29,49 @@ public class PublicAtsJobFetcherService {
     private static final String[] GREENHOUSE_COMPANIES = {"stripe", "airbnb", "figma", "coinbase", "datadog", "gitlab", "discord", "hashicorp"};
     private static final String[] LEVER_COMPANIES = {"netflix", "spotify", "palantir", "scale", "postman"};
 
-    public int fetchLiveJobsFromPublicAts() {
-        log.info("[PUBLIC ATS FETCHER] Starting live job fetching from Greenhouse and Lever public career APIs...");
-        int totalNewJobs = 0;
-
-        // 1. Fetch from Greenhouse Public Board APIs
-        for (String company : GREENHOUSE_COMPANIES) {
-            totalNewJobs += fetchGreenhouseJobs(company);
-        }
-
-        // 2. Fetch from Lever Public Board APIs
-        for (String company : LEVER_COMPANIES) {
-            totalNewJobs += fetchLeverJobs(company);
-        }
-
-        log.info("[PUBLIC ATS FETCHER] Completed live ingestion. Total new real jobs added: {}", totalNewJobs);
-        return totalNewJobs;
+    @Data
+    @Builder
+    public static class PublicAtsFetchResult {
+        private int totalNewJobs;
+        private List<JobPosting> newJobPostings;
+        private List<String> companiesScanned;
     }
 
-    private int fetchGreenhouseJobs(String companySlug) {
+    public PublicAtsFetchResult fetchLiveJobsWithDetails() {
+        log.info("[PUBLIC ATS FETCHER] Starting live job fetching from Greenhouse and Lever public career APIs...");
+        List<JobPosting> newPostings = new ArrayList<>();
+        List<String> companiesScanned = new ArrayList<>();
+
+        for (String company : GREENHOUSE_COMPANIES) {
+            String capitalized = company.substring(0, 1).toUpperCase() + company.substring(1);
+            companiesScanned.add(capitalized + " (Greenhouse)");
+            newPostings.addAll(fetchGreenhouseJobsDetailed(company));
+        }
+
+        for (String company : LEVER_COMPANIES) {
+            String capitalized = company.substring(0, 1).toUpperCase() + company.substring(1);
+            companiesScanned.add(capitalized + " (Lever)");
+            newPostings.addAll(fetchLeverJobsDetailed(company));
+        }
+
+        log.info("[PUBLIC ATS FETCHER] Completed live ingestion. Total new real jobs added: {}", newPostings.size());
+        return PublicAtsFetchResult.builder()
+                .totalNewJobs(newPostings.size())
+                .newJobPostings(newPostings)
+                .companiesScanned(companiesScanned)
+                .build();
+    }
+
+    public int fetchLiveJobsFromPublicAts() {
+        return fetchLiveJobsWithDetails().getTotalNewJobs();
+    }
+
+    private List<JobPosting> fetchGreenhouseJobsDetailed(String companySlug) {
         String url = "https://boards-api.greenhouse.io/v1/boards/" + companySlug + "/jobs?content=true";
-        int added = 0;
+        List<JobPosting> addedJobs = new ArrayList<>();
         try {
             String jsonResponse = restTemplate.getForObject(url, String.class);
-            if (jsonResponse == null || jsonResponse.isBlank()) return 0;
+            if (jsonResponse == null || jsonResponse.isBlank()) return addedJobs;
 
             JsonNode root = objectMapper.readTree(jsonResponse);
             JsonNode jobsNode = root.path("jobs");
@@ -76,8 +97,8 @@ public class PublicAtsJobFetcherService {
                                 .hrEmails(hrEmail)
                                 .build();
 
-                        jobPostingRepository.save(posting);
-                        added++;
+                        JobPosting saved = jobPostingRepository.save(posting);
+                        addedJobs.add(saved);
 
                         // Save clean HR contact if domain has MX record
                         if (ClientScraperServiceImpl.hasMxRecord(companySlug + ".com")) {
@@ -91,21 +112,21 @@ public class PublicAtsJobFetcherService {
                             }
                         }
                     }
-                    if (added >= 5) break; // Limit per company per run to keep feed balanced
+                    if (addedJobs.size() >= 5) break; // Limit per company per run to keep feed balanced
                 }
             }
         } catch (Exception e) {
             log.warn("[GREENHOUSE FETCHER] Could not fetch jobs for company '{}': {}", companySlug, e.getMessage());
         }
-        return added;
+        return addedJobs;
     }
 
-    private int fetchLeverJobs(String companySlug) {
+    private List<JobPosting> fetchLeverJobsDetailed(String companySlug) {
         String url = "https://api.lever.co/v2/postings/" + companySlug;
-        int added = 0;
+        List<JobPosting> addedJobs = new ArrayList<>();
         try {
             String jsonResponse = restTemplate.getForObject(url, String.class);
-            if (jsonResponse == null || jsonResponse.isBlank()) return 0;
+            if (jsonResponse == null || jsonResponse.isBlank()) return addedJobs;
 
             JsonNode jobsNode = objectMapper.readTree(jsonResponse);
             if (jobsNode.isArray()) {
@@ -130,8 +151,8 @@ public class PublicAtsJobFetcherService {
                                 .hrEmails(hrEmail)
                                 .build();
 
-                        jobPostingRepository.save(posting);
-                        added++;
+                        JobPosting saved = jobPostingRepository.save(posting);
+                        addedJobs.add(saved);
 
                         if (ClientScraperServiceImpl.hasMxRecord(companySlug + ".com")) {
                             if (hrRepository.findByEmailIgnoreCase(hrEmail).isEmpty()) {
@@ -144,12 +165,20 @@ public class PublicAtsJobFetcherService {
                             }
                         }
                     }
-                    if (added >= 5) break;
+                    if (addedJobs.size() >= 5) break;
                 }
             }
         } catch (Exception e) {
             log.warn("[LEVER FETCHER] Could not fetch jobs for company '{}': {}", companySlug, e.getMessage());
         }
-        return added;
+        return addedJobs;
+    }
+
+    private int fetchGreenhouseJobs(String companySlug) {
+        return fetchGreenhouseJobsDetailed(companySlug).size();
+    }
+
+    private int fetchLeverJobs(String companySlug) {
+        return fetchLeverJobsDetailed(companySlug).size();
     }
 }

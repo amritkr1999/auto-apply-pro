@@ -63,6 +63,9 @@ public class SocialOAuthService {
                     .build();
             professionalProfileRepository.saveAndFlush(candidate);
         } else {
+            if (user.updateLoginStreak()) {
+                user = userRepository.saveAndFlush(user);
+            }
             if (user.getRole() != UserRole.RECRUITER && user.getRole() != UserRole.COMPANY) {
                 final User existingUser = user;
                 ProfessionalProfile candidate = professionalProfileRepository.findByUserId(existingUser.getId())
@@ -141,6 +144,9 @@ public class SocialOAuthService {
                     .build();
             professionalProfileRepository.saveAndFlush(candidate);
         } else {
+            if (user.updateLoginStreak()) {
+                user = userRepository.saveAndFlush(user);
+            }
             if (user.getRole() != UserRole.RECRUITER && user.getRole() != UserRole.COMPANY) {
                 final User existingUser = user;
                 ProfessionalProfile candidate = professionalProfileRepository.findByUserId(existingUser.getId())

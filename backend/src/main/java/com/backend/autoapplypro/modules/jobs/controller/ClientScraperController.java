@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+import com.backend.autoapplypro.modules.jobs.dto.RawHarvestedJobDto;
+
 @RestController
 @RequestMapping("/api/v1/jobs/scraper")
 @RequiredArgsConstructor
@@ -26,6 +28,14 @@ public class ClientScraperController {
     private final UserRepository userRepository;
     private final HrRepository hrRepository;
     private final JobPostingRepository jobPostingRepository;
+
+    @GetMapping("/raw-harvested/latest")
+    public ResponseEntity<List<RawHarvestedJobDto>> getLatestRawHarvestedJobs(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size) {
+        List<RawHarvestedJobDto> jobs = clientScraperService.getLatestRawHarvestedJobs(page, size);
+        return ResponseEntity.ok(jobs);
+    }
 
     @GetMapping("/client-tasks")
     public ResponseEntity<List<String>> getClientTasks(@AuthenticationPrincipal UserDetails userDetails) {

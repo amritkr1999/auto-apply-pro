@@ -17,7 +17,11 @@ interface JobPostingFeedDto {
   skillBadges?: string[];
 }
 
-export const JobPostingFeedSection: React.FC = () => {
+interface JobPostingFeedSectionProps {
+  refreshTrigger?: number;
+}
+
+export const JobPostingFeedSection: React.FC<JobPostingFeedSectionProps> = ({ refreshTrigger }) => {
   const [postings, setPostings] = useState<JobPostingFeedDto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -105,7 +109,7 @@ export const JobPostingFeedSection: React.FC = () => {
 
   useEffect(() => {
     fetchLatestJobs();
-  }, []);
+  }, [refreshTrigger]);
 
   // Reset pagination to page 1 whenever filters change
   useEffect(() => {

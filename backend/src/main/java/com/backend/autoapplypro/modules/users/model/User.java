@@ -347,4 +347,31 @@ public class User {
                 .findFirst()
                 .orElse(professionalProfiles.get(0));
     }
+
+    /**
+     * Updates login streak based on the current date.
+     * @return true if the streak or last login date was updated; false if already logged in today.
+     */
+    public boolean updateLoginStreak() {
+        java.time.LocalDate today = java.time.LocalDate.now();
+        if (this.lastLoginDate == null) {
+            this.loginStreak = 1;
+            this.lastLoginDate = today;
+            return true;
+        }
+        long daysBetween = java.time.temporal.ChronoUnit.DAYS.between(this.lastLoginDate, today);
+        if (daysBetween == 1) {
+            this.loginStreak = (this.loginStreak != null ? this.loginStreak : 0) + 1;
+            this.lastLoginDate = today;
+            return true;
+        } else if (daysBetween > 1) {
+            this.loginStreak = 1;
+            this.lastLoginDate = today;
+            return true;
+        } else if (daysBetween < 0) {
+            this.lastLoginDate = today;
+            return true;
+        }
+        return false;
+    }
 }

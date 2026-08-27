@@ -30,8 +30,23 @@ public class ExtensionDownloadController {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             try (ZipOutputStream zos = new ZipOutputStream(baos)) {
 
-                // Path to extension directory
-                File baseDir = new File("extension");
+                // Path to extension directory (check relative to backend dir & workspace root)
+                File baseDir = new File("../extension");
+                if (!baseDir.exists() || !baseDir.isDirectory()) {
+                    baseDir = new File("extension");
+                }
+                if (!baseDir.exists() || !baseDir.isDirectory()) {
+                    baseDir = new File(System.getProperty("user.dir"), "../extension");
+                }
+                if (!baseDir.exists() || !baseDir.isDirectory()) {
+                    baseDir = new File(System.getProperty("user.dir"), "extension");
+                }
+                if (!baseDir.exists() || !baseDir.isDirectory()) {
+                    File userDir = new File(System.getProperty("user.dir"));
+                    if (userDir.getParentFile() != null) {
+                        baseDir = new File(userDir.getParentFile(), "extension");
+                    }
+                }
                 if (baseDir.exists() && baseDir.isDirectory()) {
                     addFolderToZip(baseDir, baseDir, zos);
                 } else {

@@ -8,6 +8,8 @@ import com.backend.autoapplypro.modules.jobs.dto.ScrapedItemDto;
 import com.backend.autoapplypro.modules.jobs.model.JobPosting;
 import com.backend.autoapplypro.modules.jobs.repository.JobPostingRepository;
 import com.backend.autoapplypro.modules.users.model.User;
+import com.backend.autoapplypro.modules.outreach.model.EmailQueue;
+import com.backend.autoapplypro.modules.outreach.repository.EmailQueueRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -23,6 +25,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.backend.autoapplypro.modules.jobs.dto.RawHarvestedJobDto;
+import com.backend.autoapplypro.modules.jobs.model.RawHarvestedJob;
+import com.backend.autoapplypro.modules.jobs.repository.RawHarvestedJobRepository;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -30,6 +36,8 @@ public class ClientScraperServiceImpl implements ClientScraperService {
 
     private final HrRepository hrRepository;
     private final JobPostingRepository jobPostingRepository;
+    private final EmailQueueRepository emailQueueRepository;
+    private final RawHarvestedJobRepository rawHarvestedJobRepository;
 
     @Override
     public Map<String, Object> processClientScrapePayload(ClientScrapePayloadDto payload, User user) {
@@ -40,13 +48,35 @@ public class ClientScraperServiceImpl implements ClientScraperService {
         int newHrCount = 0;
         int skippedHrCount = 0;
         int newJobCount = 0;
+        int rawSavedCount = 0;
 
         if (payload.getItems() != null && !payload.getItems().isEmpty()) {
             for (ScrapedItemDto item : payload.getItems()) {
+                // 0. Save Raw Text Block to raw_harvested_jobs Table
+                String rawText = item.getRawText();
+                if (rawText == null || rawText.isBlank()) {
+                    rawText = item.getDescription();
+                }
+                if (rawText == null || rawText.isBlank()) {
+                    StringBuilder sb = new StringBuilder();
+                    if (item.getTitle() != null && !item.getTitle().isBlank()) sb.append("Title: ").append(item.getTitle()).append("\n");
+                    if (item.getCompany() != null && !item.getCompany().isBlank()) sb.append("Company: ").append(item.getCompany()).append("\n");
+                    if (item.getHrEmail() != null && !item.getHrEmail().isBlank()) sb.append("Email: ").append(item.getHrEmail()).append("\n");
+                    rawText = sb.toString();
+                }
+
+                if (rawText != null && !rawText.isBlank()) {
+                    RawHarvestedJob rawJob = RawHarvestedJob.builder()
+                            .rawText(rawText.trim())
+                            .build();
+                    rawHarvestedJobRepository.save(rawJob);
+                    rawSavedCount++;
+                    log.info("⚡ Successfully saved RawHarvestedJob ID: {} to database", rawJob.getId());
+                }
+
                 // 1. Permanent HR details extraction & deduplication
                 if (item.getHrEmail() != null && item.getHrEmail().contains("@")) {
                     String cleanEmail = item.getHrEmail().trim().toLowerCase();
-                    // Basic email sanity check
                     if (isValidEmail(cleanEmail)) {
                         Optional<HrDetails> existingHr = hrRepository.findByEmailIgnoreCase(cleanEmail);
                         if (existingHr.isEmpty()) {
@@ -93,6 +123,21 @@ public class ClientScraperServiceImpl implements ClientScraperService {
                         
                         jobPostingRepository.save(jobPosting);
                         newJobCount++;
+                    } else {
+                        JobPosting job = existingJob.get();
+                        boolean updated = false;
+                        if ((job.getHrEmail() == null || job.getHrEmail().isBlank()) && item.getHrEmail() != null && !item.getHrEmail().isBlank()) {
+                            job.setHrEmail(item.getHrEmail());
+                            job.setHrEmails(item.getHrEmail());
+                            updated = true;
+                        }
+                        if ((job.getDescription() == null || job.getDescription().isBlank()) && item.getDescription() != null && !item.getDescription().isBlank()) {
+                            job.setDescription(item.getDescription());
+                            updated = true;
+                        }
+                        if (updated) {
+                            jobPostingRepository.save(job);
+                        }
                     }
                 }
             }
@@ -100,12 +145,24 @@ public class ClientScraperServiceImpl implements ClientScraperService {
 
         Map<String, Object> result = new HashMap<>();
         result.put("status", "SUCCESS");
+        result.put("rawHarvestedJobsSaved", rawSavedCount);
         result.put("newHrContactsAdded", newHrCount);
         result.put("existingHrContactsSkipped", skippedHrCount);
         result.put("newJobPostingsAdded", newJobCount);
-        result.put("message", String.format("Processed payload. Added %d new HR contacts & %d job postings.", newHrCount, newJobCount));
+        result.put("message", String.format("Processed payload. Saved %d raw jobs & %d new HR contacts.", rawSavedCount, newHrCount));
         
         return result;
+    }
+
+    @Override
+    public List<RawHarvestedJobDto> getLatestRawHarvestedJobs(int page, int size) {
+        List<RawHarvestedJob> list = rawHarvestedJobRepository.findAllByOrderByCreatedAtDesc(PageRequest.of(page, size));
+        return list.stream().map(job -> RawHarvestedJobDto.builder()
+                .id(job.getId())
+                .rawText(job.getRawText())
+                .createdAt(job.getCreatedAt())
+                .build()
+        ).collect(Collectors.toList());
     }
 
     @Override
@@ -116,6 +173,14 @@ public class ClientScraperServiceImpl implements ClientScraperService {
         if (jobList == null || jobList.isEmpty()) {
             jobList = jobPostingRepository.findAll(PageRequest.of(page, size, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "id"))).getContent();
         }
+
+        List<EmailQueue> allQueueItems = emailQueueRepository.findAll();
+        Map<String, EmailQueue> queueByEmail = new HashMap<>();
+        for (EmailQueue eq : allQueueItems) {
+            if (eq.getRecipientEmail() != null) {
+                queueByEmail.put(eq.getRecipientEmail().trim().toLowerCase(), eq);
+            }
+        }
         
         return jobList.stream().map(job -> {
             long daysAgo = 0;
@@ -125,6 +190,17 @@ public class ClientScraperServiceImpl implements ClientScraperService {
 
             List<String> skills = extractSkillBadges(job.getTitle() + " " + job.getRequirements() + " " + job.getDescription());
             int matchScore = 85 + (int) (Math.abs(job.getId() != null ? job.getId() : 1) % 13); // Calculated match score 85%-98%
+
+            String status = "HARVESTED";
+            Long queueId = null;
+            if (job.getHrEmail() != null && !job.getHrEmail().isBlank()) {
+                String cleanEmail = job.getHrEmail().trim().toLowerCase();
+                if (queueByEmail.containsKey(cleanEmail)) {
+                    EmailQueue eq = queueByEmail.get(cleanEmail);
+                    status = eq.getStatus() != null ? eq.getStatus().name() : "PENDING";
+                    queueId = eq.getId();
+                }
+            }
 
             return JobPostingFeedDto.builder()
                     .id(job.getId())
@@ -140,6 +216,8 @@ public class ClientScraperServiceImpl implements ClientScraperService {
                     .daysAgo(daysAgo)
                     .matchScore(matchScore)
                     .skillBadges(skills)
+                    .queueStatus(status)
+                    .queueId(queueId)
                     .build();
         }).collect(Collectors.toList());
     }

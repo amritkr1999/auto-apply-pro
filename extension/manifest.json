@@ -5,14 +5,18 @@
   "description": "Background job harvester and auto-apply extension node for EasyNaukri (Auto Apply Pro).",
   "permissions": [
     "alarms",
-    "storage"
+    "storage",
+    "unlimitedStorage"
   ],
   "host_permissions": [
+    "<all_urls>",
     "*://*.naukri.com/*",
     "*://*.linkedin.com/*",
     "*://*.indeed.com/*",
     "*://*.instahyre.com/*",
     "*://*.wellfound.com/*",
+    "http://localhost:8060/*",
+    "http://127.0.0.1:8060/*",
     "*://localhost/*",
     "*://127.0.0.1/*"
   ],

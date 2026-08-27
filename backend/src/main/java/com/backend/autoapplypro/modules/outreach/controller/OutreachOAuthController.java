@@ -155,6 +155,10 @@ public class OutreachOAuthController {
                             .jobPreferences(new java.util.HashMap<>())
                             .build();
                     professionalProfileRepository.save(candidate);
+                } else {
+                    if (user.updateLoginStreak()) {
+                        user = userRepository.save(user);
+                    }
                 }
 
                 String roleName = user.getRole() != null ? user.getRole().name() : "CANDIDATE";

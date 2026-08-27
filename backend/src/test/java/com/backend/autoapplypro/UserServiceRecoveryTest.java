@@ -51,7 +51,7 @@ class UserServiceRecoveryTest {
 
         ForgotPasswordRequest request = new ForgotPasswordRequest("user@example.com");
 
-        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(Optional.of(user));
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         userService.initiatePasswordReset(request);
@@ -64,10 +64,27 @@ class UserServiceRecoveryTest {
     }
 
     @Test
+    void testInitiatePasswordReset_UserExistsMixedCase() {
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("user@example.com");
+
+        ForgotPasswordRequest request = new ForgotPasswordRequest("UsEr@ExAmPlE.cOm ");
+
+        when(userRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(Optional.of(user));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        userService.initiatePasswordReset(request);
+
+        assertNotNull(user.getResetToken());
+        verify(systemEmailService, times(1)).sendPasswordResetEmail(eq("user@example.com"), anyString());
+    }
+
+    @Test
     void testInitiatePasswordReset_UserNotFound() {
         ForgotPasswordRequest request = new ForgotPasswordRequest("nonexistent@example.com");
 
-        when(userRepository.findByEmail("nonexistent@example.com")).thenReturn(Optional.empty());
+        when(userRepository.findByEmailIgnoreCase("nonexistent@example.com")).thenReturn(Optional.empty());
 
         assertDoesNotThrow(() -> userService.initiatePasswordReset(request));
 
@@ -83,10 +100,10 @@ class UserServiceRecoveryTest {
         user.setResetToken("valid-token");
         user.setResetTokenExpiry(LocalDateTime.now().plusMinutes(10));
 
-        ResetPasswordRequest request = new ResetPasswordRequest("valid-token", "newSecretPassword");
+        ResetPasswordRequest request = new ResetPasswordRequest("valid-token", "newSecretPassword123");
 
         when(userRepository.findByResetToken("valid-token")).thenReturn(Optional.of(user));
-        when(passwordEncoder.encode("newSecretPassword")).thenReturn("hashedNewSecretPassword");
+        when(passwordEncoder.encode("newSecretPassword123")).thenReturn("hashedNewSecretPassword");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         userService.resetPassword(request);
@@ -100,7 +117,7 @@ class UserServiceRecoveryTest {
 
     @Test
     void testResetPassword_InvalidToken() {
-        ResetPasswordRequest request = new ResetPasswordRequest("invalid-token", "newSecretPassword");
+        ResetPasswordRequest request = new ResetPasswordRequest("invalid-token", "newSecretPassword123");
 
         when(userRepository.findByResetToken("invalid-token")).thenReturn(Optional.empty());
 
@@ -119,7 +136,7 @@ class UserServiceRecoveryTest {
         user.setResetToken("expired-token");
         user.setResetTokenExpiry(LocalDateTime.now().minusMinutes(5)); // Expired 5 minutes ago
 
-        ResetPasswordRequest request = new ResetPasswordRequest("expired-token", "newSecretPassword");
+        ResetPasswordRequest request = new ResetPasswordRequest("expired-token", "newSecretPassword123");
 
         when(userRepository.findByResetToken("expired-token")).thenReturn(Optional.of(user));
 

@@ -14,7 +14,7 @@ const RecruiterDashboardView = lazy(() => import("../features/dashboard/componen
 const CompanyDashboardView = lazy(() => import("../features/dashboard/components/views/CompanyDashboardView"));
 const ProfessionalProfile = lazy(() => import("../features/profile/ProfessionalProfile"));
 const OpportunityImporter = lazy(() => import("../features/opportunities/components/OpportunityImporter"));
-const HrHarvesterPage = lazy(() => import("../pages/HrHarvesterPage"));
+const HrHarvesterPage = lazy(() => import("../pages/HrHarvesterPage").then((m: any) => ({ default: m.HrHarvesterPage || m.default })));
 const TemplateManager = lazy(() => import("../features/outreach/components/TemplateManager").then((m: any) => ({ default: m.TemplateManager || m.default })));
 const OutreachDraftSection = lazy(() => import("../features/outreach/components/OutreachDraftSection").then((m: any) => ({ default: m.OutreachDraftSection || m.default })));
 const DraftsReviewPage = lazy(() => import("../pages/DraftsReviewPage"));

@@ -194,7 +194,12 @@ export const profileService = {
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      throw new Error(data.message || "Failed to process forgot password request.");
+      const errorMsg =
+        data.message ||
+        data.error ||
+        (data.fieldErrors ? (Object.values(data.fieldErrors) as string[]).join(", ") : undefined) ||
+        "Failed to process forgot password request.";
+      throw new Error(errorMsg);
     }
     return data;
   },
@@ -207,7 +212,12 @@ export const profileService = {
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      throw new Error(data.message || "Failed to reset password.");
+      const errorMsg =
+        data.message ||
+        data.error ||
+        (data.fieldErrors ? (Object.values(data.fieldErrors) as string[]).join(", ") : undefined) ||
+        "Failed to reset password.";
+      throw new Error(errorMsg);
     }
     return data;
   },

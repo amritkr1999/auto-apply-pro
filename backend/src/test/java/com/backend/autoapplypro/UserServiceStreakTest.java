@@ -147,4 +147,30 @@ class UserServiceStreakTest {
         assertEquals(1, response.getLoginStreak());
         assertEquals(LocalDate.now(), user.getLastLoginDate());
     }
+
+    @Test
+    void testUserUpdateLoginStreak_DirectCalls() {
+        User user = new User();
+        user.setLastLoginDate(null);
+        user.setLoginStreak(0);
+        assertTrue(user.updateLoginStreak());
+        assertEquals(1, user.getLoginStreak());
+        assertEquals(LocalDate.now(), user.getLastLoginDate());
+
+        // Same day call: returns false, keeps streak
+        assertFalse(user.updateLoginStreak());
+        assertEquals(1, user.getLoginStreak());
+
+        // Consecutive day
+        user.setLastLoginDate(LocalDate.now().minusDays(1));
+        assertTrue(user.updateLoginStreak());
+        assertEquals(2, user.getLoginStreak());
+        assertEquals(LocalDate.now(), user.getLastLoginDate());
+
+        // Missed multiple days
+        user.setLastLoginDate(LocalDate.now().minusDays(5));
+        assertTrue(user.updateLoginStreak());
+        assertEquals(1, user.getLoginStreak());
+        assertEquals(LocalDate.now(), user.getLastLoginDate());
+    }
 }
